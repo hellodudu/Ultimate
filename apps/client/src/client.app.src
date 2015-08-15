@@ -1,0 +1,10 @@
+{application, client, [
+    {description, "client application."},
+    {vsn, "0.0.1"},
+    {modules, [client_app, client]},
+    {registered, [account_pb]},
+    {mod, {client_app, [] } },
+    {applications, []},
+    {env, []}
+]
+}.

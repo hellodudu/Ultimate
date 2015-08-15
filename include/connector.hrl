@@ -1,0 +1,3 @@
+-define(DEFAULT_CONNECTOR_PORT, 3306).
+-define(SESSION_TIMEOUT,timer:minutes(5)).
+-record(connector, {id, address, port}).

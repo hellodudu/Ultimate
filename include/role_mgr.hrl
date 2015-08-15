@@ -1,0 +1,2 @@
+-define(ACCOUNT_BUCKET,{<<"default">>, <<"account">>}).
+-define(ROLE_BUCKET, {<<"default">>, <<"role">>}).

@@ -1,0 +1,13 @@
+message cs_chat_deliver_to {
+    required int32 recipient_account_id = 1;
+    optional string message = 2;
+}
+
+message sc_chat_deliver_to {
+    required int32 result = 1;
+}
+
+message sc_chat_one_message {
+    required int32 sender_account_id = 1;
+    optional string message = 2;
+}

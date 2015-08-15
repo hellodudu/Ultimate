@@ -1,0 +1,1 @@
+-define(DBPOOL, my_pool).

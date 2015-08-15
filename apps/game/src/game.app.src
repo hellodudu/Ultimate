@@ -1,0 +1,29 @@
+{application, game, [
+    {description, "Game logic application."},
+    {vsn, "0.0.1"},
+    {modules, [game_app, game_sup, redis_worker, connector, role_mgr, role_sup, role]},
+    {registered, [game_sup]},
+    {applications, [
+                    kernel,
+                    stdlib,
+                    ranch,
+                    poolboy,
+                    lager]},
+    {mod, {game_app, [] } },
+    {env, [
+            {pools, [
+                        {redis_pool, [
+                            {size, 10},
+                            {max_overflow, 20}
+                        ], [
+                            {hostname, "127.0.0.1"},
+                            {database, "db1"},
+                            {username, "db1"},
+                            {password, "abc123"}
+                        ]}
+                    ]
+            }
+          ]
+    }
+    ]
+}.

@@ -152,7 +152,7 @@ def start_game(detach=False):
     if detach == True:
         command1 += " -detached"
     command2 = " -s lager" +" -pa " + dep_ebin_dirs + " " + apps_ebin_dirs + " -name " + nodeName
-    command3 = " -port " + PORT + " -eval \'" + pb_list+ "application:ensure_all_started(game).\'"
+    command3 = " -port " + PORT + " -eval \'" + pb_list+ "application:ensure_all_started(comment).\'"
     command = command1 + command2 + command3
     os.system(command)
 

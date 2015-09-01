@@ -1,4 +1,4 @@
--module(game_sup).
+-module(comment_sup).
 -behaviour(supervisor).
 -export([init/1]).
 

@@ -1,8 +1,8 @@
 ## Name of the node
--name game@127.0.0.1
+-name comment@127.0.0.1
 
 ## Cookie for distributed erlang
--setcookie game
+-setcookie comment
 
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)

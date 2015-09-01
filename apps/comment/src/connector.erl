@@ -56,6 +56,7 @@ handle_cast(_Msg, Session) ->
 handle_info({tcp, Socket, Data}, Session) ->
     try
         #session{socket=Socket, transport=Transport, connector_pid=_ConnectorPid} = Session,
+        lager:info("receive data:~p", [Data]),
         RequestRecord = erlang:binary_to_term(Data),
         NewSession1 = 
             case route(RequestRecord, Session) of

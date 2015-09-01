@@ -1,15 +1,15 @@
-{application, game, [
+{application, comment, [
     {description, "Game logic application."},
     {vsn, "0.0.1"},
-    {modules, [game_app, game_sup, redis_worker, connector, role_mgr, role_sup, role]},
-    {registered, [game_sup]},
+    {modules, [comment_app, comment_sup, redis_worker, connector, role_mgr, role_sup, role]},
+    {registered, [comment_sup]},
     {applications, [
                     kernel,
                     stdlib,
                     ranch,
                     poolboy,
                     lager]},
-    {mod, {game_app, [] } },
+    {mod, {comment_app, [] } },
     {env, [
             {pools, [
                         {redis_pool, [

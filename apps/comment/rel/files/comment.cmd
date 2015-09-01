@@ -1,6 +1,6 @@
 @setlocal
 
-@set node_name=game
+@set node_name=comment
 
 @rem Get the absolute path to the parent directory,
 @rem which is assumed to be the node root.

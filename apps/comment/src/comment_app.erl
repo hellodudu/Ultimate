@@ -11,12 +11,7 @@ start(_Type, _StartArgs) ->
     pass = case ranch:start_listener(comment, 
                                    2000, 
                                    ranch_tcp, 
-                                   [{port, Port},
-                                    {active, once}, 
-                                    {packet, 0},
-                                    {reuseaddr, true},
-                                    {keepalive, true},
-                                    {max_connections, 256}], 
+                                   [{port, Port}],
                                    connector, 
                                    []) of
         {ok,_ } -> 

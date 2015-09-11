@@ -44,6 +44,7 @@ CI_OTP	deps/ranch/erlang.mk	/^CI_OTP ?=$/;"	m
 CLIENT_LOCAL_FILE	deps/emysql/include/emysql.hrl	/^-define(CLIENT_LOCAL_FILE, 128).$/;"	d
 CLIENT_MULTI_RESULTS	deps/emysql/include/emysql.hrl	/^-define(CLIENT_MULTI_RESULTS, 131072).$/;"	d
 CLIENT_MULTI_STATEMENTS	deps/emysql/include/emysql.hrl	/^-define(CLIENT_MULTI_STATEMENTS, 65536).$/;"	d
+CODE_VERSION	deps/protobuffs/src/protobuffs_parser.erl	/^-define(CODE_VERSION, "1.4").$/;"	d
 COMBO_PLT	deps/emysql/Makefile	/^COMBO_PLT = $(HOME)\/.$(REPO)_combo_dialyzer_plt$/;"	m
 COMBO_PLT	deps/protobuffs/Makefile	/^COMBO_PLT = $(HOME)\/.$(REPO)_combo_dialyzer_plt$/;"	m
 COMPILE_C	deps/ranch/erlang.mk	/^COMPILE_C = $(c_verbose) $(CC) $(CFLAGS) $(CPPFLAGS) -c$/;"	m
@@ -238,6 +239,10 @@ FILENAMES	deps/lager/src/lager_app.erl	/^-define(FILENAMES, '__lager_file_backen
 FORALL	deps/protobuffs/test/quickcheck_setup.hrl	/^-define(FORALL(A,B,C), ok).$/;"	d
 From_the_Erlang_Manual	deps/emysql/doc/emysql.html	/^  <h4><a name="From_the_Erlang_Manual">From the Erlang Manual<\/a><\/h4><p>  $/;"	a
 GLOBAL	deps/lager/src/lager_config.erl	/^-define(GLOBAL, '_global').$/;"	d
+HASH_FINAL	deps/emysql/include/crypto_compat.hrl	/^-define(HASH_FINAL(Data), crypto:hash_final(Data)).$/;"	d
+HASH_INIT	deps/emysql/include/crypto_compat.hrl	/^-define(HASH_INIT(), crypto:hash_init(sha)).$/;"	d
+HASH_SHA	deps/emysql/include/crypto_compat.hrl	/^-define(HASH_SHA(Data), crypto:hash(sha, Data)).$/;"	d
+HASH_UPDATE	deps/emysql/include/crypto_compat.hrl	/^-define(HASH_UPDATE(Data, Salt), crypto:hash_update(Data, Salt)).$/;"	d
 HOSTNAME	start.py	/^HOSTNAME = "127.0.0.1"$/;"	v
 IGNORE_DEPS	deps/ranch/erlang.mk	/^IGNORE_DEPS ?=$/;"	m
 INCLUDE_DIRS	deps/emysql/support/include.mk	/^INCLUDE_DIRS := ..\/include $(wildcard ..\/deps\/*\/include)$/;"	m
@@ -605,7 +610,7 @@ application_config_mangling_test_	deps/lager/src/lager_app.erl	/^application_con
 apps_ebin_dirs	start.py	/^apps_ebin_dirs = get_apps_ebin_dirs()$/;"	v
 appsrc_verbose	deps/ranch/erlang.mk	/^appsrc_verbose = $(appsrc_verbose_$(V))$/;"	m
 appsrc_verbose_0	deps/ranch/erlang.mk	/^appsrc_verbose_0 = @echo " APP   " $(PROJECT).app.src;$/;"	m
-args	apps/comment/rel/files/game.cmd	/^@set args= ++ %node_name% ++ %node_root%$/;"	v
+args	apps/comment/rel/files/comment.cmd	/^@set args= ++ %node_name% ++ %node_root%$/;"	v
 args	apps/comment/rel/files/start_erl.cmd	/^@set args="%*"$/;"	v
 args	deps/meck/src/meck_code_gen.erl	/^args(0)     -> [];$/;"	f	module:meck_code_gen
 args	deps/meck/src/meck_code_gen.erl	/^args(Arity) -> [?var(var_name(N)) || N <- lists:seq(1, Arity)].$/;"	f	module:meck_code_gen
@@ -662,7 +667,7 @@ atomic_unload_test	deps/meck/test/meck_tests.erl	/^atomic_unload_test() ->$/;"	f
 atomize	deps/protobuffs/src/protobuffs_compile.erl	/^atomize(String) ->$/;"	f	module:protobuffs_compile
 atomize	deps/protobuffs/src/protobuffs_compile.erl	/^atomize([String]) when is_list(String) ->$/;"	f	module:protobuffs_compile
 atomize	deps/protobuffs/src/protobuffs_compile.erl	/^atomize([String|[_Rest]]) when is_list(String) ->$/;"	f	module:protobuffs_compile
-attach	apps/comment/rel/files/game.cmd	/^:attach$/;"	l
+attach	apps/comment/rel/files/comment.cmd	/^:attach$/;"	l
 attach_rel_db	start.py	/^def attach_rel_db():$/;"	f
 attach_rel_game	start.py	/^def attach_rel_game():$/;"	f
 attribute	deps/meck/src/meck_code_gen.erl	/^-define(attribute(Attribute, Args), {attribute, ?LINE, Attribute, Args}).$/;"	d
@@ -889,7 +894,7 @@ ci_verbose_0	deps/ranch/erlang.mk	/^ci_verbose_0 = @echo " CI    " $(1);$/;"	m
 classify	deps/emysql/etc/markdown.lua	/^function classify(line)$/;"	f
 clause	deps/meck/src/meck_code_gen.erl	/^-define(clause(Arguments, Body), {clause, ?LINE, Arguments, [], Body}).$/;"	d
 clean	start.py	/^def clean():$/;"	f
-clean_boot_script	apps/comment/rel/files/game.cmd	/^@set clean_boot_script=%releases_dir%\\%release_version%\\start_clean$/;"	v
+clean_boot_script	apps/comment/rel/files/comment.cmd	/^@set clean_boot_script=%releases_dir%\\%release_version%\\start_clean$/;"	v
 clean_traces	deps/ranch/test/acceptor_SUITE.erl	/^clean_traces() ->$/;"	f	module:acceptor_SUITE
 clean_traces	deps/ranch/test/sendfile_SUITE.erl	/^clean_traces() ->$/;"	f	module:sendfile_SUITE
 clean_up_config_checks	deps/lager/src/lager_app.erl	/^clean_up_config_checks() ->$/;"	f	module:lager_app
@@ -985,6 +990,8 @@ comma	deps/ranch/erlang.mk	/^comma := ,$/;"	m
 comma_list	deps/ranch/erlang.mk	/^define comma_list$/;"	m
 command	deps/emysql/t/emysql_eqc.erl	/^command(State) ->$/;"	f	module:emysql_eqc
 command	deps/poolboy/test/poolboy_eqc.erl	/^command(S) ->$/;"	f	module:poolboy_eqc
+comment_app	apps/comment/src/comment_app.erl	/^-module(comment_app).$/;"	m
+comment_sup	apps/comment/src/comment_sup.erl	/^-module(comment_sup).$/;"	m
 common	deps/goldrush/src/glc_lib.erl	/^common(Other) ->$/;"	f	module:glc_lib
 common	deps/goldrush/src/glc_lib.erl	/^common({all, Conds}) ->$/;"	f	module:glc_lib
 common	deps/goldrush/src/glc_lib.erl	/^common({any, Conds}) ->$/;"	f	module:glc_lib
@@ -1083,7 +1090,7 @@ connection_type_supervisor_separate_from_connection	deps/ranch/test/acceptor_SUI
 connector	apps/comment/src/connector.erl	/^-module(connector).$/;"	m
 connector	include/connector.hrl	/^-record(connector, {id, address, port}).$/;"	r
 consider_profiling	deps/ranch/src/ranch_app.erl	/^consider_profiling() ->$/;"	f	module:ranch_app
-console	apps/comment/rel/files/game.cmd	/^:console$/;"	l
+console	apps/comment/rel/files/comment.cmd	/^:console$/;"	l
 console_log_test_	deps/lager/src/lager_console_backend.erl	/^console_log_test_() ->$/;"	f	module:lager_console_backend
 constants	deps/goldrush/src/glc_lib.erl	/^constants(Query) ->$/;"	f	module:glc_lib
 contains_opaque	deps/meck/src/meck_code_gen.erl	/^contains_opaque(Term) when is_list(Term) ->$/;"	f	module:meck_code_gen
@@ -1258,6 +1265,9 @@ decrement_pool_size	deps/emysql/t/emysql_eqc.erl	/^decrement_pool_size(PoolId, N
 decrement_pool_size	deps/emysql/t/emysql_load_test.erl	/^decrement_pool_size() ->$/;"	f	module:emysql_load_test
 decrement_pool_size-2	deps/emysql/doc/emysql.html	/^<h3 class="function"><a name="decrement_pool_size-2">decrement_pool_size\/2<\/a><\/h3>$/;"	a
 deep_exec_test	deps/meck/test/meck_ret_spec_tests.erl	/^deep_exec_test() ->$/;"	f	module:meck_ret_spec_tests
+default	deps/protobuffs/src/protobuffs_parser.erl	/^default(_, _) ->$/;"	f	module:protobuffs_parser
+default	deps/protobuffs/src/protobuffs_parser.erl	/^default(_, {default,D}) ->$/;"	f	module:protobuffs_parser
+default	deps/protobuffs/src/protobuffs_parser.erl	/^default(repeated, _) ->$/;"	f	module:protobuffs_parser
 default	deps/protobuffs/test/quickcheck_setup.hrl	/^default(_,_) -> ok.$/;"	f
 default_is_output_test_	deps/goldrush/src/glc_lib.erl	/^default_is_output_test_() ->$/;"	f	module:glc_lib
 default_strategy_lifo	deps/poolboy/test/poolboy_tests.erl	/^default_strategy_lifo() ->$/;"	f	module:poolboy_tests
@@ -1308,7 +1318,7 @@ dep_target	deps/ranch/erlang.mk	/^define dep_target$/;"	m
 dep_verbose	deps/ranch/erlang.mk	/^dep_verbose = $(dep_verbose_$(V))$/;"	m
 dep_verbose_0	deps/ranch/erlang.mk	/^dep_verbose_0 = @echo " DEP   " $(1);$/;"	m
 depth_limit_test	deps/lager/src/lager_trunc_io.erl	/^depth_limit_test() ->$/;"	f	module:lager_trunc_io
-description	apps/comment/rel/files/game.cmd	/^@set description=Erlang node %node_name% in %node_root%$/;"	v
+description	apps/comment/rel/files/comment.cmd	/^@set description=Erlang node %node_name% in %node_root%$/;"	v
 description	deps/emysql/doc/emysql.html	/^<h2><a name="description">Description<\/a><\/h2><p>The main Emysql module.<\/p>$/;"	a
 destinations	deps/lager/src/lager_msg.erl	/^destinations(Msg) ->$/;"	f	module:lager_msg
 detab	deps/emysql/etc/markdown.lua	/^function detab(text)$/;"	f
@@ -1510,7 +1520,7 @@ enum_value	deps/protobuffs/test/protobuffs_proper.erl	/^enum_value() -> oneof([v
 environment_SUITE	deps/emysql/test/environment_SUITE.erl	/^-module(environment_SUITE).$/;"	m
 eof_packet	deps/emysql/include/emysql.hrl	/^-record(eof_packet, {seq_num :: number(), $/;"	r
 eol	deps/lager/src/lager_console_backend.erl	/^eol() ->$/;"	f	module:lager_console_backend
-epmd	apps/comment/rel/files/game.cmd	/^@set epmd="%erts_bin%\\epmd.exe"$/;"	v
+epmd	apps/comment/rel/files/comment.cmd	/^@set epmd="%erts_bin%\\epmd.exe"$/;"	v
 eq	deps/goldrush/src/glc.erl	/^eq(Key, Term) ->$/;"	f	module:glc
 eq	deps/goldrush/src/glc_ops.erl	/^eq(Key, Term) ->$/;"	f	module:glc_ops
 eq	deps/goldrush/src/glc_ops.erl	/^eq(Key, Term) when is_atom(Key) ->$/;"	f	module:glc_ops
@@ -1530,11 +1540,11 @@ erl	start.py	/^erl = "erl "$/;"	v
 erl_args	apps/comment/rel/files/start_erl.cmd	/^    @set erl_args=%%I$/;"	v
 erl_exe	apps/comment/rel/files/start_erl.cmd	/^@set erl_exe="%node_root%\\erts-%erts_version%\\bin\\erl.exe"$/;"	v
 erlang	deps/ranch/erlang.mk	/^define erlang$/;"	m
-erlang_cookie	apps/comment/rel/files/game.cmd	/^@for \/f "usebackq tokens=1-2" %%I in (`findstr \/b \\-setcookie "%vm_args%"`) do @set erlang_cookie=%%J$/;"	v
+erlang_cookie	apps/comment/rel/files/comment.cmd	/^@for \/f "usebackq tokens=1-2" %%I in (`findstr \/b \\-setcookie "%vm_args%"`) do @set erlang_cookie=%%J$/;"	v
 erlang_protobuffs_SUITE	deps/protobuffs/test/erlang_protobuffs_SUITE.erl	/^-module(erlang_protobuffs_SUITE).$/;"	m
 erlc_verbose	deps/ranch/erlang.mk	/^erlc_verbose = $(erlc_verbose_$(V))$/;"	m
 erlc_verbose_0	deps/ranch/erlang.mk	/^erlc_verbose_0 = @echo " ERLC  " $(filter-out $(patsubst %,%.erl,$(ERLC_EXCLUDE)),\\$/;"	m
-erlsrv	apps/comment/rel/files/game.cmd	/^@set erlsrv="%erts_bin%\\erlsrv.exe"$/;"	v
+erlsrv	apps/comment/rel/files/comment.cmd	/^@set erlsrv="%erts_bin%\\erlsrv.exe"$/;"	v
 erlydtl_compile	deps/sync/src/sync_scanner.erl	/^erlydtl_compile(SrcFile, Options) ->$/;"	f	module:sync_scanner
 error_inside_multibulk_test	deps/eredis/test/eredis_parser_tests.erl	/^error_inside_multibulk_test() ->$/;"	f	module:eredis_parser_tests
 error_logger_lager_h	deps/lager/src/error_logger_lager_h.erl	/^-module(error_logger_lager_h).$/;"	m
@@ -1546,7 +1556,7 @@ error_packet	deps/emysql/include/emysql.hrl	/^-record(error_packet, {seq_num :: 
 error_report	deps/lager/test/sync_error_logger.erl	/^error_report(Report) ->$/;"	f	module:sync_error_logger
 error_report	deps/lager/test/sync_error_logger.erl	/^error_report(Type, Report) ->$/;"	f	module:sync_error_logger
 error_test	deps/eredis/test/eredis_parser_tests.erl	/^error_test() ->$/;"	f	module:eredis_parser_tests
-erts_bin	apps/comment/rel/files/game.cmd	/^@set erts_bin=%node_root%\\erts-%erts_version%\\bin$/;"	v
+erts_bin	apps/comment/rel/files/comment.cmd	/^@set erts_bin=%node_root%\\erts-%erts_version%\\bin$/;"	v
 escape	deps/lager/src/lager_trunc_io.erl	/^escape($\\b) -> "\\\\b";$/;"	f	module:lager_trunc_io
 escape	deps/lager/src/lager_trunc_io.erl	/^escape($\\e) -> "\\\\e";$/;"	f	module:lager_trunc_io
 escape	deps/lager/src/lager_trunc_io.erl	/^escape($\\f) -> "\\\\f";$/;"	f	module:lager_trunc_io
@@ -1555,7 +1565,7 @@ escape	deps/lager/src/lager_trunc_io.erl	/^escape($\\r) -> "\\\\r";$/;"	f	module
 escape	deps/lager/src/lager_trunc_io.erl	/^escape($\\t) -> "\\\\t";$/;"	f	module:lager_trunc_io
 escape	deps/lager/src/lager_trunc_io.erl	/^escape($\\v) -> "\\\\v".$/;"	f	module:lager_trunc_io
 escape_special_chars	deps/emysql/etc/markdown.lua	/^function escape_special_chars(text)$/;"	f
-escript	apps/comment/rel/files/game.cmd	/^@set escript="%erts_bin%\\escript.exe"$/;"	v
+escript	apps/comment/rel/files/comment.cmd	/^@set escript="%erts_bin%\\escript.exe"$/;"	v
 eunit.erl	deps/ranch/erlang.mk	/^define eunit.erl$/;"	m
 eval_gl	deps/lager/src/error_logger_lager_h.erl	/^eval_gl(Event, #state{groupleader_strategy=GlStrategy0}=State) when is_pid(element(2, Event)) ->$/;"	f	module:error_logger_lager_h
 eval_gl	deps/lager/src/error_logger_lager_h.erl	/^eval_gl(Event, State) ->$/;"	f	module:error_logger_lager_h
@@ -1870,6 +1880,9 @@ format_args	deps/lager/src/error_logger_lager_h.erl	/^format_args([H|T], FmtAcc,
 format_args	deps/lager/src/error_logger_lager_h.erl	/^format_args([], FmtAcc, ArgsAcc) ->$/;"	f	module:error_logger_lager_h
 format_call	deps/lager/src/lager_stdlib.erl	/^format_call(ErrStr, Pre1, ForMForFun, As, PF) ->$/;"	f	module:lager_stdlib
 format_crash_report	deps/lager/src/error_logger_lager_h.erl	/^format_crash_report(Report, Neighbours) ->$/;"	f	module:error_logger_lager_h
+format_error	deps/protobuffs/src/protobuffs_parser.erl	/^format_error(Message) ->$/;"	f	module:protobuffs_parser
+format_error	deps/protobuffs/src/protobuffs_scanner.erl	/^format_error({illegal,S}) -> ["illegal characters ",io_lib:write_string(S)];$/;"	f	module:protobuffs_scanner
+format_error	deps/protobuffs/src/protobuffs_scanner.erl	/^format_error({user,S}) -> S.$/;"	f	module:protobuffs_scanner
 format_error	deps/sync/src/sync_scanner.erl	/^format_error(Module, ErrorDescription) ->$/;"	f	module:sync_scanner
 format_errors	deps/sync/src/sync_scanner.erl	/^format_errors(File, Errors, Warnings) ->$/;"	f	module:sync_scanner
 format_errstr_call	deps/lager/src/lager_stdlib.erl	/^format_errstr_call(ErrStr, Class, ForMForFun, As, PF, Pre0) ->$/;"	f	module:lager_stdlib
@@ -1961,8 +1974,6 @@ fwrite_f	deps/lager/src/lager_format.erl	/^fwrite_f(Fl, none, _Adj, P, _Pad) whe
 fwrite_g	deps/lager/src/lager_format.erl	/^fwrite_g(Fl, F, Adj, P, Pad) when P >= 1 ->$/;"	f	module:lager_format
 fwrite_g	deps/lager/src/lager_format.erl	/^fwrite_g(Fl, F, Adj, none, Pad) ->$/;"	f	module:lager_format
 g_rows_as_json	deps/emysql/samples/g_rows_as_json.erl	/^-module(g_rows_as_json).$/;"	m
-game_app	apps/comment/src/game_app.erl	/^-module(game_app).$/;"	m
-game_sup	apps/comment/src/game_sup.erl	/^-module(game_sup).$/;"	m
 gather_remote_queries	deps/eredis/test/eredis_tests.erl	/^gather_remote_queries(Pids) ->$/;"	f	module:eredis_tests
 gather_remote_queries	deps/eredis/test/eredis_tests.erl	/^gather_remote_queries([Pid | Rest], Acc) ->$/;"	f	module:eredis_tests
 gather_remote_queries	deps/eredis/test/eredis_tests.erl	/^gather_remote_queries([], Acc) ->$/;"	f	module:eredis_tests
@@ -2053,6 +2064,7 @@ get_onsync	deps/sync/src/sync_options.erl	/^get_onsync() ->$/;"	f	module:sync_op
 get_options	deps/sync/src/sync_options.erl	/^get_options(SrcDir) ->$/;"	f	module:sync_options
 get_options	deps/sync/src/sync_options.erl	/^get_options([]) ->$/;"	f	module:sync_options
 get_options_from_module	deps/sync/src/sync_utils.erl	/^get_options_from_module(Module) ->$/;"	f	module:sync_utils
+get_pid	apps/comment/rel/files/comment	/^get_pid() {$/;"	f
 get_pool	deps/emysql/t/emysql_load_test.erl	/^get_pool() ->$/;"	f	module:emysql_load_test
 get_port	deps/ranch/src/ranch.erl	/^get_port(Ref) ->$/;"	f	module:ranch
 get_proto_files_list	start.py	/^def get_proto_files_list():$/;"	f
@@ -2451,6 +2463,7 @@ hello_record	deps/emysql/test/basics_SUITE.erl	/^-record(hello_record, {hello_te
 hello_record	src/test/emysql_test.erl	/^-record(hello_record, {role_id, account_id, name, sex, level, diamond}).$/;"	r
 help	start.py	/^def help():$/;"	f
 hex_fetch.erl	deps/ranch/erlang.mk	/^define hex_fetch.erl$/;"	m
+hex_to_int	deps/protobuffs/src/protobuffs_scanner.erl	/^hex_to_int([_,_|R]) ->$/;"	f	module:protobuffs_scanner
 hexists	src/tools/neo_kvs.erl	/^hexists(C, Key, Field) ->$/;"	f	module:neo_kvs
 hget	src/tools/neo_kvs.erl	/^hget(C, Key, Field) ->$/;"	f	module:neo_kvs
 hget	src/tools/neo_kvs.erl	/^hget(C, Key, Field, Default) ->$/;"	f	module:neo_kvs
@@ -2486,7 +2499,7 @@ hmset	apps/comment/src/redis_interface.erl	/^hmset(RoleRecord) ->$/;"	f	module:r
 hmset	apps/comment/src/redis_query.erl	/^hmset(KeyValuePairs) ->$/;"	f	module:redis_query
 hmset	src/tools/neo_kvs.erl	/^hmset(C, Key, Vals) ->$/;"	f	module:neo_kvs
 honeybee	deps/emysql/t/honeybee.erl	/^-module(honeybee).$/;"	m
-hostname	apps/comment/rel/files/game.cmd	/^@for \/f "usebackq" %%I in (`hostname`) do @set hostname=%%I$/;"	v
+hostname	apps/comment/rel/files/comment.cmd	/^@for \/f "usebackq" %%I in (`hostname`) do @set hostname=%%I$/;"	v
 hset	src/tools/neo_kvs.erl	/^hset(C, Key, Field, Val) ->$/;"	f	module:neo_kvs
 hsetnx	src/tools/neo_kvs.erl	/^hsetnx(C, Key, Field, Val) ->$/;"	f	module:neo_kvs
 hstate	deps/emysql/src/emysql_conn.erl	/^hstate(State) ->$/;"	f	module:emysql_conn
@@ -2524,9 +2537,9 @@ info_msg	deps/lager/test/sync_error_logger.erl	/^info_msg(Format, Args) ->$/;"	f
 info_report	deps/lager/test/sync_error_logger.erl	/^info_report(Report) ->$/;"	f	module:sync_error_logger
 info_report	deps/lager/test/sync_error_logger.erl	/^info_report(Type, Report) ->$/;"	f	module:sync_error_logger
 info_size	deps/goldrush/src/gr_param.erl	/^info_size(Server) ->$/;"	f	module:gr_param
+init	apps/comment/src/comment_sup.erl	/^init([]) ->$/;"	f	module:comment_sup
 init	apps/comment/src/connector.erl	/^init(Ref, Socket, Transport, _Opts) ->$/;"	f	module:connector
 init	apps/comment/src/connector.erl	/^init([]) -> $/;"	f	module:connector
-init	apps/comment/src/game_sup.erl	/^init([]) ->$/;"	f	module:game_sup
 init	apps/comment/src/redis_worker.erl	/^init(_Args) -> $/;"	f	module:redis_worker
 init	apps/comment/src/role.erl	/^init(RoleRecord) when erlang:is_record(RoleRecord, role) ->$/;"	f	module:role
 init	apps/comment/src/role_mgr.erl	/^init() ->$/;"	f	module:role_mgr
@@ -2657,7 +2670,7 @@ insert_id-1	deps/emysql/doc/emysql.html	/^<h3 class="function"><a name="insert_i
 insert_id-1	deps/emysql/doc/emysql_util.html	/^<h3 class="function"><a name="insert_id-1">insert_id\/1<\/a><\/h3>$/;"	a
 insert_only	deps/emysql/test/basics_SUITE.erl	/^insert_only(_) ->$/;"	f	module:basics_SUITE
 insert_record_attribute	deps/lager/src/lager_transform.erl	/^insert_record_attribute(AST) ->$/;"	f	module:lager_transform
-install	apps/comment/rel/files/game.cmd	/^:install$/;"	l
+install	apps/comment/rel/files/comment.cmd	/^:install$/;"	l
 install_handler	deps/lager/src/lager_handler_watcher.erl	/^install_handler(Sink, Module, Config) ->$/;"	f	module:lager_handler_watcher
 install_handler	deps/lager/src/lager_handler_watcher.erl	/^install_handler(Sink, lager_backend_throttle, Config) ->$/;"	f	module:lager_handler_watcher
 install_handler2	deps/lager/src/lager_handler_watcher.erl	/^install_handler2(Sink, Module, Config) ->$/;"	f	module:lager_handler_watcher
@@ -2963,6 +2976,7 @@ make_printable	deps/lager/src/lager_default_formatter.erl	/^make_printable(L) wh
 make_printable	deps/lager/src/lager_default_formatter.erl	/^make_printable(Other) -> io_lib:format("~p",[Other]).$/;"	f	module:lager_default_formatter
 make_printable	deps/lager/src/lager_default_formatter.erl	/^make_printable(P) when is_pid(P) -> pid_to_list(P);$/;"	f	module:lager_default_formatter
 make_queries	deps/emysql/test/conn_mgr_SUITE.erl	/^make_queries(Loops) ->$/;"	f	module:conn_mgr_SUITE
+make_safe	deps/protobuffs/src/protobuffs_parser.erl	/^make_safe(String) ->$/;"	f	module:protobuffs_parser
 make_varname	deps/lager/src/lager_transform.erl	/^make_varname(Prefix, Line) ->$/;"	f	module:lager_transform
 manage_counts_name	deps/goldrush/src/glc.erl	/^manage_counts_name(Module) -> reg_name(Module, "_counters_mgr").$/;"	f	module:glc
 manage_params_name	deps/goldrush/src/glc.erl	/^manage_params_name(Module) -> reg_name(Module, "_params_mgr").$/;"	f	module:glc
@@ -3166,11 +3180,11 @@ nf	deps/goldrush/src/glc_ops.erl	/^nf(Key) ->$/;"	f	module:glc_ops
 nf	deps/goldrush/src/glc_ops.erl	/^nf(Key) when is_atom(Key) ->$/;"	f	module:glc_ops
 no_cover_passthrough_test	deps/meck/test/meck_tests.erl	/^no_cover_passthrough_test() ->$/;"	f	module:meck_tests
 no_enable_on_load	deps/meck/test/meck_on_load_tests.erl	/^no_enable_on_load() ->$/;"	f	module:meck_on_load_tests
-node_boot_script	apps/comment/rel/files/game.cmd	/^@set node_boot_script=%releases_dir%\\%release_version%\\%node_name%$/;"	v
-node_name	apps/comment/rel/files/game.cmd	/^@set node_name=game$/;"	v
-node_root	apps/comment/rel/files/game.cmd	/^@for \/F "delims=" %%I in ("%~dp0..") do @set node_root=%%~fI$/;"	v
+node_boot_script	apps/comment/rel/files/comment.cmd	/^@set node_boot_script=%releases_dir%\\%release_version%\\%node_name%$/;"	v
+node_name	apps/comment/rel/files/comment.cmd	/^@set node_name=comment$/;"	v
+node_root	apps/comment/rel/files/comment.cmd	/^@for \/F "delims=" %%I in ("%~dp0..") do @set node_root=%%~fI$/;"	v
 node_root	apps/comment/rel/files/start_erl.cmd	/^    @for \/f "tokens=* delims= " %%a in ("%%K") do @set node_root=%%a$/;"	v
-nodetool	apps/comment/rel/files/game.cmd	/^@set nodetool="%erts_bin%\\nodetool"$/;"	v
+nodetool	apps/comment/rel/files/comment.cmd	/^@set nodetool="%erts_bin%\\nodetool"$/;"	v
 non_neg_integer	deps/protobuffs/test/quickcheck_setup.hrl	/^non_neg_integer() ->$/;"	f
 normal_exports	deps/meck/src/meck_proc.erl	/^normal_exports(Mod) ->$/;"	f	module:meck_proc
 normalize_case_windows_dir	deps/sync/src/sync_utils.erl	/^normalize_case_windows_dir(Dir) ->$/;"	f	module:sync_utils
@@ -3274,6 +3288,8 @@ pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated, [], _, Acc) ->$/;"	f
 pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated, undefined, _, _) -> [];$/;"	f	module:pokemon_pb
 pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated_packed, [], _, _) -> [];$/;"	f	module:pokemon_pb
 pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated_packed, undefined, _, _) -> [];$/;"	f	module:pokemon_pb
+pack_repeated	deps/protobuffs/src/protobuffs_parser.erl	/^pack_repeated(Type,_) ->$/;"	f	module:protobuffs_parser
+pack_repeated	deps/protobuffs/src/protobuffs_parser.erl	/^pack_repeated(repeated,{packed,true}) ->$/;"	f	module:protobuffs_parser
 package_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^package_test_() ->$/;"	f	module:protobuffs_parser_tests
 packed_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^packed_test_() ->$/;"	f	module:protobuffs_parser_tests
 packet	deps/emysql/include/emysql.hrl	/^-record(packet, {size :: number(), $/;"	r
@@ -3287,7 +3303,10 @@ parse	deps/eredis/src/eredis_parser.erl	/^parse(#pstate{state = bulk_continue,$/
 parse	deps/eredis/src/eredis_parser.erl	/^parse(#pstate{state = multibulk_continue,$/;"	f	module:eredis_parser
 parse	deps/eredis/src/eredis_parser.erl	/^parse(#pstate{state = status_continue,$/;"	f	module:eredis_parser
 parse	deps/eredis/src/eredis_parser.erl	/^parse(#pstate{state = undefined} = State, NewData) ->$/;"	f	module:eredis_parser
+parse	deps/protobuffs/src/protobuffs_parser.erl	/^parse(Tokens) ->$/;"	f	module:protobuffs_parser
 parse	deps/protobuffs/test/erlang_protobuffs_SUITE.erl	/^parse(FileName) ->$/;"	f	module:erlang_protobuffs_SUITE
+parse_and_scan	deps/protobuffs/src/protobuffs_parser.erl	/^parse_and_scan({F, A}) ->$/;"	f	module:protobuffs_parser
+parse_and_scan	deps/protobuffs/src/protobuffs_parser.erl	/^parse_and_scan({M, F, A}) ->$/;"	f	module:protobuffs_parser
 parse_buffer	deps/emysql/src/emysql_tcp.erl	/^parse_buffer(FieldList,<<PacketLength:24\/little-integer, SeqNum:8\/integer, PacketData:PacketLength\/binary, Rest\/binary>>, Acc) ->$/;"	f	module:emysql_tcp
 parse_buffer	deps/emysql/src/emysql_tcp.erl	/^parse_buffer(_FieldList, Buff = <<PacketLength:24\/little-integer, _SeqNum:8\/integer, PacketData\/binary>>, Acc) ->$/;"	f	module:emysql_tcp
 parse_buffer	deps/emysql/src/emysql_tcp.erl	/^parse_buffer(_FieldList,Buff, Acc) ->$/;"	f	module:emysql_tcp
@@ -3383,8 +3402,9 @@ phone_number	deps/protobuffs/test/protobuffs_proper.erl	/^phone_number() ->$/;"	
 phone_type	deps/protobuffs/test/protobuffs_proper.erl	/^phone_type() ->$/;"	f	module:protobuffs_proper
 pick_member	src/tools/neo_pooler.erl	/^pick_member(PoolName) ->$/;"	f	module:neo_pooler
 pikachu	deps/protobuffs/src/pokemon_pb.erl	/^-record(pikachu, {abc, def, '$extensions' = dict:new()}).$/;"	r
-ping	apps/comment/rel/files/game.cmd	/^:ping$/;"	l
+ping	apps/comment/rel/files/comment.cmd	/^:ping$/;"	l
 ping	deps/meck/test/meck_on_load_module.erl	/^ping() -> pong.$/;"	f	module:meck_on_load_module
+ping_node	apps/comment/rel/files/comment	/^ping_node() {$/;"	f
 pipeline	deps/eredis/src/eredis.erl	/^pipeline(Client, Pipeline, Timeout) ->$/;"	f	module:eredis
 pipeline	deps/eredis/src/eredis.erl	/^pipeline(_Client, [], _Timeout) ->$/;"	f	module:eredis
 pipeline_mixed_test	deps/eredis/test/eredis_tests.erl	/^pipeline_mixed_test() ->$/;"	f	module:eredis_tests
@@ -6444,8 +6464,10 @@ protobuffs_compile_tests	deps/protobuffs/test/protobuffs_compile_tests.erl	/^-mo
 protobuffs_file	deps/protobuffs/src/protobuffs_file.erl	/^-module(protobuffs_file).$/;"	m
 protobuffs_packed_test_case	deps/protobuffs/test/erlang_protobuffs_SUITE.erl	/^protobuffs_packed_test_case() -> [].$/;"	f	module:erlang_protobuffs_SUITE
 protobuffs_packed_test_case	deps/protobuffs/test/erlang_protobuffs_SUITE.erl	/^protobuffs_packed_test_case(Config) ->$/;"	f	module:erlang_protobuffs_SUITE
+protobuffs_parser	deps/protobuffs/src/protobuffs_parser.erl	/^-module(protobuffs_parser).$/;"	m
 protobuffs_parser_tests	deps/protobuffs/test/protobuffs_parser_tests.erl	/^-module(protobuffs_parser_tests).$/;"	m
 protobuffs_proper	deps/protobuffs/test/protobuffs_proper.erl	/^-module(protobuffs_proper).$/;"	m
+protobuffs_scanner	deps/protobuffs/src/protobuffs_scanner.erl	/^-module(protobuffs_scanner).$/;"	m
 protobuffs_test_case	deps/protobuffs/test/erlang_protobuffs_SUITE.erl	/^protobuffs_test_case() -> [].$/;"	f	module:erlang_protobuffs_SUITE
 protobuffs_test_case	deps/protobuffs/test/erlang_protobuffs_SUITE.erl	/^protobuffs_test_case(Config) ->$/;"	f	module:erlang_protobuffs_SUITE
 protobuffs_tests	deps/protobuffs/test/protobuffs_tests.erl	/^-module(protobuffs_tests).$/;"	m
@@ -6471,7 +6493,7 @@ qp	apps/comment/src/redis_query.erl	/^qp(Command, Timeout) ->$/;"	f	module:redis
 qp	deps/eredis/src/eredis.erl	/^qp(Client, Pipeline) ->$/;"	f	module:eredis
 qp	deps/eredis/src/eredis.erl	/^qp(Client, Pipeline, Timeout) ->$/;"	f	module:eredis
 qp	src/tools/neo_kvs.erl	/^qp(C, Pipeline) ->$/;"	f	module:neo_kvs
-query	apps/comment/rel/files/game.cmd	/^:query$/;"	l
+query	apps/comment/rel/files/comment.cmd	/^:query$/;"	l
 queue_or_send	deps/eredis/src/eredis_sub_client.erl	/^queue_or_send(Msg, State) ->$/;"	f	module:eredis_sub_client
 quickcheck	deps/protobuffs/test/quickcheck_setup.hrl	/^quickcheck(Prop, _) ->$/;"	f
 quickcheck	deps/protobuffs/test/quickcheck_setup.hrl	/^quickcheck(_) ->$/;"	f
@@ -6561,7 +6583,7 @@ reference_link	deps/emysql/etc/markdown.lua	/^	local function reference_link(tex
 reg_name	deps/goldrush/src/glc.erl	/^reg_name(Module, Name) ->$/;"	f	module:glc
 reinstall_on_initial_failure_test_	deps/lager/src/lager_handler_watcher.erl	/^reinstall_on_initial_failure_test_() ->$/;"	f	module:lager_handler_watcher
 reinstall_on_runtime_failure_test_	deps/lager/src/lager_handler_watcher.erl	/^reinstall_on_runtime_failure_test_() ->$/;"	f	module:lager_handler_watcher
-releases_dir	apps/comment/rel/files/game.cmd	/^@set releases_dir=%node_root%\\releases$/;"	v
+releases_dir	apps/comment/rel/files/comment.cmd	/^@set releases_dir=%node_root%\\releases$/;"	v
 releases_dir	apps/comment/rel/files/start_erl.cmd	/^@set releases_dir=%node_root%\\releases$/;"	v
 reload	src/tools/reloader.erl	/^reload(Module) ->$/;"	f	module:reloader
 reload_if_necessary	deps/sync/src/sync_scanner.erl	/^reload_if_necessary(CompileFun, SrcFile, Module, _OldBinary, _Binary, Options, Warnings) ->$/;"	f	module:sync_scanner
@@ -6670,6 +6692,7 @@ retrieve_result	deps/meck/src/meck_ret_spec.erl	/^retrieve_result(RetSpec = {mec
 retrieve_result	deps/meck/src/meck_ret_spec.erl	/^retrieve_result(RetSpec) ->$/;"	f	module:meck_ret_spec
 retrieve_result	deps/meck/src/meck_ret_spec.erl	/^retrieve_result(RetSpec, ExplodedRs) ->$/;"	f	module:meck_ret_spec
 return_error	deps/eredis/src/eredis_parser.erl	/^return_error(Result, State, StateName) ->$/;"	f	module:eredis_parser
+return_error	deps/protobuffs/src/protobuffs_parser.erl	/^return_error(Line, Message) ->$/;"	f	module:protobuffs_parser
 return_result	deps/eredis/src/eredis_parser.erl	/^return_result({continue, ContinuationData}, State, StateName) ->$/;"	f	module:eredis_parser
 return_result	deps/eredis/src/eredis_parser.erl	/^return_result({ok, Value, <<>>}, _State, _StateName) ->$/;"	f	module:eredis_parser
 return_result	deps/eredis/src/eredis_parser.erl	/^return_result({ok, Value, Rest}, _State, _StateName) ->$/;"	f	module:eredis_parser
@@ -6738,6 +6761,7 @@ safe_format_chop	deps/lager/src/lager.erl	/^safe_format_chop(Fmt, Args, Limit) -
 safe_format_test	deps/lager/test/lager_test_backend.erl	/^safe_format_test() ->$/;"	f	module:lager_test_backend
 safe_reply	deps/eredis/src/eredis_client.erl	/^safe_reply(From, Value) ->$/;"	f	module:eredis_client
 safe_reply	deps/eredis/src/eredis_client.erl	/^safe_reply(undefined, _Value) ->$/;"	f	module:eredis_client
+safe_string	deps/protobuffs/src/protobuffs_parser.erl	/^safe_string(A) -> make_safe(atom_to_list(A)).$/;"	f	module:protobuffs_parser
 sane_float_printing_test	deps/lager/src/lager_trunc_io.erl	/^sane_float_printing_test() ->$/;"	f	module:lager_trunc_io
 sasl_limited_str	deps/lager/src/lager_crash_log.erl	/^sasl_limited_str(crash_report, Report, FmtMaxBytes) ->$/;"	f	module:lager_crash_log
 sasl_limited_str	deps/lager/src/lager_crash_log.erl	/^sasl_limited_str(progress, Report, FmtMaxBytes) ->$/;"	f	module:lager_crash_log
@@ -6816,7 +6840,7 @@ sequence_	deps/meck/test/meck_tests.erl	/^sequence_(Mod) ->$/;"	f	module:meck_te
 sequence_multi_	deps/meck/test/meck_tests.erl	/^sequence_multi_(Mod) ->$/;"	f	module:meck_tests
 serve_waiting_pids	deps/emysql/src/emysql_conn_mgr.erl	/^serve_waiting_pids(Pool) ->$/;"	f	module:emysql_conn_mgr
 serve_waiting_pids	deps/emysql/src/emysql_conn_mgr.erl	/^serve_waiting_pids(Waiting, Available, Locked, MonitorRefs) ->$/;"	f	module:emysql_conn_mgr
-service_name	apps/comment/rel/files/game.cmd	/^@set service_name=%node_name%_%release_version%$/;"	v
+service_name	apps/comment/rel/files/comment.cmd	/^@set service_name=%node_name%_%release_version%$/;"	v
 service_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^service_test_() ->$/;"	f	module:protobuffs_parser_tests
 set	apps/comment/src/redis_query.erl	/^set(Key, Value) -> $/;"	f	module:redis_query
 set	deps/lager/src/lager_config.erl	/^set(Key, Value) ->$/;"	f	module:lager_config
@@ -6861,7 +6885,7 @@ set_protocol_options	deps/ranch/src/ranch.erl	/^set_protocol_options(Ref, Opts) 
 set_protocol_options	deps/ranch/src/ranch_server.erl	/^set_protocol_options(Ref, ProtoOpts) ->$/;"	f	module:ranch_server
 set_record_field	deps/protobuffs/src/pokemon_pb.erl	/^set_record_field(Fields, Record, '$extensions', Value) ->$/;"	f	module:pokemon_pb
 set_record_field	deps/protobuffs/src/pokemon_pb.erl	/^set_record_field(Fields, Record, Field, Value) ->$/;"	f	module:pokemon_pb
-set_trim	apps/comment/rel/files/game.cmd	/^:set_trim$/;"	l
+set_trim	apps/comment/rel/files/comment.cmd	/^:set_trim$/;"	l
 set_trim	apps/comment/rel/files/start_erl.cmd	/^:set_trim$/;"	l
 setbit	src/tools/neo_kvs.erl	/^setbit(C, Key, Offset, Val) ->$/;"	f	module:neo_kvs
 setex	src/tools/neo_kvs.erl	/^setex(C, Key, Seconds, Val) ->$/;"	f	module:neo_kvs
@@ -6898,8 +6922,17 @@ sint64	deps/protobuffs/test/protobuffs_proper.erl	/^sint64() ->$/;"	f	module:pro
 sinter	src/tools/neo_kvs.erl	/^sinter(C, Keys) ->$/;"	f	module:neo_kvs
 sinterstore	src/tools/neo_kvs.erl	/^sinterstore(C, Dest, Keys) ->$/;"	f	module:neo_kvs
 sismember	src/tools/neo_kvs.erl	/^sismember(C, Key, Val) ->$/;"	f	module:neo_kvs
+skip_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_cont(Rest, Line, skip_token, Error) ->$/;"	f	module:protobuffs_scanner
+skip_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_cont(Rest, Line, {end_token,_T,Push}, Error) ->$/;"	f	module:protobuffs_scanner
+skip_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_cont(Rest, Line, {end_token,_T}, Error) ->$/;"	f	module:protobuffs_scanner
+skip_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_cont(Rest, Line, {error,_S}, Error) ->$/;"	f	module:protobuffs_scanner
+skip_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_cont(Rest, Line, {skip_token,Push}, Error) ->$/;"	f	module:protobuffs_scanner
+skip_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_cont(Rest, Line, {token,_T,Push}, Error) ->$/;"	f	module:protobuffs_scanner
+skip_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_cont(Rest, Line, {token,_T}, Error) ->$/;"	f	module:protobuffs_scanner
 skip_next_field	deps/protobuffs/src/protobuffs.erl	/^skip_next_field(Bytes) ->$/;"	f	module:protobuffs
 skip_next_field_test_	deps/protobuffs/test/protobuffs_tests.erl	/^skip_next_field_test_() ->$/;"	f	module:protobuffs_tests
+skip_tokens	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_tokens(Ics, Line, Error) ->$/;"	f	module:protobuffs_scanner
+skip_tokens	deps/protobuffs/src/protobuffs_scanner.erl	/^skip_tokens(S0, Ics0, L0, Tcs, Tlen0, Tline, Error, A0, Alen0) ->$/;"	f	module:protobuffs_scanner
 smadd	src/tools/neo_kvs.erl	/^smadd(C, Key, Vals) ->$/;"	f	module:neo_kvs
 smadd	src/tools/neo_kvs.erl	/^smadd(_C, _Key, []) ->$/;"	f	module:neo_kvs
 smembers	src/tools/neo_kvs.erl	/^smembers(C, Key) ->$/;"	f	module:neo_kvs
@@ -6932,8 +6965,8 @@ ssl_echo	deps/ranch/test/acceptor_SUITE.erl	/^ssl_echo(_) ->$/;"	f	module:accept
 stacktrace_	deps/meck/test/meck_tests.erl	/^stacktrace_(Mod) ->$/;"	f	module:meck_tests
 stacktrace_function_clause_	deps/meck/test/meck_tests.erl	/^stacktrace_function_clause_(Mod) ->$/;"	f	module:meck_tests
 stamp	src/tools/reloader.erl	/^stamp() ->$/;"	f	module:reloader
-start	apps/comment/rel/files/game.cmd	/^:start$/;"	l
-start	apps/comment/src/game_app.erl	/^start(_Type, _StartArgs) ->$/;"	f	module:game_app
+start	apps/comment/rel/files/comment.cmd	/^:start$/;"	l
+start	apps/comment/src/comment_app.erl	/^start(_Type, _StartArgs) ->$/;"	f	module:comment_app
 start	deps/emysql/src/emysql.erl	/^start() ->$/;"	f	module:emysql
 start	deps/emysql/src/emysql_app.erl	/^start(_Type, _StartArgs) ->$/;"	f	module:emysql_app
 start	deps/emysql/src/emysql_worker.erl	/^start(Module) ->$/;"	f	module:emysql_worker
@@ -6961,7 +6994,7 @@ start-1	deps/emysql/doc/emysql_worker.html	/^<h3 class="function"><a name="start
 start-2	deps/emysql/doc/emysql_app.html	/^<h3 class="function"><a name="start-2">start\/2<\/a><\/h3>$/;"	a
 start_client	start.py	/^def start_client():$/;"	f
 start_db	start.py	/^def start_db(detach=False):$/;"	f
-start_erl	apps/comment/rel/files/game.cmd	/^@set start_erl=%node_root%\\bin\\start_erl.cmd$/;"	v
+start_erl	apps/comment/rel/files/comment.cmd	/^@set start_erl=%node_root%\\bin\\start_erl.cmd$/;"	v
 start_error_logger_handler	deps/lager/src/lager_app.erl	/^start_error_logger_handler(_, HWM, undefined) ->$/;"	f	module:lager_app
 start_error_logger_handler	deps/lager/src/lager_app.erl	/^start_error_logger_handler(_, HWM, {ok, WhiteList}) ->$/;"	f	module:lager_app
 start_error_logger_handler	deps/lager/src/lager_app.erl	/^start_error_logger_handler({ok, false}, _HWM, _Whitelist) ->$/;"	f	module:lager_app
@@ -6970,8 +7003,8 @@ start_handler	deps/lager/src/lager_app.erl	/^start_handler(Sink, Module, Config)
 start_handlers	deps/lager/src/lager_app.erl	/^start_handlers(Sink, Handlers) ->$/;"	f	module:lager_app
 start_handlers	deps/lager/src/lager_app.erl	/^start_handlers(_Sink, Handlers) when not is_list(Handlers) ->$/;"	f	module:lager_app
 start_handlers	deps/lager/src/lager_app.erl	/^start_handlers(_Sink, undefined) ->$/;"	f	module:lager_app
+start_link	apps/comment/src/comment_sup.erl	/^start_link() ->$/;"	f	module:comment_sup
 start_link	apps/comment/src/connector.erl	/^start_link(Ref, Socket, Transport, Opts) ->$/;"	f	module:connector
-start_link	apps/comment/src/game_sup.erl	/^start_link() ->$/;"	f	module:game_sup
 start_link	apps/comment/src/redis_worker.erl	/^start_link(Args) ->$/;"	f	module:redis_worker
 start_link	apps/comment/src/role.erl	/^start_link(RoleRecord) when erlang:is_record(RoleRecord, role)->$/;"	f	module:role
 start_link	apps/comment/src/role_sup.erl	/^start_link() ->$/;"	f	module:role_sup
@@ -7087,8 +7120,8 @@ status_test	deps/eredis/test/eredis_parser_tests.erl	/^status_test() ->$/;"	f	mo
 sticky_directory_test_	deps/meck/test/meck_tests.erl	/^sticky_directory_test_() ->$/;"	f	module:meck_tests
 sticky_setup	deps/meck/test/meck_tests.erl	/^sticky_setup() ->$/;"	f	module:meck_tests
 sticky_teardown	deps/meck/test/meck_tests.erl	/^sticky_teardown({Module, {Dir, Dest}}) ->$/;"	f	module:meck_tests
-stop	apps/comment/rel/files/game.cmd	/^:stop$/;"	l
-stop	apps/comment/src/game_app.erl	/^stop(_State) ->$/;"	f	module:game_app
+stop	apps/comment/rel/files/comment.cmd	/^:stop$/;"	l
+stop	apps/comment/src/comment_app.erl	/^stop(_State) ->$/;"	f	module:comment_app
 stop	apps/comment/src/role_mgr.erl	/^stop() ->$/;"	f	module:role_mgr
 stop	deps/emysql/src/emysql.erl	/^stop() ->$/;"	f	module:emysql
 stop	deps/emysql/src/emysql_app.erl	/^stop(_State) ->$/;"	f	module:emysql_app
@@ -7122,6 +7155,17 @@ string	deps/lager/src/lager_format.erl	/^string(S, F, Adj, P, Pad) when F >= P -
 string	deps/lager/src/lager_format.erl	/^string(S, F, Adj, none, Pad) ->$/;"	f	module:lager_format
 string	deps/lager/src/lager_format.erl	/^string(S, none, _Adj, P, Pad) ->$/;"	f	module:lager_format
 string	deps/lager/src/lager_format.erl	/^string(S, none, _Adj, none, _Pad) -> S;$/;"	f	module:lager_format
+string	deps/protobuffs/src/protobuffs_scanner.erl	/^string(Ics0, L0, Tcs, Ts) ->$/;"	f	module:protobuffs_scanner
+string	deps/protobuffs/src/protobuffs_scanner.erl	/^string(String) -> string(String, 1).$/;"	f	module:protobuffs_scanner
+string	deps/protobuffs/src/protobuffs_scanner.erl	/^string(String, Line) -> string(String, Line, String, []).$/;"	f	module:protobuffs_scanner
+string	deps/protobuffs/src/protobuffs_scanner.erl	/^string([], L, [], Ts) ->                     % No partial tokens!$/;"	f	module:protobuffs_scanner
+string_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^string_cont(Rest, Line, skip_token, Ts) ->$/;"	f	module:protobuffs_scanner
+string_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^string_cont(Rest, Line, {end_token,T,Push}, Ts) ->$/;"	f	module:protobuffs_scanner
+string_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^string_cont(Rest, Line, {end_token,T}, Ts) ->$/;"	f	module:protobuffs_scanner
+string_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^string_cont(Rest, Line, {skip_token,Push}, Ts) ->$/;"	f	module:protobuffs_scanner
+string_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^string_cont(Rest, Line, {token,T,Push}, Ts) ->$/;"	f	module:protobuffs_scanner
+string_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^string_cont(Rest, Line, {token,T}, Ts) ->$/;"	f	module:protobuffs_scanner
+string_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^string_cont(_Rest, Line, {error,S}, _Ts) ->$/;"	f	module:protobuffs_scanner
 string_field	deps/lager/src/lager_format.erl	/^string_field(S, F, Adj, N, Pad) when N < F ->$/;"	f	module:lager_format
 string_field	deps/lager/src/lager_format.erl	/^string_field(S, F, _Adj, N, _Pad) when N > F ->$/;"	f	module:lager_format
 string_field	deps/lager/src/lager_format.erl	/^string_field(S, _, _, _, _) -> % N == F$/;"	f	module:lager_format
@@ -7138,6 +7182,7 @@ string_p1	deps/lager/src/lager_stdlib.erl	/^string_p1([H|T]) when is_integer(H),
 string_p1	deps/lager/src/lager_stdlib.erl	/^string_p1([H|T]) when is_list(H) ->$/;"	f	module:lager_stdlib
 string_p1	deps/lager/src/lager_stdlib.erl	/^string_p1([]) -> true;$/;"	f	module:lager_stdlib
 string_p1	deps/lager/src/lager_stdlib.erl	/^string_p1(_) ->  false.$/;"	f	module:lager_stdlib
+strip	deps/protobuffs/src/protobuffs_scanner.erl	/^strip(TokenChars,TokenLen) -> $/;"	f	module:protobuffs_scanner
 strip_link_definitions	deps/emysql/etc/markdown.lua	/^function strip_link_definitions(text)$/;"	f
 strip_off_matchers	deps/meck/src/meck_args_matcher.erl	/^strip_off_matchers(ArgsPattern) ->$/;"	f	module:meck_args_matcher
 strip_off_matchers	deps/meck/src/meck_args_matcher.erl	/^strip_off_matchers([ArgPattern | Rest], Stripped, HasMatchers) ->$/;"	f	module:meck_args_matcher
@@ -7182,7 +7227,7 @@ sync_options	deps/sync/src/sync_options.erl	/^-module(sync_options).$/;"	m
 sync_scanner	deps/sync/src/sync_scanner.erl	/^-module(sync_scanner).$/;"	m
 sync_utils	deps/sync/src/sync_utils.erl	/^-module(sync_utils).$/;"	m
 sys	start.py	/^import sys$/;"	i
-sys_config	apps/comment/rel/files/game.cmd	/^@set sys_config=%releases_dir%\\%release_version%\\sys.config$/;"	v
+sys_config	apps/comment/rel/files/comment.cmd	/^@set sys_config=%releases_dir%\\%release_version%\\sys.config$/;"	v
 system_code_change	deps/ranch/src/ranch_conns_sup.erl	/^system_code_change(Misc, _, _, _) ->$/;"	f	module:ranch_conns_sup
 system_continue	deps/ranch/src/ranch_conns_sup.erl	/^system_continue(_, _, {State, CurConns, NbChildren, Sleepers}) ->$/;"	f	module:ranch_conns_sup
 system_terminate	deps/ranch/src/ranch_conns_sup.erl	/^system_terminate(Reason, _, _, {State, _, NbChildren, _}) ->$/;"	f	module:ranch_conns_sup
@@ -7294,7 +7339,30 @@ to_integer	deps/emysql/src/emysql_tcp.erl	/^to_integer(Data) -> list_to_integer(
 to_record	deps/protobuffs/src/pokemon_pb.erl	/^to_record(pikachu, DecodedTuples) ->$/;"	f	module:pokemon_pb
 to_time	deps/emysql/src/emysql_tcp.erl	/^to_time(Data) ->$/;"	f	module:emysql_tcp
 to_timestamp	deps/emysql/src/emysql_tcp.erl	/^to_timestamp(Data) ->$/;"	f	module:emysql_tcp
+token	deps/protobuffs/src/protobuffs_scanner.erl	/^token(Cont, Chars) -> token(Cont, Chars, 1).$/;"	f	module:protobuffs_scanner
+token	deps/protobuffs/src/protobuffs_scanner.erl	/^token(S0, Ics0, L0, Tcs, Tlen0, Tline, A0, Alen0) ->$/;"	f	module:protobuffs_scanner
+token	deps/protobuffs/src/protobuffs_scanner.erl	/^token([], Chars, Line) ->$/;"	f	module:protobuffs_scanner
+token	deps/protobuffs/src/protobuffs_scanner.erl	/^token({token,State,Line,Tcs,Tlen,Tline,Action,Alen}, Chars, _) ->$/;"	f	module:protobuffs_scanner
+token_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^token_cont(Rest, Line, skip_token) ->$/;"	f	module:protobuffs_scanner
+token_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^token_cont(Rest, Line, {end_token,T,Push}) ->$/;"	f	module:protobuffs_scanner
+token_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^token_cont(Rest, Line, {end_token,T}) ->$/;"	f	module:protobuffs_scanner
+token_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^token_cont(Rest, Line, {error,S}) ->$/;"	f	module:protobuffs_scanner
+token_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^token_cont(Rest, Line, {skip_token,Push}) ->$/;"	f	module:protobuffs_scanner
+token_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^token_cont(Rest, Line, {token,T,Push}) ->$/;"	f	module:protobuffs_scanner
+token_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^token_cont(Rest, Line, {token,T}) ->$/;"	f	module:protobuffs_scanner
 tokenize_html	deps/emysql/etc/markdown.lua	/^function tokenize_html(html)$/;"	f
+tokens	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens(Cont, Chars) -> tokens(Cont, Chars, 1).$/;"	f	module:protobuffs_scanner
+tokens	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens(S0, Ics0, L0, Tcs, Tlen0, Tline, Ts, A0, Alen0) ->$/;"	f	module:protobuffs_scanner
+tokens	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens([], Chars, Line) ->$/;"	f	module:protobuffs_scanner
+tokens	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens({skip_tokens,State,Line,Tcs,Tlen,Tline,Error,Action,Alen}, Chars, _) ->$/;"	f	module:protobuffs_scanner
+tokens	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens({tokens,State,Line,Tcs,Tlen,Tline,Ts,Action,Alen}, Chars, _) ->$/;"	f	module:protobuffs_scanner
+tokens_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens_cont(Rest, Line, skip_token, Ts) ->$/;"	f	module:protobuffs_scanner
+tokens_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens_cont(Rest, Line, {end_token,T,Push}, Ts) ->$/;"	f	module:protobuffs_scanner
+tokens_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens_cont(Rest, Line, {end_token,T}, Ts) ->$/;"	f	module:protobuffs_scanner
+tokens_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens_cont(Rest, Line, {error,S}, _Ts) ->$/;"	f	module:protobuffs_scanner
+tokens_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens_cont(Rest, Line, {skip_token,Push}, Ts) ->$/;"	f	module:protobuffs_scanner
+tokens_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens_cont(Rest, Line, {token,T,Push}, Ts) ->$/;"	f	module:protobuffs_scanner
+tokens_cont	deps/protobuffs/src/protobuffs_scanner.erl	/^tokens_cont(Rest, Line, {token,T}, Ts) ->$/;"	f	module:protobuffs_scanner
 too_much_data_in_continuation_test	deps/eredis/test/eredis_parser_tests.erl	/^too_much_data_in_continuation_test() ->$/;"	f	module:eredis_parser_tests
 too_much_data_test	deps/eredis/test/eredis_parser_tests.erl	/^too_much_data_test() ->$/;"	f	module:eredis_parser_tests
 tpl_cowboy_http	deps/ranch/erlang.mk	/^define tpl_cowboy_http$/;"	m
@@ -7373,7 +7441,7 @@ undefined_module_test	deps/meck/test/meck_tests.erl	/^undefined_module_test() ->
 unescape_special_chars	deps/emysql/etc/markdown.lua	/^function unescape_special_chars(t)$/;"	f
 unicode_test	deps/lager/src/lager_trunc_io.erl	/^unicode_test() ->$/;"	f	module:lager_trunc_io
 uniconv	deps/lager/src/lager_format.erl	/^uniconv(C) ->$/;"	f	module:lager_format
-uninstall	apps/comment/rel/files/game.cmd	/^:uninstall$/;"	l
+uninstall	apps/comment/rel/files/comment.cmd	/^:uninstall$/;"	l
 union	deps/goldrush/src/glc.erl	/^union(Queries) ->$/;"	f	module:glc
 union	deps/goldrush/src/glc_ops.erl	/^union(Queries) ->$/;"	f	module:glc_ops
 union	deps/protobuffs/test/quickcheck_setup.hrl	/^union(List) ->$/;"	f
@@ -7403,6 +7471,8 @@ unstick_original	deps/meck/src/meck_proc.erl	/^unstick_original(Module) -> unsti
 unstick_original	deps/meck/src/meck_proc.erl	/^unstick_original(Module, true) -> code:unstick_mod(Module);$/;"	f	module:meck_proc
 unstick_original	deps/meck/src/meck_proc.erl	/^unstick_original(_,_) -> false.$/;"	f	module:meck_proc
 unsubscribe	deps/eredis/src/eredis_sub.erl	/^unsubscribe(Client, Channels) ->$/;"	f	module:eredis_sub
+unwrap	deps/protobuffs/src/protobuffs_parser.erl	/^unwrap({V,_}) -> V.$/;"	f	module:protobuffs_parser
+unwrap	deps/protobuffs/src/protobuffs_parser.erl	/^unwrap({_,_,V}) -> V;$/;"	f	module:protobuffs_parser
 update_counter	deps/goldrush/src/gr_counter.erl	/^update_counter(Server, Counter, Value) when is_atom(Server) ->$/;"	f	module:gr_counter
 update_counter	deps/goldrush/src/gr_counter.erl	/^update_counter(Server, Counter, Value) when is_pid(Server) ->$/;"	f	module:gr_counter
 update_loglevel_config	deps/lager/src/lager.erl	/^update_loglevel_config(Sink) ->$/;"	f	module:lager
@@ -7421,8 +7491,8 @@ update_trackers	deps/meck/src/meck_proc.erl	/^update_trackers(HistoryRecord, Tra
 update_trackers	deps/meck/src/meck_proc.erl	/^update_trackers(HistoryRecord, [Tracker | Rest], UpdatedSoFar) ->$/;"	f	module:meck_proc
 update_trackers	deps/meck/src/meck_proc.erl	/^update_trackers(_HistoryRecord, [], UpdatedSoFar) ->$/;"	f	module:meck_proc
 update_type	deps/emysql/t/honeybee.erl	/^update_type(BeeID, Type) ->$/;"	f	module:honeybee
-upgrade	apps/comment/rel/files/game.cmd	/^:upgrade$/;"	l
-usage	apps/comment/rel/files/game.cmd	/^:usage$/;"	l
+upgrade	apps/comment/rel/files/comment.cmd	/^:upgrade$/;"	l
+usage	apps/comment/rel/files/comment.cmd	/^:usage$/;"	l
 use_original_file_if_exists	deps/sync/src/sync_utils.erl	/^use_original_file_if_exists(Path, IsFile) ->$/;"	f	module:sync_utils
 utf8char	deps/protobuffs/test/protobuffs_proper.erl	/^utf8char() ->$/;"	f	module:protobuffs_proper
 utf8char	deps/protobuffs/test/protobuffs_tests.erl	/^utf8char() ->$/;"	f	module:protobuffs_tests
@@ -7469,7 +7539,7 @@ verbose	deps/ranch/erlang.mk	/^verbose = $(verbose_$(V))$/;"	m
 verbose_0	deps/ranch/erlang.mk	/^verbose_0 = @$/;"	m
 version	deps/emysql/src/emysql_statements.erl	/^version(ConnId, StmtName) ->$/;"	f	module:emysql_statements
 version-2	deps/emysql/doc/emysql_statements.html	/^<h3 class="function"><a name="version-2">version\/2<\/a><\/h3>$/;"	a
-vm_args	apps/comment/rel/files/game.cmd	/^@set vm_args=%releases_dir%\\%release_version%\\vm.args$/;"	v
+vm_args	apps/comment/rel/files/comment.cmd	/^@set vm_args=%releases_dir%\\%release_version%\\vm.args$/;"	v
 vm_args	apps/comment/rel/files/start_erl.cmd	/^    @set vm_args="%node_root%\\etc\\vm.args"$/;"	v
 vm_args	apps/comment/rel/files/start_erl.cmd	/^    @set vm_args="%releases_dir%\\%release_version%\\vm.args"$/;"	v
 wait	deps/emysql/etc/issue7.erl	/^wait(Pid, Mref) ->$/;"	f	module:issue7
@@ -7520,7 +7590,7 @@ warning_report_tag	deps/lager/test/sync_error_logger.erl	/^warning_report_tag(Ty
 wc	deps/goldrush/src/glc.erl	/^wc(Key) ->$/;"	f	module:glc
 wc	deps/goldrush/src/glc_ops.erl	/^wc(Key) ->$/;"	f	module:glc_ops
 wc	deps/goldrush/src/glc_ops.erl	/^wc(Key) when is_atom(Key) ->$/;"	f	module:glc_ops
-werl	apps/comment/rel/files/game.cmd	/^@set werl="%erts_bin%\\werl.exe"$/;"	v
+werl	apps/comment/rel/files/comment.cmd	/^@set werl="%erts_bin%\\werl.exe"$/;"	v
 whitelist_modules_to_scan	deps/sync/src/sync_scanner.erl	/^whitelist_modules_to_scan(Modules) ->$/;"	f	module:sync_scanner
 who_include	deps/sync/src/sync_scanner.erl	/^who_include(HrlFile, SrcFiles) ->$/;"	f	module:sync_scanner
 wildcard	deps/sync/src/sync_utils.erl	/^wildcard(Dir, Regex) ->$/;"	f	module:sync_utils
@@ -7546,6 +7616,405 @@ write_time	deps/lager/src/lager_stdlib.erl	/^write_time({utc,{{Y,Mo,D},{H,Mi,S}}
 write_time	deps/lager/src/lager_stdlib.erl	/^write_time({{Y,Mo,D},{H,Mi,S}},Type) ->$/;"	f	module:lager_stdlib
 xyrl_verbose	deps/ranch/erlang.mk	/^xyrl_verbose = $(xyrl_verbose_$(V))$/;"	m
 xyrl_verbose_0	deps/ranch/erlang.mk	/^xyrl_verbose_0 = @echo " XYRL  " $(filter %.xrl %.yrl,$(?F));$/;"	m
+yecc_end	deps/protobuffs/src/protobuffs_parser.erl	/^yecc_end(Line) ->$/;"	f	module:protobuffs_parser
+yecc_end	deps/protobuffs/src/protobuffs_parser.erl	/^yecc_end({Line,_Column}) ->$/;"	f	module:protobuffs_parser
+yecc_error_type	deps/protobuffs/src/protobuffs_parser.erl	/^yecc_error_type(function_clause, [{?MODULE,F,ArityOrArgs,_} | _]) ->$/;"	f	module:protobuffs_parser
+yeccerror	deps/protobuffs/src/protobuffs_parser.erl	/^yeccerror(Token) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_default	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_default(45, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_element	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_element(20, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_element	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_element(26, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_elements	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_elements(20, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_elements	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_elements(26=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_header	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_header(0, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_header	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_header(3, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_header	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_header(4, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_message	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_message(0, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_message	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_message(20=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_message	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_message(26=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_message	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_message(3, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_message	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_message(4, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_protobuffs	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_protobuffs(0, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_protobuffs	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_protobuffs(3=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_protobuffs	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_protobuffs(4=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_rpc	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_rpc(20, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_rpc	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_rpc(23, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_rpcs	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_rpcs(20, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_rpcs	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_rpcs(23=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_value	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_value(19, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_value	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_value(41, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_value	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_value(49, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_value	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_value(9, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(0, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(1, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(19=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(20, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(21, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(23, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(26, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(28, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(3, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(30, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(32, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(33, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(4, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(41=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(47, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(49=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(54, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(57, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(59, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(61, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(66, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccgoto_g_var	deps/protobuffs/src/protobuffs_parser.erl	/^yeccgoto_g_var(9=_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars0	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars0(Tokens, Tzr, State, States, Vstack) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1(State1, State, States, Vstack, Token0, [Token | Tokens], Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1(State1, State, States, Vstack, Token0, [], {no_func, Line}) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1(State1, State, States, Vstack, Token0, [], {no_func, no_line}) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1(State1, State, States, Vstack, Token0, [], {{_F,_A}, _Line}=Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1([Token | Tokens], Tzr, State, States, Vstack) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1([], {no_func, Endline}, State, States, Vstack) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1([], {no_func, no_line}, State, States, Vstack) ->$/;"	f	module:protobuffs_parser
+yeccpars1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars1([], {{F, A},_Line}, State, States, Vstack) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(0=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(10=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(11=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(14=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(15=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(16=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(17=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(18=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(19=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(20=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(27=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(31=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(32=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(35=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(36=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(37=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(38=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(39=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(41=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(43=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(44=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(45=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(47=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(49=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(51=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(52=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(53=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(57=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(59=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(5=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(61=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(63=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(64=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(65=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(68=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(9=S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2(Other, _, _, _, _, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_0	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_0(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_0	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_0(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_0_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_0_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_1(S, '=', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_1(S, string, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_1(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_1	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_1(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_10	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_10(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_10	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_10(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_11	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_11(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_11_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_11_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_12	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_12(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_13	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_13(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_13	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_13(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_14	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_14(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_14_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_14_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_15	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_15(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_15_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_15_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_16	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_16(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_16_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_16_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_17	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_17(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_17_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_17_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_18	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_18(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_18_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_18_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_2(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_2	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_2(_S, '$end', _Ss, Stack, _T, _Ts, _Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_20	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_20(S, '}', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_20	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_20(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_20	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_20(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_21	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_21(S, '=', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_21	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_21(S, integer, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_21	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_21(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_21	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_21(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_22	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_22(S, '}', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_22	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_22(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_23	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_23(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_23	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_23(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_23_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_23_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_24	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_24(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_25	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_25(S, '}', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_25	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_25(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_26	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_26(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_26	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_26(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_26_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_26_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_27	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_27(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_27_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_27_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_29	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_29(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_29_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_29_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_3	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_3(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_3	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_3(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_30	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_30(S, '=', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_30	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_30(S, '{', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_30	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_30(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_30	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_30(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_31	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_31(S, integer, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_31	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_31(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_32	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_32(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_32	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_32(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_33	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_33(S, integer, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_33	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_33(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_33	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_33(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_34	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_34(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_34	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_34(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_35	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_35(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_35	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_35(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_36	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_36(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_36_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_36_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_37	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_37(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_37_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_37_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_38	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_38(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_38	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_38(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_39	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_39(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_39_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_39_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_3_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_3_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_4	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_4(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_4	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_4(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_40	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_40(S, '=', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_40	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_40(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_42	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_42(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_42	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_42(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_43	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_43(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_43_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_43_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_44	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_44(S, integer, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_44	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_44(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_45	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_45(S, '[', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_45	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_45(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_45_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_45_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_46	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_46(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_46	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_46(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_48	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_48(S, '=', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_48	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_48(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_4_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_4_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_5	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_5(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_50	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_50(S, ']', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_50	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_50(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_51	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_51(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_51_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_51_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_52	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_52(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_52_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_52_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_53	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_53(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_53_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_53_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_55	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_55(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_55_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_55_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_56	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_56(S, '(', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_56	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_56(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_58	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_58(S, ')', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_58	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_58(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_5_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_5_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_6	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_6(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_60	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_60(S, '(', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_60	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_60(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_62	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_62(S, ')', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_62	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_62(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_63	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_63(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_63	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_63(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_64	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_64(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_64_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_64_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_65	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_65(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_65_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_65_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_66	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_66(S, '(', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_66	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_66(S, '=', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_66	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_66(S, '{', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_66	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_66(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_66	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_66(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_67	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_67(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_67	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_67(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_68	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_68(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_68_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_68_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_6_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_6_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_7	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_7(_S, Cat, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_7_	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_7_(__Stack0) ->$/;"	f	module:protobuffs_parser
+yeccpars2_8	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_8(S, ';', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_8	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_8(S, '=', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_8	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_8(S, '{', Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_8	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_8(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yeccpars2_9	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_9(S, float, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_9	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_9(S, integer, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_9	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_9(S, string, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_9	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_9(S, var, Ss, Stack, T, Ts, Tzr) ->$/;"	f	module:protobuffs_parser
+yeccpars2_9	deps/protobuffs/src/protobuffs_parser.erl	/^yeccpars2_9(_, _, _, _, T, _, _) ->$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string(Other) ->$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({'$end', _}) ->$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({Other, _}) when is_atom(Other) ->$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({_Cat, _, Val}) -> io_lib:format("~p",[Val]);$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({atom, _, A}) -> io_lib:write(A);$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({char,_,C}) -> io_lib:write_char(C);$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({dot, _}) -> "'.'";$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({float,_,F}) -> io_lib:write(F);$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({integer,_,N}) -> io_lib:write(N);$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({reserved_symbol, _, A}) -> io_lib:write(A);$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({string,_,S}) -> io_lib:write_string(S);$/;"	f	module:protobuffs_parser
+yecctoken2string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken2string({var,_,V}) -> io_lib:format("~s", [V]);$/;"	f	module:protobuffs_parser
+yecctoken_end_location	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken_end_location(Token) ->$/;"	f	module:protobuffs_parser
+yecctoken_location	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken_location(Token) ->$/;"	f	module:protobuffs_parser
+yecctoken_to_string	deps/protobuffs/src/protobuffs_parser.erl	/^yecctoken_to_string(Token) ->$/;"	f	module:protobuffs_parser
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(0, TokenLen, YYtcs, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(1, TokenLen, YYtcs, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(2, TokenLen, YYtcs, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(3, TokenLen, YYtcs, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(4, _, _, _) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(5, _, _, _) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(6, _, _, _) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(7, TokenLen, YYtcs, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(8, TokenLen, YYtcs, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(9, TokenLen, YYtcs, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction(_, _, _, _) -> error.$/;"	f	module:protobuffs_scanner
+yyaction_0	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_0(TokenChars, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction_1	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_1(TokenChars, TokenLen, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction_2	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_2(TokenChars, TokenLen, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction_3	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_3(TokenChars, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction_4	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_4() ->$/;"	f	module:protobuffs_scanner
+yyaction_5	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_5() ->$/;"	f	module:protobuffs_scanner
+yyaction_6	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_6() ->$/;"	f	module:protobuffs_scanner
+yyaction_7	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_7(TokenChars, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction_8	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_8(TokenChars, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yyaction_9	deps/protobuffs/src/protobuffs_scanner.erl	/^yyaction_9(TokenChars, TokenLine) ->$/;"	f	module:protobuffs_scanner
+yypre	deps/protobuffs/src/protobuffs_scanner.erl	/^yypre(List, N) -> lists:sublist(List, N).$/;"	f	module:protobuffs_scanner
+yyrev	deps/protobuffs/src/protobuffs_scanner.erl	/^yyrev(List) -> lists:reverse(List).$/;"	f	module:protobuffs_scanner
+yyrev	deps/protobuffs/src/protobuffs_scanner.erl	/^yyrev(List, Tail) -> lists:reverse(List, Tail).$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate() -> 23.$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(0, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(0, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(1, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(1, [46|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(1, [95|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(1, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(1, [C|Ics], Line, Tlen, Action, Alen) when C >= 65, C =< 90 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(1, [C|Ics], Line, Tlen, Action, Alen) when C >= 97, C =< 122 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(10, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(10, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(11, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(11, [101|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(11, [69|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(11, [C|Ics], Line, Tlen, _, _) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(12, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(12, [C|Ics], Line, Tlen, _, _) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(12, [C|Ics], Line, Tlen, _, _) when C >= 65, C =< 70 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(12, [C|Ics], Line, Tlen, _, _) when C >= 97, C =< 102 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(13, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(13, [10|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(13, [37|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(13, [C|Ics], Line, Tlen, _, _) when C >= 0, C =< 9 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(13, [C|Ics], Line, Tlen, _, _) when C >= 11, C =< 32 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(13, [C|Ics], Line, Tlen, _, _) when C >= 33, C =< 36 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(13, [C|Ics], Line, Tlen, _, _) when C >= 38 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(14, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(14, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(15, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(15, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(16, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(16, [42|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(16, [47|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, [34|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, [46|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, [47|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, [95|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, [C|Ics], Line, Tlen, Action, Alen) when C >= 65, C =< 90 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(17, [C|Ics], Line, Tlen, Action, Alen) when C >= 97, C =< 122 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(18, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(18, [46|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(18, [95|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(18, [C|Ics], Line, Tlen, _, _) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(18, [C|Ics], Line, Tlen, _, _) when C >= 65, C =< 90 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(18, [C|Ics], Line, Tlen, _, _) when C >= 97, C =< 122 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(19, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(19, [46|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(19, [C|Ics], Line, Tlen, _, _) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(2, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(20, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(20, [C|Ics], Line, Tlen, _, _) when C >= 0, C =< 9 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(20, [C|Ics], Line, Tlen, _, _) when C >= 11 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(21, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(22, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(22, [10|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(22, [42|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(22, [C|Ics], Line, Tlen, Action, Alen) when C >= 0, C =< 9 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(22, [C|Ics], Line, Tlen, Action, Alen) when C >= 11, C =< 41 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(22, [C|Ics], Line, Tlen, Action, Alen) when C >= 43 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [10|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [123|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [125|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [34|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [37|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [39|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [40|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [41|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [43|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [45|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [46|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [47|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [48|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [59|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [61|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [91|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [93|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [95|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [C|Ics], Line, Tlen, Action, Alen) when C >= 0, C =< 9 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [C|Ics], Line, Tlen, Action, Alen) when C >= 11, C =< 32 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [C|Ics], Line, Tlen, Action, Alen) when C >= 49, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [C|Ics], Line, Tlen, Action, Alen) when C >= 65, C =< 90 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(23, [C|Ics], Line, Tlen, Action, Alen) when C >= 97, C =< 122 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(24, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(24, [10|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(24, [47|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(24, [C|Ics], Line, Tlen, Action, Alen) when C >= 0, C =< 9 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(24, [C|Ics], Line, Tlen, Action, Alen) when C >= 11, C =< 46 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(24, [C|Ics], Line, Tlen, Action, Alen) when C >= 48 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(25, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(25, [10|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(25, [37|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(25, [C|Ics], Line, Tlen, _, _) when C >= 0, C =< 9 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(25, [C|Ics], Line, Tlen, _, _) when C >= 11, C =< 32 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(26, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(3, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(3, [C|Ics], Line, Tlen, _, _) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(4, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(4, [120|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(4, [46|Ics], Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(4, [C|Ics], Line, Tlen, _, _) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(5, Ics, Line, Tlen, _, _) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(6, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(6, [46|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(6, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(7, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(7, [43|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(7, [45|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(7, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(8, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(8, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(8, [C|Ics], Line, Tlen, Action, Alen) when C >= 65, C =< 70 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(8, [C|Ics], Line, Tlen, Action, Alen) when C >= 97, C =< 102 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(9, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(9, [39|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(9, [46|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(9, [95|Ics], Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(9, [C|Ics], Line, Tlen, Action, Alen) when C >= 48, C =< 57 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(9, [C|Ics], Line, Tlen, Action, Alen) when C >= 65, C =< 90 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(9, [C|Ics], Line, Tlen, Action, Alen) when C >= 97, C =< 122 ->$/;"	f	module:protobuffs_scanner
+yystate	deps/protobuffs/src/protobuffs_scanner.erl	/^yystate(S, Ics, Line, Tlen, Action, Alen) ->$/;"	f	module:protobuffs_scanner
+yysuf	deps/protobuffs/src/protobuffs_scanner.erl	/^yysuf(List, N) -> lists:nthtail(N, List).$/;"	f	module:protobuffs_scanner
 zadd	src/tools/neo_kvs.erl	/^zadd(C, Key, Score, Val) ->$/;"	f	module:neo_kvs
 zip	deps/lager/src/lager.erl	/^zip([FieldName|RecordFields], [FieldValue|Record], Module, Options, ToReturn) ->$/;"	f	module:lager
 zip	deps/lager/src/lager.erl	/^zip([], [], _Module, _Compress, ToReturn) ->$/;"	f	module:lager

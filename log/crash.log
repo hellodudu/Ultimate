@@ -42,3 +42,15 @@ Transport option {active,once} unknown or invalid.
 Transport option {packet,0} unknown or invalid.
 2015-09-01 18:46:03 =ERROR REPORT====
 Transport option {reuseaddr,true} unknown or invalid.
+2015-09-11 14:39:44 =ERROR REPORT====
+Transport option {active,once} unknown or invalid.
+2015-09-11 14:39:44 =ERROR REPORT====
+Transport option {packet,0} unknown or invalid.
+2015-09-11 14:39:44 =ERROR REPORT====
+Transport option {reuseaddr,true} unknown or invalid.
+2015-09-11 15:49:39 =ERROR REPORT====
+Transport option {active,once} unknown or invalid.
+2015-09-11 15:49:39 =ERROR REPORT====
+Transport option {packet,0} unknown or invalid.
+2015-09-11 15:49:39 =ERROR REPORT====
+Transport option {reuseaddr,true} unknown or invalid.

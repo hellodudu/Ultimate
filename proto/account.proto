@@ -45,3 +45,7 @@ message sc_account_enter_game{
     //put various game info here.
 }
 
+message MS_FashionError{
+    required int32 dwErrorCode = 1;
+}
+

@@ -7,6 +7,8 @@
 -behaviour(gen_server).
 -behaviour(ranch_protocol).
 
+-define( DWORD, 32/unsigned-little-integer ).
+
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([init/4, start_link/4]).
 -export([send_to_role/2]).
@@ -57,6 +59,11 @@ handle_info({tcp, Socket, Data}, Session) ->
     try
         #session{socket=Socket, transport=Transport, connector_pid=_ConnectorPid} = Session,
         lager:info("receive data:~p", [Data]),
+        <<_RecvSize:?DWORD, MsgID:?DWORD, MsgSize:?DWORD, ProtoData/binary>> = Data,
+        lager:info("MsgID:~p, MsgSize:~p, ProtoData:~p", [MsgID, MsgSize, ProtoData]),
+        Result = account_pb:decode_ms_fashionerror(ProtoData),
+        lager:info("proto parse result = ~p", [Result]),
+
         RequestRecord = erlang:binary_to_term(Data),
         NewSession1 = 
             case route(RequestRecord, Session) of

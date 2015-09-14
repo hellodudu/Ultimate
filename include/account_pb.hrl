@@ -113,3 +113,10 @@
 }).
 -endif.
 
+-ifndef(MS_FASHIONERROR_PB_H).
+-define(MS_FASHIONERROR_PB_H, true).
+-record(ms_fashionerror, {
+    dwerrorcode = erlang:error({required, dwerrorcode})
+}).
+-endif.
+

@@ -1,82 +1,177 @@
-2015-09-01 17:40:51.140 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 17:42:46.688 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 17:45:51.108 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 17:55:21.941 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 17:56:11.427 [info] <0.7.0> Application sync started on node 'game@127.0.0.1'
-2015-09-01 17:59:05.466 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 18:05:57.228 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 18:33:44.901 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 18:33:44.907 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-01 18:33:44.909 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-01 18:33:44.915 [error] <0.78.0> CRASH REPORT Process <0.78.0> with 0 neighbours exited with reason: call to undefined function game_app:start(normal, []) in application_master:init/4 line 133
-2015-09-01 18:33:44.915 [info] <0.7.0> Application game exited with reason: call to undefined function game_app:start(normal, [])
-2015-09-01 18:33:44.916 [info] <0.7.0> Application poolboy exited with reason: stopped
-2015-09-01 18:33:44.920 [info] <0.7.0> Application ranch exited with reason: stopped
-2015-09-01 18:42:46.375 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 18:42:46.380 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-01 18:42:46.382 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-01 18:42:46.385 [error] <0.78.0> CRASH REPORT Process <0.78.0> with 0 neighbours exited with reason: call to undefined function game_app:start(normal, []) in application_master:init/4 line 133
-2015-09-01 18:42:46.385 [info] <0.7.0> Application game exited with reason: call to undefined function game_app:start(normal, [])
-2015-09-01 18:42:46.385 [info] <0.7.0> Application poolboy exited with reason: stopped
-2015-09-01 18:42:46.401 [info] <0.7.0> Application ranch exited with reason: stopped
-2015-09-01 18:43:45.799 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 18:43:45.805 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-01 18:43:45.807 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-01 18:43:45.823 [error] <0.82.0> Transport option {active,once} unknown or invalid.
-2015-09-01 18:43:45.823 [error] <0.82.0> Transport option {packet,0} unknown or invalid.
-2015-09-01 18:43:45.823 [error] <0.82.0> Transport option {reuseaddr,true} unknown or invalid.
-2015-09-01 18:43:45.895 [info] <0.79.0>@comment_app:start:23 ranch start_listener success
-2015-09-01 18:43:45.896 [info] <0.79.0>@comment_app:start:35 game_sup start error={error,{{badmatch,undefined},[{comment_sup,init,1,[{file,"src/comment_sup.erl"},{line,10}]},{supervisor,init,1,[{file,"supervisor.erl"},{line,243}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,306}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,237}]}]}}
-2015-09-01 18:43:45.896 [info] <0.79.0>@comment_app:start:39 game start on node 'game@127.0.0.1', listening on port 2345
-2015-09-01 18:46:03.700 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-01 18:46:03.708 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-01 18:46:03.710 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-01 18:46:03.717 [error] <0.82.0> Transport option {active,once} unknown or invalid.
-2015-09-01 18:46:03.717 [error] <0.82.0> Transport option {packet,0} unknown or invalid.
-2015-09-01 18:46:03.717 [error] <0.82.0> Transport option {reuseaddr,true} unknown or invalid.
-2015-09-01 18:46:03.788 [info] <0.79.0>@comment_app:start:23 ranch start_listener success
-2015-09-01 18:46:03.789 [info] <0.79.0>@comment_app:start:35 game_sup start error={error,{{badmatch,undefined},[{comment_sup,init,1,[{file,"src/comment_sup.erl"},{line,10}]},{supervisor,init,1,[{file,"supervisor.erl"},{line,243}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,306}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,237}]}]}}
-2015-09-01 18:46:03.789 [info] <0.79.0>@comment_app:start:39 game start on node 'game@127.0.0.1', listening on port 2345
-2015-09-11 14:39:44.620 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-11 14:39:44.629 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-11 14:39:44.631 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-11 14:39:44.640 [error] <0.82.0> Transport option {active,once} unknown or invalid.
-2015-09-11 14:39:44.640 [error] <0.82.0> Transport option {packet,0} unknown or invalid.
-2015-09-11 14:39:44.640 [error] <0.82.0> Transport option {reuseaddr,true} unknown or invalid.
-2015-09-11 14:39:44.708 [info] <0.79.0>@comment_app:start:23 ranch start_listener success
-2015-09-11 14:39:44.710 [info] <0.79.0>@comment_app:start:35 game_sup start error={error,{{badmatch,undefined},[{comment_sup,init,1,[{file,"src/comment_sup.erl"},{line,10}]},{supervisor,init,1,[{file,"supervisor.erl"},{line,243}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,306}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,237}]}]}}
-2015-09-11 14:39:44.710 [info] <0.79.0>@comment_app:start:39 game start on node 'game@127.0.0.1', listening on port 2345
-2015-09-11 15:49:39.829 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-11 15:49:39.839 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-11 15:49:39.841 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-11 15:49:39.842 [info] <0.79.0>@comment_app:start:11 port is 2345
-2015-09-11 15:49:39.857 [error] <0.82.0> Transport option {active,once} unknown or invalid.
-2015-09-11 15:49:39.857 [error] <0.82.0> Transport option {packet,0} unknown or invalid.
-2015-09-11 15:49:39.857 [error] <0.82.0> Transport option {reuseaddr,true} unknown or invalid.
-2015-09-11 15:49:39.923 [info] <0.79.0>@comment_app:start:24 ranch start_listener success
-2015-09-11 15:49:39.925 [info] <0.79.0>@comment_app:start:36 game_sup start error={error,{{badmatch,undefined},[{comment_sup,init,1,[{file,"src/comment_sup.erl"},{line,10}]},{supervisor,init,1,[{file,"supervisor.erl"},{line,243}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,306}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,237}]}]}}
-2015-09-11 15:49:39.925 [info] <0.79.0>@comment_app:start:40 game start on node 'game@127.0.0.1', listening on port 2345
-2015-09-11 15:53:36.302 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-11 15:53:36.312 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-11 15:53:36.314 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-11 15:53:36.403 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
-2015-09-11 15:53:36.404 [info] <0.79.0>@comment_app:start:30 game_sup start error={error,{{badmatch,undefined},[{comment_sup,init,1,[{file,"src/comment_sup.erl"},{line,10}]},{supervisor,init,1,[{file,"supervisor.erl"},{line,243}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,306}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,237}]}]}}
-2015-09-11 15:53:36.404 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
-2015-09-11 15:59:28.963 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-11 15:59:28.971 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-11 15:59:28.972 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-11 15:59:29.059 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
-2015-09-11 15:59:29.103 [info] <0.79.0>@comment_app:start:30 game_sup start error={error,{shutdown,{failed_to_start_child,role_mgr,{'EXIT',{{badmatch,{error,{connection_error,{connection_error,econnrefused}}}},[{role_mgr,init,0,[{file,"src/role_mgr.erl"},{line,24}]},{supervisor,do_start_child,2,[{file,"supervisor.erl"},{line,314}]},{supervisor,start_children,3,[{file,"supervisor.erl"},{line,297}]},{supervisor,init_children,2,[{file,"supervisor.erl"},{line,263}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,306}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,237}]}]}}}}}
-2015-09-11 15:59:29.103 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
-2015-09-11 16:03:51.405 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
-2015-09-11 16:03:51.412 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
-2015-09-11 16:03:51.414 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
-2015-09-11 16:03:51.493 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
-2015-09-11 16:03:51.502 [info] <0.79.0>@comment_app:start:27 game_sup start ok
-2015-09-11 16:03:51.502 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
-2015-09-11 16:09:02.254 [info] <0.2084.0>@connector:handle_info:59 receive data:<<7,1,0,0,32,161,40,249,192,125,49,230,174,63,51,77,175,140,219,31,208,113,220,73,23,204,129,54,162,202,121,58,64,139,214,34,146,71,252,177,102,27,208,133,58,239,164,88,13,194,119,44,225,150,75,0,180,105,30,211,136,61,242,167,91,16,197,122,47,228,152,77,2,183,108,33,213,138,63,244,169,94,18,199,124,49,230,154,79,4,185,109,34,215,140,65,245,170,95,20,200,125,50,231,155,80,5,186,110,35,216,140,65,246,171,95,20,201,125,50,231,156,80,5,186,110,35,216,140,65,246,170,95,20,200,125,50,230,155,80,4,185,110,34,215,140,64,245,169,94,19,199,124,48,229,154,78,3,184,108,33,213,138,62,243,168,92,17,197,122,46,227,152,76,1,181,106,30,211,135,60,240,165,90,14,195,119,44,224,149,73,254,178,103,27,208,132,57,237,162,86,11,142,116,40,220,145,69,250,174,99,23,204,128,53,233,157,82,6,187,111,36,216,140,65,245,170,94,18,199,123,48,228,152,77,1,182,106,30,211,135,59,240,164,89,13,193,118,42,222,147,71,251,176,100,24,205,129,53,234,158,82,7,187,111,36,216>>
-2015-09-11 16:09:02.255 [error] <0.2084.0>@connector:handle_info:72 Error in connector while handling message with 
-                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_term,[<<7,1,0,0,32,161,40,249,192,125,49,230,174,63,51,77,175,140,219,31,208,113,220,73,23,204,129,54,162,202,121,58,64,139,214,34,146,71,252,177,102,27,208,133,58,239,164,88,13,194,119,44,225,150,75,0,180,105,30,211,136,61,242,167,91,16,197,122,47,228,152,77,2,183,108,33,213,138,63,244,169,94,18,199,124,49,230,154,79,4,185,109,34,215,140,65,245,170,95,20,200,125,50,231,155,80,5,186,110,35,216,140,65,246,171,95,20,201,125,50,231,156,80,5,186,110,35,216,140,65,246,170,95,20,200,125,50,230,155,80,4,185,110,34,215,140,64,245,169,94,19,199,124,48,229,154,78,3,184,108,33,213,138,62,243,168,92,17,197,122,46,227,152,76,1,181,106,30,211,135,60,240,165,90,14,195,119,44,224,149,73,254,178,103,27,208,132,57,237,162,86,11,142,116,40,220,145,69,250,174,99,23,204,128,53,233,157,82,6,187,111,36,216,140,65,245,170,94,18,199,123,48,228,152,77,1,182,106,30,211,135,59,240,164,89,13,193,118,42,222,147,71,251,176,100,24,205,129,53,234,158,82,7,187,111,36,216>>],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,60}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
-2015-09-11 16:09:25.899 [info] <0.2085.0>@connector:handle_info:59 receive data:<<7,1,0,0,32,161,40,249,192,125,49,230,174,63,51,77,175,140,219,31,208,113,220,73,23,204,129,54,162,202,121,58,64,139,214,34,146,71,252,177,102,27,208,133,58,239,164,88,13,194,119,44,225,150,75,0,180,105,30,211,136,61,242,167,91,16,197,122,47,228,152,77,2,183,108,33,213,138,63,244,169,94,18,199,124,49,230,154,79,4,185,109,34,215,140,65,245,170,95,20,200,125,50,231,155,80,5,186,110,35,216,140,65,246,171,95,20,201,125,50,231,156,80,5,186,110,35,216,140,65,246,170,95,20,200,125,50,230,155,80,4,185,110,34,215,140,64,245,169,94,19,199,124,48,229,154,78,3,184,108,33,213,138,62,243,168,92,17,197,122,46,227,152,76,1,181,106,30,211,135,60,240,165,90,14,195,119,44,224,149,73,254,178,103,27,208,132,57,237,162,86,11,142,116,40,220,145,69,250,174,99,23,204,128,53,233,157,82,6,187,111,36,216,140,65,245,170,94,18,199,123,48,228,152,77,1,182,106,30,211,135,59,240,164,89,13,193,118,42,222,147,71,251,176,100,24,205,129,53,234,158,82,7,187,111,36,216>>
-2015-09-11 16:09:25.900 [error] <0.2085.0>@connector:handle_info:72 Error in connector while handling message with 
-                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_term,[<<7,1,0,0,32,161,40,249,192,125,49,230,174,63,51,77,175,140,219,31,208,113,220,73,23,204,129,54,162,202,121,58,64,139,214,34,146,71,252,177,102,27,208,133,58,239,164,88,13,194,119,44,225,150,75,0,180,105,30,211,136,61,242,167,91,16,197,122,47,228,152,77,2,183,108,33,213,138,63,244,169,94,18,199,124,49,230,154,79,4,185,109,34,215,140,65,245,170,95,20,200,125,50,231,155,80,5,186,110,35,216,140,65,246,171,95,20,201,125,50,231,156,80,5,186,110,35,216,140,65,246,170,95,20,200,125,50,230,155,80,4,185,110,34,215,140,64,245,169,94,19,199,124,48,229,154,78,3,184,108,33,213,138,62,243,168,92,17,197,122,46,227,152,76,1,181,106,30,211,135,60,240,165,90,14,195,119,44,224,149,73,254,178,103,27,208,132,57,237,162,86,11,142,116,40,220,145,69,250,174,99,23,204,128,53,233,157,82,6,187,111,36,216,140,65,245,170,94,18,199,123,48,228,152,77,1,182,106,30,211,135,59,240,164,89,13,193,118,42,222,147,71,251,176,100,24,205,129,53,234,158,82,7,187,111,36,216>>],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,60}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 11:28:22.952 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 11:28:22.962 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 11:28:22.964 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 11:28:23.040 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 11:28:23.048 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 11:28:23.048 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 11:29:18.289 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,118,101,176,232,203,124,49,230,154,80,5,186>>
+2015-09-14 11:29:18.290 [info] <0.2084.0>@connector:handle_info:61 MsgID:<<12,0,0,0>>, MsgSize:<<"ve°è">>, ProtoData:<<203,124,49,230,154,80,5,186>>
+2015-09-14 11:29:18.302 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<230,154,80,5,186>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 11:33:10.807 [info] <0.2085.0>@connector:handle_info:59 receive data:<<12,0,0,0,242,168,93,18,203,124,49,230,154,80,5,186>>
+2015-09-14 11:33:10.807 [info] <0.2085.0>@connector:handle_info:61 MsgID:<<12,0,0,0>>, MsgSize:<<242,168,93,18>>, ProtoData:<<203,124,49,230,154,80,5,186>>
+2015-09-14 11:33:10.808 [error] <0.2085.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<230,154,80,5,186>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 11:33:29.532 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 11:33:29.543 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 11:33:29.545 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 11:33:29.623 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 11:33:29.631 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 11:33:29.631 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 11:35:43.908 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,243,168,93,18,203,124,49,230,154,80,5,186>>
+2015-09-14 11:35:43.908 [info] <0.2084.0>@connector:handle_info:61 MsgID:<<12,0,0,0>>, MsgSize:<<243,168,93,18>>, ProtoData:<<203,124,49,230,154,80,5,186>>
+2015-09-14 11:35:43.920 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<230,154,80,5,186>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 11:40:01.805 [info] <0.2085.0>@connector:handle_info:59 receive data:<<5,0,0,0,118,101,176,232,194>>
+2015-09-14 11:40:01.805 [info] <0.2085.0>@connector:handle_info:61 MsgID:<<5,0,0,0>>, MsgSize:<<"ve°è">>, ProtoData:<<"Â">>
+2015-09-14 11:40:01.805 [error] <0.2085.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{protobuffs,decode_varint,[<<>>,66,7],[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,418}]},{protobuffs,read_field_num_and_wire_type,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,188}]},{protobuffs,next_field_num,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,243}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,671}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]}]
+2015-09-14 11:43:51.083 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 11:43:51.094 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 11:43:51.097 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 11:43:51.175 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 11:43:51.183 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 11:43:51.183 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 11:43:59.443 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,118,101,176,232,203,124,49,230,154,80,5,186>>
+2015-09-14 11:43:59.443 [info] <0.2084.0>@connector:handle_info:61 MsgID:<<12,0,0,0>>, ProtoData:<<118,101,176,232,203,124,49,230,154,80,5,186>>
+2015-09-14 11:43:59.454 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:throw, Reason:{error,[69,114,114,111,114,32,100,101,99,111,100,101,105,110,103,32,116,121,112,101]}, and stacktrace: [{protobuffs,read_field_num_and_wire_type,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,204}]},{protobuffs,next_field_num,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,243}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,671}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 11:48:57.245 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 11:48:57.255 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 11:48:57.257 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 11:48:57.336 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 11:48:57.344 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 11:48:57.344 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 11:49:20.070 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,118,101,176,232,203,124,49,230,154,80,5,186>>
+2015-09-14 11:49:20.071 [info] <0.2084.0>@connector:handle_info:61 MsgID:<<12,0,0,0>>, MsgSize:<<"ve°è">>, ProtoData:<<203,124,49,230,154,80,5,186>>
+2015-09-14 11:49:20.082 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<230,154,80,5,186>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 11:56:01.445 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 11:56:01.452 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 11:56:01.454 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 11:56:01.525 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 11:56:01.531 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 11:56:01.531 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 11:56:24.971 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,118,101,176,232,203,124,49,230,154,80,5,186>>
+2015-09-14 11:56:24.971 [info] <0.2084.0>@connector:handle_info:61 MsgID:201326592, MsgSize:1986375912, ProtoData:<<203,124,49,230,154,80,5,186>>
+2015-09-14 11:56:24.974 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<230,154,80,5,186>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:04:08.456 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 14:04:08.467 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 14:04:08.469 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 14:04:08.547 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 14:04:08.557 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 14:04:08.557 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 14:04:21.198 [info] <0.2084.0>@connector:handle_info:59 receive data:<<8,0,0,0,242,168,93,18,207,124,49,230>>
+2015-09-14 14:04:21.198 [info] <0.2084.0>@connector:handle_info:61 MsgID:134217728, MsgSize:4071120146, ProtoData:<<"Ï|1æ">>
+2015-09-14 14:04:21.210 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:throw, Reason:{error,[69,114,114,111,114,32,100,101,99,111,100,101,105,110,103,32,116,121,112,101]}, and stacktrace: [{protobuffs,read_field_num_and_wire_type,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,204}]},{protobuffs,next_field_num,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,243}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,671}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:07:09.396 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 14:07:09.407 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 14:07:09.409 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 14:07:09.484 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 14:07:09.492 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 14:07:09.492 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 14:07:15.979 [info] <0.2084.0>@connector:handle_info:59 receive data:<<8,0,0,0,242,168,93,18,207,124,49,230>>
+2015-09-14 14:07:15.979 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<8,0,0,0,242,168,93,18,207,124,49,230>>}, and stacktrace: [{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,60}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:10:16.665 [info] <0.2085.0>@connector:handle_info:59 receive data:<<8,0,0,0,243,168,93,18,207,124,49,230>>
+2015-09-14 14:10:16.665 [error] <0.2085.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<8,0,0,0,243,168,93,18,207,124,49,230>>}, and stacktrace: [{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,60}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:14:03.475 [info] <0.2087.0>@connector:handle_info:59 receive data:<<8,0,0,0,0,0,0,0,8,0,0,0>>
+2015-09-14 14:14:03.475 [error] <0.2087.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<8,0,0,0,0,0,0,0,8,0,0,0>>}, and stacktrace: [{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,60}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:15:16.650 [info] <0.2088.0>@connector:handle_info:59 receive data:<<8,0,0,0,1,0,0,0,8,0,0,0>>
+2015-09-14 14:15:16.651 [error] <0.2088.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<8,0,0,0,1,0,0,0,8,0,0,0>>}, and stacktrace: [{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,60}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:16:32.699 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 14:16:32.710 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 14:16:32.712 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 14:16:32.787 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 14:16:32.795 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 14:16:32.795 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 14:16:52.435 [info] <0.2084.0>@connector:handle_info:59 receive data:<<8,0,0,0,1,0,0,0,8,0,0,0>>
+2015-09-14 14:16:52.436 [info] <0.2084.0>@connector:handle_info:61 MsgID:<<8,0,0,0>>, MsgSize:<<1,0,0,0>>, ProtoData:<<8,0,0,0>>
+2015-09-14 14:16:52.447 [info] <0.2084.0>@connector:handle_info:63 proto parse result = {ms_fashionerror,0}
+2015-09-14 14:16:52.448 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_term,[<<8,0,0,0,1,0,0,0,8,0,0,0>>],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,65}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:20:15.287 [info] <0.2085.0>@connector:handle_info:59 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,1,0,0,0>>
+2015-09-14 14:20:15.287 [info] <0.2085.0>@connector:handle_info:61 MsgID:<<12,0,0,0>>, MsgSize:<<133,205,237,250>>, ProtoData:<<12,0,0,0,1,0,0,0>>
+2015-09-14 14:20:15.287 [error] <0.2085.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{protobuffs,decode_value,[<<0,0,0,1,0,0,0>>,4,int32],[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,356}]},{protobuffs,decode,2,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,217}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,689}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:30:20.395 [info] <0.2086.0>@connector:handle_info:59 receive data:<<8,0,0,0,3,0,0,0,8,0,0,0>>
+2015-09-14 14:30:20.396 [info] <0.2086.0>@connector:handle_info:61 MsgID:<<8,0,0,0>>, MsgSize:<<3,0,0,0>>, ProtoData:<<8,0,0,0>>
+2015-09-14 14:30:20.396 [info] <0.2086.0>@connector:handle_info:63 proto parse result = {ms_fashionerror,0}
+2015-09-14 14:30:20.396 [error] <0.2086.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_term,[<<8,0,0,0,3,0,0,0,8,0,0,0>>],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,65}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:31:46.928 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 14:31:46.938 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 14:31:46.940 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 14:31:47.000 [warning] <0.6.0> lager_error_logger_h dropped 145 messages in the last second that exceeded the limit of 50 messages/sec
+2015-09-14 14:31:47.017 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 14:31:47.025 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 14:31:47.025 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 14:32:08.687 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,1,0,0,0>>
+2015-09-14 14:32:08.687 [info] <0.2084.0>@connector:handle_info:61 MsgID:<<133,205,237,250>>, MsgSize:<<12,0,0,0>>, ProtoData:<<1,0,0,0>>
+2015-09-14 14:32:08.698 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<0,0,0>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,62}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:36:26.739 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 14:36:26.749 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 14:36:26.751 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 14:36:26.824 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 14:36:26.831 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 14:36:26.831 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 14:36:29.882 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,33,0,0,0>>
+2015-09-14 14:36:29.883 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_integer,[<<133,205,237,250>>],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,61}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:47:01.101 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 14:47:01.111 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 14:47:01.113 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 14:47:01.192 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 14:47:01.199 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 14:47:01.199 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 14:47:07.032 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,33,0,0,0>>
+2015-09-14 14:47:07.033 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_integer,[2244865530],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,61}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 14:48:48.802 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 14:48:48.808 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 14:48:48.810 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 14:48:48.881 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 14:48:48.888 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 14:48:48.888 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 14:48:50.385 [info] <0.2084.0>@connector:handle_info:59 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,33,0,0,0>>
+2015-09-14 14:48:50.385 [error] <0.2084.0>@connector:handle_info:77 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_integer,[<<133,205,237,250>>],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,61}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 15:33:09.764 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 15:33:09.775 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 15:33:09.777 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 15:33:09.860 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 15:33:09.867 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 15:33:09.867 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 15:33:17.924 [info] <0.2084.0>@connector:handle_info:61 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,33,0,0,0>>
+2015-09-14 15:33:17.924 [error] <0.2084.0>@connector:handle_info:79 Error in connector while handling message with 
+                                       Error:error, Reason:badarg, and stacktrace: [{erlang,binary_to_integer,[4209888645],[]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,63}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 15:35:09.758 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 15:35:09.763 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 15:35:09.765 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 15:35:09.836 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 15:35:09.842 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 15:35:09.842 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 15:35:14.031 [info] <0.2084.0>@connector:handle_info:61 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,33,0,0,0>>
+2015-09-14 15:35:14.031 [info] <0.2084.0>@connector:handle_info:63 MsgID:4209888645, MsgSize:12, ProtoData:<<33,0,0,0>>
+2015-09-14 15:35:14.043 [error] <0.2084.0>@connector:handle_info:79 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<0,0,0>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,64}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 15:36:22.596 [info] <0.2085.0>@connector:handle_info:61 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,33,0,0,0>>
+2015-09-14 15:36:22.597 [info] <0.2085.0>@connector:handle_info:63 MsgID:4209888645, MsgSize:12, ProtoData:<<33,0,0,0>>
+2015-09-14 15:36:22.597 [error] <0.2085.0>@connector:handle_info:79 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<0,0,0>>}, and stacktrace: [{protobuffs,skip_next_field,1,[{file,[115,114,99,47,112,114,111,116,111,98,117,102,102,115,46,101,114,108]},{line,258}]},{account_pb,decode,3,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,719}]},{account_pb,decode,2,[{file,[115,114,99,47,97,99,99,111,117,110,116,95,112,98,46,101,114,108]},{line,665}]},{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,64}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]
+2015-09-14 15:37:30.096 [info] <0.7.0> Application lager started on node 'game@127.0.0.1'
+2015-09-14 15:37:30.103 [info] <0.7.0> Application ranch started on node 'game@127.0.0.1'
+2015-09-14 15:37:30.106 [info] <0.7.0> Application poolboy started on node 'game@127.0.0.1'
+2015-09-14 15:37:30.178 [info] <0.79.0>@comment_app:start:18 ranch start_listener success
+2015-09-14 15:37:30.185 [info] <0.79.0>@comment_app:start:27 game_sup start ok
+2015-09-14 15:37:30.185 [info] <0.79.0>@comment_app:start:34 game start on node 'game@127.0.0.1', listening on port 2345
+2015-09-14 15:37:33.840 [info] <0.2084.0>@connector:handle_info:61 receive data:<<12,0,0,0,133,205,237,250,12,0,0,0,33,0,0,0>>
+2015-09-14 15:37:33.840 [info] <0.2084.0>@connector:handle_info:63 MsgID:4209888645, MsgSize:12, ProtoData:<<33,0,0,0>>
+2015-09-14 15:37:33.840 [error] <0.2084.0>@connector:handle_info:81 Error in connector while handling message with 
+                                       Error:error, Reason:{badmatch,<<33,0,0,0>>}, and stacktrace: [{connector,handle_info,2,[{file,[115,114,99,47,99,111,110,110,101,99,116,111,114,46,101,114,108]},{line,65}]},{gen_server,try_dispatch,4,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,593}]},{gen_server,handle_msg,5,[{file,[103,101,110,95,115,101,114,118,101,114,46,101,114,108]},{line,659}]},{proc_lib,init_p_do_apply,3,[{file,[112,114,111,99,95,108,105,98,46,101,114,108]},{line,237}]}]

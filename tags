@@ -275,6 +275,7 @@ MAXPACKETBYTES	deps/emysql/include/emysql.hrl	/^-define(MAXPACKETBYTES, 50000000
 MAX_CONNECTIONS	deps/emysql/t/emysql_eqc.erl	/^-define(MAX_CONNECTIONS, 40).$/;"	d
 MAX_RETRIES	src/tools/neo_pooler.erl	/^-define(MAX_RETRIES, 3).$/;"	d
 MODULES	deps/emysql/Makefile	/^MODULES=$(shell ls -1 src\/*.erl | awk -F[\/.] '{ print $$2 }' | sed '$$q;s\/$$\/,\/g')$/;"	m
+MS_FASHIONERROR_PB_H	include/account_pb.hrl	/^-define(MS_FASHIONERROR_PB_H, true).$/;"	d
 MYSQL_OLD_PASSWORD	deps/emysql/src/emysql_internal.hrl	/^-define(MYSQL_OLD_PASSWORD, <<"mysql_old_password">>).$/;"	d
 NL	deps/eredis/include/eredis.hrl	/^-define(NL, "\\r\\n").$/;"	d
 NOTICE	deps/lager/include/lager.hrl	/^-define(NOTICE, 32).$/;"	d
@@ -480,6 +481,7 @@ accept_ack	deps/ranch/src/ranch.erl	/^accept_ack(Ref) ->$/;"	f	module:ranch
 accept_ack	deps/ranch/src/ranch_ssl.erl	/^accept_ack(CSocket, Timeout) ->$/;"	f	module:ranch_ssl
 accept_ack	deps/ranch/src/ranch_tcp.erl	/^accept_ack(_, _) ->$/;"	f	module:ranch_tcp
 acceptor_SUITE	deps/ranch/test/acceptor_SUITE.erl	/^-module(acceptor_SUITE).$/;"	m
+account_pb	src/proto/account_pb.erl	/^-module(account_pb).$/;"	m
 ack_message	deps/eredis/src/eredis_sub.erl	/^ack_message(Client) ->$/;"	f	module:eredis_sub
 active_connections	deps/ranch/src/ranch_conns_sup.erl	/^active_connections(SupPid) ->$/;"	f	module:ranch_conns_sup
 active_echo_protocol	deps/ranch/test/active_echo_protocol.erl	/^-module(active_echo_protocol).$/;"	m
@@ -835,6 +837,7 @@ chars	deps/lager/src/lager_format.erl	/^chars(C, 3) ->$/;"	f	module:lager_format
 chars	deps/lager/src/lager_format.erl	/^chars(C, N) when is_integer(N) ->$/;"	f	module:lager_format
 chars	deps/lager/src/lager_format.erl	/^chars(C, N) when is_integer(N), (N band 1) =:= 0 ->$/;"	f	module:lager_format
 chars	deps/lager/src/lager_format.erl	/^chars(_C, 0) ->$/;"	f	module:lager_format
+chat_pb	src/proto/chat_pb.erl	/^-module(chat_pb).$/;"	m
 check	deps/lager/test/trunc_io_eqc.erl	/^check() ->$/;"	f	module:trunc_io_eqc
 check_by_matchers	deps/meck/src/meck_args_matcher.erl	/^check_by_matchers([Arg | RestArgs], [MaybeMatcher | RestMaybeMatchers]) ->$/;"	f	module:meck_args_matcher
 check_by_matchers	deps/meck/src/meck_args_matcher.erl	/^check_by_matchers([], []) ->$/;"	f	module:meck_args_matcher
@@ -1159,15 +1162,25 @@ create	deps/emysql/t/honeybee.erl	/^create(Bee) ->$/;"	f	module:honeybee
 create_multibulk	deps/eredis/src/eredis.erl	/^create_multibulk(Args) ->$/;"	f	module:eredis
 create_table	deps/emysql/t/emysql_eqc.erl	/^create_table(PoolId, TableName, Columns) ->$/;"	f	module:emysql_eqc
 cs_account_create_role	include/account_pb.hrl	/^-record(cs_account_create_role, {$/;"	r
+cs_account_create_role	src/proto/account_pb.erl	/^-record(cs_account_create_role,$/;"	r
 cs_account_enter_game	include/account_pb.hrl	/^-record(cs_account_enter_game, {$/;"	r
+cs_account_enter_game	src/proto/account_pb.erl	/^-record(cs_account_enter_game, {role_id}).$/;"	r
 cs_account_get_role	include/account_pb.hrl	/^-record(cs_account_get_role, {$/;"	r
+cs_account_get_role	src/proto/account_pb.erl	/^-record(cs_account_get_role, {role_id}).$/;"	r
 cs_account_get_role_id_list	include/account_pb.hrl	/^-record(cs_account_get_role_id_list, {$/;"	r
+cs_account_get_role_id_list	src/proto/account_pb.erl	/^-record(cs_account_get_role_id_list, {}).$/;"	r
 cs_account_login	include/account_pb.hrl	/^-record(cs_account_login, {$/;"	r
+cs_account_login	src/proto/account_pb.erl	/^-record(cs_account_login, {account_id}).$/;"	r
 cs_chat_deliver_to	include/chat_pb.hrl	/^-record(cs_chat_deliver_to, {$/;"	r
+cs_chat_deliver_to	src/proto/chat_pb.erl	/^-record(cs_chat_deliver_to,$/;"	r
 cs_role_create_role	include/account_pb.hrl	/^-record(cs_role_create_role, {$/;"	r
 cs_role_create_role	include/role_pb.hrl	/^-record(cs_role_create_role, {$/;"	r
+cs_role_create_role	src/proto/account_pb.erl	/^-record(cs_role_create_role, {name, sex}).$/;"	r
+cs_role_create_role	src/proto/role_pb.erl	/^-record(cs_role_create_role, {name, sex}).$/;"	r
 cs_role_get_info	include/account_pb.hrl	/^-record(cs_role_get_info, {$/;"	r
 cs_role_get_info	include/role_pb.hrl	/^-record(cs_role_get_info, {$/;"	r
+cs_role_get_info	src/proto/account_pb.erl	/^-record(cs_role_get_info, {account_id}).$/;"	r
+cs_role_get_info	src/proto/role_pb.erl	/^-record(cs_role_get_info, {account_id}).$/;"	r
 ct_suite_target	deps/ranch/erlang.mk	/^define ct_suite_target$/;"	m
 d_prepared_statement	deps/emysql/samples/d_prepared_statement.erl	/^-module(d_prepared_statement).$/;"	m
 data_for_type	deps/emysql/t/emysql_eqc.erl	/^data_for_type("BIT") -> oneof([1,0,true,false]);$/;"	f	module:emysql_eqc
@@ -1193,19 +1206,72 @@ decode	deps/protobuffs/src/pokemon_pb.erl	/^decode(<<>>, Types, Acc) -> reverse_
 decode	deps/protobuffs/src/pokemon_pb.erl	/^decode(Bytes, Types, Acc) ->$/;"	f	module:pokemon_pb
 decode	deps/protobuffs/src/pokemon_pb.erl	/^decode(pikachu, Bytes) when is_binary(Bytes) ->$/;"	f	module:pokemon_pb
 decode	deps/protobuffs/src/protobuffs.erl	/^decode(Bytes, ExpectedType) ->$/;"	f	module:protobuffs
+decode	src/proto/account_pb.erl	/^decode(<<>>, Types, Acc) ->$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(Bytes, Types, Acc) ->$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(cs_account_create_role, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(cs_account_enter_game, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(cs_account_get_role, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(cs_account_get_role_id_list, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(cs_account_login, Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(cs_role_create_role, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(cs_role_get_info, Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(enummsg_values, 1) -> value1;$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(ms_fashionerror, Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(role_info, Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(sc_account_create_role, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(sc_account_enter_game, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(sc_account_get_role, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(sc_account_get_role_id_list, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(sc_account_login, Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(sc_role_create_role, Bytes)$/;"	f	module:account_pb
+decode	src/proto/account_pb.erl	/^decode(sc_role_get_info, Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode	src/proto/chat_pb.erl	/^decode(<<>>, Types, Acc) ->$/;"	f	module:chat_pb
+decode	src/proto/chat_pb.erl	/^decode(Bytes, Types, Acc) ->$/;"	f	module:chat_pb
+decode	src/proto/chat_pb.erl	/^decode(cs_chat_deliver_to, Bytes)$/;"	f	module:chat_pb
+decode	src/proto/chat_pb.erl	/^decode(enummsg_values, 1) -> value1;$/;"	f	module:chat_pb
+decode	src/proto/chat_pb.erl	/^decode(sc_chat_deliver_to, Bytes)$/;"	f	module:chat_pb
+decode	src/proto/chat_pb.erl	/^decode(sc_chat_one_message, Bytes)$/;"	f	module:chat_pb
+decode	src/proto/role_pb.erl	/^decode(<<>>, Types, Acc) ->$/;"	f	module:role_pb
+decode	src/proto/role_pb.erl	/^decode(Bytes, Types, Acc) ->$/;"	f	module:role_pb
+decode	src/proto/role_pb.erl	/^decode(cs_role_create_role, Bytes)$/;"	f	module:role_pb
+decode	src/proto/role_pb.erl	/^decode(cs_role_get_info, Bytes) when is_binary(Bytes) ->$/;"	f	module:role_pb
+decode	src/proto/role_pb.erl	/^decode(enummsg_values, 1) -> value1;$/;"	f	module:role_pb
+decode	src/proto/role_pb.erl	/^decode(role_info, Bytes) when is_binary(Bytes) ->$/;"	f	module:role_pb
+decode	src/proto/role_pb.erl	/^decode(sc_role_create_role, Bytes)$/;"	f	module:role_pb
+decode	src/proto/role_pb.erl	/^decode(sc_role_get_info, Bytes) when is_binary(Bytes) ->$/;"	f	module:role_pb
 decode_bool_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_bool_test_() ->$/;"	f	module:protobuffs_tests
 decode_bytes_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_bytes_test_() ->$/;"	f	module:protobuffs_tests
+decode_cs_account_create_role	src/proto/account_pb.erl	/^decode_cs_account_create_role(Bytes)$/;"	f	module:account_pb
+decode_cs_account_enter_game	src/proto/account_pb.erl	/^decode_cs_account_enter_game(Bytes)$/;"	f	module:account_pb
+decode_cs_account_get_role	src/proto/account_pb.erl	/^decode_cs_account_get_role(Bytes)$/;"	f	module:account_pb
+decode_cs_account_get_role_id_list	src/proto/account_pb.erl	/^decode_cs_account_get_role_id_list(Bytes)$/;"	f	module:account_pb
+decode_cs_account_login	src/proto/account_pb.erl	/^decode_cs_account_login(Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode_cs_chat_deliver_to	src/proto/chat_pb.erl	/^decode_cs_chat_deliver_to(Bytes)$/;"	f	module:chat_pb
+decode_cs_role_create_role	src/proto/account_pb.erl	/^decode_cs_role_create_role(Bytes)$/;"	f	module:account_pb
+decode_cs_role_create_role	src/proto/role_pb.erl	/^decode_cs_role_create_role(Bytes)$/;"	f	module:role_pb
+decode_cs_role_get_info	src/proto/account_pb.erl	/^decode_cs_role_get_info(Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode_cs_role_get_info	src/proto/role_pb.erl	/^decode_cs_role_get_info(Bytes) when is_binary(Bytes) ->$/;"	f	module:role_pb
 decode_double_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_double_test_() ->$/;"	f	module:protobuffs_tests
 decode_enum_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_enum_test_() ->$/;"	f	module:protobuffs_tests
 decode_extensions	deps/protobuffs/src/pokemon_pb.erl	/^decode_extensions(#pikachu{'$extensions' = Extensions} = Record) ->$/;"	f	module:pokemon_pb
 decode_extensions	deps/protobuffs/src/pokemon_pb.erl	/^decode_extensions(Record) ->$/;"	f	module:pokemon_pb
 decode_extensions	deps/protobuffs/src/pokemon_pb.erl	/^decode_extensions(Types, [{Fnum, Bytes} | Tail], Acc) ->$/;"	f	module:pokemon_pb
 decode_extensions	deps/protobuffs/src/pokemon_pb.erl	/^decode_extensions(_Types, [], Acc) ->$/;"	f	module:pokemon_pb
+decode_extensions	src/proto/account_pb.erl	/^decode_extensions(Record) -> Record.$/;"	f	module:account_pb
+decode_extensions	src/proto/account_pb.erl	/^decode_extensions(Types, [{Fnum, Bytes} | Tail], Acc) ->$/;"	f	module:account_pb
+decode_extensions	src/proto/account_pb.erl	/^decode_extensions(_Types, [], Acc) ->$/;"	f	module:account_pb
+decode_extensions	src/proto/chat_pb.erl	/^decode_extensions(Record) -> Record.$/;"	f	module:chat_pb
+decode_extensions	src/proto/chat_pb.erl	/^decode_extensions(Types, [{Fnum, Bytes} | Tail], Acc) ->$/;"	f	module:chat_pb
+decode_extensions	src/proto/chat_pb.erl	/^decode_extensions(_Types, [], Acc) ->$/;"	f	module:chat_pb
+decode_extensions	src/proto/role_pb.erl	/^decode_extensions(Record) -> Record.$/;"	f	module:role_pb
+decode_extensions	src/proto/role_pb.erl	/^decode_extensions(Types, [{Fnum, Bytes} | Tail], Acc) ->$/;"	f	module:role_pb
+decode_extensions	src/proto/role_pb.erl	/^decode_extensions(_Types, [], Acc) ->$/;"	f	module:role_pb
 decode_fixed32_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_fixed32_test_() ->$/;"	f	module:protobuffs_tests
 decode_fixed64_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_fixed64_test_() ->$/;"	f	module:protobuffs_tests
 decode_float_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_float_test_() ->$/;"	f	module:protobuffs_tests
 decode_int64_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_int64_test_() ->$/;"	f	module:protobuffs_tests
 decode_int_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_int_test_() ->$/;"	f	module:protobuffs_tests
+decode_ms_fashionerror	src/proto/account_pb.erl	/^decode_ms_fashionerror(Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
 decode_opts	deps/protobuffs/src/protobuffs_compile.erl	/^decode_opts(Msgs, Tag, Type) ->$/;"	f	module:protobuffs_compile
 decode_packed	deps/protobuffs/src/protobuffs.erl	/^decode_packed(Bytes, ExpectedType) ->$/;"	f	module:protobuffs
 decode_packed_enum_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_packed_enum_test_() ->$/;"	f	module:protobuffs_tests
@@ -1223,12 +1289,25 @@ decode_packed_values	deps/protobuffs/src/protobuffs.erl	/^decode_packed_values(B
 decode_packed_values	deps/protobuffs/src/protobuffs.erl	/^decode_packed_values(Bytes, uint32, Acc) ->$/;"	f	module:protobuffs
 decode_packed_values	deps/protobuffs/src/protobuffs.erl	/^decode_packed_values(Bytes, uint64, Acc) ->$/;"	f	module:protobuffs
 decode_pikachu	deps/protobuffs/src/pokemon_pb.erl	/^decode_pikachu(Bytes) when is_binary(Bytes) ->$/;"	f	module:pokemon_pb
+decode_role_info	src/proto/account_pb.erl	/^decode_role_info(Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode_role_info	src/proto/role_pb.erl	/^decode_role_info(Bytes) when is_binary(Bytes) ->$/;"	f	module:role_pb
 decode_row_data	deps/emysql/src/emysql_tcp.erl	/^decode_row_data(<<251:8, Tail\/binary>>, [Field|Rest]) ->  $/;"	f	module:emysql_tcp
 decode_row_data	deps/emysql/src/emysql_tcp.erl	/^decode_row_data(<<252:8, Length:16\/little, Data:Length\/binary, Tail\/binary>>, [Field|Rest]) ->$/;"	f	module:emysql_tcp
 decode_row_data	deps/emysql/src/emysql_tcp.erl	/^decode_row_data(<<253:8, Length:24\/little, Data:Length\/binary, Tail\/binary>>, [Field|Rest]) ->$/;"	f	module:emysql_tcp
 decode_row_data	deps/emysql/src/emysql_tcp.erl	/^decode_row_data(<<254:8, Length:64\/little, Data:Length\/binary, Tail\/binary>>, [Field|Rest]) ->$/;"	f	module:emysql_tcp
 decode_row_data	deps/emysql/src/emysql_tcp.erl	/^decode_row_data(<<>>, []) ->$/;"	f	module:emysql_tcp
 decode_row_data	deps/emysql/src/emysql_tcp.erl	/^decode_row_data(<<Length:8, Data:Length\/binary, Tail\/binary>>, [Field|Rest]) $/;"	f	module:emysql_tcp
+decode_sc_account_create_role	src/proto/account_pb.erl	/^decode_sc_account_create_role(Bytes)$/;"	f	module:account_pb
+decode_sc_account_enter_game	src/proto/account_pb.erl	/^decode_sc_account_enter_game(Bytes)$/;"	f	module:account_pb
+decode_sc_account_get_role	src/proto/account_pb.erl	/^decode_sc_account_get_role(Bytes)$/;"	f	module:account_pb
+decode_sc_account_get_role_id_list	src/proto/account_pb.erl	/^decode_sc_account_get_role_id_list(Bytes)$/;"	f	module:account_pb
+decode_sc_account_login	src/proto/account_pb.erl	/^decode_sc_account_login(Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode_sc_chat_deliver_to	src/proto/chat_pb.erl	/^decode_sc_chat_deliver_to(Bytes)$/;"	f	module:chat_pb
+decode_sc_chat_one_message	src/proto/chat_pb.erl	/^decode_sc_chat_one_message(Bytes)$/;"	f	module:chat_pb
+decode_sc_role_create_role	src/proto/account_pb.erl	/^decode_sc_role_create_role(Bytes)$/;"	f	module:account_pb
+decode_sc_role_create_role	src/proto/role_pb.erl	/^decode_sc_role_create_role(Bytes)$/;"	f	module:role_pb
+decode_sc_role_get_info	src/proto/account_pb.erl	/^decode_sc_role_get_info(Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+decode_sc_role_get_info	src/proto/role_pb.erl	/^decode_sc_role_get_info(Bytes) when is_binary(Bytes) ->$/;"	f	module:role_pb
 decode_sfixed32_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_sfixed32_test_() ->$/;"	f	module:protobuffs_tests
 decode_sfixed64_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_sfixed64_test_() ->$/;"	f	module:protobuffs_tests
 decode_sint32_test_	deps/protobuffs/test/protobuffs_tests.erl	/^decode_sint32_test_() ->$/;"	f	module:protobuffs_tests
@@ -1297,8 +1376,44 @@ deleteall	deps/goldrush/src/glc_lib.erl	/^deleteall(Filter, []) ->$/;"	f	module:
 delimited_decode	deps/protobuffs/src/pokemon_pb.erl	/^delimited_decode(Type, Bytes) when is_binary(Bytes) ->$/;"	f	module:pokemon_pb
 delimited_decode	deps/protobuffs/src/pokemon_pb.erl	/^delimited_decode(Type, Bytes, Acc) ->$/;"	f	module:pokemon_pb
 delimited_decode	deps/protobuffs/src/pokemon_pb.erl	/^delimited_decode(_Type, <<>>, Acc) ->$/;"	f	module:pokemon_pb
+delimited_decode	src/proto/account_pb.erl	/^delimited_decode(Type, Bytes) when is_binary(Bytes) ->$/;"	f	module:account_pb
+delimited_decode	src/proto/account_pb.erl	/^delimited_decode(Type, Bytes, Acc) ->$/;"	f	module:account_pb
+delimited_decode	src/proto/account_pb.erl	/^delimited_decode(_Type, <<>>, Acc) ->$/;"	f	module:account_pb
+delimited_decode	src/proto/chat_pb.erl	/^delimited_decode(Type, Bytes) when is_binary(Bytes) ->$/;"	f	module:chat_pb
+delimited_decode	src/proto/chat_pb.erl	/^delimited_decode(Type, Bytes, Acc) ->$/;"	f	module:chat_pb
+delimited_decode	src/proto/chat_pb.erl	/^delimited_decode(_Type, <<>>, Acc) ->$/;"	f	module:chat_pb
+delimited_decode	src/proto/role_pb.erl	/^delimited_decode(Type, Bytes) when is_binary(Bytes) ->$/;"	f	module:role_pb
+delimited_decode	src/proto/role_pb.erl	/^delimited_decode(Type, Bytes, Acc) ->$/;"	f	module:role_pb
+delimited_decode	src/proto/role_pb.erl	/^delimited_decode(_Type, <<>>, Acc) ->$/;"	f	module:role_pb
+delimited_decode_cs_account_create_role	src/proto/account_pb.erl	/^delimited_decode_cs_account_create_role(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_cs_account_enter_game	src/proto/account_pb.erl	/^delimited_decode_cs_account_enter_game(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_cs_account_get_role	src/proto/account_pb.erl	/^delimited_decode_cs_account_get_role(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_cs_account_get_role_id_list	src/proto/account_pb.erl	/^delimited_decode_cs_account_get_role_id_list(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_cs_account_login	src/proto/account_pb.erl	/^delimited_decode_cs_account_login(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_cs_chat_deliver_to	src/proto/chat_pb.erl	/^delimited_decode_cs_chat_deliver_to(Bytes) ->$/;"	f	module:chat_pb
+delimited_decode_cs_role_create_role	src/proto/account_pb.erl	/^delimited_decode_cs_role_create_role(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_cs_role_create_role	src/proto/role_pb.erl	/^delimited_decode_cs_role_create_role(Bytes) ->$/;"	f	module:role_pb
+delimited_decode_cs_role_get_info	src/proto/account_pb.erl	/^delimited_decode_cs_role_get_info(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_cs_role_get_info	src/proto/role_pb.erl	/^delimited_decode_cs_role_get_info(Bytes) ->$/;"	f	module:role_pb
+delimited_decode_ms_fashionerror	src/proto/account_pb.erl	/^delimited_decode_ms_fashionerror(Bytes) ->$/;"	f	module:account_pb
 delimited_decode_pikachu	deps/protobuffs/src/pokemon_pb.erl	/^delimited_decode_pikachu(Bytes) ->$/;"	f	module:pokemon_pb
+delimited_decode_role_info	src/proto/account_pb.erl	/^delimited_decode_role_info(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_role_info	src/proto/role_pb.erl	/^delimited_decode_role_info(Bytes) ->$/;"	f	module:role_pb
+delimited_decode_sc_account_create_role	src/proto/account_pb.erl	/^delimited_decode_sc_account_create_role(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_sc_account_enter_game	src/proto/account_pb.erl	/^delimited_decode_sc_account_enter_game(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_sc_account_get_role	src/proto/account_pb.erl	/^delimited_decode_sc_account_get_role(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_sc_account_get_role_id_list	src/proto/account_pb.erl	/^delimited_decode_sc_account_get_role_id_list(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_sc_account_login	src/proto/account_pb.erl	/^delimited_decode_sc_account_login(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_sc_chat_deliver_to	src/proto/chat_pb.erl	/^delimited_decode_sc_chat_deliver_to(Bytes) ->$/;"	f	module:chat_pb
+delimited_decode_sc_chat_one_message	src/proto/chat_pb.erl	/^delimited_decode_sc_chat_one_message(Bytes) ->$/;"	f	module:chat_pb
+delimited_decode_sc_role_create_role	src/proto/account_pb.erl	/^delimited_decode_sc_role_create_role(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_sc_role_create_role	src/proto/role_pb.erl	/^delimited_decode_sc_role_create_role(Bytes) ->$/;"	f	module:role_pb
+delimited_decode_sc_role_get_info	src/proto/account_pb.erl	/^delimited_decode_sc_role_get_info(Bytes) ->$/;"	f	module:account_pb
+delimited_decode_sc_role_get_info	src/proto/role_pb.erl	/^delimited_decode_sc_role_get_info(Bytes) ->$/;"	f	module:role_pb
 delimited_encode	deps/protobuffs/src/pokemon_pb.erl	/^delimited_encode(Records) ->$/;"	f	module:pokemon_pb
+delimited_encode	src/proto/account_pb.erl	/^delimited_encode(Records) ->$/;"	f	module:account_pb
+delimited_encode	src/proto/chat_pb.erl	/^delimited_encode(Records) ->$/;"	f	module:chat_pb
+delimited_encode	src/proto/role_pb.erl	/^delimited_encode(Records) ->$/;"	f	module:role_pb
 demonitors_previously_waiting_processes	deps/poolboy/test/poolboy_tests.erl	/^demonitors_previously_waiting_processes() ->$/;"	f	module:poolboy_tests
 demonitors_when_checkout_cancelled	deps/poolboy/test/poolboy_tests.erl	/^demonitors_when_checkout_cancelled() ->$/;"	f	module:poolboy_tests
 dep_autopatch	deps/ranch/erlang.mk	/^define dep_autopatch$/;"	m
@@ -1426,16 +1541,96 @@ encode	deps/protobuffs/src/pokemon_pb.erl	/^encode([]) ->$/;"	f	module:pokemon_p
 encode	deps/protobuffs/src/pokemon_pb.erl	/^encode(pikachu, Record) ->$/;"	f	module:pokemon_pb
 encode	deps/protobuffs/src/pokemon_pb.erl	/^encode(pikachu, Records) when is_list(Records) ->$/;"	f	module:pokemon_pb
 encode	deps/protobuffs/src/protobuffs.erl	/^encode(FieldID, Value, Type) ->$/;"	f	module:protobuffs
+encode	src/proto/account_pb.erl	/^encode(Record) -> encode(element(1, Record), Record).$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(Records) when is_list(Records) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode([]) -> [];$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_create_role, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_create_role, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_enter_game, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_enter_game, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_get_role, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_get_role, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_get_role_id_list, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_get_role_id_list, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_login, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_account_login, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_role_create_role, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_role_create_role, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_role_get_info, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(cs_role_get_info, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(ms_fashionerror, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(ms_fashionerror, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(role_info, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(role_info, Records) when is_list(Records) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_create_role, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_create_role, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_enter_game, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_enter_game, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_get_role, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_get_role, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_get_role_id_list, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_get_role_id_list, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_login, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_account_login, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_role_create_role, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_role_create_role, Records)$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_role_get_info, Record) ->$/;"	f	module:account_pb
+encode	src/proto/account_pb.erl	/^encode(sc_role_get_info, Records)$/;"	f	module:account_pb
+encode	src/proto/chat_pb.erl	/^encode(Record) -> encode(element(1, Record), Record).$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode(Records) when is_list(Records) ->$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode([]) -> [];$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode(cs_chat_deliver_to, Record) ->$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode(cs_chat_deliver_to, Records)$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode(sc_chat_deliver_to, Record) ->$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode(sc_chat_deliver_to, Records)$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode(sc_chat_one_message, Record) ->$/;"	f	module:chat_pb
+encode	src/proto/chat_pb.erl	/^encode(sc_chat_one_message, Records)$/;"	f	module:chat_pb
+encode	src/proto/role_pb.erl	/^encode(Record) -> encode(element(1, Record), Record).$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(Records) when is_list(Records) ->$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode([]) -> [];$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(cs_role_create_role, Record) ->$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(cs_role_create_role, Records)$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(cs_role_get_info, Record) ->$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(cs_role_get_info, Records)$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(role_info, Record) ->$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(role_info, Records) when is_list(Records) ->$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(sc_role_create_role, Record) ->$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(sc_role_create_role, Records)$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(sc_role_get_info, Record) ->$/;"	f	module:role_pb
+encode	src/proto/role_pb.erl	/^encode(sc_role_get_info, Records)$/;"	f	module:role_pb
 encode_alt	deps/emysql/etc/markdown.lua	/^function encode_alt(s)$/;"	f
 encode_atoms	deps/emysql/test/basics_SUITE.erl	/^encode_atoms(_Config) ->$/;"	f	module:basics_SUITE
 encode_backslash_escapes	deps/emysql/etc/markdown.lua	/^function encode_backslash_escapes(t)$/;"	f
 encode_bytes_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_bytes_test_() ->$/;"	f	module:protobuffs_tests
 encode_code	deps/emysql/etc/markdown.lua	/^function encode_code(s)$/;"	f
+encode_cs_account_create_role	src/proto/account_pb.erl	/^encode_cs_account_create_role(Record)$/;"	f	module:account_pb
+encode_cs_account_create_role	src/proto/account_pb.erl	/^encode_cs_account_create_role(Records)$/;"	f	module:account_pb
+encode_cs_account_enter_game	src/proto/account_pb.erl	/^encode_cs_account_enter_game(Record)$/;"	f	module:account_pb
+encode_cs_account_enter_game	src/proto/account_pb.erl	/^encode_cs_account_enter_game(Records)$/;"	f	module:account_pb
+encode_cs_account_get_role	src/proto/account_pb.erl	/^encode_cs_account_get_role(Record)$/;"	f	module:account_pb
+encode_cs_account_get_role	src/proto/account_pb.erl	/^encode_cs_account_get_role(Records)$/;"	f	module:account_pb
+encode_cs_account_get_role_id_list	src/proto/account_pb.erl	/^encode_cs_account_get_role_id_list(Record)$/;"	f	module:account_pb
+encode_cs_account_get_role_id_list	src/proto/account_pb.erl	/^encode_cs_account_get_role_id_list(Records)$/;"	f	module:account_pb
+encode_cs_account_login	src/proto/account_pb.erl	/^encode_cs_account_login(Record)$/;"	f	module:account_pb
+encode_cs_account_login	src/proto/account_pb.erl	/^encode_cs_account_login(Records)$/;"	f	module:account_pb
+encode_cs_chat_deliver_to	src/proto/chat_pb.erl	/^encode_cs_chat_deliver_to(Record)$/;"	f	module:chat_pb
+encode_cs_chat_deliver_to	src/proto/chat_pb.erl	/^encode_cs_chat_deliver_to(Records)$/;"	f	module:chat_pb
+encode_cs_role_create_role	src/proto/account_pb.erl	/^encode_cs_role_create_role(Record)$/;"	f	module:account_pb
+encode_cs_role_create_role	src/proto/account_pb.erl	/^encode_cs_role_create_role(Records)$/;"	f	module:account_pb
+encode_cs_role_create_role	src/proto/role_pb.erl	/^encode_cs_role_create_role(Record)$/;"	f	module:role_pb
+encode_cs_role_create_role	src/proto/role_pb.erl	/^encode_cs_role_create_role(Records)$/;"	f	module:role_pb
+encode_cs_role_get_info	src/proto/account_pb.erl	/^encode_cs_role_get_info(Record)$/;"	f	module:account_pb
+encode_cs_role_get_info	src/proto/account_pb.erl	/^encode_cs_role_get_info(Records)$/;"	f	module:account_pb
+encode_cs_role_get_info	src/proto/role_pb.erl	/^encode_cs_role_get_info(Record)$/;"	f	module:role_pb
+encode_cs_role_get_info	src/proto/role_pb.erl	/^encode_cs_role_get_info(Records)$/;"	f	module:role_pb
 encode_double_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_double_test_() ->$/;"	f	module:protobuffs_tests
 encode_email_address	deps/emysql/etc/markdown.lua	/^	local function encode_email_address(s)$/;"	f
 encode_enum_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_enum_test_() ->$/;"	f	module:protobuffs_tests
 encode_extensions	deps/protobuffs/src/pokemon_pb.erl	/^encode_extensions(#pikachu{'$extensions' = Extends}) ->$/;"	f	module:pokemon_pb
 encode_extensions	deps/protobuffs/src/pokemon_pb.erl	/^encode_extensions(_) -> [].$/;"	f	module:pokemon_pb
+encode_extensions	src/proto/account_pb.erl	/^encode_extensions(_) -> [].$/;"	f	module:account_pb
+encode_extensions	src/proto/chat_pb.erl	/^encode_extensions(_) -> [].$/;"	f	module:chat_pb
+encode_extensions	src/proto/role_pb.erl	/^encode_extensions(_) -> [].$/;"	f	module:role_pb
 encode_field_tag	deps/protobuffs/src/protobuffs.erl	/^encode_field_tag(FieldID, FieldType) when FieldID band 16#3fffffff =:= FieldID ->$/;"	f	module:protobuffs
 encode_fixed32_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_fixed32_test_() ->$/;"	f	module:protobuffs_tests
 encode_fixed64_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_fixed64_test_() ->$/;"	f	module:protobuffs_tests
@@ -1473,6 +1668,8 @@ encode_internal	deps/protobuffs/src/protobuffs.erl	/^encode_internal(FieldID, in
 encode_internal	deps/protobuffs/src/protobuffs.erl	/^encode_internal(FieldID, nan, double) ->$/;"	f	module:protobuffs
 encode_internal	deps/protobuffs/src/protobuffs.erl	/^encode_internal(FieldID, nan, float) ->$/;"	f	module:protobuffs
 encode_internal	deps/protobuffs/src/protobuffs.erl	/^encode_internal(FieldID, true, bool) ->$/;"	f	module:protobuffs
+encode_ms_fashionerror	src/proto/account_pb.erl	/^encode_ms_fashionerror(Record)$/;"	f	module:account_pb
+encode_ms_fashionerror	src/proto/account_pb.erl	/^encode_ms_fashionerror(Records) when is_list(Records) ->$/;"	f	module:account_pb
 encode_packed	deps/protobuffs/src/protobuffs.erl	/^encode_packed(FieldID, Values, Type) ->$/;"	f	module:protobuffs
 encode_packed	deps/protobuffs/src/protobuffs.erl	/^encode_packed(_FieldID, [], _Type) ->$/;"	f	module:protobuffs
 encode_packed_enum_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_packed_enum_test_() ->$/;"	f	module:protobuffs_tests
@@ -1481,6 +1678,32 @@ encode_packed_internal	deps/protobuffs/src/protobuffs.erl	/^encode_packed_intern
 encode_packed_internal	deps/protobuffs/src/protobuffs.erl	/^encode_packed_internal([],_Type,Acc) ->$/;"	f	module:protobuffs
 encode_pikachu	deps/protobuffs/src/pokemon_pb.erl	/^encode_pikachu(Record) when is_record(Record, pikachu) ->$/;"	f	module:pokemon_pb
 encode_pikachu	deps/protobuffs/src/pokemon_pb.erl	/^encode_pikachu(Records) when is_list(Records) ->$/;"	f	module:pokemon_pb
+encode_role_info	src/proto/account_pb.erl	/^encode_role_info(Record)$/;"	f	module:account_pb
+encode_role_info	src/proto/account_pb.erl	/^encode_role_info(Records) when is_list(Records) ->$/;"	f	module:account_pb
+encode_role_info	src/proto/role_pb.erl	/^encode_role_info(Record)$/;"	f	module:role_pb
+encode_role_info	src/proto/role_pb.erl	/^encode_role_info(Records) when is_list(Records) ->$/;"	f	module:role_pb
+encode_sc_account_create_role	src/proto/account_pb.erl	/^encode_sc_account_create_role(Record)$/;"	f	module:account_pb
+encode_sc_account_create_role	src/proto/account_pb.erl	/^encode_sc_account_create_role(Records)$/;"	f	module:account_pb
+encode_sc_account_enter_game	src/proto/account_pb.erl	/^encode_sc_account_enter_game(Record)$/;"	f	module:account_pb
+encode_sc_account_enter_game	src/proto/account_pb.erl	/^encode_sc_account_enter_game(Records)$/;"	f	module:account_pb
+encode_sc_account_get_role	src/proto/account_pb.erl	/^encode_sc_account_get_role(Record)$/;"	f	module:account_pb
+encode_sc_account_get_role	src/proto/account_pb.erl	/^encode_sc_account_get_role(Records)$/;"	f	module:account_pb
+encode_sc_account_get_role_id_list	src/proto/account_pb.erl	/^encode_sc_account_get_role_id_list(Record)$/;"	f	module:account_pb
+encode_sc_account_get_role_id_list	src/proto/account_pb.erl	/^encode_sc_account_get_role_id_list(Records)$/;"	f	module:account_pb
+encode_sc_account_login	src/proto/account_pb.erl	/^encode_sc_account_login(Record)$/;"	f	module:account_pb
+encode_sc_account_login	src/proto/account_pb.erl	/^encode_sc_account_login(Records)$/;"	f	module:account_pb
+encode_sc_chat_deliver_to	src/proto/chat_pb.erl	/^encode_sc_chat_deliver_to(Record)$/;"	f	module:chat_pb
+encode_sc_chat_deliver_to	src/proto/chat_pb.erl	/^encode_sc_chat_deliver_to(Records)$/;"	f	module:chat_pb
+encode_sc_chat_one_message	src/proto/chat_pb.erl	/^encode_sc_chat_one_message(Record)$/;"	f	module:chat_pb
+encode_sc_chat_one_message	src/proto/chat_pb.erl	/^encode_sc_chat_one_message(Records)$/;"	f	module:chat_pb
+encode_sc_role_create_role	src/proto/account_pb.erl	/^encode_sc_role_create_role(Record)$/;"	f	module:account_pb
+encode_sc_role_create_role	src/proto/account_pb.erl	/^encode_sc_role_create_role(Records)$/;"	f	module:account_pb
+encode_sc_role_create_role	src/proto/role_pb.erl	/^encode_sc_role_create_role(Record)$/;"	f	module:role_pb
+encode_sc_role_create_role	src/proto/role_pb.erl	/^encode_sc_role_create_role(Records)$/;"	f	module:role_pb
+encode_sc_role_get_info	src/proto/account_pb.erl	/^encode_sc_role_get_info(Record)$/;"	f	module:account_pb
+encode_sc_role_get_info	src/proto/account_pb.erl	/^encode_sc_role_get_info(Records)$/;"	f	module:account_pb
+encode_sc_role_get_info	src/proto/role_pb.erl	/^encode_sc_role_get_info(Record)$/;"	f	module:role_pb
+encode_sc_role_get_info	src/proto/role_pb.erl	/^encode_sc_role_get_info(Records)$/;"	f	module:role_pb
 encode_sfixed32_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_sfixed32_test_() ->$/;"	f	module:protobuffs_tests
 encode_sfixed64_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_sfixed64_test_() ->$/;"	f	module:protobuffs_tests
 encode_sint32_test_	deps/protobuffs/test/protobuffs_tests.erl	/^encode_sint32_test_() ->$/;"	f	module:protobuffs_tests
@@ -1516,6 +1739,9 @@ enum_negative_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^enum_nega
 enum_outside_value	deps/protobuffs/test/protobuffs_proper.erl	/^enum_outside_value() -> oneof(['FIRST', 'SECOND']).$/;"	f	module:protobuffs_proper
 enum_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^enum_test_() ->$/;"	f	module:protobuffs_parser_tests
 enum_to_int	deps/protobuffs/src/pokemon_pb.erl	/^enum_to_int(pikachu,value) ->$/;"	f	module:pokemon_pb
+enum_to_int	src/proto/account_pb.erl	/^enum_to_int(pikachu, value) -> 1.$/;"	f	module:account_pb
+enum_to_int	src/proto/chat_pb.erl	/^enum_to_int(pikachu, value) -> 1.$/;"	f	module:chat_pb
+enum_to_int	src/proto/role_pb.erl	/^enum_to_int(pikachu, value) -> 1.$/;"	f	module:role_pb
 enum_value	deps/protobuffs/test/protobuffs_proper.erl	/^enum_value() -> oneof([value1, value2]).$/;"	f	module:protobuffs_proper
 environment_SUITE	deps/emysql/test/environment_SUITE.erl	/^-module(environment_SUITE).$/;"	m
 eof_packet	deps/emysql/include/emysql.hrl	/^-record(eof_packet, {seq_num :: number(), $/;"	r
@@ -1697,6 +1923,9 @@ exports_	deps/meck/test/meck_tests.erl	/^exports_(Mod) ->$/;"	f	module:meck_test
 extend_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^extend_test_() ->$/;"	f	module:protobuffs_parser_tests
 extension_size	deps/protobuffs/src/pokemon_pb.erl	/^extension_size(#pikachu{'$extensions' = Extensions}) ->$/;"	f	module:pokemon_pb
 extension_size	deps/protobuffs/src/pokemon_pb.erl	/^extension_size(_) ->$/;"	f	module:pokemon_pb
+extension_size	src/proto/account_pb.erl	/^extension_size(_) -> 0.$/;"	f	module:account_pb
+extension_size	src/proto/chat_pb.erl	/^extension_size(_) -> 0.$/;"	f	module:chat_pb
+extension_size	src/proto/role_pb.erl	/^extension_size(_) -> 0.$/;"	f	module:role_pb
 extensions_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^extensions_test_() ->$/;"	f	module:protobuffs_parser_tests
 extra_sinks_test_	deps/lager/test/lager_test_backend.erl	/^extra_sinks_test_() ->$/;"	f	module:lager_test_backend
 f	start.py	/^    def f(x):$/;"	f	function:get_proto_files_list
@@ -2038,6 +2267,9 @@ get_env_default	deps/lager/src/lager_app.erl	/^get_env_default({ok, Value}, _Def
 get_extension	deps/protobuffs/src/pokemon_pb.erl	/^get_extension(#pikachu{'$extensions' = Extensions}, Int) when is_integer(Int) ->$/;"	f	module:pokemon_pb
 get_extension	deps/protobuffs/src/pokemon_pb.erl	/^get_extension(Record, fieldatom) when is_record(Record, pikachu) ->$/;"	f	module:pokemon_pb
 get_extension	deps/protobuffs/src/pokemon_pb.erl	/^get_extension(_Record, _FieldName) ->$/;"	f	module:pokemon_pb
+get_extension	src/proto/account_pb.erl	/^get_extension(_Record, _FieldName) -> undefined.$/;"	f	module:account_pb
+get_extension	src/proto/chat_pb.erl	/^get_extension(_Record, _FieldName) -> undefined.$/;"	f	module:chat_pb
+get_extension	src/proto/role_pb.erl	/^get_extension(_Record, _FieldName) -> undefined.$/;"	f	module:role_pb
 get_filetype	deps/sync/src/sync_utils.erl	/^get_filetype(Module) when is_atom(Module) ->$/;"	f	module:sync_utils
 get_filetype	deps/sync/src/sync_utils.erl	/^get_filetype(Source) when is_list(Source) ->$/;"	f	module:sync_utils
 get_growl	deps/sync/src/sync_scanner.erl	/^get_growl() ->$/;"	f	module:sync_scanner
@@ -2446,6 +2678,9 @@ handshake	deps/emysql/src/emysql_conn.erl	/^handshake(Sock, User, Password) ->$/
 has	deps/goldrush/src/gre.erl	/^has(Key, {list, List}) ->$/;"	f	module:gre
 has_extension	deps/protobuffs/src/pokemon_pb.erl	/^has_extension(#pikachu{'$extensions' = Extensions}, FieldKey) ->$/;"	f	module:pokemon_pb
 has_extension	deps/protobuffs/src/pokemon_pb.erl	/^has_extension(_Record, _FieldName) ->$/;"	f	module:pokemon_pb
+has_extension	src/proto/account_pb.erl	/^has_extension(_Record, _FieldName) -> false.$/;"	f	module:account_pb
+has_extension	src/proto/chat_pb.erl	/^has_extension(_Record, _FieldName) -> false.$/;"	f	module:chat_pb
+has_extension	src/proto/role_pb.erl	/^has_extension(_Record, _FieldName) -> false.$/;"	f	module:role_pb
 has_line_numbers	deps/lager/test/lager_test_backend.erl	/^has_line_numbers() ->$/;"	f	module:lager_test_backend
 has_pool	deps/emysql/src/emysql_conn_mgr.erl	/^has_pool(Pool) ->$/;"	f	module:emysql_conn_mgr
 has_pool-1	deps/emysql/doc/emysql_conn_mgr.html	/^<h3 class="function"><a name="has_pool-1">has_pool\/1<\/a><\/h3>$/;"	a
@@ -2675,6 +2910,9 @@ install_handler	deps/lager/src/lager_handler_watcher.erl	/^install_handler(Sink,
 install_handler	deps/lager/src/lager_handler_watcher.erl	/^install_handler(Sink, lager_backend_throttle, Config) ->$/;"	f	module:lager_handler_watcher
 install_handler2	deps/lager/src/lager_handler_watcher.erl	/^install_handler2(Sink, Module, Config) ->$/;"	f	module:lager_handler_watcher
 int_to_enum	deps/protobuffs/src/pokemon_pb.erl	/^int_to_enum(_,Val) ->$/;"	f	module:pokemon_pb
+int_to_enum	src/proto/account_pb.erl	/^int_to_enum(_, Val) -> Val.$/;"	f	module:account_pb
+int_to_enum	src/proto/chat_pb.erl	/^int_to_enum(_, Val) -> Val.$/;"	f	module:chat_pb
+int_to_enum	src/proto/role_pb.erl	/^int_to_enum(_, Val) -> Val.$/;"	f	module:role_pb
 integer	deps/meck/src/meck_code_gen.erl	/^-define(integer(Integer), {integer, ?LINE, Integer}).$/;"	d
 integer	deps/protobuffs/test/quickcheck_setup.hrl	/^integer() ->$/;"	f
 integer	deps/protobuffs/test/quickcheck_setup.hrl	/^integer(A,B) ->$/;"	f
@@ -2690,6 +2928,30 @@ invalidate	deps/meck/src/meck_proc.erl	/^invalidate(Mod) ->$/;"	f	module:meck_pr
 invariant	deps/poolboy/test/poolboy_eqc.erl	/^invariant(S = #state{pid=Pid},_) when Pid \/= undefined ->$/;"	f	module:poolboy_eqc
 invariant	deps/poolboy/test/poolboy_eqc.erl	/^invariant(_,_) ->$/;"	f	module:poolboy_eqc
 iolist	deps/protobuffs/src/pokemon_pb.erl	/^iolist(pikachu, Record) ->$/;"	f	module:pokemon_pb
+iolist	src/proto/account_pb.erl	/^iolist(cs_account_create_role, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(cs_account_enter_game, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(cs_account_get_role, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(cs_account_get_role_id_list, _Record) -> [];$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(cs_account_login, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(cs_role_create_role, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(cs_role_get_info, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(ms_fashionerror, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(role_info, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(sc_account_create_role, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(sc_account_enter_game, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(sc_account_get_role, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(sc_account_get_role_id_list, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(sc_account_login, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(sc_role_create_role, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/account_pb.erl	/^iolist(sc_role_get_info, Record) ->$/;"	f	module:account_pb
+iolist	src/proto/chat_pb.erl	/^iolist(cs_chat_deliver_to, Record) ->$/;"	f	module:chat_pb
+iolist	src/proto/chat_pb.erl	/^iolist(sc_chat_deliver_to, Record) ->$/;"	f	module:chat_pb
+iolist	src/proto/chat_pb.erl	/^iolist(sc_chat_one_message, Record) ->$/;"	f	module:chat_pb
+iolist	src/proto/role_pb.erl	/^iolist(cs_role_create_role, Record) ->$/;"	f	module:role_pb
+iolist	src/proto/role_pb.erl	/^iolist(cs_role_get_info, Record) ->$/;"	f	module:role_pb
+iolist	src/proto/role_pb.erl	/^iolist(role_info, Record) ->$/;"	f	module:role_pb
+iolist	src/proto/role_pb.erl	/^iolist(sc_role_create_role, Record) ->$/;"	f	module:role_pb
+iolist	src/proto/role_pb.erl	/^iolist(sc_role_get_info, Record) ->$/;"	f	module:role_pb
 iolist_printing_test	deps/lager/src/lager_trunc_io.erl	/^iolist_printing_test() ->$/;"	f	module:lager_trunc_io
 is	deps/meck/src/meck.erl	/^is(MatcherImpl) ->$/;"	f	module:meck
 is_changed	src/tools/reloader.erl	/^is_changed(M) ->$/;"	f	module:reloader
@@ -2863,6 +3125,18 @@ list_index	deps/protobuffs/src/pokemon_pb.erl	/^list_index(Target, List) ->  lis
 list_index	deps/protobuffs/src/pokemon_pb.erl	/^list_index(Target, [Target|_], Index) -> Index;$/;"	f	module:pokemon_pb
 list_index	deps/protobuffs/src/pokemon_pb.erl	/^list_index(Target, [_|Tail], Index) -> list_index(Target, Tail, Index+1);$/;"	f	module:pokemon_pb
 list_index	deps/protobuffs/src/pokemon_pb.erl	/^list_index(_, [], _) -> -1.$/;"	f	module:pokemon_pb
+list_index	src/proto/account_pb.erl	/^list_index(Target, List) -> list_index(Target, List, 1).$/;"	f	module:account_pb
+list_index	src/proto/account_pb.erl	/^list_index(Target, [Target | _], Index) -> Index;$/;"	f	module:account_pb
+list_index	src/proto/account_pb.erl	/^list_index(Target, [_ | Tail], Index) ->$/;"	f	module:account_pb
+list_index	src/proto/account_pb.erl	/^list_index(_, [], _) -> -1.$/;"	f	module:account_pb
+list_index	src/proto/chat_pb.erl	/^list_index(Target, List) -> list_index(Target, List, 1).$/;"	f	module:chat_pb
+list_index	src/proto/chat_pb.erl	/^list_index(Target, [Target | _], Index) -> Index;$/;"	f	module:chat_pb
+list_index	src/proto/chat_pb.erl	/^list_index(Target, [_ | Tail], Index) ->$/;"	f	module:chat_pb
+list_index	src/proto/chat_pb.erl	/^list_index(_, [], _) -> -1.$/;"	f	module:chat_pb
+list_index	src/proto/role_pb.erl	/^list_index(Target, List) -> list_index(Target, List, 1).$/;"	f	module:role_pb
+list_index	src/proto/role_pb.erl	/^list_index(Target, [Target | _], Index) -> Index;$/;"	f	module:role_pb
+list_index	src/proto/role_pb.erl	/^list_index(Target, [_ | Tail], Index) ->$/;"	f	module:role_pb
+list_index	src/proto/role_pb.erl	/^list_index(_, [], _) -> -1.$/;"	f	module:role_pb
 list_printing_test	deps/lager/src/lager_trunc_io.erl	/^list_printing_test() ->$/;"	f	module:lager_trunc_io
 listen	deps/ranch/src/ranch_ssl.erl	/^listen(Opts) ->$/;"	f	module:ranch_ssl
 listen	deps/ranch/src/ranch_tcp.erl	/^listen(Opts) ->$/;"	f	module:ranch_tcp
@@ -3093,6 +3367,8 @@ month	deps/lager/src/lager_stdlib.erl	/^month(7) -> "Jul";$/;"	f	module:lager_st
 month	deps/lager/src/lager_stdlib.erl	/^month(8) -> "Aug";$/;"	f	module:lager_stdlib
 month	deps/lager/src/lager_stdlib.erl	/^month(9) -> "Sep";$/;"	f	module:lager_stdlib
 move	src/tools/neo_kvs.erl	/^move(C, Key, Db) ->$/;"	f	module:neo_kvs
+ms_fashionerror	include/account_pb.hrl	/^-record(ms_fashionerror, {$/;"	r
+ms_fashionerror	src/proto/account_pb.erl	/^-record(ms_fashionerror, {dwerrorcode}).$/;"	r
 mset	src/tools/neo_kvs.erl	/^mset(C, KeyVals) ->$/;"	f	module:neo_kvs
 mset_mget_test	deps/eredis/test/eredis_tests.erl	/^mset_mget_test() ->$/;"	f	module:eredis_tests
 msetnx	src/tools/neo_kvs.erl	/^msetnx(C, KeyVals) ->$/;"	f	module:neo_kvs
@@ -3288,6 +3564,39 @@ pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated, [], _, Acc) ->$/;"	f
 pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated, undefined, _, _) -> [];$/;"	f	module:pokemon_pb
 pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated_packed, [], _, _) -> [];$/;"	f	module:pokemon_pb
 pack	deps/protobuffs/src/pokemon_pb.erl	/^pack(_, repeated_packed, undefined, _, _) -> [];$/;"	f	module:pokemon_pb
+pack	src/proto/account_pb.erl	/^pack(FNum, _, Data, Type, _) when is_atom(Data) ->$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(FNum, _, Data, Type, _)$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(FNum, _, Data, _, _) when is_tuple(Data) ->$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(FNum, repeated, [Head | Tail], Type, Acc) ->$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(FNum, repeated_packed, Data, Type, _) ->$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(FNum, required, undefined, Type, _) ->$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(_, optional, undefined, _, _) -> [];$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(_, repeated, [], _, Acc) -> lists:reverse(Acc);$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(_, repeated, undefined, _, _) -> [];$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(_, repeated_packed, [], _, _) -> [];$/;"	f	module:account_pb
+pack	src/proto/account_pb.erl	/^pack(_, repeated_packed, undefined, _, _) -> [];$/;"	f	module:account_pb
+pack	src/proto/chat_pb.erl	/^pack(FNum, _, Data, Type, _) when is_atom(Data) ->$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(FNum, _, Data, Type, _)$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(FNum, _, Data, _, _) when is_tuple(Data) ->$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(FNum, repeated, [Head | Tail], Type, Acc) ->$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(FNum, repeated_packed, Data, Type, _) ->$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(FNum, required, undefined, Type, _) ->$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(_, optional, undefined, _, _) -> [];$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(_, repeated, [], _, Acc) -> lists:reverse(Acc);$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(_, repeated, undefined, _, _) -> [];$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(_, repeated_packed, [], _, _) -> [];$/;"	f	module:chat_pb
+pack	src/proto/chat_pb.erl	/^pack(_, repeated_packed, undefined, _, _) -> [];$/;"	f	module:chat_pb
+pack	src/proto/role_pb.erl	/^pack(FNum, _, Data, Type, _) when is_atom(Data) ->$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(FNum, _, Data, Type, _)$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(FNum, _, Data, _, _) when is_tuple(Data) ->$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(FNum, repeated, [Head | Tail], Type, Acc) ->$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(FNum, repeated_packed, Data, Type, _) ->$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(FNum, required, undefined, Type, _) ->$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(_, optional, undefined, _, _) -> [];$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(_, repeated, [], _, Acc) -> lists:reverse(Acc);$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(_, repeated, undefined, _, _) -> [];$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(_, repeated_packed, [], _, _) -> [];$/;"	f	module:role_pb
+pack	src/proto/role_pb.erl	/^pack(_, repeated_packed, undefined, _, _) -> [];$/;"	f	module:role_pb
 pack_repeated	deps/protobuffs/src/protobuffs_parser.erl	/^pack_repeated(Type,_) ->$/;"	f	module:protobuffs_parser
 pack_repeated	deps/protobuffs/src/protobuffs_parser.erl	/^pack_repeated(repeated,{packed,true}) ->$/;"	f	module:protobuffs_parser
 package_test_	deps/protobuffs/test/protobuffs_parser_tests.erl	/^package_test_() ->$/;"	f	module:protobuffs_parser_tests
@@ -6701,6 +7010,9 @@ reuses_waiting_monitor_on_worker_exit	deps/poolboy/test/poolboy_tests.erl	/^reus
 reverse_binary	deps/ranch/examples/tcp_reverse/src/reverse_protocol.erl	/^reverse_binary(B) when is_binary(B) ->$/;"	f	module:reverse_protocol
 reverse_protocol	deps/ranch/examples/tcp_reverse/src/reverse_protocol.erl	/^-module(reverse_protocol).$/;"	m
 reverse_repeated_fields	deps/protobuffs/src/pokemon_pb.erl	/^reverse_repeated_fields(FieldList, Types) ->$/;"	f	module:pokemon_pb
+reverse_repeated_fields	src/proto/account_pb.erl	/^reverse_repeated_fields(FieldList, Types) ->$/;"	f	module:account_pb
+reverse_repeated_fields	src/proto/chat_pb.erl	/^reverse_repeated_fields(FieldList, Types) ->$/;"	f	module:chat_pb
+reverse_repeated_fields	src/proto/role_pb.erl	/^reverse_repeated_fields(FieldList, Types) ->$/;"	f	module:role_pb
 rmpush	src/tools/neo_kvs.erl	/^rmpush(C, Key, Vals) ->$/;"	f	module:neo_kvs
 rnd	deps/emysql/src/emysql_auth.erl	/^rnd(0, List, _, _) ->$/;"	f	module:emysql_auth
 rnd	deps/emysql/src/emysql_auth.erl	/^rnd(N, List, Seed1, Seed2) ->$/;"	f	module:emysql_auth
@@ -6716,7 +7028,10 @@ role.role_id	src/tools/db_game.sql	/^    role_id int(10) not null default '0' co
 role.sex	src/tools/db_game.sql	/^    sex tinyint(3) not null default '1' comment '性别',$/;"	F
 role_info	include/account_pb.hrl	/^-record(role_info, {$/;"	r
 role_info	include/role_pb.hrl	/^-record(role_info, {$/;"	r
+role_info	src/proto/account_pb.erl	/^-record(role_info, {role_id, name, sex, level}).$/;"	r
+role_info	src/proto/role_pb.erl	/^-record(role_info, {role_id, name, sex, level}).$/;"	r
 role_mgr	apps/comment/src/role_mgr.erl	/^-module(role_mgr).$/;"	m
+role_pb	src/proto/role_pb.erl	/^-module(role_pb).$/;"	m
 role_sup	apps/comment/src/role_sup.erl	/^-module(role_sup).$/;"	m
 rotate_file_fail_test	deps/lager/src/lager_util.erl	/^rotate_file_fail_test() ->$/;"	f	module:lager_util
 rotate_file_test	deps/lager/src/lager_util.erl	/^rotate_file_test() ->$/;"	f	module:lager_util
@@ -6772,16 +7087,27 @@ sasl_type_to_report_head	deps/lager/src/lager_crash_log.erl	/^sasl_type_to_repor
 save_role	apps/comment/src/redis_interface.erl	/^save_role(RoleID, RoleRec) ->$/;"	f	module:redis_interface
 save_script	apps/comment/src/redis_worker.erl	/^save_script(Api, Method, Script) ->$/;"	f	module:redis_worker
 sc_account_create_role	include/account_pb.hrl	/^-record(sc_account_create_role, {$/;"	r
+sc_account_create_role	src/proto/account_pb.erl	/^-record(sc_account_create_role, {result, role_id_list}).$/;"	r
 sc_account_enter_game	include/account_pb.hrl	/^-record(sc_account_enter_game, {$/;"	r
+sc_account_enter_game	src/proto/account_pb.erl	/^-record(sc_account_enter_game, {result}).$/;"	r
 sc_account_get_role	include/account_pb.hrl	/^-record(sc_account_get_role, {$/;"	r
+sc_account_get_role	src/proto/account_pb.erl	/^-record(sc_account_get_role, {result, role}).$/;"	r
 sc_account_get_role_id_list	include/account_pb.hrl	/^-record(sc_account_get_role_id_list, {$/;"	r
+sc_account_get_role_id_list	src/proto/account_pb.erl	/^-record(sc_account_get_role_id_list,$/;"	r
 sc_account_login	include/account_pb.hrl	/^-record(sc_account_login, {$/;"	r
+sc_account_login	src/proto/account_pb.erl	/^-record(sc_account_login, {result}).$/;"	r
 sc_chat_deliver_to	include/chat_pb.hrl	/^-record(sc_chat_deliver_to, {$/;"	r
+sc_chat_deliver_to	src/proto/chat_pb.erl	/^-record(sc_chat_deliver_to, {result}).$/;"	r
 sc_chat_one_message	include/chat_pb.hrl	/^-record(sc_chat_one_message, {$/;"	r
+sc_chat_one_message	src/proto/chat_pb.erl	/^-record(sc_chat_one_message,$/;"	r
 sc_role_create_role	include/account_pb.hrl	/^-record(sc_role_create_role, {$/;"	r
 sc_role_create_role	include/role_pb.hrl	/^-record(sc_role_create_role, {$/;"	r
+sc_role_create_role	src/proto/account_pb.erl	/^-record(sc_role_create_role, {result}).$/;"	r
+sc_role_create_role	src/proto/role_pb.erl	/^-record(sc_role_create_role, {result}).$/;"	r
 sc_role_get_info	include/account_pb.hrl	/^-record(sc_role_get_info, {$/;"	r
 sc_role_get_info	include/role_pb.hrl	/^-record(sc_role_get_info, {$/;"	r
+sc_role_get_info	src/proto/account_pb.erl	/^-record(sc_role_get_info, {result, role}).$/;"	r
+sc_role_get_info	src/proto/role_pb.erl	/^-record(sc_role_get_info, {result, role}).$/;"	r
 scan_file	deps/protobuffs/src/protobuffs_compile.erl	/^scan_file(ProtoFile) ->$/;"	f	module:protobuffs_compile
 scan_file	deps/protobuffs/src/protobuffs_compile.erl	/^scan_file(ProtoFile,Options) when is_atom(ProtoFile) ->$/;"	f	module:protobuffs_compile
 scan_file	deps/protobuffs/src/protobuffs_compile.erl	/^scan_file(ProtoFile,Options) when is_list(ProtoFile) ->$/;"	f	module:protobuffs_compile
@@ -6860,6 +7186,9 @@ set_env	deps/sync/src/sync_utils.erl	/^set_env(Var,Val) ->$/;"	f	module:sync_uti
 set_expect	deps/meck/src/meck_proc.erl	/^set_expect(Mod, Expect) ->$/;"	f	module:meck_proc
 set_extension	deps/protobuffs/src/pokemon_pb.erl	/^set_extension(#pikachu{'$extensions' = Extensions} = Record, fieldname, Value) ->$/;"	f	module:pokemon_pb
 set_extension	deps/protobuffs/src/pokemon_pb.erl	/^set_extension(Record, _, _) ->$/;"	f	module:pokemon_pb
+set_extension	src/proto/account_pb.erl	/^set_extension(Record, _, _) -> {error, Record}.$/;"	f	module:account_pb
+set_extension	src/proto/chat_pb.erl	/^set_extension(Record, _, _) -> {error, Record}.$/;"	f	module:chat_pb
+set_extension	src/proto/role_pb.erl	/^set_extension(Record, _, _) -> {error, Record}.$/;"	f	module:role_pb
 set_growl	deps/sync/src/sync_scanner.erl	/^set_growl(F) when ?LOG_OR_GROWL_OFF(F) ->$/;"	f	module:sync_scanner
 set_growl	deps/sync/src/sync_scanner.erl	/^set_growl(T) when ?LOG_OR_GROWL_ON(T) ->$/;"	f	module:sync_scanner
 set_high_water	deps/lager/src/error_logger_lager_h.erl	/^set_high_water(N) ->$/;"	f	module:error_logger_lager_h
@@ -6885,6 +7214,12 @@ set_protocol_options	deps/ranch/src/ranch.erl	/^set_protocol_options(Ref, Opts) 
 set_protocol_options	deps/ranch/src/ranch_server.erl	/^set_protocol_options(Ref, ProtoOpts) ->$/;"	f	module:ranch_server
 set_record_field	deps/protobuffs/src/pokemon_pb.erl	/^set_record_field(Fields, Record, '$extensions', Value) ->$/;"	f	module:pokemon_pb
 set_record_field	deps/protobuffs/src/pokemon_pb.erl	/^set_record_field(Fields, Record, Field, Value) ->$/;"	f	module:pokemon_pb
+set_record_field	src/proto/account_pb.erl	/^set_record_field(Fields, Record, '$extensions',$/;"	f	module:account_pb
+set_record_field	src/proto/account_pb.erl	/^set_record_field(Fields, Record, Field, Value) ->$/;"	f	module:account_pb
+set_record_field	src/proto/chat_pb.erl	/^set_record_field(Fields, Record, '$extensions',$/;"	f	module:chat_pb
+set_record_field	src/proto/chat_pb.erl	/^set_record_field(Fields, Record, Field, Value) ->$/;"	f	module:chat_pb
+set_record_field	src/proto/role_pb.erl	/^set_record_field(Fields, Record, '$extensions',$/;"	f	module:role_pb
+set_record_field	src/proto/role_pb.erl	/^set_record_field(Fields, Record, Field, Value) ->$/;"	f	module:role_pb
 set_trim	apps/comment/rel/files/comment.cmd	/^:set_trim$/;"	l
 set_trim	apps/comment/rel/files/start_erl.cmd	/^:set_trim$/;"	l
 setbit	src/tools/neo_kvs.erl	/^setbit(C, Key, Offset, Val) ->$/;"	f	module:neo_kvs
@@ -7337,6 +7672,30 @@ to_float	deps/emysql/src/emysql_tcp.erl	/^to_float(Data) ->$/;"	f	module:emysql_
 to_forms	deps/meck/src/meck_code_gen.erl	/^to_forms(Mod, Expects) ->$/;"	f	module:meck_code_gen
 to_integer	deps/emysql/src/emysql_tcp.erl	/^to_integer(Data) -> list_to_integer(binary_to_list(Data)).$/;"	f	module:emysql_tcp
 to_record	deps/protobuffs/src/pokemon_pb.erl	/^to_record(pikachu, DecodedTuples) ->$/;"	f	module:pokemon_pb
+to_record	src/proto/account_pb.erl	/^to_record(cs_account_create_role, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(cs_account_enter_game, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(cs_account_get_role, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(cs_account_get_role_id_list, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(cs_account_login, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(cs_role_create_role, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(cs_role_get_info, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(ms_fashionerror, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(role_info, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(sc_account_create_role, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(sc_account_enter_game, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(sc_account_get_role, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(sc_account_get_role_id_list, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(sc_account_login, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(sc_role_create_role, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/account_pb.erl	/^to_record(sc_role_get_info, DecodedTuples) ->$/;"	f	module:account_pb
+to_record	src/proto/chat_pb.erl	/^to_record(cs_chat_deliver_to, DecodedTuples) ->$/;"	f	module:chat_pb
+to_record	src/proto/chat_pb.erl	/^to_record(sc_chat_deliver_to, DecodedTuples) ->$/;"	f	module:chat_pb
+to_record	src/proto/chat_pb.erl	/^to_record(sc_chat_one_message, DecodedTuples) ->$/;"	f	module:chat_pb
+to_record	src/proto/role_pb.erl	/^to_record(cs_role_create_role, DecodedTuples) ->$/;"	f	module:role_pb
+to_record	src/proto/role_pb.erl	/^to_record(cs_role_get_info, DecodedTuples) ->$/;"	f	module:role_pb
+to_record	src/proto/role_pb.erl	/^to_record(role_info, DecodedTuples) ->$/;"	f	module:role_pb
+to_record	src/proto/role_pb.erl	/^to_record(sc_role_create_role, DecodedTuples) ->$/;"	f	module:role_pb
+to_record	src/proto/role_pb.erl	/^to_record(sc_role_get_info, DecodedTuples) ->$/;"	f	module:role_pb
 to_time	deps/emysql/src/emysql_tcp.erl	/^to_time(Data) ->$/;"	f	module:emysql_tcp
 to_timestamp	deps/emysql/src/emysql_tcp.erl	/^to_timestamp(Data) ->$/;"	f	module:emysql_tcp
 token	deps/protobuffs/src/protobuffs_scanner.erl	/^token(Cont, Chars) -> token(Cont, Chars, 1).$/;"	f	module:protobuffs_scanner
@@ -7460,6 +7819,12 @@ unload_renamed_original_test	deps/meck/test/meck_tests.erl	/^unload_renamed_orig
 unload_when_crashed_test	deps/meck/test/meck_tests.erl	/^unload_when_crashed_test() ->$/;"	f	module:meck_tests
 unpack_value	deps/protobuffs/src/pokemon_pb.erl	/^unpack_value(Binary, string) when is_binary(Binary) ->$/;"	f	module:pokemon_pb
 unpack_value	deps/protobuffs/src/pokemon_pb.erl	/^unpack_value(Value, _) -> Value.$/;"	f	module:pokemon_pb
+unpack_value	src/proto/account_pb.erl	/^unpack_value(Binary, string) when is_binary(Binary) ->$/;"	f	module:account_pb
+unpack_value	src/proto/account_pb.erl	/^unpack_value(Value, _) -> Value.$/;"	f	module:account_pb
+unpack_value	src/proto/chat_pb.erl	/^unpack_value(Binary, string) when is_binary(Binary) ->$/;"	f	module:chat_pb
+unpack_value	src/proto/chat_pb.erl	/^unpack_value(Value, _) -> Value.$/;"	f	module:chat_pb
+unpack_value	src/proto/role_pb.erl	/^unpack_value(Binary, string) when is_binary(Binary) ->$/;"	f	module:role_pb
+unpack_value	src/proto/role_pb.erl	/^unpack_value(Value, _) -> Value.$/;"	f	module:role_pb
 unpause	deps/sync/src/sync_scanner.erl	/^unpause() ->$/;"	f	module:sync_scanner
 unprefixed_integer	deps/lager/src/lager_format.erl	/^unprefixed_integer(Int, F, Adj, Base, Pad, Lowercase)$/;"	f	module:lager_format
 unprepare	deps/emysql/src/emysql_conn.erl	/^unprepare(Connection, Name) ->$/;"	f	module:emysql_conn
@@ -7600,6 +7965,12 @@ with	deps/goldrush/src/glc_ops.erl	/^with(Query, Fun) ->$/;"	f	module:glc_ops
 with	deps/goldrush/src/glc_ops.erl	/^with(Query, Fun) when is_function(Fun, 1);$/;"	f	module:glc_ops
 with_default	deps/protobuffs/src/pokemon_pb.erl	/^with_default(Default, Default) -> undefined;$/;"	f	module:pokemon_pb
 with_default	deps/protobuffs/src/pokemon_pb.erl	/^with_default(Val, _) -> Val.$/;"	f	module:pokemon_pb
+with_default	src/proto/account_pb.erl	/^with_default(Default, Default) -> undefined;$/;"	f	module:account_pb
+with_default	src/proto/account_pb.erl	/^with_default(Val, _) -> Val.$/;"	f	module:account_pb
+with_default	src/proto/chat_pb.erl	/^with_default(Default, Default) -> undefined;$/;"	f	module:chat_pb
+with_default	src/proto/chat_pb.erl	/^with_default(Val, _) -> Val.$/;"	f	module:chat_pb
+with_default	src/proto/role_pb.erl	/^with_default(Default, Default) -> undefined;$/;"	f	module:role_pb
+with_default	src/proto/role_pb.erl	/^with_default(Val, _) -> Val.$/;"	f	module:role_pb
 worker_death	deps/poolboy/test/poolboy_tests.erl	/^worker_death() ->$/;"	f	module:poolboy_tests
 worker_death_while_full	deps/poolboy/test/poolboy_tests.erl	/^worker_death_while_full() ->$/;"	f	module:poolboy_tests
 worker_death_while_full_no_overflow	deps/poolboy/test/poolboy_tests.erl	/^worker_death_while_full_no_overflow() ->$/;"	f	module:poolboy_tests

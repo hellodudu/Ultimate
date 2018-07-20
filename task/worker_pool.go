@@ -14,7 +14,7 @@ func (wp *WorkerPool) Init(tc chan Task) bool {
 	wp.taskChan = tc
 	wp.workerChan = make(chan *Worker)
 
-	maxWorker := runtime.GOMAXPROCS(0)
+	maxWorker := runtime.GOMAXPROCS(runtime.NumCPU())
 	wp.workerList = make([]Worker, maxWorker)
 
 	for n := 0; n < maxWorker; n++ {

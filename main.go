@@ -1,23 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/hellodudu/comment/task"
 )
 
-var taskDispatcher TaskDispatcher
-var reqNum int
+var TD task.TaskDispatcher
+var ReqNum int
 
-func editHandler(w http.ResponseWriter, r *http.Request) {
-	task := &Task{req: reqNum}
-	reqNum++
-	taskDispatcher.AddTask(task)
+func taskHandler(w http.ResponseWriter, r *http.Request) {
+	tk := task.Task{Req: ReqNum}
+	ReqNum++
+	TD.AddTask(tk)
 }
 
 func main() {
-	reqNum = 1
-	taskDispatcher.Init()
+	ReqNum = 1
+	if ret := TD.Init(); !ret {
+		fmt.Println("task dispatcher init failed!")
+	}
 
-	http.HandleFunc("/edit/", editHandler)
+	http.HandleFunc("/", taskHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+
 }

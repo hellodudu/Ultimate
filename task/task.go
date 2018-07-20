@@ -1,5 +1,5 @@
 package task
 
 type Task struct {
-	req interface{}
+	Req int
 }

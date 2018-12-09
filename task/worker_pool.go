@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"runtime"
 )
 
@@ -16,6 +17,7 @@ func (wp *WorkerPool) Init(tc chan *Task) bool {
 
 	maxWorker := runtime.GOMAXPROCS(runtime.NumCPU())
 	wp.workerList = make([]Worker, maxWorker)
+	fmt.Printf("Init max workers %d!\n", maxWorker)
 
 	for n := 1; n <= maxWorker; n++ {
 		worker := &Worker{}

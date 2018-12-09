@@ -1,17 +1,17 @@
 package task
 
 type TaskDispatcher struct {
-	taskChan   chan Task
+	taskChan   chan *Task
 	workerPool *WorkerPool
 }
 
 func (td *TaskDispatcher) Init() bool {
-	td.taskChan = make(chan Task)
+	td.taskChan = make(chan *Task, 100)
 	td.workerPool = &WorkerPool{}
 	td.workerPool.Init(td.taskChan)
 	return true
 }
 
-func (td *TaskDispatcher) AddTask(task Task) {
+func (td *TaskDispatcher) AddTask(task *Task) {
 	td.taskChan <- task
 }

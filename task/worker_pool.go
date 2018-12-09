@@ -5,19 +5,19 @@ import (
 )
 
 type WorkerPool struct {
-	taskChan   chan Task
+	taskChan   chan *Task
 	workerChan chan *Worker
 	workerList []Worker
 }
 
-func (wp *WorkerPool) Init(tc chan Task) bool {
+func (wp *WorkerPool) Init(tc chan *Task) bool {
 	wp.taskChan = tc
 	wp.workerChan = make(chan *Worker)
 
 	maxWorker := runtime.GOMAXPROCS(runtime.NumCPU())
 	wp.workerList = make([]Worker, maxWorker)
 
-	for n := 0; n < maxWorker; n++ {
+	for n := 1; n <= maxWorker; n++ {
 		worker := &Worker{}
 		worker.Init(n)
 		wp.workerList = append(wp.workerList, *worker)
@@ -39,7 +39,7 @@ func (wp *WorkerPool) Run() {
 				freeWorker.AddWork(tk)
 				freeWorker.Work()
 				wp.workerChan <- freeWorker
-			}(&newTask)
+			}(newTask)
 		}
 	}
 }

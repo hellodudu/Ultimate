@@ -11,25 +11,28 @@ type WorkerPool struct {
 	workerList []Worker
 }
 
-func (wp *WorkerPool) Init(tc chan *Task) bool {
-	wp.taskChan = tc
-	wp.workerChan = make(chan *Worker)
-
+func NewWorkerPool(tc chan *Task) (*WorkerPool, error) {
 	maxWorker := runtime.GOMAXPROCS(runtime.NumCPU())
-	wp.workerList = make([]Worker, maxWorker)
+
+	pool := &WorkerPool{
+		taskChan:   tc,
+		workerChan: make(chan *Worker),
+		workerList: make([]Worker, maxWorker),
+	}
+
 	fmt.Printf("Init max workers %d!\n", maxWorker)
 
 	for n := 1; n <= maxWorker; n++ {
 		worker := &Worker{}
 		worker.Init(n)
-		wp.workerList = append(wp.workerList, *worker)
+		pool.workerList = append(pool.workerList, *worker)
 		go func() {
-			wp.workerChan <- worker
+			pool.workerChan <- worker
 		}()
 	}
 
-	go wp.Run()
-	return true
+	go pool.Run()
+	return pool, nil
 }
 
 func (wp *WorkerPool) Run() {

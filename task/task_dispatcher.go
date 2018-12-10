@@ -5,11 +5,18 @@ type TaskDispatcher struct {
 	workerPool *WorkerPool
 }
 
-func (td *TaskDispatcher) Init() bool {
-	td.taskChan = make(chan *Task, 100)
-	td.workerPool = &WorkerPool{}
-	td.workerPool.Init(td.taskChan)
-	return true
+func NewTaskDispatcher() (*TaskDispatcher, error) {
+	td := &TaskDispatcher{
+		taskChan:   make(chan *Task, 100),
+		workerPool: nil,
+	}
+
+	var err error
+	if td.workerPool, err = NewWorkerPool(td.taskChan); err != nil {
+		return nil, err
+	}
+
+	return td, nil
 }
 
 func (td *TaskDispatcher) AddTask(task *Task) {

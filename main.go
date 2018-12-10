@@ -9,7 +9,7 @@ import (
 	"github.com/hellodudu/comment/task"
 )
 
-var td task.TaskDispatcher
+var td *task.TaskDispatcher
 var ReqNum int = 0
 var appMap map[int]comt.App
 
@@ -18,9 +18,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	tk := &task.Task{Req: ReqNum}
 	td.AddTask(tk)
 
-	if _, err := w.Write([]byte("It is done!")); err != nil {
-		panic("task handler response err!")
-	}
+	w.Write([]byte("It is done!"))
 }
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +29,13 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("create new app %v!\n", appMap[newApp.AppID])
 
-	if _, err := w.Write([]byte("It is done!")); err != nil {
-		panic("task handler response err!")
-	}
+	w.Write([]byte("It is done!"))
 }
 
 func main() {
-	if ret := td.Init(); !ret {
-		fmt.Println("task dispatcher init failed!")
+	var err error
+	if td, err = task.NewTaskDispatcher(); err != nil {
+		panic("new task dispatcher failed!")
 	}
 
 	appMap = make(map[int]comt.App)

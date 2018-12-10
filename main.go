@@ -23,6 +23,9 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {
 	// todo check app exist
+	var byReq []byte
+	r.Body.Read(byReq)
+	fmt.Printf("recv request: %s\n", byReq)
 
 	newApp := comt.App{AppID: 1, PubKey: "pub_key", PriKey: "pri_key"}
 	appMap[newApp.AppID] = newApp

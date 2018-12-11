@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -22,17 +24,36 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {
-	// todo check app exist
-	var byReq []byte
-	r.Body.Read(byReq)
-	fmt.Printf("recv request: %s\n", byReq)
 
-	newApp := comt.App{AppID: 1, PubKey: "pub_key", PriKey: "pri_key"}
-	appMap[newApp.AppID] = newApp
+	body, readErr := ioutil.ReadAll(r.Body)
+	if readErr != nil {
+		log.Fatal(readErr)
+	}
 
-	fmt.Printf("create new app %v!\n", appMap[newApp.AppID])
+	newApp := &comt.App{}
+	if jsonErr := json.Unmarshal(body, newApp); jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
 
-	w.Write([]byte("It is done!"))
+	// appid exist
+	if _, ok := appMap[newApp.AppID]; ok {
+		retBuf := fmt.Sprintf("appid<%d> exist!\n", newApp.AppID)
+		log.Println(retBuf)
+		w.Write([]byte(retBuf))
+		return
+	}
+
+	log.Printf("create new app %+v!\n", newApp)
+	appMap[newApp.AppID] = *newApp
+
+	retBuf, retErr := json.Marshal(newApp)
+	if retErr != nil {
+		log.Fatal("create app response json marshal error!")
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(retBuf)
 }
 
 func main() {

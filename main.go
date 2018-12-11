@@ -1,12 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/comment/comt"
 	"github.com/hellodudu/comment/task"
 )
@@ -61,6 +63,13 @@ func main() {
 	if td, err = task.NewTaskDispatcher(); err != nil {
 		panic("new task dispatcher failed!")
 	}
+
+	db, err := sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	fmt.Printf("mysql connect success %+v\n", db)
 
 	appMap = make(map[int]comt.App)
 

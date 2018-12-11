@@ -16,7 +16,8 @@ type Topic struct {
 }
 
 type App struct {
-	AppID  int    `json:"id"`
-	PubKey string `json:"pub_key"`
-	PriKey string `json:"pri_key"`
+	AppID   int    `json:"id"`
+	AppName string `json:"name"`
+	PubKey  string `json:"pub_key"`
+	PriKey  string `json:"pri_key"`
 }

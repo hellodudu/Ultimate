@@ -14,6 +14,7 @@ import (
 )
 
 var td *task.TaskDispatcher
+var db *sql.DB
 var ReqNum int = 0
 var appMap map[int]comt.App
 
@@ -27,14 +28,14 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {
 
-	body, readErr := ioutil.ReadAll(r.Body)
-	if readErr != nil {
-		log.Fatal(readErr)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	newApp := &comt.App{}
-	if jsonErr := json.Unmarshal(body, newApp); jsonErr != nil {
-		log.Fatal(jsonErr)
+	if err := json.Unmarshal(body, newApp); err != nil {
+		log.Fatal(err)
 	}
 
 	// appid exist
@@ -45,6 +46,35 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// insert into db
+	if db == nil {
+		log.Println("db didn't exist!")
+		return
+	}
+
+	stmt, err := db.Prepare("insert into app values(?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res, err := stmt.Exec(newApp.AppID, newApp.AppName, newApp.PubKey, newApp.PriKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rowAffect, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("insert id = %d, affect rows = %d!\n", lastID, rowAffect)
+
+	// add to app map cache
 	log.Printf("create new app %+v!\n", newApp)
 	appMap[newApp.AppID] = *newApp
 
@@ -64,12 +94,35 @@ func main() {
 		panic("new task dispatcher failed!")
 	}
 
-	db, err := sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
+	db, err = sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	fmt.Printf("mysql connect success %+v\n", db)
+	fmt.Printf("mysql connect success: %+v\n", db)
+
+	rows, rowErr := db.Query("select * from app")
+	if rowErr != nil {
+		log.Fatal(rowErr)
+	}
+	defer rows.Close()
+
+	var (
+		appid   int
+		appname string
+		pubkey  string
+		prikey  string
+	)
+	for rows.Next() {
+		if err := rows.Scan(&appid, &appname, &pubkey, &prikey); err != nil {
+			log.Fatal(err)
+		}
+		log.Println("select result:", appid, appname, pubkey, prikey)
+	}
+	rowErr = rows.Err()
+	if rowErr != nil {
+		log.Fatal(rowErr)
+	}
 
 	appMap = make(map[int]comt.App)
 

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/comment/comt"
@@ -88,18 +89,8 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(retBuf)
 }
 
-func main() {
-	var err error
-	if td, err = task.NewTaskDispatcher(); err != nil {
-		panic("new task dispatcher failed!")
-	}
-
-	db, err = sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	fmt.Printf("mysql connect success: %+v\n", db)
+// db init
+func dbInit(wg *sync.WaitGroup) {
 
 	rows, rowErr := db.Query("select * from app")
 	if rowErr != nil {
@@ -124,6 +115,29 @@ func main() {
 		log.Fatal(rowErr)
 	}
 
+	wg.Done()
+}
+
+func main() {
+	var wg sync.WaitGroup
+
+	var err error
+	if td, err = task.NewTaskDispatcher(); err != nil {
+		panic("new task dispatcher failed!")
+	}
+
+	db, err = sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	fmt.Printf("mysql connect success: %+v\n", db)
+
+	wg.Add(1)
+	go dbInit(&wg)
+
+	wg.Wait()
+	fmt.Println("all init ok!")
 	appMap = make(map[int]comt.App)
 
 	http.HandleFunc("/create_app", createAppHandler)

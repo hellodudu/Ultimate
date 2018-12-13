@@ -2,6 +2,8 @@ package comt
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -79,19 +81,14 @@ func (api *ComtAPI) InitDB() {
 	}
 	defer rows.Close()
 
-	var (
-		appid   int
-		appname string
-		pubkey  string
-		prikey  string
-	)
+	newApp := &App{}
 	for rows.Next() {
-		if err := rows.Scan(&appid, &appname, &pubkey, &prikey); err != nil {
+		if err := rows.Scan(&newApp.AppID, &newApp.AppName, &newApp.PubKey, &newApp.PriKey); err != nil {
 			log.Fatal(err)
 		}
-		log.Println("select result:", appid, appname, pubkey, prikey)
+		log.Println("select result:", newApp)
 
-		// todo add to appMap
+		// add to appMap
 	}
 
 	if err := rows.Err(); err != nil {
@@ -115,4 +112,43 @@ func (api *ComtAPI) AddTask() {
 
 	api.wg.Wait()
 	api.td.AddTask(&task.Task{Req: newReqNum})
+}
+
+func (api *ComtAPI) AddNewApp(app *App) error {
+	if _, ok := api.appMap[app.AppID]; ok {
+		errStr := fmt.Sprintf("add exist app<%d>\n", app.AppID)
+		log.Printf(errStr)
+		return errors.New(errStr)
+	}
+
+	api.appMap[app.AppID] = app
+
+	// todo insert into db
+	if db == nil {
+		log.Println("db didn't exist!")
+		return
+	}
+
+	stmt, err := db.Prepare("insert into app values(?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res, err := stmt.Exec(newApp.AppID, newApp.AppName, newApp.PubKey, newApp.PriKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rowAffect, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("insert id = %d, affect rows = %d!\n", lastID, rowAffect)
+	return nil
 }

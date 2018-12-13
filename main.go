@@ -29,45 +29,11 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	// appid exist
-	// if _, ok := appMap[newApp.AppID]; ok {
-	// 	retBuf := fmt.Sprintf("appid<%d> exist!\n", newApp.AppID)
-	// 	log.Println(retBuf)
-	// 	w.Write([]byte(retBuf))
-	// 	return
-	// }
-
-	// // insert into db
-	// if db == nil {
-	// 	log.Println("db didn't exist!")
-	// 	return
-	// }
-
-	// stmt, err := db.Prepare("insert into app values(?, ?, ?, ?)")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// res, err := stmt.Exec(newApp.AppID, newApp.AppName, newApp.PubKey, newApp.PriKey)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// lastID, err := res.LastInsertId()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// rowAffect, err := res.RowsAffected()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// log.Printf("insert id = %d, affect rows = %d!\n", lastID, rowAffect)
-
-	// // add to app map cache
-	// log.Printf("create new app %+v!\n", newApp)
-	// appMap[newApp.AppID] = *newApp
+	// add app
+	if err := comtAPI.AddNewApp(newApp); err != nil {
+		http.Error(w, err, http.StatusInternalServerError)
+		return
+	}
 
 	retBuf, retErr := json.Marshal(newApp)
 	if retErr != nil {

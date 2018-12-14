@@ -89,6 +89,7 @@ func (api *ComtAPI) InitDB() {
 		log.Println("select result:", newApp)
 
 		// add to appMap
+		api.appMap[newApp.AppID] = *newApp
 	}
 
 	if err := rows.Err(); err != nil {
@@ -121,20 +122,19 @@ func (api *ComtAPI) AddNewApp(app *App) error {
 		return errors.New(errStr)
 	}
 
-	api.appMap[app.AppID] = app
-
 	// todo insert into db
-	if db == nil {
-		log.Println("db didn't exist!")
-		return
+	if api.db == nil {
+		errStr := "db didn't exist!"
+		log.Println(errStr)
+		return errors.New(errStr)
 	}
 
-	stmt, err := db.Prepare("insert into app values(?, ?, ?, ?)")
+	stmt, err := api.db.Prepare("insert into app values(?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	res, err := stmt.Exec(newApp.AppID, newApp.AppName, newApp.PubKey, newApp.PriKey)
+	res, err := stmt.Exec(app.AppID, app.AppName, app.PubKey, app.PriKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -150,5 +150,8 @@ func (api *ComtAPI) AddNewApp(app *App) error {
 	}
 
 	log.Printf("insert id = %d, affect rows = %d!\n", lastID, rowAffect)
+
+	api.appMap[app.AppID] = *app
+
 	return nil
 }

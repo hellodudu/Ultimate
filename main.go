@@ -31,7 +31,7 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 
 	// add app
 	if err := comtAPI.AddNewApp(newApp); err != nil {
-		http.Error(w, err, http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

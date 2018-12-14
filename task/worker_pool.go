@@ -5,16 +5,17 @@ import (
 	"runtime"
 )
 
-type WorkerPool struct {
+type workerPool struct {
 	taskChan   chan *Task
 	workerChan chan *Worker
 	workerList []Worker
 }
 
-func NewWorkerPool(tc chan *Task) (*WorkerPool, error) {
+// NewWorkerPool create new workerpool
+func NewWorkerPool(tc chan *Task) (*workerPool, error) {
 	maxWorker := runtime.GOMAXPROCS(runtime.NumCPU())
 
-	pool := &WorkerPool{
+	pool := &workerPool{
 		taskChan:   tc,
 		workerChan: make(chan *Worker),
 		workerList: make([]Worker, maxWorker),
@@ -35,7 +36,8 @@ func NewWorkerPool(tc chan *Task) (*WorkerPool, error) {
 	return pool, nil
 }
 
-func (wp *WorkerPool) Run() {
+// Run workerpool running
+func (wp *workerPool) Run() {
 	for {
 		select {
 		case newTask := <-wp.taskChan:

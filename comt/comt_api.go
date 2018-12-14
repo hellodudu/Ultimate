@@ -10,12 +10,12 @@ import (
 	"github.com/hellodudu/comment/task"
 )
 
-// api
+// ComtAPI api define
 type ComtAPI struct {
-	td     *task.TaskDispatcher // task dispatcher
-	db     *sql.DB              // database
-	reqNum int                  // request number
-	appMap map[int]*App         // app map
+	td     *task.Dispatcher // task dispatcher
+	db     *sql.DB          // database
+	reqNum int              // request number
+	appMap map[int]*App     // app map
 	wg     sync.WaitGroup
 }
 
@@ -37,7 +37,7 @@ func NewComtAPI() (*ComtAPI, error) {
 func (api *ComtAPI) InitTask() {
 	api.wg.Add(1)
 	var err error
-	if api.td, err = task.NewTaskDispatcher(); err != nil {
+	if api.td, err = task.NewDispatcher(); err != nil {
 		log.Fatal(err)
 	}
 

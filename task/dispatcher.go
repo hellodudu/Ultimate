@@ -1,12 +1,14 @@
 package task
 
-type TaskDispatcher struct {
+// Dispatcher define
+type Dispatcher struct {
 	taskChan   chan *Task
-	workerPool *WorkerPool
+	workerPool *workerPool
 }
 
-func NewTaskDispatcher() (*TaskDispatcher, error) {
-	td := &TaskDispatcher{
+// NewDispatcher return new dispatcher
+func NewDispatcher() (*Dispatcher, error) {
+	td := &Dispatcher{
 		taskChan:   make(chan *Task, 100),
 		workerPool: nil,
 	}
@@ -19,7 +21,8 @@ func NewTaskDispatcher() (*TaskDispatcher, error) {
 	return td, nil
 }
 
-func (td *TaskDispatcher) AddTask(request int, callback interface{}) {
+// AddTask add new task to taskchan
+func (td *Dispatcher) AddTask(request int, callback interface{}) {
 	task := &Task{req: request, cb: callback}
 	td.taskChan <- task
 }

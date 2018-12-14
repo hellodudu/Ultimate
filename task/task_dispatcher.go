@@ -19,6 +19,7 @@ func NewTaskDispatcher() (*TaskDispatcher, error) {
 	return td, nil
 }
 
-func (td *TaskDispatcher) AddTask(task *Task) {
+func (td *TaskDispatcher) AddTask(request int, callback interface{}) {
+	task := &Task{req: request, cb: callback}
 	td.taskChan <- task
 }

@@ -8,12 +8,20 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/comment/comt"
+	"github.com/hellodudu/comment/task"
 )
 
 var comtAPI *comt.ComtAPI
 
+func callBack(ts *task.Task) {
+	log.Println("task callback with reqnum:", ts.GetReq())
+}
+
 func taskHandler(w http.ResponseWriter, r *http.Request) {
-	comtAPI.AddTask()
+	//test add task
+	// newApp := &comt.App{AppID: 1, AppName: "testName"}
+
+	comtAPI.AddTask(callBack)
 	w.Write([]byte("It is done!"))
 }
 

@@ -1,6 +1,10 @@
 package task
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"reflect"
+)
 
 type Worker struct {
 	task *Task
@@ -20,9 +24,12 @@ func (worker *Worker) Work() {
 		fmt.Println("worker<", worker.num, ">'s task is nil")
 	}
 
-	fmt.Println("work proof with task:", worker.task.req, ", by worker number:", worker.num)
+	log.Println("work proof with task:", worker.task.req, ", by worker number:", worker.num)
 
-	if fun, ok := worker.task.cb.(func()); ok {
-		fun()
-	}
+	// worker.task.cb(worker.task)
+
+	fun := reflect.ValueOf(worker.task.cb)
+	param := make([]reflect.Value, 1)
+	param[0] = reflect.ValueOf(worker.task)
+	fun.Call(param)
 }

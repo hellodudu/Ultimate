@@ -6,17 +6,17 @@ import (
 )
 
 type workerPool struct {
-	taskChan   chan *Task
+	taskerChan chan Tasker
 	workerChan chan *Worker
 	workerList []Worker
 }
 
 // NewWorkerPool create new workerpool
-func NewWorkerPool(tc chan *Task) (*workerPool, error) {
+func NewWorkerPool(tc chan Tasker) (*workerPool, error) {
 	maxWorker := runtime.GOMAXPROCS(runtime.NumCPU())
 
 	pool := &workerPool{
-		taskChan:   tc,
+		taskerChan: tc,
 		workerChan: make(chan *Worker),
 		workerList: make([]Worker, maxWorker),
 	}
@@ -40,13 +40,13 @@ func NewWorkerPool(tc chan *Task) (*workerPool, error) {
 func (wp *workerPool) Run() {
 	for {
 		select {
-		case newTask := <-wp.taskChan:
-			go func(tk *Task) {
+		case newTasker := <-wp.taskerChan:
+			go func(tk Tasker) {
 				freeWorker := <-wp.workerChan
 				freeWorker.AddWork(tk)
 				freeWorker.Work()
 				wp.workerChan <- freeWorker
-			}(newTask)
+			}(newTasker)
 		}
 	}
 }

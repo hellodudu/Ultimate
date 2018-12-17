@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"sync"
 
 	"github.com/hellodudu/comment/task"
@@ -91,9 +92,15 @@ func (api *ComtAPI) GenReqNum() int {
 	return api.reqNum
 }
 
-func (api *ComtAPI) AddTask(callback interface{}) {
+func (api *ComtAPI) AddTask(w http.ResponseWriter, r *http.Request, callback HandleCallback) {
 	newReqNum := api.GenReqNum()
 	api.td.AddTask(newReqNum, callback)
+}
+
+func (api *ComtAPI) AddHttpTask(w http.ResponseWriter, r *http.Request, callback task.TaskCallback) {
+	newReqNum := api.GenReqNum()
+	newTask := &task.HttpTask{req: newReqNum, w: w, r: r, cb: callback}
+	api.td.AddTask(newTask)
 }
 
 func (api *ComtAPI) AddNewApp(app *App) error {

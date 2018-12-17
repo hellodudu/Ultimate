@@ -2,19 +2,19 @@ package task
 
 // Dispatcher define
 type Dispatcher struct {
-	taskChan   chan *Task
+	taskerChan chan Tasker
 	workerPool *workerPool
 }
 
 // NewDispatcher return new dispatcher
 func NewDispatcher() (*Dispatcher, error) {
 	td := &Dispatcher{
-		taskChan:   make(chan *Task, 100),
+		taskerChan: make(chan Tasker, 100),
 		workerPool: nil,
 	}
 
 	var err error
-	if td.workerPool, err = NewWorkerPool(td.taskChan); err != nil {
+	if td.workerPool, err = NewWorkerPool(td.taskerChan); err != nil {
 		return nil, err
 	}
 
@@ -22,7 +22,6 @@ func NewDispatcher() (*Dispatcher, error) {
 }
 
 // AddTask add new task to taskchan
-func (td *Dispatcher) AddTask(request int, callback interface{}) {
-	task := &Task{req: request, cb: callback}
-	td.taskChan <- task
+func (td *Dispatcher) AddTask(tasker *Tasker) {
+	td.taskerChan <- tasker
 }

@@ -13,16 +13,13 @@ import (
 
 var comtAPI *comt.ComtAPI
 
-func callBack(ts *task.Task) {
+func callBackTask(w http.ResponseWriter, r *http.Request, ts *task.Task) {
 	log.Println("task callback with reqnum:", ts.GetReq())
+	w.Write([]byte("It is done!"))
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
-	//test add task
-	// newApp := &comt.App{AppID: 1, AppName: "testName"}
-
-	comtAPI.AddTask(callBack)
-	w.Write([]byte("It is done!"))
+	comtAPI.AddTask(callBackTask)
 }
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {

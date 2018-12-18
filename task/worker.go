@@ -6,7 +6,7 @@ import (
 )
 
 type Worker struct {
-	tasker *Tasker
+	tasker Tasker
 	num    int
 }
 
@@ -14,18 +14,18 @@ func (worker *Worker) Init(num int) {
 	worker.num = num
 }
 
-func (worker *Worker) AddWork(tk *Tasker) {
+func (worker *Worker) AddWork(tk Tasker) {
 	worker.tasker = tk
 }
 
 func (worker *Worker) Work() {
-	if worker.tasker == nil {
+	if worker.tasker.GetReq() == 0 {
 		fmt.Println("worker<", worker.num, ">'s task is nil")
 	}
 
-	log.Println("work proof with task:", worker.task.req, ", by worker number:", worker.num)
+	log.Println("work proof with task:", worker.tasker.GetReq(), ", by worker number:", worker.num)
 
-	worker.task.cb(worker.task)
+	worker.tasker.Callback(worker.tasker)
 
 	// fun := reflect.ValueOf(worker.task.cb)
 	// param := make([]reflect.Value, 1)

@@ -92,14 +92,21 @@ func (api *ComtAPI) GenReqNum() int {
 	return api.reqNum
 }
 
-func (api *ComtAPI) AddTask(w http.ResponseWriter, r *http.Request, callback HandleCallback) {
+func (api *ComtAPI) AddTask() {
 	newReqNum := api.GenReqNum()
-	api.td.AddTask(newReqNum, callback)
+	newTask, err := task.NewTask(newReqNum)
+	if err != nil {
+		log.Fatal("create new task error")
+	}
+	api.td.AddTask(newTask)
 }
 
-func (api *ComtAPI) AddHttpTask(w http.ResponseWriter, r *http.Request, callback task.TaskCallback) {
+func (api *ComtAPI) AddHttpTask(w http.ResponseWriter, r *http.Request, cb task.TaskCallback) {
 	newReqNum := api.GenReqNum()
-	newTask := &task.HttpTask{req: newReqNum, w: w, r: r, cb: callback}
+	newTask, err := task.NewHttpTask(newReqNum, w, r, cb)
+	if err != nil {
+		log.Fatal("create new http task error")
+	}
 	api.td.AddTask(newTask)
 }
 

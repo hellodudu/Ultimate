@@ -22,6 +22,6 @@ func NewDispatcher() (*Dispatcher, error) {
 }
 
 // AddTask add new task to taskchan
-func (td *Dispatcher) AddTask(tasker *Tasker) {
+func (td *Dispatcher) AddTask(tasker Tasker) {
 	td.taskerChan <- tasker
 }

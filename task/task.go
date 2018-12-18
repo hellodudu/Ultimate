@@ -1,12 +1,16 @@
 package task
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+	"reflect"
+)
 
-type TaskCallback func(http.ResponseWriter, *http.Request, *Task)
+type TaskCallback func(Tasker)
 
 type Tasker interface {
 	Write([]byte) (int, error)
-	Callback(*Task)
+	Callback(Tasker)
 	GetReq() int
 }
 
@@ -25,18 +29,31 @@ func (task *Task) GetReq() int {
 	return task.req
 }
 
-func (task Task) Write([]byte) (int, error) {
+func (task *Task) Write([]byte) (int, error) {
 	return 0, nil
 }
 
-func (task Task) Callback() {
+func (task Task) Callback(Tasker) {
 
+}
+
+func (task *HttpTask) GetReq() int {
+	return task.tk.req
 }
 
 func (task *HttpTask) Write(b []byte) (int, error) {
-	task.rw.Write(b)
+	log.Printf("http task write %s in %+v\n", b, reflect.TypeOf(task.w))
+	return task.w.Write(b)
 }
 
-func (task *HttpTask) Callback(tk *Task) {
-	task.cb(task.rw, task.rq, tk)
+func (task *HttpTask) Callback(tk Tasker) {
+	task.cb(task)
+}
+
+func NewTask(req int) (*Task, error) {
+	return &Task{req: req}, nil
+}
+
+func NewHttpTask(req int, w http.ResponseWriter, r *http.Request, cb TaskCallback) (*HttpTask, error) {
+	return &HttpTask{tk: Task{req}, w: w, r: r, cb: cb}, nil
 }

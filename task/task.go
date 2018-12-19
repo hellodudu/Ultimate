@@ -1,9 +1,7 @@
 package task
 
 import (
-	"log"
 	"net/http"
-	"reflect"
 )
 
 type TaskCallback func(Tasker)
@@ -19,7 +17,7 @@ type Task struct {
 }
 
 type HttpTask struct {
-	tk Task
+	Task
 	w  http.ResponseWriter
 	r  *http.Request
 	cb TaskCallback
@@ -38,11 +36,10 @@ func (task Task) Callback(Tasker) {
 }
 
 func (task *HttpTask) GetReq() int {
-	return task.tk.req
+	return task.req
 }
 
 func (task *HttpTask) Write(b []byte) (int, error) {
-	log.Printf("http task write %s in %+v\n", b, reflect.TypeOf(task.w))
 	return task.w.Write(b)
 }
 
@@ -55,5 +52,5 @@ func NewTask(req int) (*Task, error) {
 }
 
 func NewHttpTask(req int, w http.ResponseWriter, r *http.Request, cb TaskCallback) (*HttpTask, error) {
-	return &HttpTask{tk: Task{req}, w: w, r: r, cb: cb}, nil
+	return &HttpTask{req: req, w: w, r: r, cb: cb}, nil
 }

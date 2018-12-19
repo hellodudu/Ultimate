@@ -12,14 +12,18 @@ import (
 )
 
 var comtAPI *comt.ComtAPI
+var testChan chan interface{} = make(chan interface{}, 1)
 
 func callBackTask(ts task.Tasker) {
 	log.Println("task callback with reqnum:", ts.GetReq())
 	ts.Write([]byte("It is done!"))
+	testChan <- 1
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	comtAPI.AddHttpTask(w, r, callBackTask)
+	<-testChan
+	log.Printf("taskHandler over\n", w)
 }
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {

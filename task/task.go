@@ -52,5 +52,5 @@ func NewTask(req int) (*Task, error) {
 }
 
 func NewHttpTask(req int, w http.ResponseWriter, r *http.Request, cb TaskCallback) (*HttpTask, error) {
-	return &HttpTask{req: req, w: w, r: r, cb: cb}, nil
+	return &HttpTask{Task: Task{req: req}, w: w, r: r, cb: cb}, nil
 }

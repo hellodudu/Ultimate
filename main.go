@@ -7,12 +7,17 @@ import (
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/websocket"
 	"github.com/hellodudu/comment/comt"
 	"github.com/hellodudu/comment/task"
 )
 
 var comtAPI *comt.ComtAPI
 var testChan chan interface{} = make(chan interface{}, 1)
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 func callBackTask(ts task.Tasker) {
 	log.Println("task callback with reqnum:", ts.GetReq())
@@ -24,6 +29,27 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	comtAPI.AddHttpTask(w, r, callBackTask)
 	<-testChan
 	log.Printf("taskHandler over\n", w)
+}
+
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
+	for {
+		msgtype, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		res := []byte("server recv:")
+		if err := conn.WriteMessage(msgtype, append(res, p...)); err != nil {
+			log.Println(err)
+			return
+		}
+	}
 }
 
 func createAppHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +89,7 @@ func main() {
 
 	http.HandleFunc("/create_app", createAppHandler)
 	http.HandleFunc("/task", taskHandler)
+	http.HandleFunc("/ws", wsHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
 }

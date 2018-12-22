@@ -7,8 +7,10 @@ import (
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/hellodudu/comment/comt"
+	"github.com/hellodudu/comment/proto"
 	"github.com/hellodudu/comment/task"
 )
 
@@ -23,6 +25,25 @@ func callBackTask(ts task.Tasker) {
 	log.Println("task callback with reqnum:", ts.GetReq())
 	ts.Write([]byte("It is done!"))
 	testChan <- 1
+
+	// test proto
+	// p := &tutorial.Person{
+	// 	Id:    1234,
+	// 	Name:  "John Doe",
+	// 	Email: "jdoe@example.com",
+	// 	Phones: []*tutorial.Person_PhoneNumber{
+	// 		{Number: "555-4321", Type: tutorial.Person_HOME},
+	// 	},
+	// }
+	book := &tutorial.AddressBook{}
+	out, err := proto.Marshal(book)
+	if err != nil {
+		log.Fatalln("Failed to encode address book:", err)
+	}
+
+	if err := ioutil.WriteFile("address_book", out, 0644); err != nil {
+		log.Fatalln("Failed to write address book:", err)
+	}
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {

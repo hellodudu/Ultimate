@@ -1,10 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/proto"
@@ -27,16 +32,19 @@ func callBackTask(ts task.Tasker) {
 	testChan <- 1
 
 	// test proto
-	// p := &tutorial.Person{
-	// 	Id:    1234,
-	// 	Name:  "John Doe",
-	// 	Email: "jdoe@example.com",
-	// 	Phones: []*tutorial.Person_PhoneNumber{
-	// 		{Number: "555-4321", Type: tutorial.Person_HOME},
-	// 	},
-	// }
+	p := &tutorial.Person{
+		Id:    1234,
+		Name:  "John Doe",
+		Email: "jdoe@example.com",
+		Phones: []*tutorial.Person_PhoneNumber{
+			{Number: "555-4321", Type: tutorial.Person_HOME},
+		},
+	}
 	book := &tutorial.AddressBook{}
+	book.People = append(book.People, p)
+	log.Println("unmashaled book = ", book)
 	out, err := proto.Marshal(book)
+	log.Println("mashaled book = ", out)
 	if err != nil {
 		log.Fatalln("Failed to encode address book:", err)
 	}
@@ -101,6 +109,17 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(retBuf)
 }
 
+func handleTcpConnection(con net.Conn) {
+	defer con.Close()
+	scanner := bufio.NewScanner(con)
+	for scanner.Scan() {
+		msg := scanner.Text()
+		log.Printf("tcp recv:%s\n", msg)
+		reply := strings.Join([]string{"server recv:", msg}, "")
+		con.Write([]byte(reply))
+	}
+}
+
 func main() {
 	var err error
 	if comtAPI, err = comt.NewComtAPI(); err != nil {
@@ -108,9 +127,37 @@ func main() {
 	}
 	defer comtAPI.Close()
 
-	http.HandleFunc("/create_app", createAppHandler)
-	http.HandleFunc("/task", taskHandler)
-	http.HandleFunc("/ws", wsHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// http handle
+	go func() {
+		http.HandleFunc("/create_app", createAppHandler)
+		http.HandleFunc("/task", taskHandler)
+		http.HandleFunc("/ws", wsHandler)
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	}()
 
+	// tcp handle
+	go func() {
+		addr := string("127.0.0.1:8081")
+		ln, err := net.Listen("tcp", addr)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer ln.Close()
+
+		log.Println("tcp listening at ", addr)
+
+		for {
+			con, err := ln.Accept()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			go handleTcpConnection(con)
+		}
+	}()
+
+	// server exit
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill)
+	sig := <-c
+	log.Printf("Leaf closing down (signal: %v)\n", sig)
 }

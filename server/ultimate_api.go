@@ -1,4 +1,4 @@
-package comt
+package ultimate
 
 import (
 	"database/sql"
@@ -11,31 +11,42 @@ import (
 	"github.com/hellodudu/comment/task"
 )
 
-// ComtAPI api define
-type ComtAPI struct {
+// global var
+var ultimateAPI *UltimateAPI
+
+// UltimateAPI api define
+type UltimateAPI struct {
 	td     *task.Dispatcher // task dispatcher
 	db     *sql.DB          // database
+	tcp_s  *TcpServer       // tcp server
+	http_s *HttpServer      // http server
 	reqNum int              // request number
 	appMap map[int]*App     // app map
 	wg     sync.WaitGroup
 }
 
-func NewComtAPI() (*ComtAPI, error) {
-	api := &ComtAPI{
+func NewUltimateAPI() (*UltimateAPI, error) {
+	ultimateAPI = &UltimateAPI{
 		reqNum: 0,
 		appMap: make(map[int]*App),
 	}
 
-	go api.InitTask()
-	go api.InitDB()
+	go ultimateAPI.InitTask()
+	go ultimateAPI.InitDB()
+	go ultimateAPI.InitTcpServer()
+	go ultimateAPI.InitHttpServer()
 
-	api.wg.Wait()
-	log.Println("ComtAPI all init ok!")
-	return api, nil
+	ultimateAPI.wg.Wait()
+	log.Println("UltimateAPI all init ok!")
+	return ultimateAPI, nil
+}
+
+func GetUltimateAPI() *UltimateAPI {
+	return ultimateAPI
 }
 
 // init task and taskdispatcher
-func (api *ComtAPI) InitTask() {
+func (api *UltimateAPI) InitTask() {
 	api.wg.Add(1)
 	var err error
 	if api.td, err = task.NewDispatcher(); err != nil {
@@ -43,11 +54,11 @@ func (api *ComtAPI) InitTask() {
 	}
 
 	api.wg.Done()
-	log.Println("ComtAPI task init ok!")
+	log.Println("UltimateAPI task init ok!")
 }
 
 // init db
-func (api *ComtAPI) InitDB() {
+func (api *UltimateAPI) InitDB() {
 	var err error
 	api.wg.Add(1)
 	api.db, err = sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
@@ -77,22 +88,52 @@ func (api *ComtAPI) InitDB() {
 	}
 
 	api.wg.Done()
-	log.Printf("ComtAPI db init ok!")
+	log.Printf("UltimateAPI db init ok!")
+}
+
+// init tcp server
+func (api *UltimateAPI) InitTcpServer() {
+	api.wg.Add(1)
+	var err error
+	if api.tcp_s, err = NewTcpServer(); err != nil {
+		log.Fatal(err)
+	}
+
+	api.wg.Done()
+	log.Println("UltimateAPI tcp_server init ok!")
+}
+
+// init http server
+func (api *UltimateAPI) InitHttpServer() {
+	api.wg.Add(1)
+	var err error
+	if api.http_s, err = NewHttpServer(); err != nil {
+		log.Fatal(err)
+	}
+
+	api.wg.Done()
+	log.Println("UltimateAPI http_server init ok!")
+}
+
+// run
+func (api *UltimateAPI) Run() {
+	go api.tcp_s.Run()
+	go api.http_s.Run()
 }
 
 // defer close
-func (api *ComtAPI) Close() {
+func (api *UltimateAPI) Close() {
 	api.db.Close()
 }
 
-func (api *ComtAPI) GenReqNum() int {
+func (api *UltimateAPI) GenReqNum() int {
 	api.wg.Add(1)
 	api.reqNum = api.reqNum + 1
 	api.wg.Done()
 	return api.reqNum
 }
 
-func (api *ComtAPI) AddTask() {
+func (api *UltimateAPI) AddTask() {
 	newReqNum := api.GenReqNum()
 	newTask, err := task.NewTask(newReqNum)
 	if err != nil {
@@ -101,7 +142,7 @@ func (api *ComtAPI) AddTask() {
 	api.td.AddTask(newTask)
 }
 
-func (api *ComtAPI) AddHttpTask(w http.ResponseWriter, r *http.Request, cb task.TaskCallback) {
+func (api *UltimateAPI) AddHttpTask(w http.ResponseWriter, r *http.Request, cb task.TaskCallback) {
 	newReqNum := api.GenReqNum()
 	newTask, err := task.NewHttpTask(newReqNum, w, r, cb)
 	if err != nil {
@@ -110,7 +151,7 @@ func (api *ComtAPI) AddHttpTask(w http.ResponseWriter, r *http.Request, cb task.
 	api.td.AddTask(newTask)
 }
 
-func (api *ComtAPI) AddNewApp(app *App) error {
+func (api *UltimateAPI) AddNewApp(app *App) error {
 	if _, ok := api.appMap[app.AppID]; ok {
 		errStr := fmt.Sprintf("add exist app<%d>\n", app.AppID)
 		log.Printf(errStr)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/binary"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -9,14 +10,15 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/hellodudu/comment/comt"
 	"github.com/hellodudu/comment/proto"
+	"github.com/hellodudu/comment/res"
 	"github.com/hellodudu/comment/task"
+	"github.com/hellodudu/comment/utils"
 )
 
 var comtAPI *comt.ComtAPI
@@ -113,10 +115,9 @@ func handleTcpConnection(con net.Conn) {
 	defer con.Close()
 	scanner := bufio.NewScanner(con)
 	for scanner.Scan() {
-		msg := scanner.Text()
-		log.Printf("tcp recv:%s\n", msg)
-		reply := strings.Join([]string{"server recv:", msg}, "")
-		con.Write([]byte(reply))
+		byMsg := scanner.Bytes()
+		log.Printf("tcp recv bytes:%v\n", scanner.Bytes())
+		log.Printf("recv msg size:%d, msg_id:%x, msg_size:%d, world_id:%d, world_name:%s\n", binary.LittleEndian.Uint32(byMsg[:4]), binary.LittleEndian.Uint32(byMsg[4:8]), binary.LittleEndian.Uint32(byMsg[8:12]), binary.LittleEndian.Uint32(byMsg[12:16]), string(byMsg[16:]))
 	}
 }
 
@@ -137,7 +138,7 @@ func main() {
 
 	// tcp handle
 	go func() {
-		addr := string("127.0.0.1:8081")
+		addr := string("192.168.2.124:7030")
 		ln, err := net.Listen("tcp", addr)
 		if err != nil {
 			log.Fatalln(err)
@@ -154,6 +155,13 @@ func main() {
 			go handleTcpConnection(con)
 		}
 	}()
+
+	// test crc32
+	log.Println("message crc32:", utils.Crc32(string("MWU_WorldLogon")))
+
+	// xmlloader
+	res.NewXmlLoader()
+	// log.Println("load entity_client ok! ", loader.EntityClientXml[0])
 
 	// server exit
 	c := make(chan os.Signal, 1)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/session"
+	"github.com/hellodudu/comment/utils"
 )
 
 type TcpServer struct {
@@ -40,21 +41,48 @@ func (server *TcpServer) Run() {
 func handleTcpConnection(con net.Conn) {
 	defer con.Close()
 	scanner := bufio.NewScanner(con)
+
+	// first 4 bytes represent tcp package size, split it
+	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		if !atEOF {
+			if len(data) > 4 {
+				length := uint32(0)
+				binary.Read(bytes.NewReader(data[:4]), binary.LittleEndian, &length)
+				if int(length)+4 <= len(data) {
+					return int(length) + 4, data[:int(length)+4], nil
+				}
+			}
+		}
+		return
+	})
+
 	for scanner.Scan() {
-		byMsg := make([]byte, 128+8)
-		copy(byMsg, scanner.Bytes())
-		log.Printf("tcp recv bytes:%v\n", scanner.Bytes())
+		byMsg := scanner.Bytes()
+		log.Printf("tcp recv bytes:%v, len(msg):%d\n", byMsg, len(byMsg))
 
 		buf := &bytes.Buffer{}
 		if _, err := buf.Write(byMsg); err != nil {
 			log.Fatal(err)
 		}
+		log.Printf("buffer = %v, len(buffer) = %d\n", buf.Bytes(), buf.Len())
+
+		// proto buff begin
+		// byProto := byMsg[16:]
+		// book := &tutorial.AddressBook{}
+		// if err := proto.Unmarshal(byProto, book); err != nil {
+		// 	log.Fatalln("Failed to parse address book:", err)
+		// }
 
 		msg := &world_session.BaseNetMsg{}
 		if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("read buffer success:%v\n", msg)
-		log.Printf("msg world_id = %d\n", binary.LittleEndian.Uint32(msg.Data[4:8]))
+
+		log.Printf("translate msg:%s\n", msg.Data)
+
+		// if first message is WorldLogon
+		if msg.Id == utils.Crc32(string("MWU_WorldLogon")) {
+			log.Printf("world<id:%d, name:%s> logon!\n", msg.Data[:4], msg.Data[4:4+32])
+		}
 	}
 }

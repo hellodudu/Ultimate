@@ -6,9 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/comment/config"
-	"github.com/hellodudu/comment/proto"
 	"github.com/hellodudu/comment/task"
 )
 
@@ -34,26 +32,26 @@ func callBackTask(ts task.Tasker) {
 	testChan <- 1
 
 	// test proto
-	p := &tutorial.Person{
-		Id:    1234,
-		Name:  "John Doe",
-		Email: "jdoe@example.com",
-		Phones: []*tutorial.Person_PhoneNumber{
-			{Number: "555-4321", Type: tutorial.Person_HOME},
-		},
-	}
-	book := &tutorial.AddressBook{}
-	book.People = append(book.People, p)
-	log.Println("unmashaled book = ", book)
-	out, err := proto.Marshal(book)
-	log.Println("mashaled book = ", out)
-	if err != nil {
-		log.Fatalln("Failed to encode address book:", err)
-	}
+	// p := &tutorial.Person{
+	// 	Id:    int32(1234),
+	// 	Name:  "John Doe",
+	// 	Email: "jdoe@example.com",
+	// 	Phones: []*tutorial.Person_PhoneNumber{
+	// 		{Number: "555-4321", Type: tutorial.Person_HOME},
+	// 	},
+	// }
+	// book := &tutorial.AddressBook{}
+	// book.People = append(book.People, p)
+	// log.Println("unmashaled book = ", book)
+	// out, err := proto.Marshal(book)
+	// log.Println("mashaled book = ", out)
+	// if err != nil {
+	// 	log.Fatalln("Failed to encode address book:", err)
+	// }
 
-	if err := ioutil.WriteFile("address_book", out, 0644); err != nil {
-		log.Fatalln("Failed to write address book:", err)
-	}
+	// if err := ioutil.WriteFile("address_book", out, 0644); err != nil {
+	// 	log.Fatalln("Failed to write address book:", err)
+	// }
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {

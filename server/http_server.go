@@ -1,13 +1,17 @@
 package ultimate
 
 import (
+	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/hellodudu/comment/config"
+	"github.com/hellodudu/comment/session"
 	"github.com/hellodudu/comment/task"
+	"github.com/hellodudu/comment/utils"
 )
 
 var testChan chan interface{} = make(chan interface{}, 1)
@@ -23,6 +27,7 @@ func (server *HttpServer) Run() {
 	http.HandleFunc("/create_app", createAppHandler)
 	http.HandleFunc("/task", taskHandler)
 	http.HandleFunc("/ws", wsHandler)
+	http.HandleFunc("/bn", binaryHandler)
 	log.Fatal(http.ListenAndServe(config.HttpListenAddr, nil))
 }
 
@@ -107,4 +112,39 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(retBuf)
+}
+
+func binaryHandler(w http.ResponseWriter, r *http.Request) {
+	msg := &world_session.BaseNetMsg{}
+	arrayData := []byte{44, 0, 0, 0, 65, 81, 58, 14, 44, 0, 0, 0, 1, 0, 0, 0, 76, 111, 99, 97, 108, 83, 101, 114, 118, 101, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+	byData := make([]byte, binary.Size(msg))
+	copy(byData, arrayData[:])
+
+	buf := &bytes.Buffer{}
+	if _, err := buf.Write(byData); err != nil {
+		log.Fatal(err)
+	}
+
+	if nGrow := binary.Size(msg) - buf.Cap(); nGrow > 0 {
+		buf.Grow(nGrow)
+	}
+
+	// proto buff begin
+	// byProto := byMsg[16:]
+	// book := &tutorial.AddressBook{}
+	// if err := proto.Unmarshal(byProto, book); err != nil {
+	// 	log.Fatalln("Failed to parse address book:", err)
+	// }
+
+	if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("translate msg:%+v\n", msg)
+
+	// if first message is WorldLogon
+	if msg.Id == utils.Crc32(string("MWU_WorldLogon")) {
+		log.Printf("world<id:%d, name:%s> logon!\n", binary.LittleEndian.Uint32(msg.Data[4:8]), msg.Data[8:8+32])
+	}
 }

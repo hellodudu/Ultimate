@@ -57,14 +57,16 @@ func handleTcpConnection(con net.Conn) {
 	})
 
 	for scanner.Scan() {
-		byMsg := scanner.Bytes()
-		log.Printf("tcp recv bytes:%v, len(msg):%d\n", byMsg, len(byMsg))
+		baseMsg := &world_session.BaseNetMsg{}
+		byMsg := make([]byte, binary.Size(baseMsg))
+
+		log.Printf("tcp recv bytes:%v, len(msg):%d\n", scanner.Bytes(), len(scanner.Bytes()))
 
 		buf := &bytes.Buffer{}
 		if _, err := buf.Write(byMsg); err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("buffer = %v, len(buffer) = %d\n", buf.Bytes(), buf.Len())
+		log.Printf("buffer = %v, len(buffer) = %d\n", buf, buf.Len())
 
 		// proto buff begin
 		// byProto := byMsg[16:]
@@ -73,16 +75,15 @@ func handleTcpConnection(con net.Conn) {
 		// 	log.Fatalln("Failed to parse address book:", err)
 		// }
 
-		msg := &world_session.BaseNetMsg{}
-		if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
+		if err := binary.Read(buf, binary.LittleEndian, baseMsg); err != nil {
 			log.Fatal(err)
 		}
 
-		log.Printf("translate msg:%s\n", msg.Data)
+		log.Printf("translate msg:%s\n", baseMsg.Data)
 
 		// if first message is WorldLogon
-		if msg.Id == utils.Crc32(string("MWU_WorldLogon")) {
-			log.Printf("world<id:%d, name:%s> logon!\n", msg.Data[:4], msg.Data[4:4+32])
+		if baseMsg.Id == utils.Crc32(string("MWU_WorldLogon")) {
+			log.Printf("world<id:%d, name:%s> logon!\n", baseMsg.Data[4:8], baseMsg.Data[8:8+32])
 		}
 	}
 }

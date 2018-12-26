@@ -115,19 +115,17 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func binaryHandler(w http.ResponseWriter, r *http.Request) {
-	msg := &world_session.BaseNetMsg{}
+	msg := &world_session.MSG_MWU_WorldLogon{}
 	arrayData := []byte{44, 0, 0, 0, 65, 81, 58, 14, 44, 0, 0, 0, 1, 0, 0, 0, 76, 111, 99, 97, 108, 83, 101, 114, 118, 101, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	byData := make([]byte, binary.Size(msg))
-	copy(byData, arrayData[:])
+
+	// discard top 4 bytes(message size)
+	copy(byData, arrayData[4:])
 
 	buf := &bytes.Buffer{}
 	if _, err := buf.Write(byData); err != nil {
 		log.Fatal(err)
-	}
-
-	if nGrow := binary.Size(msg) - buf.Cap(); nGrow > 0 {
-		buf.Grow(nGrow)
 	}
 
 	// proto buff begin
@@ -137,14 +135,14 @@ func binaryHandler(w http.ResponseWriter, r *http.Request) {
 	// 	log.Fatalln("Failed to parse address book:", err)
 	// }
 
-	if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
-		log.Fatal(err)
+	// top 4 bytes messageid
+	msgID := binary.LittleEndian.Uint32(buf.Bytes()[:4])
+	if msgID == utils.Crc32(string("MWU_WorldLogon")) {
+		if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("world<id:%d, name:%s> logon!\n", msg.WorldID, msg.WorldName)
 	}
 
 	log.Printf("translate msg:%+v\n", msg)
-
-	// if first message is WorldLogon
-	if msg.Id == utils.Crc32(string("MWU_WorldLogon")) {
-		log.Printf("world<id:%d, name:%s> logon!\n", binary.LittleEndian.Uint32(msg.Data[4:8]), msg.Data[8:8+32])
-	}
 }

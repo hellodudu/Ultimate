@@ -6,6 +6,6 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func handleAddressBook(p proto.Message) {
+func HandleRecvAddressBook(p proto.Message) {
 	log.Printf("handleAddressBook:%v\n", p)
 }

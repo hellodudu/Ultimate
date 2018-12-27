@@ -27,20 +27,24 @@ type MSG_MWU_WorldLogon struct {
 	WorldName [32]byte
 }
 
+// world session msg register info
+type regInfo struct {
+	p  proto.Message
+	cb ProtoHandleFunc
+}
+
 type World struct {
 }
 
 type WorldSession struct {
-	worldMap      map[uint32]*World // all connected world
-	protoReg      map[uint32]proto.Message
-	handleFuncReg map[uint32]ProtoHandleFunc
+	worldMap map[uint32]*World // all connected world
+	protoReg map[uint32]*regInfo
 }
 
 func NewWorldSession() (*WorldSession, error) {
 	w := &WorldSession{
-		worldMap:      make(map[uint32]*World),
-		protoReg:      make(map[uint32]proto.Message),
-		handleFuncReg: make(map[uint32]ProtoHandleFunc),
+		worldMap: make(map[uint32]*World),
+		protoReg: make(map[uint32]*regInfo),
 	}
 
 	w.registerAllMessage()
@@ -49,11 +53,14 @@ func NewWorldSession() (*WorldSession, error) {
 
 func (ws *WorldSession) registerAllMessage() {
 	msgID := utils.Crc32("tutorial.AddressBook")
-	ws.regProto(msgID, &tutorial.AddressBook{})
-	ws.regProtoHandleFunc(msgID, handleAddressBook)
+	info := &regInfo{
+		p:  &tutorial.AddressBook{},
+		cb: HandleRecvAddressBook,
+	}
+	ws.regProto(msgID, info)
 }
 
-func (ws *WorldSession) getRegProto(msgID uint32) (proto.Message, error) {
+func (ws *WorldSession) getRegProto(msgID uint32) (*regInfo, error) {
 	v, ok := ws.protoReg[msgID]
 	if ok {
 		return v, nil
@@ -62,31 +69,13 @@ func (ws *WorldSession) getRegProto(msgID uint32) (proto.Message, error) {
 	return v, errors.New("cannot find proto type registed in world_session!")
 }
 
-func (ws *WorldSession) regProto(msgID uint32, m proto.Message) {
-	if _, ok := ws.protoReg[msgID]; ok {
-		log.Printf("proto msg_id<%d> existed while registing protobuf type!\n", msgID)
+func (ws *WorldSession) regProto(msgID uint32, info *regInfo) {
+	if v, ok := ws.protoReg[msgID]; ok {
+		log.Printf("register proto msg_id<%d> existed! protobuf type:%v\n", msgID, v)
 		return
 	}
 
-	ws.protoReg[msgID] = m
-}
-
-func (ws *WorldSession) getProtoHandleFunc(msgID uint32) (ProtoHandleFunc, error) {
-	v, ok := ws.handleFuncReg[msgID]
-	if ok {
-		return v, nil
-	}
-
-	return v, errors.New("cannot find proto functor registed in world_session!")
-}
-
-func (ws *WorldSession) regProtoHandleFunc(msgID uint32, f ProtoHandleFunc) {
-	if _, ok := ws.handleFuncReg[msgID]; ok {
-		log.Printf("proto msg_id<%d> existed while registing handle func!\n", msgID)
-		return
-	}
-
-	ws.handleFuncReg[msgID] = f
+	ws.protoReg[msgID] = info
 }
 
 func binaryUnmarshal(data []byte) {
@@ -143,22 +132,15 @@ func protoMarshal(book *tutorial.AddressBook) []byte {
 func (ws *WorldSession) HandleMessage(data []byte) {
 	// top 4 bytes are msgSize, next 4 bytes are msgID
 	msgID := binary.LittleEndian.Uint32(data[4:8])
-	p, err := ws.getRegProto(msgID)
+	r, err := ws.getRegProto(msgID)
 	if err != nil {
 		log.Printf("unregisted msgid<%d> received!\n", msgID)
 		return
 	}
 
 	// begin unmarshal protobuf
-	protoUnmarshal(data[8:], p)
-
-	// get proto handler
-	f, err := ws.getProtoHandleFunc(msgID)
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
+	protoUnmarshal(data[8:], r.p)
 
 	// callback
-	f(p)
+	r.cb(r.p)
 }

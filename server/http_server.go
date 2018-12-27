@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/hellodudu/comment/config"
-	"github.com/hellodudu/comment/session"
 	"github.com/hellodudu/comment/task"
 	"github.com/hellodudu/comment/utils"
 )
@@ -115,7 +114,7 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func binaryHandler(w http.ResponseWriter, r *http.Request) {
-	msg := &world_session.MSG_MWU_WorldLogon{}
+	msg := &MSG_MWU_WorldLogon{}
 	arrayData := []byte{44, 0, 0, 0, 65, 81, 58, 14, 44, 0, 0, 0, 1, 0, 0, 0, 76, 111, 99, 97, 108, 83, 101, 114, 118, 101, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	byData := make([]byte, binary.Size(msg))

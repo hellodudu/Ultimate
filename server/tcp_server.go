@@ -8,8 +8,6 @@ import (
 	"net"
 
 	"github.com/hellodudu/comment/config"
-	"github.com/hellodudu/comment/session"
-	"github.com/hellodudu/comment/utils"
 )
 
 type TcpServer struct {
@@ -56,35 +54,10 @@ func handleTcpConnection(con net.Conn) {
 		return
 	})
 
+	// proto recv
 	for scanner.Scan() {
-		byScanMsg := scanner.Bytes()
-		msg := &world_session.MSG_MWU_WorldLogon{}
-		byData := make([]byte, binary.Size(msg))
-
-		// discard top 4 bytes(message size)
-		copy(byData, byScanMsg[4:])
-
-		buf := &bytes.Buffer{}
-		if _, err := buf.Write(byData); err != nil {
-			log.Fatal(err)
-		}
-
-		// proto buff begin
-		// byProto := byMsg[16:]
-		// book := &tutorial.AddressBook{}
-		// if err := proto.Unmarshal(byProto, book); err != nil {
-		// 	log.Fatalln("Failed to parse address book:", err)
-		// }
-
-		// get top 4 bytes messageid
-		msgID := binary.LittleEndian.Uint32(buf.Bytes()[:4])
-		if msgID == utils.Crc32(string("MWU_WorldLogon")) {
-			if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
-				log.Fatal(err)
-			}
-			log.Printf("world<id:%d, name:%s> logon!\n", msg.WorldID, msg.WorldName)
-		}
-
-		log.Printf("translate msg:%+v\n", msg)
+		GetUltimateAPI().GetWorldSession().HandleMessage(scanner.Bytes())
+		// protoUnmarshal(scanner.Bytes())
+		// binaryUnmarshal(byData)
 	}
 }

@@ -1,12 +1,12 @@
-syntax = "proto2";
+syntax = "proto3";
 package tutorial;
 
 /* import "google/protobuf/timestamp.proto"; */
 
 message Person {
-  required string name = 1;
-  required int32 id = 2;  // Unique ID number for this person.
-  optional string email = 3;
+  string name = 1;
+  int32 id = 2;  // Unique ID number for this person.
+  string email = 3;
 
   enum PhoneType {
     MOBILE = 0;
@@ -15,8 +15,8 @@ message Person {
   }
 
   message PhoneNumber {
-    required string number = 1;
-    optional PhoneType type = 2;
+    string number = 1;
+    PhoneType type = 2;
   }
 
   repeated PhoneNumber phones = 4;

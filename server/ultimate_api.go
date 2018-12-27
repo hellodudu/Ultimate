@@ -16,13 +16,14 @@ var ultimateAPI *UltimateAPI
 
 // UltimateAPI api define
 type UltimateAPI struct {
-	td     *task.Dispatcher // task dispatcher
-	db     *sql.DB          // database
-	tcp_s  *TcpServer       // tcp server
-	http_s *HttpServer      // http server
-	reqNum int              // request number
-	appMap map[int]*App     // app map
-	wg     sync.WaitGroup
+	td       *task.Dispatcher // task dispatcher
+	db       *sql.DB          // database
+	tcp_s    *TcpServer       // tcp server
+	http_s   *HttpServer      // http server
+	world_sn *WorldSession    // world session
+	reqNum   int              // request number
+	appMap   map[int]*App     // app map
+	wg       sync.WaitGroup
 }
 
 func NewUltimateAPI() (*UltimateAPI, error) {
@@ -35,6 +36,7 @@ func NewUltimateAPI() (*UltimateAPI, error) {
 	go ultimateAPI.InitDB()
 	go ultimateAPI.InitTcpServer()
 	go ultimateAPI.InitHttpServer()
+	go ultimateAPI.InitWorldSession()
 
 	ultimateAPI.wg.Wait()
 	log.Println("UltimateAPI all init ok!")
@@ -43,6 +45,10 @@ func NewUltimateAPI() (*UltimateAPI, error) {
 
 func GetUltimateAPI() *UltimateAPI {
 	return ultimateAPI
+}
+
+func (api *UltimateAPI) GetWorldSession() *WorldSession {
+	return api.world_sn
 }
 
 // init task and taskdispatcher
@@ -113,6 +119,18 @@ func (api *UltimateAPI) InitHttpServer() {
 
 	api.wg.Done()
 	log.Println("UltimateAPI http_server init ok!")
+}
+
+// init world session
+func (api *UltimateAPI) InitWorldSession() {
+	api.wg.Add(1)
+	var err error
+	if api.world_sn, err = NewWorldSession(); err != nil {
+		log.Fatal(err)
+	}
+
+	api.wg.Done()
+	log.Println("UltimateAPI world_session init ok!")
 }
 
 // run

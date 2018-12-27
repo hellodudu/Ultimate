@@ -1,8 +1,6 @@
 package ultimate
 
 import (
-	"bytes"
-	"encoding/binary"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -10,7 +8,6 @@ import (
 
 	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/task"
-	"github.com/hellodudu/comment/utils"
 )
 
 var testChan chan interface{} = make(chan interface{}, 1)
@@ -113,35 +110,9 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(retBuf)
 }
 
+// for test
 func binaryHandler(w http.ResponseWriter, r *http.Request) {
-	msg := &MSG_MWU_WorldLogon{}
-	arrayData := []byte{44, 0, 0, 0, 65, 81, 58, 14, 44, 0, 0, 0, 1, 0, 0, 0, 76, 111, 99, 97, 108, 83, 101, 114, 118, 101, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	data := []byte{58, 0, 0, 0, 94, 144, 225, 39, 10, 52, 10, 9, 104, 101, 108, 108, 111, 100, 117, 100, 117, 16, 161, 96, 26, 21, 104, 101, 108, 108, 111, 100, 117, 100, 117, 56, 54, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109, 34, 13, 10, 11, 49, 51, 52, 48, 49, 48, 51, 57, 50, 57, 55}
 
-	byData := make([]byte, binary.Size(msg))
-
-	// discard top 4 bytes(message size)
-	copy(byData, arrayData[4:])
-
-	buf := &bytes.Buffer{}
-	if _, err := buf.Write(byData); err != nil {
-		log.Fatal(err)
-	}
-
-	// proto buff begin
-	// byProto := byMsg[16:]
-	// book := &tutorial.AddressBook{}
-	// if err := proto.Unmarshal(byProto, book); err != nil {
-	// 	log.Fatalln("Failed to parse address book:", err)
-	// }
-
-	// top 4 bytes messageid
-	msgID := binary.LittleEndian.Uint32(buf.Bytes()[:4])
-	if msgID == utils.Crc32(string("MWU_WorldLogon")) {
-		if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("world<id:%d, name:%s> logon!\n", msg.WorldID, msg.WorldName)
-	}
-
-	log.Printf("translate msg:%+v\n", msg)
+	GetUltimateAPI().GetWorldSession().HandleMessage(data)
 }

@@ -29,7 +29,7 @@ type MSG_MWU_WorldLogon struct {
 
 // world session msg register info
 type regInfo struct {
-	cb func(net.Conn, *WorldSession, proto.Message)
+	cb func(*WorldSession, proto.Message)
 }
 
 type WorldSession struct {
@@ -49,9 +49,9 @@ func NewWorldSession() (*WorldSession, error) {
 
 func (ws *WorldSession) registerAllMessage() {
 	// cb -- callback function
-	ws.regProto(utils.Crc32("tutorial.AddressBook"), &regInfo{
-		cb: HandleRecvAddressBook,
-	})
+	// ws.regProto(utils.Crc32("tutorial.AddressBook"), &regInfo{
+	// 	cb: HandleRecvAddressBook,
+	// })
 }
 
 func (ws *WorldSession) getRegProto(msgID uint32) (*regInfo, error) {
@@ -138,18 +138,25 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	newProto := reflect.New(pType.Elem()).Interface().(proto.Message)
 	protoUnmarshal(protoData, newProto)
 
-	msgID := utils.Crc32(protoTypeName)
-	r, err := ws.getRegProto(msgID)
-	if err != nil {
-		log.Printf("unregisted msgid<%d> received!\n", msgID)
-		return
+	if protoTypeName == "MWU_WorldLogon" {
+		// world logon
+		HandleWorldLogon(con, ws, newProto)
+	} else {
+		// other message
+		msgID := utils.Crc32(protoTypeName)
+		r, err := ws.getRegProto(msgID)
+		if err != nil {
+			log.Printf("unregisted msgid<%d> received!\n", msgID)
+			return
+		}
+
+		// callback
+		r.cb(ws, newProto)
 	}
 
-	// callback
-	r.cb(con, ws, newProto)
 }
 
-func (ws *WorldSession) AddWorld(id uint32, name string, addr string) (*World, error) {
+func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
 	var invalidID int32 = -1
 	if id == uint32(invalidID) {
 		return nil, errors.New("add world id invalid!")
@@ -159,7 +166,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, addr string) (*World, e
 		return nil, errors.New("add existed world")
 	}
 
-	world := &World{Id: id, Name: name, Addr: addr}
+	world := &World{Id: id, Name: name, Con: con}
 	ws.mapWorld[id] = world
 	log.Printf("add world<id:%d, %s> success!\n", id, name)
 

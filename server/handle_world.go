@@ -8,8 +8,8 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func HandleRecvAddressBook(con net.Conn, ws *WorldSession, p proto.Message) {
-	world, err := ws.AddWorld(1, "localserver", "127.0.0.1:1234")
+func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
+	world, err := ws.AddWorld(1, "localserver", con)
 	if err != nil {
 		log.Printf(err.Error())
 	}
@@ -21,4 +21,8 @@ func HandleRecvAddressBook(con net.Conn, ws *WorldSession, p proto.Message) {
 	copy(resp[4:], replyText)
 	n, err := con.Write(resp)
 	log.Printf("con write bytes<%d>, err<%v>\n", n, err)
+}
+
+func HandleRecvAddressBook(con net.Conn, ws *WorldSession, p proto.Message) {
+
 }

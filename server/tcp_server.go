@@ -56,7 +56,7 @@ func handleTcpConnection(con net.Conn) {
 
 	// proto recv
 	for scanner.Scan() {
-		GetUltimateAPI().GetWorldSession().HandleMessage(scanner.Bytes())
+		GetUltimateAPI().GetWorldSession().HandleMessage(&con, scanner.Bytes())
 		// protoUnmarshal(scanner.Bytes())
 		// binaryUnmarshal(byData)
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"log"
+	"net"
 	"reflect"
 	"strings"
 
@@ -28,7 +29,7 @@ type MSG_MWU_WorldLogon struct {
 
 // world session msg register info
 type regInfo struct {
-	cb func(*WorldSession, proto.Message)
+	cb func(*net.Conn, *WorldSession, proto.Message)
 }
 
 type WorldSession struct {
@@ -122,7 +123,7 @@ func protoMarshal(book *tutorial.AddressBook) []byte {
 	return out
 }
 
-func (ws *WorldSession) HandleMessage(data []byte) {
+func (ws *WorldSession) HandleMessage(con *net.Conn, data []byte) {
 	// top 4 bytes are msgSize, next 2 bytes are proto name length, the next is proto name, final is proto data.
 	protoNameLen := binary.LittleEndian.Uint16(data[4:6])
 	protoTypeName := string(data[6 : 6+protoNameLen])

@@ -12,7 +12,7 @@ import (
 )
 
 // global var
-var ultimateAPI *UltimateAPI
+var ultimateAPI *UltimateAPI = nil
 
 // UltimateAPI api define
 type UltimateAPI struct {
@@ -27,6 +27,10 @@ type UltimateAPI struct {
 }
 
 func NewUltimateAPI() (*UltimateAPI, error) {
+	if ultimateAPI != nil {
+		return ultimateAPI, nil
+	}
+
 	ultimateAPI = &UltimateAPI{
 		reqNum: 0,
 		appMap: make(map[int]*App),

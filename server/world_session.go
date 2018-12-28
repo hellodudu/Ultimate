@@ -28,20 +28,47 @@ type MSG_MWU_WorldLogon struct {
 
 // world session msg register info
 type regInfo struct {
-	p  proto.Message
 	cb func(*WorldSession, proto.Message)
 }
 
 type WorldSession struct {
 	mapWorld map[uint32]*World // all connected world
+	protoReg map[uint32]*regInfo
 }
 
 func NewWorldSession() (*WorldSession, error) {
 	w := &WorldSession{
 		mapWorld: make(map[uint32]*World),
+		protoReg: make(map[uint32]*regInfo),
 	}
 
+	w.registerAllMessage()
 	return w, nil
+}
+
+func (ws *WorldSession) registerAllMessage() {
+	// cb -- callback function
+	ws.regProto(utils.Crc32("tutorial.AddressBook"), &regInfo{
+		cb: HandleRecvAddressBook,
+	})
+}
+
+func (ws *WorldSession) getRegProto(msgID uint32) (*regInfo, error) {
+	v, ok := ws.protoReg[msgID]
+	if ok {
+		return v, nil
+	}
+
+	return v, errors.New("cannot find proto type registed in world_session!")
+}
+
+func (ws *WorldSession) regProto(msgID uint32, info *regInfo) {
+	if v, ok := ws.protoReg[msgID]; ok {
+		log.Printf("register proto msg_id<%d> existed! protobuf type:%v\n", msgID, v)
+		return
+	}
+
+	ws.protoReg[msgID] = info
 }
 
 func binaryUnmarshal(data []byte) {
@@ -96,7 +123,7 @@ func protoMarshal(book *tutorial.AddressBook) []byte {
 }
 
 func (ws *WorldSession) HandleMessage(data []byte) {
-	// top 4 bytes are msgSize, next 2 bytes are message name length, and next is message name, final is proto data.
+	// top 4 bytes are msgSize, next 2 bytes are proto name length, the next is proto name, final is proto data.
 	protoNameLen := binary.LittleEndian.Uint16(data[4:6])
 	protoTypeName := string(data[6 : 6+protoNameLen])
 	protoData := data[6+protoNameLen:]
@@ -106,8 +133,19 @@ func (ws *WorldSession) HandleMessage(data []byte) {
 		return
 	}
 
+	// unmarshal
 	newProto := reflect.New(pType.Elem()).Interface().(proto.Message)
 	protoUnmarshal(protoData, newProto)
+
+	msgID := utils.Crc32(protoTypeName)
+	r, err := ws.getRegProto(msgID)
+	if err != nil {
+		log.Printf("unregisted msgid<%d> received!\n", msgID)
+		return
+	}
+
+	// callback
+	r.cb(ws, newProto)
 }
 
 func (ws *WorldSession) AddWorld(id uint32, name string, addr string) (*World, error) {

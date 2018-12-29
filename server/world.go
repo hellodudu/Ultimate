@@ -30,5 +30,8 @@ func (w *World) SendMessage(p proto.Message) {
 	binary.LittleEndian.PutUint16(resp[4:6], uint16(len(typeName)))
 	copy(resp[6:6+len(typeName)], []byte(typeName))
 	copy(resp[6+len(typeName):], out)
-	n, err := w.Con.Write(resp)
+
+	if _, err := w.Con.Write(resp); err != nil {
+		log.Println(err.Error())
+	}
 }

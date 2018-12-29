@@ -27,7 +27,7 @@ type MSG_MWU_WorldLogon struct {
 
 // world session msg register info
 type regInfo struct {
-	cb func(*WorldSession, proto.Message)
+	cb func(net.Conn, *WorldSession, proto.Message)
 }
 
 type WorldSession struct {
@@ -49,12 +49,20 @@ func NewWorldSession() (*WorldSession, error) {
 
 func (ws *WorldSession) registerAllMessage() {
 	// cb -- callback function
-	// ws.regProto(utils.Crc32("tutorial.AddressBook"), &regInfo{
-	// 	cb: HandleRecvAddressBook,
-	// })
+	ws.registerProto(utils.Crc32("world_message.MWU_WorldLogon"), &regInfo{
+		cb: HandleWorldLogon,
+	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_TestConnect"), &regInfo{
+		cb: HandleTestConnect,
+	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_HeartBeat"), &regInfo{
+		cb: HandleHeartBeat,
+	})
 }
 
-func (ws *WorldSession) getRegProto(msgID uint32) (*regInfo, error) {
+func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {
 	v, ok := ws.protoReg[msgID]
 	if ok {
 		return v, nil
@@ -63,7 +71,7 @@ func (ws *WorldSession) getRegProto(msgID uint32) (*regInfo, error) {
 	return v, errors.New("cannot find proto type registed in world_session!")
 }
 
-func (ws *WorldSession) regProto(msgID uint32, info *regInfo) {
+func (ws *WorldSession) registerProto(msgID uint32, info *regInfo) {
 	if v, ok := ws.protoReg[msgID]; ok {
 		log.Printf("register proto msg_id<%d> existed! protobuf type:%v\n", msgID, v)
 		return
@@ -104,25 +112,6 @@ func protoUnmarshal(data []byte, m proto.Message) {
 	log.Printf("translate msg to proto:%+v\n", m)
 }
 
-// func protoMarshal(book *tutorial.AddressBook) []byte {
-// 	p := &tutorial.Person{}
-// 	p.Name = strings.TrimSpace("hellodudu")
-// 	p.Id = 11000001
-// 	p.Email = strings.TrimSpace("hellodudu86@gmail.com")
-// 	pn := &tutorial.Person_PhoneNumber{
-// 		Number: strings.TrimSpace("13401039297"),
-// 		Type:   tutorial.Person_MOBILE,
-// 	}
-// 	p.Phones = append(p.Phones, pn)
-// 	book.People = append(book.People, p)
-// 	out, err := proto.Marshal(book)
-// 	log.Println("marshal proto byte:", out, ", size:", len(out))
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	return out
-// }
-
 func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	// top 4 bytes are msgSize, next 2 bytes are proto name length, the next is proto name, final is proto data.
 	protoNameLen := binary.LittleEndian.Uint16(data[4:6])
@@ -138,22 +127,15 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	newProto := reflect.New(pType.Elem()).Interface().(proto.Message)
 	protoUnmarshal(protoData, newProto)
 
-	if protoTypeName == "world_message.MWU_WorldLogon" {
-		// world logon
-		HandleWorldLogon(con, ws, newProto)
-	} else {
-		// other message
-		msgID := utils.Crc32(protoTypeName)
-		r, err := ws.getRegProto(msgID)
-		if err != nil {
-			log.Printf("unregisted msgid<%d> received!\n", msgID)
-			return
-		}
-
-		// callback
-		r.cb(ws, newProto)
+	msgID := utils.Crc32(protoTypeName)
+	r, err := ws.getRegisterProto(msgID)
+	if err != nil {
+		log.Printf("unregisted msgid<%d> received!\n", msgID)
+		return
 	}
 
+	// callback
+	r.cb(con, ws, newProto)
 }
 
 func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
@@ -176,6 +158,22 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	log.Printf("add world<id:%d, %s> success!\n", id, name)
 
 	return world, nil
+}
+
+func (ws *WorldSession) GetWorldByID(id uint32) *World {
+	w, ok := ws.mapWorld[id]
+	if !ok {
+		return nil
+	}
+	return w
+}
+
+func (ws *WorldSession) GetWorldByCon(con net.Conn) *World {
+	w, ok := ws.mapConn[con]
+	if !ok {
+		return nil
+	}
+	return w
 }
 
 func (ws *WorldSession) DisconnectWorld(con net.Conn) {

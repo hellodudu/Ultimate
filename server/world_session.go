@@ -138,7 +138,7 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	newProto := reflect.New(pType.Elem()).Interface().(proto.Message)
 	protoUnmarshal(protoData, newProto)
 
-	if protoTypeName == "MWU_WorldLogon" {
+	if protoTypeName == "world_message.MWU_WorldLogon" {
 		// world logon
 		HandleWorldLogon(con, ws, newProto)
 	} else {

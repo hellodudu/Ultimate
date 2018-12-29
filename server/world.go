@@ -31,5 +31,4 @@ func (w *World) SendMessage(p proto.Message) {
 	copy(resp[6:6+len(typeName)], []byte(typeName))
 	copy(resp[6+len(typeName):], out)
 	n, err := w.Con.Write(resp)
-	log.Printf("con write bytes<%d>, err<%v>\n", n, err)
 }

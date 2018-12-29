@@ -7,10 +7,8 @@ import (
 	"log"
 	"net"
 	"reflect"
-	"strings"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/comment/proto"
 	"github.com/hellodudu/comment/utils"
 )
 
@@ -34,12 +32,14 @@ type regInfo struct {
 
 type WorldSession struct {
 	mapWorld map[uint32]*World // all connected world
+	mapConn  map[net.Conn]*World
 	protoReg map[uint32]*regInfo
 }
 
 func NewWorldSession() (*WorldSession, error) {
 	w := &WorldSession{
 		mapWorld: make(map[uint32]*World),
+		mapConn:  make(map[net.Conn]*World),
 		protoReg: make(map[uint32]*regInfo),
 	}
 
@@ -104,24 +104,24 @@ func protoUnmarshal(data []byte, m proto.Message) {
 	log.Printf("translate msg to proto:%+v\n", m)
 }
 
-func protoMarshal(book *tutorial.AddressBook) []byte {
-	p := &tutorial.Person{}
-	p.Name = strings.TrimSpace("hellodudu")
-	p.Id = 11000001
-	p.Email = strings.TrimSpace("hellodudu86@gmail.com")
-	pn := &tutorial.Person_PhoneNumber{
-		Number: strings.TrimSpace("13401039297"),
-		Type:   tutorial.Person_MOBILE,
-	}
-	p.Phones = append(p.Phones, pn)
-	book.People = append(book.People, p)
-	out, err := proto.Marshal(book)
-	log.Println("marshal proto byte:", out, ", size:", len(out))
-	if err != nil {
-		log.Fatal(err)
-	}
-	return out
-}
+// func protoMarshal(book *tutorial.AddressBook) []byte {
+// 	p := &tutorial.Person{}
+// 	p.Name = strings.TrimSpace("hellodudu")
+// 	p.Id = 11000001
+// 	p.Email = strings.TrimSpace("hellodudu86@gmail.com")
+// 	pn := &tutorial.Person_PhoneNumber{
+// 		Number: strings.TrimSpace("13401039297"),
+// 		Type:   tutorial.Person_MOBILE,
+// 	}
+// 	p.Phones = append(p.Phones, pn)
+// 	book.People = append(book.People, p)
+// 	out, err := proto.Marshal(book)
+// 	log.Println("marshal proto byte:", out, ", size:", len(out))
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return out
+// }
 
 func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	// top 4 bytes are msgSize, next 2 bytes are proto name length, the next is proto name, final is proto data.
@@ -166,9 +166,24 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 		return nil, errors.New("add existed world")
 	}
 
+	if _, ok := ws.mapConn[con]; ok {
+		return nil, errors.New("add existed connection")
+	}
+
 	world := &World{Id: id, Name: name, Con: con}
 	ws.mapWorld[id] = world
+	ws.mapConn[con] = world
 	log.Printf("add world<id:%d, %s> success!\n", id, name)
 
 	return world, nil
+}
+
+func (ws *WorldSession) DisconnectWorld(con net.Conn) {
+	w, ok := ws.mapConn[con]
+	if !ok {
+		return
+	}
+
+	delete(ws.mapWorld, w.Id)
+	delete(ws.mapConn, con)
 }

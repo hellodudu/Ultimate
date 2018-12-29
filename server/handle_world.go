@@ -1,28 +1,24 @@
 package ultimate
 
 import (
-	"encoding/binary"
 	"log"
 	"net"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/comment/proto"
 )
 
 func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
 	world, err := ws.AddWorld(1, "localserver", con)
 	if err != nil {
 		log.Printf(err.Error())
+		return
 	}
-	log.Printf("add world result:%v\n", world)
 
-	replyText := []byte("success!")
-	var resp []byte = make([]byte, 4+len(replyText))
-	binary.LittleEndian.PutUint32(resp[:4], uint32(len(replyText)))
-	copy(resp[4:], replyText)
-	n, err := con.Write(resp)
-	log.Printf("con write bytes<%d>, err<%v>\n", n, err)
+	rm := &world_message.MUW_WorldLogon{}
+	world.SendMessage(rm)
 }
 
-func HandleRecvAddressBook(con net.Conn, ws *WorldSession, p proto.Message) {
+func HandleRecvAddressBook(ws *WorldSession, p proto.Message) {
 
 }

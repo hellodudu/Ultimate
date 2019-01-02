@@ -52,17 +52,13 @@ func NewWorldSession() (*WorldSession, error) {
 
 func (ws *WorldSession) registerAllMessage() {
 	// cb -- callback function
-	ws.registerProto(utils.Crc32("world_message.MWU_WorldLogon"), &regInfo{
-		cb: HandleWorldLogon,
-	})
+	ws.registerProto(utils.Crc32("world_message.MWU_WorldLogon"), &regInfo{cb: HandleWorldLogon})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_TestConnect"), &regInfo{
-		cb: HandleTestConnect,
-	})
+	ws.registerProto(utils.Crc32("world_message.MWU_TestConnect"), &regInfo{cb: HandleTestConnect})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_HeartBeat"), &regInfo{
-		cb: HandleHeartBeat,
-	})
+	ws.registerProto(utils.Crc32("world_message.MWU_HeartBeat"), &regInfo{cb: HandleHeartBeat})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_WorldConnected"), &regInfo{cb: HandleWorldConnected})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {
@@ -112,7 +108,7 @@ func protoUnmarshal(data []byte, m proto.Message) {
 		log.Fatalln("Failed to parse address book:", err)
 	}
 
-	log.Printf("translate msg to proto:%+v\n", m)
+	log.Printf("translate msg to proto:%T\n", m)
 }
 
 func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
@@ -187,6 +183,8 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 		return
 	}
 
+	log.Printf("World<id:%d> disconnected!\n", w.Id)
+
 	delete(ws.mapWorld, w.Id)
 	delete(ws.mapConn, con)
 }
@@ -197,7 +195,6 @@ func (ws *WorldSession) Run() {
 		t := time.Now()
 
 		for _, world := range ws.mapWorld {
-			log.Println("for range world:", world)
 			ws.wg.Add(1)
 			world.Run(&ws.wg)
 		}

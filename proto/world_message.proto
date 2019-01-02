@@ -25,3 +25,7 @@ message MWU_HeartBeat {
 message MUW_HeartBeat {
     uint32  battle_time = 1;
 }
+
+message MWU_WorldConnected {
+    repeated uint32 world_id = 1;
+}

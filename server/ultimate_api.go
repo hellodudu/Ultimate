@@ -36,6 +36,7 @@ func NewUltimateAPI() (*UltimateAPI, error) {
 		appMap: make(map[int]*App),
 	}
 
+	ultimateAPI.wg.Add(5)
 	go ultimateAPI.InitTask()
 	go ultimateAPI.InitDB()
 	go ultimateAPI.InitTcpServer()
@@ -57,20 +58,19 @@ func (api *UltimateAPI) GetWorldSession() *WorldSession {
 
 // init task and taskdispatcher
 func (api *UltimateAPI) InitTask() {
-	api.wg.Add(1)
+	defer api.wg.Done()
 	var err error
 	if api.td, err = task.NewDispatcher(); err != nil {
 		log.Fatal(err)
 	}
 
-	api.wg.Done()
 	log.Println("UltimateAPI task init ok!")
 }
 
 // init db
 func (api *UltimateAPI) InitDB() {
+	defer api.wg.Done()
 	var err error
-	api.wg.Add(1)
 	api.db, err = sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
 	if err != nil {
 		log.Fatal(err)
@@ -97,43 +97,39 @@ func (api *UltimateAPI) InitDB() {
 		log.Fatal(err)
 	}
 
-	api.wg.Done()
 	log.Printf("UltimateAPI db init ok!")
 }
 
 // init tcp server
 func (api *UltimateAPI) InitTcpServer() {
-	api.wg.Add(1)
+	defer api.wg.Done()
 	var err error
 	if api.tcp_s, err = NewTcpServer(); err != nil {
 		log.Fatal(err)
 	}
 
-	api.wg.Done()
 	log.Println("UltimateAPI tcp_server init ok!")
 }
 
 // init http server
 func (api *UltimateAPI) InitHttpServer() {
-	api.wg.Add(1)
+	defer api.wg.Done()
 	var err error
 	if api.http_s, err = NewHttpServer(); err != nil {
 		log.Fatal(err)
 	}
 
-	api.wg.Done()
 	log.Println("UltimateAPI http_server init ok!")
 }
 
 // init world session
 func (api *UltimateAPI) InitWorldSession() {
-	api.wg.Add(1)
+	defer api.wg.Done()
 	var err error
 	if api.world_sn, err = NewWorldSession(); err != nil {
 		log.Fatal(err)
 	}
 
-	api.wg.Done()
 	log.Println("UltimateAPI world_session init ok!")
 }
 
@@ -141,6 +137,7 @@ func (api *UltimateAPI) InitWorldSession() {
 func (api *UltimateAPI) Run() {
 	go api.tcp_s.Run()
 	go api.http_s.Run()
+	go api.world_sn.Run()
 }
 
 // defer close

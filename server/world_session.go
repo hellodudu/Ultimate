@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 	"reflect"
+	"sync"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/comment/utils"
@@ -34,6 +36,7 @@ type WorldSession struct {
 	mapWorld map[uint32]*World // all connected world
 	mapConn  map[net.Conn]*World
 	protoReg map[uint32]*regInfo
+	wg       sync.WaitGroup
 }
 
 func NewWorldSession() (*WorldSession, error) {
@@ -139,6 +142,7 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 }
 
 func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
+	ws.wg.Wait()
 	var invalidID int32 = -1
 	if id == uint32(invalidID) {
 		return nil, errors.New("add world id invalid!")
@@ -177,6 +181,7 @@ func (ws *WorldSession) GetWorldByCon(con net.Conn) *World {
 }
 
 func (ws *WorldSession) DisconnectWorld(con net.Conn) {
+	ws.wg.Wait()
 	w, ok := ws.mapConn[con]
 	if !ok {
 		return
@@ -184,4 +189,22 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 
 	delete(ws.mapWorld, w.Id)
 	delete(ws.mapConn, con)
+}
+
+func (ws *WorldSession) Run() {
+	for {
+
+		t := time.Now()
+
+		for _, world := range ws.mapWorld {
+			log.Println("for range world:", world)
+			ws.wg.Add(1)
+			world.Run(&ws.wg)
+		}
+
+		e := time.Since(t)
+		if e < 100*time.Millisecond {
+			time.Sleep(100*time.Millisecond - e)
+		}
+	}
 }

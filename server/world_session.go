@@ -50,6 +50,13 @@ func NewWorldSession() (*WorldSession, error) {
 	return w, nil
 }
 
+func (ws *WorldSession) Destroy() {
+	ws.wg.Wait()
+	for _, world := range ws.mapWorld {
+		world.Destroy()
+	}
+}
+
 func (ws *WorldSession) registerAllMessage() {
 	// cb -- callback function
 	ws.registerProto(utils.Crc32("world_message.MWU_WorldLogon"), &regInfo{cb: HandleWorldLogon})
@@ -152,7 +159,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 		return nil, errors.New("add existed connection")
 	}
 
-	world := &World{Id: id, Name: name, Con: con}
+	world := NewWorld(id, name, con)
 	ws.mapWorld[id] = world
 	ws.mapConn[con] = world
 	log.Printf("add world<id:%d, %s> success!\n", id, name)
@@ -184,9 +191,26 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 	}
 
 	log.Printf("World<id:%d> disconnected!\n", w.Id)
+	w.Destroy()
 
 	delete(ws.mapWorld, w.Id)
 	delete(ws.mapConn, con)
+}
+
+func (ws *WorldSession) KickWorld(world *World) {
+	ws.wg.Wait()
+	if _, ok := ws.mapWorld[world.Id]; !ok {
+		return
+	}
+
+	if _, ok := ws.mapConn[world.Con]; !ok {
+		return
+	}
+
+	log.Printf("World<id:%d> was kicked by timeout reason!\n", world.Id)
+	world.Destroy()
+	delete(ws.mapConn, world.Con)
+	delete(ws.mapWorld, world.Id)
 }
 
 func (ws *WorldSession) Run() {
@@ -194,9 +218,17 @@ func (ws *WorldSession) Run() {
 
 		t := time.Now()
 
+		var arrInvalidWorld []*World
 		for _, world := range ws.mapWorld {
 			ws.wg.Add(1)
-			world.Run(&ws.wg)
+			if !world.Run(&ws.wg) {
+				arrInvalidWorld = append(arrInvalidWorld, world)
+			}
+		}
+
+		// kick world
+		for _, invalidWorld := range arrInvalidWorld {
+			ws.KickWorld(invalidWorld)
 		}
 
 		e := time.Since(t)

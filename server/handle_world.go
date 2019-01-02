@@ -22,8 +22,7 @@ func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
 
 func HandleTestConnect(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
-		reply := &world_message.MUW_TestConnect{}
-		world.SendMessage(reply)
+		world.ResetTestConnect()
 	}
 }
 

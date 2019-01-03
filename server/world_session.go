@@ -2,13 +2,13 @@ package ultimate
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"errors"
 	"log"
 	"net"
 	"reflect"
 	"sync"
-	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/comment/utils"
@@ -37,6 +37,8 @@ type WorldSession struct {
 	mapConn  map[net.Conn]*World
 	protoReg map[uint32]*regInfo
 	wg       sync.WaitGroup
+	ctx      context.Context
+	cancel   context.CancelFunc
 }
 
 func NewWorldSession() (*WorldSession, error) {
@@ -46,16 +48,18 @@ func NewWorldSession() (*WorldSession, error) {
 		protoReg: make(map[uint32]*regInfo),
 	}
 
+	w.ctx, w.cancel = context.WithCancel(context.Background())
+
 	w.registerAllMessage()
 	return w, nil
 }
 
 func (ws *WorldSession) Stop() {
-	ws.wg.Wait()
-
 	for _, world := range ws.mapWorld {
 		world.Stop()
 	}
+
+	ws.cancel()
 }
 
 func (ws *WorldSession) registerAllMessage() {
@@ -169,6 +173,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	w := NewWorld(id, name, con)
 	ws.wg.Add(1)
 	ws.addWorld(w)
+	go w.Run()
 	return w, nil
 }
 
@@ -189,7 +194,6 @@ func (ws *WorldSession) GetWorldByCon(con net.Conn) *World {
 }
 
 func (ws *WorldSession) DisconnectWorld(con net.Conn) {
-	ws.wg.Wait()
 	w, ok := ws.mapConn[con]
 	if !ok {
 		return
@@ -198,12 +202,13 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 	log.Printf("World<id:%d> disconnected!\n", w.Id)
 	w.Stop()
 
+	ws.wg.Add(1)
+	defer ws.wg.Done()
 	delete(ws.mapWorld, w.Id)
 	delete(ws.mapConn, con)
 }
 
 func (ws *WorldSession) KickWorld(world *World) {
-	ws.wg.Wait()
 	if _, ok := ws.mapWorld[world.Id]; !ok {
 		return
 	}
@@ -215,26 +220,17 @@ func (ws *WorldSession) KickWorld(world *World) {
 	log.Printf("World<id:%d> was kicked by timeout reason!\n", world.Id)
 	world.Stop()
 
+	ws.wg.Add(1)
+	defer ws.wg.Done()
 	delete(ws.mapConn, world.Con)
 	delete(ws.mapWorld, world.Id)
 }
 
 func (ws *WorldSession) Run() {
-
 	for {
-
-		t := time.Now()
-
-		var arrInvalidWorld []*World
-
-		// kick world
-		for _, invalidWorld := range arrInvalidWorld {
-			ws.KickWorld(invalidWorld)
-		}
-
-		e := time.Since(t)
-		if e < 100*time.Millisecond {
-			time.Sleep(100*time.Millisecond - e)
+		select {
+		case <-ws.ctx.Done():
+			return
 		}
 	}
 }

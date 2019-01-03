@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"log"
 	"net"
-	"time"
 
 	"github.com/hellodudu/comment/config"
 )
@@ -57,8 +56,9 @@ func handleTcpConnection(con net.Conn) {
 
 	// proto recv
 	for scanner.Scan() {
-		GetUltimateAPI().GetWorldSession().HandleMessage(con, scanner.Bytes())
-		time.Sleep(100 * time.Millisecond)
+		GetUltimateAPI().AddTask(func() {
+			GetUltimateAPI().GetWorldSession().HandleMessage(con, scanner.Bytes())
+		})
 	}
 
 	// end of connection

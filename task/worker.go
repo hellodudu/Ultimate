@@ -25,7 +25,7 @@ func (worker *Worker) Work() {
 
 	log.Println("work proof with task:", worker.tasker.GetReq(), ", by worker number:", worker.num)
 
-	worker.tasker.Callback(worker.tasker)
+	worker.tasker.Callback()
 
 	// fun := reflect.ValueOf(worker.task.cb)
 	// param := make([]reflect.Value, 1)

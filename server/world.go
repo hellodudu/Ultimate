@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"log"
 	"net"
-	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -19,8 +18,8 @@ type World struct {
 	Con          net.Conn    // connection
 	ConHeartBeat *time.Timer // connection heart beat
 	ConTimeOut   *time.Timer // connection time out
-	Ctx          context.Context
-	Cancel       context.CancelFunc
+	ctx          context.Context
+	cancel       context.CancelFunc
 }
 
 func NewWorld(id uint32, name string, con net.Conn) *World {
@@ -32,25 +31,25 @@ func NewWorld(id uint32, name string, con net.Conn) *World {
 		ConTimeOut:   time.NewTimer(time.Duration(config.WorldConTimeOutSec) * time.Second),
 	}
 
-	w.Ctx, w.Cancel = context.WithCancel(context.Background())
+	w.ctx, w.cancel = context.WithCancel(context.Background())
 	return w
 }
 
 func (w *World) Stop() {
 	w.ConHeartBeat.Stop()
 	w.ConTimeOut.Stop()
-	w.Cancel()
+	w.cancel()
 	w.Con.Close()
 }
 
-func (w *World) Run(wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	// update connecting
+func (w *World) Run() {
 	for {
 		select {
-		case <-w.Ctx.Done():
+		// context canceled
+		case <-w.ctx.Done():
 			return
+
+		// update connecting
 		case <-w.ConTimeOut.C:
 			return
 		case <-w.ConHeartBeat.C:

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"sync"
 
@@ -154,20 +153,11 @@ func (api *UltimateAPI) GenReqNum() int {
 	return api.reqNum
 }
 
-func (api *UltimateAPI) AddTask() {
+func (api *UltimateAPI) AddTask(cb task.TaskCallback) {
 	newReqNum := api.GenReqNum()
-	newTask, err := task.NewTask(newReqNum)
+	newTask, err := task.NewTask(newReqNum, cb)
 	if err != nil {
 		log.Fatal("create new task error")
-	}
-	api.td.AddTask(newTask)
-}
-
-func (api *UltimateAPI) AddHttpTask(w http.ResponseWriter, r *http.Request, cb task.TaskCallback) {
-	newReqNum := api.GenReqNum()
-	newTask, err := task.NewHttpTask(newReqNum, w, r, cb)
-	if err != nil {
-		log.Fatal("create new http task error")
 	}
 	api.td.AddTask(newTask)
 }

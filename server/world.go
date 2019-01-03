@@ -20,15 +20,17 @@ type World struct {
 	ConTimeOut   *time.Timer // connection time out
 	ctx          context.Context
 	cancel       context.CancelFunc
+	chw          chan uint32
 }
 
-func NewWorld(id uint32, name string, con net.Conn) *World {
+func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 	w := &World{
 		Id:           id,
 		Name:         name,
 		Con:          con,
 		ConHeartBeat: time.NewTimer(time.Duration(config.WorldHeartBeatSec) * time.Second),
 		ConTimeOut:   time.NewTimer(time.Duration(config.WorldConTimeOutSec) * time.Second),
+		chw:          chw,
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -49,9 +51,11 @@ func (w *World) Run() {
 		case <-w.ctx.Done():
 			return
 
-		// update connecting
+		// connecting timeout
 		case <-w.ConTimeOut.C:
-			return
+			w.chw <- w.Id
+
+		// Heart Beat
 		case <-w.ConHeartBeat.C:
 			msg := &world_message.MUW_TestConnect{}
 			w.SendMessage(msg)

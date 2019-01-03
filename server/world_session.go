@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/utils"
 )
 
@@ -33,19 +34,21 @@ type regInfo struct {
 }
 
 type WorldSession struct {
-	mapWorld map[uint32]*World // all connected world
-	mapConn  map[net.Conn]*World
-	protoReg map[uint32]*regInfo
-	wg       sync.WaitGroup
-	ctx      context.Context
-	cancel   context.CancelFunc
+	mapWorld  map[uint32]*World // all connected world
+	mapConn   map[net.Conn]*World
+	protoReg  map[uint32]*regInfo
+	wg        sync.WaitGroup
+	ctx       context.Context
+	cancel    context.CancelFunc
+	cTimeOutW chan uint32
 }
 
 func NewWorldSession() (*WorldSession, error) {
 	w := &WorldSession{
-		mapWorld: make(map[uint32]*World),
-		mapConn:  make(map[net.Conn]*World),
-		protoReg: make(map[uint32]*regInfo),
+		mapWorld:  make(map[uint32]*World),
+		mapConn:   make(map[net.Conn]*World),
+		protoReg:  make(map[uint32]*regInfo),
+		cTimeOutW: make(chan uint32, config.WorldConnectMax),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -150,13 +153,11 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 }
 
 func (ws *WorldSession) addWorld(w *World) {
-	defer ws.wg.Done()
-	ws.mapWorld[w.Id] = w
-	ws.mapConn[w.Con] = w
-	log.Printf("add world<id:%d, %s> success!\n", w.Id, w.Name)
 }
 
 func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
+	ws.wg.Add(1)
+	defer ws.wg.Done()
 	var invalidID int32 = -1
 	if id == uint32(invalidID) {
 		return nil, errors.New("add world id invalid!")
@@ -170,9 +171,10 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 		return nil, errors.New("add existed connection")
 	}
 
-	w := NewWorld(id, name, con)
-	ws.wg.Add(1)
-	ws.addWorld(w)
+	w := NewWorld(id, name, con, ws.cTimeOutW)
+	ws.mapWorld[w.Id] = w
+	ws.mapConn[w.Con] = w
+	log.Printf("add world<id:%d, %s> success!\n", w.Id, w.Name)
 	go w.Run()
 	return w, nil
 }
@@ -194,6 +196,8 @@ func (ws *WorldSession) GetWorldByCon(con net.Conn) *World {
 }
 
 func (ws *WorldSession) DisconnectWorld(con net.Conn) {
+	ws.wg.Add(1)
+	defer ws.wg.Done()
 	w, ok := ws.mapConn[con]
 	if !ok {
 		return
@@ -202,28 +206,27 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 	log.Printf("World<id:%d> disconnected!\n", w.Id)
 	w.Stop()
 
-	ws.wg.Add(1)
-	defer ws.wg.Done()
 	delete(ws.mapWorld, w.Id)
 	delete(ws.mapConn, con)
 }
 
-func (ws *WorldSession) KickWorld(world *World) {
-	if _, ok := ws.mapWorld[world.Id]; !ok {
-		return
-	}
-
-	if _, ok := ws.mapConn[world.Con]; !ok {
-		return
-	}
-
-	log.Printf("World<id:%d> was kicked by timeout reason!\n", world.Id)
-	world.Stop()
-
+func (ws *WorldSession) KickWorld(id uint32) {
 	ws.wg.Add(1)
 	defer ws.wg.Done()
-	delete(ws.mapConn, world.Con)
-	delete(ws.mapWorld, world.Id)
+	w, ok := ws.mapWorld[id]
+	if !ok {
+		return
+	}
+
+	if _, ok := ws.mapConn[w.Con]; !ok {
+		return
+	}
+
+	log.Printf("World<id:%d> was kicked by timeout reason!\n", w.Id)
+	w.Stop()
+
+	delete(ws.mapConn, w.Con)
+	delete(ws.mapWorld, w.Id)
 }
 
 func (ws *WorldSession) Run() {
@@ -231,6 +234,8 @@ func (ws *WorldSession) Run() {
 		select {
 		case <-ws.ctx.Done():
 			return
+		case wid := <-ws.cTimeOutW:
+			ws.KickWorld(wid)
 		}
 	}
 }

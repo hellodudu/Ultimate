@@ -8,6 +8,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/task"
 )
 
@@ -71,7 +72,7 @@ func (api *UltimateAPI) InitTask() {
 func (api *UltimateAPI) InitDB() {
 	defer api.wg.Done()
 	var err error
-	api.db, err = sql.Open("mysql", "root:hello1986@tcp(127.0.0.1:3306)/comt")
+	api.db, err = sql.Open("mysql", config.MysqlDSN)
 	if err != nil {
 		log.Fatal(err)
 	}

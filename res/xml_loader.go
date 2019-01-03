@@ -8,15 +8,21 @@ import (
 )
 
 type XmlEntityClient struct {
-	Id       uint32 `xml:"id"`
-	Name     string `xml:"name"`
-	Icon     string `xml:"icon"`
-	Model    string `xml:"model"`
-	Aptitude int32  `xml:"aptitude"`
+	Id           string `xml:"id,attr"`
+	Name         string `xml:"name,attr"`
+	Icon         string `xml:"icon,attr"`
+	Model        string `xml:"model,attr"`
+	Desc         string `xml:"desc,attr"`
+	Aptitude     string `xml:"aptitude,attr"`
+	Scale        string `xml:"scale,attr"`
+	AngrySkill   string `xml:"angry_skill,attr"`
+	SortPriority string `xml:"sort_priority,attr"`
+	IconType     string `xml:"icon_type,attr"`
+	RareIcon     string `xml:"rare_icon,attr"`
 }
 
 type XmlLoader struct {
-	EntityClientXml []XmlEntityClient
+	EntityClientXml XmlEntityClient `xml:"entity"`
 }
 
 func NewXmlLoader() *XmlLoader {
@@ -32,12 +38,11 @@ func NewXmlLoader() *XmlLoader {
 		log.Println(err)
 	}
 
-	var xmlData XmlEntityClient
-	if err := xml.Unmarshal(byXml, &xmlData); err != nil {
+	if err := xml.Unmarshal(byXml, xmlLoader); err != nil {
 		log.Println(err)
 	}
 
-	log.Printf("Unmarshal xml success : +%v\n", xmlData)
+	log.Printf("Unmarshal xml success : %+v\n", xmlLoader)
 
 	return xmlLoader
 }

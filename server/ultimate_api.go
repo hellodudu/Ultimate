@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/hellodudu/comment/task"
@@ -140,9 +141,10 @@ func (api *UltimateAPI) Run() {
 	go api.world_sn.Run()
 }
 
-// defer close
-func (api *UltimateAPI) Close() {
+func (api *UltimateAPI) Stop() {
 	api.db.Close()
+	api.world_sn.Stop()
+	os.Exit(0)
 }
 
 func (api *UltimateAPI) GenReqNum() int {

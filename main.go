@@ -15,7 +15,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer ultimateAPI.Close()
 
 	ultimateAPI.Run()
 
@@ -27,4 +26,5 @@ func main() {
 	signal.Notify(c, os.Interrupt, os.Kill)
 	sig := <-c
 	log.Printf("ultimate server closing down (signal: %v)\n", sig)
+	ultimateAPI.Stop()
 }

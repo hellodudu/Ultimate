@@ -11,9 +11,15 @@ import (
 )
 
 func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
-	world, err := ws.AddWorld(1, "localserver", con)
+	msg, ok := p.(*world_message.MWU_WorldLogon)
+	if !ok {
+		log.Println(color.YellowString("Cannot assert value to message world_message.MWU_WorldLogon"))
+		return
+	}
+
+	world, err := ws.AddWorld(msg.WorldId, msg.WorldName, con)
 	if err != nil {
-		log.Printf(err.Error())
+		log.Println(color.YellowString(err.Error()), color.YellowString("<id:%d, name:%s, con:%v>", msg.WorldId, msg.WorldName, con))
 		return
 	}
 

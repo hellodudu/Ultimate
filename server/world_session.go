@@ -129,17 +129,33 @@ func protoUnmarshal(data []byte, m proto.Message) {
 
 func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	// top 4 bytes are msgSize, next 2 bytes are proto name length, the next is proto name, final is proto data.
+	if len(data) <= 6 {
+		log.Println(color.YellowString("tcp recv data length <= 6:%s", string(data)))
+		return
+	}
+
 	protoNameLen := binary.LittleEndian.Uint16(data[4:6])
+
+	if uint16(len(data)) < 6+protoNameLen {
+		log.Println(color.YellowString("tcp recv data length <= 6+protoNameLen:%s", string(data)))
+		return
+	}
+
 	protoTypeName := string(data[6 : 6+protoNameLen])
 	protoData := data[6+protoNameLen:]
 	pType := proto.MessageType(protoTypeName)
 	if pType == nil {
-		log.Printf("invalid message<%s>, won't deal with it!\n", protoTypeName)
+		log.Println(color.YellowString("invalid message<%s>, won't deal with it!", protoTypeName))
 		return
 	}
 
 	// unmarshal
-	newProto := reflect.New(pType.Elem()).Interface().(proto.Message)
+	newProto, ok := reflect.New(pType.Elem()).Interface().(proto.Message)
+	if !ok {
+		log.Println(color.YellowString("invalid message<%s>, won't deal with it!", protoTypeName))
+		return
+	}
+
 	protoUnmarshal(protoData, newProto)
 
 	msgID := utils.Crc32(protoTypeName)
@@ -175,7 +191,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	w := NewWorld(id, name, con, ws.cTimeOutW)
 	ws.mapWorld[w.Id] = w
 	ws.mapConn[w.Con] = w
-	log.Printf("%v\n", color.GreenString("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
+	log.Println(color.GreenString("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
 	go w.Run()
 	return w, nil
 }

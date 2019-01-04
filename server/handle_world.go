@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/comment/proto"
 )
@@ -37,7 +38,7 @@ func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
 		np := p.(*world_message.MWU_WorldConnected)
 		arrWorldID := np.GetWorldId()
-		log.Printf("world ref<%v> connected!\n", arrWorldID)
+		log.Println(color.GreenString("world ref<%v> connected!", arrWorldID))
 
 		// todo add ref worldid
 		// todo request world info

@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/proto"
@@ -49,6 +50,7 @@ func (w *World) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
+			log.Println(color.RedString("world<%d> context done!", w.Id))
 			return
 
 		// connecting timeout

@@ -6,7 +6,9 @@ import (
 	"encoding/binary"
 	"log"
 	"net"
+	"time"
 
+	"github.com/fatih/color"
 	"github.com/hellodudu/comment/config"
 )
 
@@ -29,9 +31,15 @@ func (server *TcpServer) Run() {
 
 	for {
 		con, err := ln.Accept()
-		if err != nil {
-			log.Fatalln(err)
+		if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
+			time.Sleep(100 * time.Millisecond)
+			continue
 		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		go handleTcpConnection(con)
 	}
 }
@@ -54,13 +62,17 @@ func handleTcpConnection(con net.Conn) {
 		return
 	})
 
-	// proto recv
-	for scanner.Scan() {
-		GetUltimateAPI().AddTask(func() {
-			GetUltimateAPI().GetWorldSession().HandleMessage(con, scanner.Bytes())
-		})
-	}
+	for {
+		if scanner.Scan() {
+			GetUltimateAPI().AddTask(func() {
+				GetUltimateAPI().GetWorldSession().HandleMessage(con, scanner.Bytes())
+			})
+		}
 
-	// end of connection
-	GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
+		// end of connection
+		if err := scanner.Err(); err != nil {
+			log.Println(color.YellowString("scan error:%s", err.Error()))
+			GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
+		}
+	}
 }

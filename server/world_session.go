@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/utils"
@@ -174,7 +175,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	w := NewWorld(id, name, con, ws.cTimeOutW)
 	ws.mapWorld[w.Id] = w
 	ws.mapConn[w.Con] = w
-	log.Printf("add world<id:%d, %s> success!\n", w.Id, w.Name)
+	log.Printf("%v\n", color.GreenString("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
 	go w.Run()
 	return w, nil
 }
@@ -203,7 +204,7 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 		return
 	}
 
-	log.Printf("World<id:%d> disconnected!\n", w.Id)
+	log.Println(color.YellowString("World<id:%d> disconnected!", w.Id))
 	w.Stop()
 
 	delete(ws.mapWorld, w.Id)
@@ -222,7 +223,7 @@ func (ws *WorldSession) KickWorld(id uint32) {
 		return
 	}
 
-	log.Printf("World<id:%d> was kicked by timeout reason!\n", w.Id)
+	log.Println(color.RedString("World<id:%d> was kicked by timeout reason!", w.Id))
 	w.Stop()
 
 	delete(ws.mapConn, w.Con)
@@ -233,6 +234,7 @@ func (ws *WorldSession) Run() {
 	for {
 		select {
 		case <-ws.ctx.Done():
+			log.Println(color.RedString("world session context done!"))
 			return
 		case wid := <-ws.cTimeOutW:
 			ws.KickWorld(wid)

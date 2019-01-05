@@ -40,12 +40,16 @@ func (server *TcpServer) Run() {
 			log.Fatal(err)
 		}
 
+		log.Println(color.CyanString("new tcp connection!"))
 		go handleTcpConnection(con)
 	}
 }
 
 func handleTcpConnection(con net.Conn) {
 	defer con.Close()
+
+	con.(*net.TCPConn).SetKeepAlive(true)
+	con.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
 	scanner := bufio.NewScanner(con)
 
 	// first 4 bytes represent tcp package size, split it
@@ -76,6 +80,7 @@ func handleTcpConnection(con net.Conn) {
 			if err := scanner.Err(); err != nil {
 				log.Println(color.YellowString("scan error:%s", err.Error()))
 				GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
+				return
 			}
 		}
 

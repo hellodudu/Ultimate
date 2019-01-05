@@ -14,24 +14,24 @@ import (
 )
 
 type World struct {
-	Id           uint32      // world id
-	Name         string      // world name
-	Con          net.Conn    // connection
-	ConHeartBeat *time.Timer // connection heart beat
-	ConTimeOut   *time.Timer // connection time out
-	ctx          context.Context
-	cancel       context.CancelFunc
-	chw          chan uint32
+	Id         uint32      // world id
+	Name       string      // world name
+	Con        net.Conn    // connection
+	tHeartBeat *time.Timer // connection heart beat
+	tTimeOut   *time.Timer // connection time out
+	ctx        context.Context
+	cancel     context.CancelFunc
+	chw        chan uint32
 }
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 	w := &World{
-		Id:           id,
-		Name:         name,
-		Con:          con,
-		ConHeartBeat: time.NewTimer(time.Duration(config.WorldHeartBeatSec) * time.Second),
-		ConTimeOut:   time.NewTimer(time.Duration(config.WorldConTimeOutSec) * time.Second),
-		chw:          chw,
+		Id:         id,
+		Name:       name,
+		Con:        con,
+		tHeartBeat: time.NewTimer(time.Duration(config.WorldHeartBeatSec) * time.Second),
+		tTimeOut:   time.NewTimer(time.Duration(config.WorldConTimeOutSec) * time.Second),
+		chw:        chw,
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -39,8 +39,8 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 }
 
 func (w *World) Stop() {
-	w.ConHeartBeat.Stop()
-	w.ConTimeOut.Stop()
+	w.tHeartBeat.Stop()
+	w.tTimeOut.Stop()
 	w.cancel()
 	w.Con.Close()
 }
@@ -54,21 +54,21 @@ func (w *World) Run() {
 			return
 
 		// connecting timeout
-		case <-w.ConTimeOut.C:
+		case <-w.tTimeOut.C:
 			w.chw <- w.Id
 
 		// Heart Beat
-		case <-w.ConHeartBeat.C:
+		case <-w.tHeartBeat.C:
 			msg := &world_message.MUW_TestConnect{}
 			w.SendMessage(msg)
-			w.ConHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
+			w.tHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
 		}
 	}
 }
 
 func (w *World) ResetTestConnect() {
-	w.ConHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
-	w.ConTimeOut.Reset(time.Duration(config.WorldConTimeOutSec) * time.Second)
+	w.tHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
+	w.tTimeOut.Reset(time.Duration(config.WorldConTimeOutSec) * time.Second)
 }
 
 func (w *World) SendMessage(p proto.Message) {
@@ -91,4 +91,14 @@ func (w *World) SendMessage(p proto.Message) {
 	if _, err := w.Con.Write(resp); err != nil {
 		log.Println(err.Error())
 	}
+}
+
+func (w *World) RequestWorldInfo() {
+	// request player info
+	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 17}
+	w.SendMessage(msgP)
+
+	// request guild info
+	msgG := &world_message.MUW_RequestGuildInfo{}
+	w.SendMessage(msgG)
 }

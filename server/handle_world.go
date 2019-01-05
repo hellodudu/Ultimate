@@ -46,8 +46,18 @@ func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 		arrWorldID := np.GetWorldId()
 		log.Println(color.GreenString("world ref<%v> connected!", arrWorldID))
 
-		// todo add ref worldid
-		// todo request world info
-		// todo deal things after world connected
+		world.RequestWorldInfo()
+	}
+}
+
+func HandleRequestPlayerInfo(con net.Conn, ws *WorldSession, p proto.Message) {
+	if world := ws.GetWorldByCon(con); world != nil {
+		msg, ok := p.(*world_message.MWU_RequestPlayerInfo)
+		if !ok {
+			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_RequestPlayerInfo"))
+			return
+		}
+
+		log.Println(color.GreenString("get player info:%v", msg))
 	}
 }

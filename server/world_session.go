@@ -75,6 +75,8 @@ func (ws *WorldSession) registerAllMessage() {
 	ws.registerProto(utils.Crc32("world_message.MWU_HeartBeat"), &regInfo{cb: HandleHeartBeat})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_WorldConnected"), &regInfo{cb: HandleWorldConnected})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_RequestPlayerInfo"), &regInfo{cb: HandleRequestPlayerInfo})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {
@@ -181,11 +183,11 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	}
 
 	if _, ok := ws.mapWorld[id]; ok {
-		return nil, errors.New("add existed world")
+		ws.KickWorld(id)
 	}
 
 	if _, ok := ws.mapConn[con]; ok {
-		return nil, errors.New("add existed connection")
+		ws.KickWorld(id)
 	}
 
 	w := NewWorld(id, name, con, ws.cTimeOutW)

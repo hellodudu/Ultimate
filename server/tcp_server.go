@@ -51,7 +51,6 @@ func handleTcpConnection(con net.Conn) {
 
 	con.(*net.TCPConn).SetKeepAlive(true)
 	con.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
-	con.(*net.TCPConn).SetWriteDeadline(time.Now().Add(5 * time.Second))
 	scanner := bufio.NewScanner(con)
 
 	// first 4 bytes represent tcp package size, split it

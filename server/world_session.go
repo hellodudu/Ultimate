@@ -38,6 +38,7 @@ type WorldSession struct {
 	mapWorld  map[uint32]*World // all connected world
 	mapConn   map[net.Conn]*World
 	protoReg  map[uint32]*regInfo
+	mu        sync.Mutex
 	wg        sync.WaitGroup
 	ctx       context.Context
 	cancel    context.CancelFunc
@@ -175,8 +176,6 @@ func (ws *WorldSession) addWorld(w *World) {
 }
 
 func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
-	ws.wg.Add(1)
-	defer ws.wg.Done()
 	var invalidID int32 = -1
 	if id == uint32(invalidID) {
 		return nil, errors.New("add world id invalid!")
@@ -191,8 +190,10 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	}
 
 	w := NewWorld(id, name, con, ws.cTimeOutW)
+	ws.mu.Lock()
 	ws.mapWorld[w.Id] = w
 	ws.mapConn[w.Con] = w
+	ws.mu.Unlock()
 	log.Println(color.GreenString("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
 	go w.Run()
 	return w, nil
@@ -215,8 +216,6 @@ func (ws *WorldSession) GetWorldByCon(con net.Conn) *World {
 }
 
 func (ws *WorldSession) DisconnectWorld(con net.Conn) {
-	ws.wg.Add(1)
-	defer ws.wg.Done()
 	w, ok := ws.mapConn[con]
 	if !ok {
 		return
@@ -225,13 +224,13 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 	log.Println(color.YellowString("World<id:%d> disconnected!", w.Id))
 	w.Stop()
 
+	ws.mu.Lock()
 	delete(ws.mapWorld, w.Id)
 	delete(ws.mapConn, con)
+	ws.mu.Unlock()
 }
 
 func (ws *WorldSession) KickWorld(id uint32) {
-	ws.wg.Add(1)
-	defer ws.wg.Done()
 	w, ok := ws.mapWorld[id]
 	if !ok {
 		return
@@ -244,8 +243,10 @@ func (ws *WorldSession) KickWorld(id uint32) {
 	log.Println(color.RedString("World<id:%d> was kicked by timeout reason!", w.Id))
 	w.Stop()
 
+	ws.mu.Lock()
 	delete(ws.mapConn, w.Con)
 	delete(ws.mapWorld, w.Id)
+	ws.mu.Unlock()
 }
 
 func (ws *WorldSession) Run() {

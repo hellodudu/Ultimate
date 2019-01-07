@@ -67,22 +67,18 @@ func handleTcpConnection(con net.Conn) {
 	})
 
 	for {
-		select {
-		default:
-			if scanner.Scan() {
-				byMsg := scanner.Bytes()
-				GetUltimateAPI().AddTask(func() {
-					GetUltimateAPI().GetWorldSession().HandleMessage(con, byMsg)
-				})
-			}
-
-			// end of connection
-			if err := scanner.Err(); err != nil {
-				log.Println(color.YellowString("scan error:%s", err.Error()))
-				GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
-				return
-			}
+		if scanner.Scan() {
+			byMsg := scanner.Bytes()
+			GetUltimateAPI().AddTask(func() {
+				GetUltimateAPI().GetWorldSession().HandleMessage(con, byMsg)
+			})
 		}
 
+		// end of connection
+		if err := scanner.Err(); err != nil {
+			log.Println(color.YellowString("scan error:%s", err.Error()))
+			GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
+			return
+		}
 	}
 }

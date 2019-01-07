@@ -1,11 +1,13 @@
-comment -- A game heros' comment services
-==================
-#get
+#comment -- A game heros' comment services
 
-    $ go get github.com/hellodudu/comment
+Install:
+
+```shell
+go get github.com/hellodudu/comment
+```
 
 
-#using tools
+Using tools:
 
     github.com/go-sql-driver/mysql
 

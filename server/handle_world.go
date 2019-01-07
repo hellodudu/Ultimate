@@ -58,6 +58,18 @@ func HandleRequestPlayerInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		log.Println(color.GreenString("get player info:%v", msg))
+		log.Println(color.GreenString("get player info:", msg))
+	}
+}
+
+func HandleRequestGuildInfo(con net.Conn, ws *WorldSession, p proto.Message) {
+	if world := ws.GetWorldByCon(con); world != nil {
+		msg, ok := p.(*world_message.MWU_RequestGuildInfo)
+		if !ok {
+			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_RequestGuildInfo"))
+			return
+		}
+
+		log.Println(color.GreenString("get guild info:", msg))
 	}
 }

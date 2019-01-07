@@ -89,7 +89,7 @@ func (w *World) SendMessage(p proto.Message) {
 	copy(resp[6+len(typeName):], out)
 
 	if _, err := w.Con.Write(resp); err != nil {
-		log.Println(err.Error())
+		log.Println(color.YellowString("reply message error:", err.Error()))
 	}
 }
 

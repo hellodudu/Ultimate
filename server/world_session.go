@@ -78,6 +78,8 @@ func (ws *WorldSession) registerAllMessage() {
 	ws.registerProto(utils.Crc32("world_message.MWU_WorldConnected"), &regInfo{cb: HandleWorldConnected})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_RequestPlayerInfo"), &regInfo{cb: HandleRequestPlayerInfo})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_RequestGuildInfo"), &regInfo{cb: HandleRequestGuildInfo})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {

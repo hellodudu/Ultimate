@@ -85,5 +85,5 @@ message MWU_RequestGuildInfo {
         int32 member_num = 10;
     }
 
-    repeated CrossGuildInfo info = 2;
+    repeated CrossGuildInfo info = 1;
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -42,7 +43,15 @@ func (server *TcpServer) Run() {
 
 		log.Println(color.CyanString("new tcp connection!"))
 		go handleTcpConnection(con)
+		// go handleTcpReadCon(con)
 	}
+}
+
+func handleTcpReadCon(con net.Conn) {
+	// byLen := [4]byte
+	// if _, err := io.ReadFull(con, byLen); err != nil {
+	// 	log.Println(color.RedString("tcp read error:", err.Error()))
+	// }
 }
 
 func handleTcpConnection(con net.Conn) {
@@ -50,35 +59,40 @@ func handleTcpConnection(con net.Conn) {
 
 	con.(*net.TCPConn).SetKeepAlive(true)
 	con.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
+	// con.(*net.TCPConn).SetWriteDeadline(time.Now().Add(5 * time.Second))
 	scanner := bufio.NewScanner(con)
 
 	// first 4 bytes represent tcp package size, split it
 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		if !atEOF {
-			if len(data) > 4 {
-				length := uint32(0)
-				binary.Read(bytes.NewReader(data[:4]), binary.LittleEndian, &length)
-				if int(length)+4 <= len(data) {
-					return int(length) + 4, data[:int(length)+4], nil
-				}
+		if atEOF {
+			return advance, token, io.EOF
+		}
+
+		if len(data) > 4 {
+			length := uint32(0)
+			binary.Read(bytes.NewReader(data[:4]), binary.LittleEndian, &length)
+			if int(length)+4 <= len(data) {
+				return int(length) + 4, data[:int(length)+4], nil
 			}
 		}
 		return
 	})
 
 	for {
-		if scanner.Scan() {
+		ok := scanner.Scan()
+		if ok {
 			byMsg := scanner.Bytes()
 			GetUltimateAPI().AddTask(func() {
 				GetUltimateAPI().GetWorldSession().HandleMessage(con, byMsg)
 			})
-		}
-
-		// end of connection
-		if err := scanner.Err(); err != nil {
+		} else if err := scanner.Err(); err != nil {
 			log.Println(color.YellowString("scan error:%s", err.Error()))
+			// end of connection
 			GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
-			return
+			break
+		} else {
+			log.Println(color.CyanString("connection shut down!"))
+			break
 		}
 	}
 }

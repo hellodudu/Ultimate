@@ -41,17 +41,9 @@ func (server *TcpServer) Run() {
 			log.Fatal(err)
 		}
 
-		log.Println(color.CyanString("new tcp connection!"))
+		log.Println(color.CyanString("a new tcp connection!"))
 		go handleTcpConnection(con)
-		// go handleTcpReadCon(con)
 	}
-}
-
-func handleTcpReadCon(con net.Conn) {
-	// byLen := [4]byte
-	// if _, err := io.ReadFull(con, byLen); err != nil {
-	// 	log.Println(color.RedString("tcp read error:", err.Error()))
-	// }
 }
 
 func handleTcpConnection(con net.Conn) {
@@ -59,7 +51,7 @@ func handleTcpConnection(con net.Conn) {
 
 	con.(*net.TCPConn).SetKeepAlive(true)
 	con.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
-	// con.(*net.TCPConn).SetWriteDeadline(time.Now().Add(5 * time.Second))
+	con.(*net.TCPConn).SetWriteDeadline(time.Now().Add(5 * time.Second))
 	scanner := bufio.NewScanner(con)
 
 	// first 4 bytes represent tcp package size, split it
@@ -91,7 +83,7 @@ func handleTcpConnection(con net.Conn) {
 			GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
 			break
 		} else {
-			log.Println(color.CyanString("connection shut down!"))
+			log.Println(color.CyanString("one client connection shut down!"))
 			break
 		}
 	}

@@ -1,4 +1,4 @@
-#comment -- A game heros' comment services
+# Ultimate server -- A game server writed by golang
 
 [![Build Status](https://travis-ci.com/hellodudu/comment.svg?branch=master)](https://travis-ci.com/hellodudu/comment)
 

@@ -191,6 +191,10 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 		ws.KickWorld(id)
 	}
 
+	if uint32(len(ws.mapConn)) >= config.WorldConnectMax {
+		return nil, errors.New("world connected num full!")
+	}
+
 	w := NewWorld(id, name, con, ws.cTimeOutW)
 	ws.mu.Lock()
 	ws.mapWorld[w.Id] = w

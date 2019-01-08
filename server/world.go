@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/fatih/color"
@@ -12,6 +13,9 @@ import (
 	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/proto"
 )
+
+type CrossPlayerInfo *world_message.MWU_RequestPlayerInfo_CrossPlayerInfo
+type CrossGuildInfo *world_message.MWU_RequestGuildInfo_CrossGuildInfo
 
 type World struct {
 	Id         uint32      // world id
@@ -22,6 +26,10 @@ type World struct {
 	ctx        context.Context
 	cancel     context.CancelFunc
 	chw        chan uint32
+
+	mapPlayer map[int64]CrossPlayerInfo
+	mapGuild  map[int64]CrossGuildInfo
+	mu        sync.Mutex
 }
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
@@ -32,6 +40,8 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		tHeartBeat: time.NewTimer(time.Duration(config.WorldHeartBeatSec) * time.Second),
 		tTimeOut:   time.NewTimer(time.Duration(config.WorldConTimeOutSec) * time.Second),
 		chw:        chw,
+		mapPlayer:  make(map[int64]CrossPlayerInfo),
+		mapGuild:   make(map[int64]CrossGuildInfo),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -101,4 +111,30 @@ func (w *World) RequestWorldInfo() {
 	// request guild info
 	msgG := &world_message.MUW_RequestGuildInfo{}
 	w.SendMessage(msgG)
+}
+
+func (w *World) AddPlayerInfo(p proto.Message) {
+	msg, ok := p.(*world_message.MWU_RequestPlayerInfo_CrossPlayerInfo)
+	if !ok {
+		return
+	}
+
+	w.mu.Lock()
+	w.mapPlayer[msg.PlayerId] = msg
+	w.mu.Unlock()
+
+	log.Println(color.GreenString("add player info:", msg))
+}
+
+func (w *World) AddGuildInfo(p proto.Message) {
+	msg, ok := p.(*world_message.MWU_RequestGuildInfo_CrossGuildInfo)
+	if !ok {
+		return
+	}
+
+	w.mu.Lock()
+	w.mapGuild[msg.GuildId] = msg
+	w.mu.Unlock()
+
+	log.Println(color.GreenString("add guild info:", msg))
 }

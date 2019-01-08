@@ -8,6 +8,8 @@ import (
 	"os"
 	"sync"
 
+	"github.com/fatih/color"
+	"github.com/go-redis/redis"
 	"github.com/hellodudu/comment/config"
 	"github.com/hellodudu/comment/task"
 )
@@ -19,6 +21,7 @@ var ultimateAPI *UltimateAPI = nil
 type UltimateAPI struct {
 	td       *task.Dispatcher // task dispatcher
 	db       *sql.DB          // database
+	rds      *redis.Client    // redis
 	tcp_s    *TcpServer       // tcp server
 	http_s   *HttpServer      // http server
 	world_sn *WorldSession    // world session
@@ -40,12 +43,13 @@ func NewUltimateAPI() (*UltimateAPI, error) {
 	ultimateAPI.wg.Add(5)
 	go ultimateAPI.InitTask()
 	go ultimateAPI.InitDB()
+	// go ultimateAPI.InitRedis()
 	go ultimateAPI.InitTcpServer()
 	go ultimateAPI.InitHttpServer()
 	go ultimateAPI.InitWorldSession()
 
 	ultimateAPI.wg.Wait()
-	log.Println("UltimateAPI all init ok!")
+	log.Println(color.CyanString("UltimateAPI all init ok!"))
 	return ultimateAPI, nil
 }
 
@@ -65,7 +69,7 @@ func (api *UltimateAPI) InitTask() {
 		log.Fatal(err)
 	}
 
-	log.Println("UltimateAPI task init ok!")
+	log.Println(color.CyanString("UltimateAPI task init ok!"))
 }
 
 // init db
@@ -98,7 +102,22 @@ func (api *UltimateAPI) InitDB() {
 		log.Fatal(err)
 	}
 
-	log.Printf("UltimateAPI db init ok!")
+	log.Printf(color.CyanString("UltimateAPI db init ok!"))
+}
+
+func (api *UltimateAPI) InitRedis() {
+	defer api.wg.Done()
+	api.rds = redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddr,
+		Password: config.RedisPwd,
+		DB:       config.RedisDB,
+	})
+
+	if _, err := api.rds.Ping().Result(); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(color.CyanString("UltimateAPI redis init ok"))
 }
 
 // init tcp server
@@ -109,7 +128,7 @@ func (api *UltimateAPI) InitTcpServer() {
 		log.Fatal(err)
 	}
 
-	log.Println("UltimateAPI tcp_server init ok!")
+	log.Println(color.CyanString("UltimateAPI tcp_server init ok!"))
 }
 
 // init http server
@@ -120,7 +139,7 @@ func (api *UltimateAPI) InitHttpServer() {
 		log.Fatal(err)
 	}
 
-	log.Println("UltimateAPI http_server init ok!")
+	log.Println(color.CyanString("UltimateAPI http_server init ok!"))
 }
 
 // init world session
@@ -131,7 +150,7 @@ func (api *UltimateAPI) InitWorldSession() {
 		log.Fatal(err)
 	}
 
-	log.Println("UltimateAPI world_session init ok!")
+	log.Println(color.CyanString("UltimateAPI world_session init ok!"))
 }
 
 // run

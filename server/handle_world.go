@@ -58,7 +58,9 @@ func HandleRequestPlayerInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		log.Println(color.GreenString("get player info:", msg))
+		for _, v := range msg.Info {
+			world.AddPlayerInfo(v)
+		}
 	}
 }
 
@@ -70,6 +72,8 @@ func HandleRequestGuildInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		log.Println(color.GreenString("get guild info:", msg))
+		for _, v := range msg.Info {
+			world.AddGuildInfo(v)
+		}
 	}
 }

@@ -34,7 +34,6 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		c <- struct{}{}
 	})
 	<-c
-	log.Printf("taskHandler over\n", w)
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {

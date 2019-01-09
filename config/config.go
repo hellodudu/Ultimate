@@ -12,7 +12,7 @@ var WorldConTimeOutSec uint32 = 60
 var WorldConnectMax uint32 = 500
 
 // mysql
-var MysqlDSN string = "root:hello1986@tcp(127.0.0.1:3306)/comt"
+var MysqlDSN string = "root:hello1986@tcp(127.0.0.1:3306)/db_ultimate"
 
 // redis
 var RedisAddr string = "127.0.0.1:6379"

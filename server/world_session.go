@@ -174,9 +174,6 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	r.cb(con, ws, newProto)
 }
 
-func (ws *WorldSession) addWorld(w *World) {
-}
-
 func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
 	var invalidID int32 = -1
 	if id == uint32(invalidID) {

@@ -81,26 +81,26 @@ func (api *UltimateAPI) InitDB() {
 		log.Fatal(err)
 	}
 
-	rows, err := api.db.Query("select * from app")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
+	// rows, err := api.db.Query("select * from app")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer rows.Close()
 
-	newApp := &App{}
-	for rows.Next() {
-		if err := rows.Scan(&newApp.AppID, &newApp.AppName, &newApp.PubKey, &newApp.PriKey); err != nil {
-			log.Fatal(err)
-		}
-		log.Println("select result:", newApp)
+	// newApp := &App{}
+	// for rows.Next() {
+	// 	if err := rows.Scan(&newApp.AppID, &newApp.AppName, &newApp.PubKey, &newApp.PriKey); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	log.Println("select result:", newApp)
 
-		// add to appMap
-		api.appMap[newApp.AppID] = newApp
-	}
+	// 	// add to appMap
+	// 	api.appMap[newApp.AppID] = newApp
+	// }
 
-	if err := rows.Err(); err != nil {
-		log.Fatal(err)
-	}
+	// if err := rows.Err(); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	log.Printf(color.CyanString("UltimateAPI db init ok!"))
 }

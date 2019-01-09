@@ -58,9 +58,7 @@ func HandleRequestPlayerInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		for _, v := range msg.Info {
-			world.AddPlayerInfo(v)
-		}
+		world.AddPlayerInfoList(msg.Info)
 	}
 }
 
@@ -72,8 +70,6 @@ func HandleRequestGuildInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		for _, v := range msg.Info {
-			world.AddGuildInfo(v)
-		}
+		world.AddGuildInfoList(msg.Info)
 	}
 }

@@ -15,7 +15,9 @@ import (
 )
 
 type CrossPlayerInfo *world_message.MWU_RequestPlayerInfo_CrossPlayerInfo
+type CrossPlayerInfoList []*world_message.MWU_RequestPlayerInfo_CrossPlayerInfo
 type CrossGuildInfo *world_message.MWU_RequestGuildInfo_CrossGuildInfo
+type CrossGuildInfoList []*world_message.MWU_RequestGuildInfo_CrossGuildInfo
 
 type World struct {
 	Id         uint32      // world id
@@ -30,6 +32,9 @@ type World struct {
 	mapPlayer map[int64]CrossPlayerInfo
 	mapGuild  map[int64]CrossGuildInfo
 	mu        sync.Mutex
+
+	qWChan chan string
+	qRChan chan string
 }
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
@@ -42,6 +47,8 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		chw:        chw,
 		mapPlayer:  make(map[int64]CrossPlayerInfo),
 		mapGuild:   make(map[int64]CrossGuildInfo),
+		qWChan:     make(chan string, 100),
+		qRChan:     make(chan string, 100),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -72,6 +79,16 @@ func (w *World) Run() {
 			msg := &world_message.MUW_TestConnect{}
 			w.SendMessage(msg)
 			w.tHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
+
+		// write query
+		case q := <-w.qWChan:
+			go GetUltimateAPI().db.ExecContext(w.ctx, q)
+
+			// read query
+		case r := <-w.qRChan:
+			go func() {
+				GetUltimateAPI().db.QueryContext(w.ctx, r)
+			}()
 		}
 	}
 }
@@ -113,28 +130,46 @@ func (w *World) RequestWorldInfo() {
 	w.SendMessage(msgG)
 }
 
-func (w *World) AddPlayerInfo(p proto.Message) {
-	msg, ok := p.(*world_message.MWU_RequestPlayerInfo_CrossPlayerInfo)
-	if !ok {
-		return
-	}
-
+func (w *World) AddPlayerInfo(p CrossPlayerInfo) {
 	w.mu.Lock()
-	w.mapPlayer[msg.PlayerId] = msg
+	w.mapPlayer[p.PlayerId] = p
 	w.mu.Unlock()
 
-	log.Println(color.GreenString("add player info:", msg))
+	log.Println(color.GreenString("add player info:", p))
 }
 
-func (w *World) AddGuildInfo(p proto.Message) {
-	msg, ok := p.(*world_message.MWU_RequestGuildInfo_CrossGuildInfo)
-	if !ok {
+func (w *World) AddPlayerInfoList(s CrossPlayerInfoList) {
+	if len(s) == 0 {
 		return
 	}
 
 	w.mu.Lock()
-	w.mapGuild[msg.GuildId] = msg
+
+	for _, v := range s {
+		w.mapPlayer[v.PlayerId] = v
+	}
+
+	w.mu.Unlock()
+}
+
+func (w *World) AddGuildInfo(g CrossGuildInfo) {
+	w.mu.Lock()
+	w.mapGuild[g.GuildId] = g
 	w.mu.Unlock()
 
-	log.Println(color.GreenString("add guild info:", msg))
+	log.Println(color.GreenString("add guild info:", g))
+}
+
+func (w *World) AddGuildInfoList(s CrossGuildInfoList) {
+	if len(s) == 0 {
+		return
+	}
+
+	w.mu.Lock()
+
+	for _, v := range s {
+		w.mapGuild[v.GuildId] = v
+	}
+
+	w.mu.Unlock()
 }

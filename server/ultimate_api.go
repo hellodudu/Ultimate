@@ -28,6 +28,7 @@ type UltimateAPI struct {
 	reqNum   int              // request number
 	appMap   map[int]*App     // app map
 	wg       sync.WaitGroup
+	cWrite   chan string
 }
 
 func NewUltimateAPI() (*UltimateAPI, error) {
@@ -38,6 +39,7 @@ func NewUltimateAPI() (*UltimateAPI, error) {
 	ultimateAPI = &UltimateAPI{
 		reqNum: 0,
 		appMap: make(map[int]*App),
+		cWrite: make(chan string, 100),
 	}
 
 	ultimateAPI.wg.Add(5)
@@ -158,6 +160,14 @@ func (api *UltimateAPI) Run() {
 	go api.tcp_s.Run()
 	go api.http_s.Run()
 	go api.world_sn.Run()
+
+	go func() {
+		select {
+		default:
+		case q := <-api.cWrite:
+			api.db.Exec(q)
+		}
+	}()
 }
 
 func (api *UltimateAPI) Stop() {
@@ -221,4 +231,8 @@ func (api *UltimateAPI) AddNewApp(app *App) error {
 	api.appMap[app.AppID] = app
 
 	return nil
+}
+
+func (api *UltimateAPI) QueryWrite(query string) {
+	api.cWrite <- query
 }

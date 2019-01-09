@@ -1,6 +1,7 @@
 package ultimate
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -25,6 +26,10 @@ func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
 
 	reply := &world_message.MUW_WorldLogon{}
 	world.SendMessage(reply)
+
+	// save to db
+	query := fmt.Sprintf("replace into world(id, last_connect_time) values(%d, %d)", world.Id, int32(time.Now().Unix()))
+	world.QueryWrite(query)
 }
 
 func HandleTestConnect(con net.Conn, ws *WorldSession, p proto.Message) {

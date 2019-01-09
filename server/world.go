@@ -82,7 +82,7 @@ func (w *World) Run() {
 
 		// write query
 		case q := <-w.qWChan:
-			go GetUltimateAPI().db.ExecContext(w.ctx, q)
+			w.Save2DB(q)
 
 			// read query
 		case r := <-w.qRChan:
@@ -172,4 +172,30 @@ func (w *World) AddGuildInfoList(s CrossGuildInfoList) {
 	}
 
 	w.mu.Unlock()
+}
+
+func (w *World) QueryWrite(query string) {
+	w.qWChan <- query
+}
+
+func (w *World) Save2DB(query string) {
+	stmt, err := GetUltimateAPI().db.PrepareContext(w.ctx, query)
+	if err != nil {
+		log.Println(color.YellowString("world <id:", w.Id, "> doing sql prepare failed:", err.Error()))
+		return
+	}
+
+	res, err := stmt.ExecContext(w.ctx)
+	if err != nil {
+		log.Println(color.YellowString("world <id:", w.Id, "> doing sql exec failed:", err.Error()))
+		return
+	}
+
+	rowAffect, err := res.RowsAffected()
+	if err != nil {
+		log.Println(color.WhiteString("world <id:", w.Id, "> doing sql rows affected failed:", err.Error()))
+		return
+	}
+
+	log.Println(color.CyanString("query exec successful, affect rows = ", rowAffect))
 }

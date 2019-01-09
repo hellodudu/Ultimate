@@ -6,8 +6,8 @@ import (
 	"os/signal"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/hellodudu/comment/res"
-	"github.com/hellodudu/comment/server"
+	"github.com/hellodudu/Ultimate/res"
+	"github.com/hellodudu/Ultimate/server"
 )
 
 func main() {

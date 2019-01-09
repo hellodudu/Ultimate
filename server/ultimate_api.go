@@ -10,8 +10,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/go-redis/redis"
-	"github.com/hellodudu/comment/config"
-	"github.com/hellodudu/comment/task"
+	"github.com/hellodudu/Ultimate/config"
+	"github.com/hellodudu/Ultimate/task"
 )
 
 // global var

@@ -10,8 +10,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/comment/config"
-	"github.com/hellodudu/comment/proto"
+	"github.com/hellodudu/Ultimate/config"
+	"github.com/hellodudu/Ultimate/proto"
 )
 
 type CrossPlayerInfo *world_message.MWU_RequestPlayerInfo_CrossPlayerInfo

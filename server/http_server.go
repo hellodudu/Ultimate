@@ -7,7 +7,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/hellodudu/comment/config"
+	"github.com/hellodudu/Ultimate/config"
 )
 
 var testChan chan interface{} = make(chan interface{}, 1)

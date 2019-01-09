@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/hellodudu/comment/config"
+	"github.com/hellodudu/Ultimate/config"
 )
 
 type TcpServer struct {

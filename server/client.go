@@ -3,7 +3,7 @@ package ultimate
 import (
 	"net/http"
 
-	"github.com/hellodudu/comment/task"
+	"github.com/hellodudu/Ultimate/task"
 )
 
 type Client struct {

@@ -12,8 +12,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/comment/config"
-	"github.com/hellodudu/comment/utils"
+	"github.com/hellodudu/Ultimate/config"
+	"github.com/hellodudu/Ultimate/utils"
 )
 
 // base net message type define

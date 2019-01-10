@@ -34,7 +34,6 @@ type World struct {
 	mu        sync.Mutex
 
 	qWChan chan string
-	qRChan chan string
 }
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
@@ -48,7 +47,6 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		mapPlayer:  make(map[int64]CrossPlayerInfo),
 		mapGuild:   make(map[int64]CrossGuildInfo),
 		qWChan:     make(chan string, 100),
-		qRChan:     make(chan string, 100),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -83,12 +81,6 @@ func (w *World) Run() {
 		// write query
 		case q := <-w.qWChan:
 			w.Save2DB(q)
-
-			// read query
-		case r := <-w.qRChan:
-			go func() {
-				GetUltimateAPI().db.QueryContext(w.ctx, r)
-			}()
 		}
 	}
 }
@@ -191,11 +183,11 @@ func (w *World) Save2DB(query string) {
 		return
 	}
 
-	rowAffect, err := res.RowsAffected()
+	_, err = res.RowsAffected()
 	if err != nil {
 		log.Println(color.WhiteString("world <id:", w.Id, "> doing sql rows affected failed:", err.Error()))
 		return
 	}
 
-	log.Println(color.CyanString("query exec successful, affect rows = ", rowAffect))
+	log.Println(color.CyanString("query successful exec:", query))
 }

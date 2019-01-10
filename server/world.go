@@ -3,6 +3,7 @@ package ultimate
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -33,7 +34,8 @@ type World struct {
 	mapGuild  map[int64]CrossGuildInfo
 	mu        sync.Mutex
 
-	qWChan chan string
+	qWChan  chan string
+	cDBInit chan struct{} //
 }
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
@@ -47,10 +49,37 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		mapPlayer:  make(map[int64]CrossPlayerInfo),
 		mapGuild:   make(map[int64]CrossGuildInfo),
 		qWChan:     make(chan string, 100),
+		cDBInit:    make(chan struct{}, 1),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
+	w.LoadFromDB()
 	return w
+}
+
+func (w *World) LoadFromDB() {
+	query := fmt.Sprintf("select * from world where id = %d", w.Id)
+	stmt, err := GetUltimateAPI().db.PrepareContext(w.ctx, query)
+	if err != nil {
+		log.Println(color.YellowString("world <id:", w.Id, "> doing sql prepare failed:", err.Error()))
+		return
+	}
+
+	rows, err := stmt.QueryContext(w.ctx)
+	if err != nil {
+		log.Println(color.YellowString("world <id:", w.Id, "> doing sql exec failed:", err.Error()))
+		return
+	}
+
+	for rows.Next() {
+		var id, time int32
+		if err := rows.Scan(&id, &time); err != nil {
+			log.Println(color.YellowString("world load query err:", err))
+		}
+		log.Println(color.CyanString("world load query success:", id, time))
+	}
+
+	w.cDBInit <- struct{}{}
 }
 
 func (w *World) Stop() {
@@ -61,6 +90,8 @@ func (w *World) Stop() {
 }
 
 func (w *World) Run() {
+	<-w.cDBInit
+
 	for {
 		select {
 		// context canceled

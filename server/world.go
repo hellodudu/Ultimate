@@ -15,11 +15,6 @@ import (
 	"github.com/hellodudu/Ultimate/proto"
 )
 
-type CrossPlayerInfo *world_message.MWU_RequestPlayerInfo_CrossPlayerInfo
-type CrossPlayerInfoList []*world_message.MWU_RequestPlayerInfo_CrossPlayerInfo
-type CrossGuildInfo *world_message.MWU_RequestGuildInfo_CrossGuildInfo
-type CrossGuildInfoList []*world_message.MWU_RequestGuildInfo_CrossGuildInfo
-
 type World struct {
 	Id         uint32      // world id
 	Name       string      // world name
@@ -30,8 +25,8 @@ type World struct {
 	cancel     context.CancelFunc
 	chw        chan uint32
 
-	mapPlayer map[int64]CrossPlayerInfo
-	mapGuild  map[int64]CrossGuildInfo
+	mapPlayer map[int64]*world_message.CrossPlayerInfo
+	mapGuild  map[int64]*world_message.CrossGuildInfo
 	mu        sync.Mutex
 
 	qWChan  chan string
@@ -46,8 +41,8 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		tHeartBeat: time.NewTimer(time.Duration(config.WorldHeartBeatSec) * time.Second),
 		tTimeOut:   time.NewTimer(time.Duration(config.WorldConTimeOutSec) * time.Second),
 		chw:        chw,
-		mapPlayer:  make(map[int64]CrossPlayerInfo),
-		mapGuild:   make(map[int64]CrossGuildInfo),
+		mapPlayer:  make(map[int64]*world_message.CrossPlayerInfo),
+		mapGuild:   make(map[int64]*world_message.CrossGuildInfo),
 		qWChan:     make(chan string, 100),
 		cDBInit:    make(chan struct{}, 1),
 	}
@@ -153,7 +148,7 @@ func (w *World) RequestWorldInfo() {
 	w.SendMessage(msgG)
 }
 
-func (w *World) AddPlayerInfo(p CrossPlayerInfo) {
+func (w *World) AddPlayerInfo(p *world_message.CrossPlayerInfo) {
 	w.mu.Lock()
 	w.mapPlayer[p.PlayerId] = p
 	w.mu.Unlock()
@@ -161,7 +156,7 @@ func (w *World) AddPlayerInfo(p CrossPlayerInfo) {
 	log.Println(color.GreenString("add player info:", p))
 }
 
-func (w *World) AddPlayerInfoList(s CrossPlayerInfoList) {
+func (w *World) AddPlayerInfoList(s []*world_message.CrossPlayerInfo) {
 	if len(s) == 0 {
 		return
 	}
@@ -175,7 +170,7 @@ func (w *World) AddPlayerInfoList(s CrossPlayerInfoList) {
 	w.mu.Unlock()
 }
 
-func (w *World) AddGuildInfo(g CrossGuildInfo) {
+func (w *World) AddGuildInfo(g *world_message.CrossGuildInfo) {
 	w.mu.Lock()
 	w.mapGuild[g.GuildId] = g
 	w.mu.Unlock()
@@ -183,7 +178,7 @@ func (w *World) AddGuildInfo(g CrossGuildInfo) {
 	log.Println(color.GreenString("add guild info:", g))
 }
 
-func (w *World) AddGuildInfoList(s CrossGuildInfoList) {
+func (w *World) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
 	if len(s) == 0 {
 		return
 	}

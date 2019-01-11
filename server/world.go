@@ -13,6 +13,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/config"
 	"github.com/hellodudu/Ultimate/proto"
+	"github.com/hellodudu/Ultimate/utils"
 )
 
 type World struct {
@@ -101,7 +102,7 @@ func (w *World) Run() {
 		// Heart Beat
 		case <-w.tHeartBeat.C:
 			msg := &world_message.MUW_TestConnect{}
-			w.SendMessage(msg)
+			w.SendProtoMessage(msg)
 			w.tHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
 
 		// write query
@@ -116,8 +117,8 @@ func (w *World) ResetTestConnect() {
 	w.tTimeOut.Reset(time.Duration(config.WorldConTimeOutSec) * time.Second)
 }
 
-func (w *World) SendMessage(p proto.Message) {
-	// reply message length = 4bytes size + 2bytes message_name size + message_name + proto_data
+func (w *World) SendProtoMessage(p proto.Message) {
+	// reply message length = 4bytes size + 8bytes size BaseNetMsg + 2bytes message_name size + message_name + proto_data
 	out, err := proto.Marshal(p)
 	if err != nil {
 		log.Printf(err.Error())
@@ -125,13 +126,18 @@ func (w *World) SendMessage(p proto.Message) {
 	}
 
 	typeName := proto.MessageName(p)
-	msgSize := 2 + len(typeName) + len(out)
+	baseMsg := &BaseNetMsg{}
+	msgSize := binary.Size(baseMsg) + 2 + len(typeName) + len(out)
+	baseMsg.Id = utils.Crc32("MUW_DirectProtoMsg")
+	baseMsg.Size = uint32(msgSize)
 
 	var resp []byte = make([]byte, 4+msgSize)
 	binary.LittleEndian.PutUint32(resp[:4], uint32(msgSize))
-	binary.LittleEndian.PutUint16(resp[4:6], uint16(len(typeName)))
-	copy(resp[6:6+len(typeName)], []byte(typeName))
-	copy(resp[6+len(typeName):], out)
+	binary.LittleEndian.PutUint32(resp[4:8], baseMsg.Id)
+	binary.LittleEndian.PutUint32(resp[8:12], baseMsg.Size)
+	binary.LittleEndian.PutUint16(resp[12:12+2], uint16(len(typeName)))
+	copy(resp[14:14+len(typeName)], []byte(typeName))
+	copy(resp[14+len(typeName):], out)
 
 	if _, err := w.Con.Write(resp); err != nil {
 		log.Println(color.YellowString("reply message error:", err.Error()))
@@ -141,11 +147,11 @@ func (w *World) SendMessage(p proto.Message) {
 func (w *World) RequestWorldInfo() {
 	// request player info
 	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 17}
-	w.SendMessage(msgP)
+	w.SendProtoMessage(msgP)
 
 	// request guild info
 	msgG := &world_message.MUW_RequestGuildInfo{}
-	w.SendMessage(msgG)
+	w.SendProtoMessage(msgG)
 }
 
 func (w *World) AddPlayerInfo(p *world_message.CrossPlayerInfo) {

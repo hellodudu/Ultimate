@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"reflect"
@@ -20,13 +21,6 @@ import (
 type BaseNetMsg struct {
 	Id   uint32 // message name crc32
 	Size uint32 // message size
-}
-
-// world logon
-type MSG_MWU_WorldLogon struct {
-	BaseNetMsg
-	WorldID   uint32
-	WorldName [32]byte
 }
 
 // world session msg register info
@@ -100,29 +94,29 @@ func (ws *WorldSession) registerProto(msgID uint32, info *regInfo) {
 	ws.protoReg[msgID] = info
 }
 
-func binaryUnmarshal(data []byte) {
-	msg := &MSG_MWU_WorldLogon{}
-	byData := make([]byte, binary.Size(msg))
+// func binaryUnmarshal(data []byte) {
+// 	msg := &MSG_MWU_WorldLogon{}
+// 	byData := make([]byte, binary.Size(msg))
 
-	// discard top 4 bytes(message size)
-	copy(byData, data[4:])
+// 	// discard top 4 bytes(message size)
+// 	copy(byData, data[4:])
 
-	buf := &bytes.Buffer{}
-	if _, err := buf.Write(byData); err != nil {
-		log.Fatal(err)
-	}
+// 	buf := &bytes.Buffer{}
+// 	if _, err := buf.Write(byData); err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	// get top 4 bytes messageid
-	msgID := binary.LittleEndian.Uint32(buf.Bytes()[:4])
-	if msgID == utils.Crc32(string("MWU_WorldLogon")) {
-		if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("world<id:%d, name:%s> logon!\n", msg.WorldID, msg.WorldName)
-	}
+// 	// get top 4 bytes messageid
+// 	msgID := binary.LittleEndian.Uint32(buf.Bytes()[:4])
+// 	if msgID == utils.Crc32(string("MWU_WorldLogon")) {
+// 		if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		log.Printf("world<id:%d, name:%s> logon!\n", msg.WorldID, msg.WorldName)
+// 	}
 
-	log.Printf("translate msg:%+v\n", msg)
-}
+// 	log.Printf("translate msg:%+v\n", msg)
+// }
 
 func protoUnmarshal(data []byte, m proto.Message) {
 	if err := proto.Unmarshal(data, m); err != nil {
@@ -132,46 +126,79 @@ func protoUnmarshal(data []byte, m proto.Message) {
 	log.Printf("translate msg to proto:%T\n", m)
 }
 
-func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
-	// top 4 bytes are msgSize, next 2 bytes are proto name length, the next is proto name, final is proto data.
-	if len(data) <= 6 {
-		log.Println(color.YellowString("tcp recv data length <= 6:%s", string(data)))
-		return
+// decode binarys to proto message
+func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
+	byProto := data[12:]
+	protoNameLen := binary.LittleEndian.Uint16(byProto[:2])
+
+	if uint16(len(byProto)) < 2+protoNameLen {
+		return nil, errors.New("recv proto msg length < 2+protoNameLen:" + string(byProto))
 	}
 
-	protoNameLen := binary.LittleEndian.Uint16(data[4:6])
-
-	if uint16(len(data)) < 6+protoNameLen {
-		log.Println(color.YellowString("tcp recv data length <= 6+protoNameLen:%s", string(data)))
-		return
-	}
-
-	protoTypeName := string(data[6 : 6+protoNameLen])
-	protoData := data[6+protoNameLen:]
+	protoTypeName := string(byProto[2 : 2+protoNameLen])
+	protoData := byProto[2+protoNameLen:]
 	pType := proto.MessageType(protoTypeName)
 	if pType == nil {
-		log.Println(color.YellowString("invalid message<%s>, won't deal with it!", protoTypeName))
-		return
+		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it!" + protoTypeName))
 	}
 
 	// unmarshal
 	newProto, ok := reflect.New(pType.Elem()).Interface().(proto.Message)
 	if !ok {
-		log.Println(color.YellowString("invalid message<%s>, won't deal with it!", protoTypeName))
-		return
+		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it!" + protoTypeName))
 	}
 
 	protoUnmarshal(protoData, newProto)
+	return newProto, nil
+}
 
-	msgID := utils.Crc32(protoTypeName)
-	r, err := ws.getRegisterProto(msgID)
-	if err != nil {
-		log.Printf("unregisted msgid<%d> received!\n", msgID)
+// top 4 bytes are msgSize, next 8 bytes are BaseNetMsg
+// if it is protobuf msg, then next 2 bytes are proto name length, the next is proto name, final is proto data.
+// if it is transfer msg(transfer binarys to other world), then next are binarys to be transferd
+func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
+	if len(data) <= 12 {
+		log.Println(color.YellowString("tcp recv data length <= 12:%s", string(data)))
 		return
 	}
 
-	// callback
-	r.cb(con, ws, newProto)
+	baseMsg := &BaseNetMsg{}
+	byBaseMsg := make([]byte, binary.Size(baseMsg))
+
+	// discard top 4 bytes(message size)
+	copy(byBaseMsg, data[4:4+8])
+	buf := &bytes.Buffer{}
+	if _, err := buf.Write(byBaseMsg); err != nil {
+		log.Println(color.YellowString("cannot read message:", byBaseMsg, " from connection:", con, " err:", err.Error()))
+		return
+	}
+
+	// get top 4 bytes messageid
+	if err := binary.Read(buf, binary.LittleEndian, baseMsg); err != nil {
+		log.Println(color.YellowString("cannot read message:", byBaseMsg, " from connection:", con, " err:", err.Error()))
+		return
+	}
+
+	// proto message
+	if baseMsg.Id == utils.Crc32(string("MWU_DirectProtoMsg")) {
+		newProto, err := ws.decodeToProto(data)
+		if err != nil {
+			log.Println(color.YellowString(err.Error()))
+			return
+		}
+
+		protoMsgID := utils.Crc32(proto.MessageName(newProto))
+		r, err := ws.getRegisterProto(protoMsgID)
+		if err != nil {
+			log.Println(color.YellowString(fmt.Sprintf("unregisted protoMsgID<%d> received!", protoMsgID)))
+		}
+
+		// callback
+		r.cb(con, ws, newProto)
+	} else {
+
+		// transfer message
+	}
+
 }
 
 func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
@@ -197,7 +224,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	ws.mapWorld[w.Id] = w
 	ws.mapConn[w.Con] = w
 	ws.mu.Unlock()
-	log.Println(color.GreenString("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
+	log.Println(color.CyanString("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
 	go w.Run()
 	return w, nil
 }

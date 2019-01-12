@@ -144,6 +144,12 @@ func (w *World) SendProtoMessage(p proto.Message) {
 	}
 }
 
+func (w *World) SendTransferMessage(data []byte) {
+	if _, err := w.Con.Write(data); err != nil {
+		log.Println(color.YellowString("transfer message error:", err.Error()))
+	}
+}
+
 func (w *World) RequestWorldInfo() {
 	// request player info
 	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 17}

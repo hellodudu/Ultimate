@@ -23,6 +23,13 @@ type BaseNetMsg struct {
 	Size uint32 // message size
 }
 
+// transfer message type
+type TransferNetMsg struct {
+	BaseNetMsg
+	WorldID  uint32 // world to recv message
+	PlayerID int64  // player to recv message
+}
+
 // world session msg register info
 type regInfo struct {
 	cb func(net.Conn, *WorldSession, proto.Message)
@@ -165,7 +172,7 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	byBaseMsg := make([]byte, binary.Size(baseMsg))
 
 	// discard top 4 bytes(message size)
-	copy(byBaseMsg, data[4:4+8])
+	copy(byBaseMsg, data[4:4+binary.Size(baseMsg)])
 	buf := &bytes.Buffer{}
 	if _, err := buf.Write(byBaseMsg); err != nil {
 		log.Println(color.YellowString("cannot read message:", byBaseMsg, " from connection:", con, " err:", err.Error()))
@@ -194,9 +201,36 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 
 		// callback
 		r.cb(con, ws, newProto)
-	} else {
 
 		// transfer message
+	} else if baseMsg.Id == utils.Crc32(string("MWU_TransferMsg")) {
+		transferMsg := &TransferNetMsg{}
+		byTransferMsg := make([]byte, binary.Size(transferMsg))
+
+		// discard top 4 bytes(message size)
+		copy(byTransferMsg, data[4:4+binary.Size(transferMsg)])
+		buf := &bytes.Buffer{}
+		if _, err := buf.Write(byTransferMsg); err != nil {
+			log.Println(color.YellowString("cannot read message:", byTransferMsg, " from connection:", con, " err:", err.Error()))
+			return
+		}
+
+		// get top 4 bytes messageid
+		if err := binary.Read(buf, binary.LittleEndian, transferMsg); err != nil {
+			log.Println(color.YellowString("cannot read message:", byTransferMsg, " from connection:", con, " err:", err.Error()))
+			return
+		}
+
+		log.Println(color.CyanString(fmt.Sprintf("recv transfer msg to world<%d> player<%d>", transferMsg.WorldID, transferMsg.PlayerID)))
+
+		// send message to world
+		sendWorld := ws.GetWorldByID(transferMsg.WorldID)
+		if sendWorld == nil {
+			log.Println(color.YellowString(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.WorldID)))
+			return
+		}
+
+		sendWorld.SendTransferMessage(data)
 	}
 
 }

@@ -12,6 +12,7 @@ create table global (
 drop table if exists `world`;
 create table world (
     `id` int(10) not null default '0' comment 'world id',
+    `name` varchar(32) not null default '' comment 'world name',
     `last_connect_time` int(10) not null default '0' comment 'last connect time stamp',
     primary key (`id`)
 ) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='world';

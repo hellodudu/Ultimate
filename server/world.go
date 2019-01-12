@@ -17,8 +17,8 @@ import (
 )
 
 type World struct {
-	Id         uint32      // world id
-	Name       string      // world name
+	Id         uint32      `sql:"id"`   // world id
+	Name       string      `sql:"name"` // world name
 	Con        net.Conn    // connection
 	tHeartBeat *time.Timer // connection heart beat
 	tTimeOut   *time.Timer // connection time out

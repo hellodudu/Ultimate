@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"reflect"
 	"time"
 
 	"github.com/fatih/color"
@@ -28,7 +29,14 @@ func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
 	world.SendProtoMessage(reply)
 
 	// save to db
-	query := fmt.Sprintf("replace into world(id, last_connect_time) values(%d, %d)", world.Id, int32(time.Now().Unix()))
+	fieldID, foundID := reflect.TypeOf(*world).FieldByName("Id")
+	fieldName, foundName := reflect.TypeOf(*world).FieldByName("Name")
+	if !foundID || !foundName {
+		log.Println(color.YellowString("cannot find world's field by Id or Name"))
+		return
+	}
+
+	query := fmt.Sprintf("replace into world(%s, %s, last_connect_time) values(%d, \"%s\", %d)", fieldID.Tag.Get("sql"), fieldName.Tag.Get("sql"), world.Id, world.Name, int32(time.Now().Unix()))
 	world.QueryWrite(query)
 }
 

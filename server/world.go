@@ -69,7 +69,8 @@ func (w *World) LoadFromDB() {
 
 	for rows.Next() {
 		var id, time int32
-		if err := rows.Scan(&id, &time); err != nil {
+		var name string
+		if err := rows.Scan(&id, &name, &time); err != nil {
 			log.Println(color.YellowString("world load query err:", err))
 		}
 		log.Println(color.CyanString("world load query success:", id, time))
@@ -202,6 +203,26 @@ func (w *World) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
 	}
 
 	w.mu.Unlock()
+}
+
+func (w *World) PlayUltimateRecord(src_player_id int64, src_server_id uint32, record_id int64, dst_server_id uint32) {
+	msg := &world_message.MUW_PlayUltimateRecord{
+		SrcPlayerId: src_player_id,
+		SrcServerId: src_server_id,
+		RecordId:    record_id,
+		DstServerId: dst_server_id,
+	}
+	w.SendProtoMessage(msg)
+}
+
+func (w *World) RequestUltimatePlayer(src_player_id int64, src_server_id uint32, dst_player_id int64, dst_server_id uint32) {
+	msg := &world_message.MUW_RequestUltimatePlayer{
+		SrcPlayerId: src_player_id,
+		SrcServerId: src_server_id,
+		DstPlayerId: dst_player_id,
+		DstServerId: dst_server_id,
+	}
+	w.SendProtoMessage(msg)
 }
 
 func (w *World) QueryWrite(query string) {

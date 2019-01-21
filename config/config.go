@@ -3,8 +3,8 @@ package config
 import "github.com/gorilla/websocket"
 
 // listen
-var TcpListenAddr string = "192.168.2.225:7030"
-var HttpListenAddr string = "127.0.0.1:8080"
+var TcpListenAddr string = ":7030"
+var HttpListenAddr string = ":8080"
 
 // world config
 var WorldHeartBeatSec uint32 = 20

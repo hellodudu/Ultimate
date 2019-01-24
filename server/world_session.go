@@ -85,6 +85,12 @@ func (ws *WorldSession) registerAllMessage() {
 	ws.registerProto(utils.Crc32("world_message.MWU_PlayUltimateRecord"), &regInfo{cb: HandlePlayUltimateRecord})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_RequestUltimatePlayer"), &regInfo{cb: HandleRequestUltimatePlayer})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_ArenaMatching"), &regInfo{cb: HandleArenaMatching})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_ArenaAddRecord"), &regInfo{cb: HandleArenaAddRecord})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_ArenaBattleResult"), &regInfo{cb: HandleArenaBattleResult})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {

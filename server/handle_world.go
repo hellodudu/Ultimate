@@ -9,6 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/Ultimate/game"
 	"github.com/hellodudu/Ultimate/proto"
 )
 
@@ -118,5 +119,32 @@ func HandleRequestUltimatePlayer(con net.Conn, ws *WorldSession, p proto.Message
 		}
 
 		dstWorld.RequestUltimatePlayer(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, msg.DstServerId)
+	}
+}
+
+///////////////////////////////
+// arena battle
+//////////////////////////////
+func HandleArenaMatching(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ArenaMatching)
+		if !ok {
+			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_ArenaMatching"))
+			return
+		}
+
+		game.GetGame().GetArena().Matching(srcWorld, msg.PlayerId)
+	}
+}
+
+func HandleArenaAddRecord(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ArenaAddRecord)
+		if !ok {
+			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_ArenaAddRecord"))
+			return
+		}
+
+		game.GetGame().GetArena().AddRecord(srcWorld, msg.Record)
 	}
 }

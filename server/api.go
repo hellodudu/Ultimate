@@ -15,67 +15,73 @@ import (
 )
 
 // global var
-var ultimateAPI *UltimateAPI = nil
+var api *API = nil
 
-// UltimateAPI api define
-type UltimateAPI struct {
+// api define
+type API struct {
 	td       *task.Dispatcher // task dispatcher
 	db       *sql.DB          // database
 	rds      *redis.Client    // redis
 	tcp_s    *TcpServer       // tcp server
 	http_s   *HttpServer      // http server
 	world_sn *WorldSession    // world session
-	reqNum   int              // request number
-	appMap   map[int]*App     // app map
+	gameMgr  *GameMgr
+	reqNum   int          // request number
+	appMap   map[int]*App // app map
 	wg       sync.WaitGroup
 	cWrite   chan string
 }
 
-func NewUltimateAPI() (*UltimateAPI, error) {
-	if ultimateAPI != nil {
-		return ultimateAPI, nil
+func NewAPI() (*API, error) {
+	if api != nil {
+		return api, nil
 	}
 
-	ultimateAPI = &UltimateAPI{
+	api = &API{
 		reqNum: 0,
 		appMap: make(map[int]*App),
 		cWrite: make(chan string, 100),
 	}
 
-	ultimateAPI.wg.Add(5)
-	go ultimateAPI.InitTask()
-	go ultimateAPI.InitDB()
-	// go ultimateAPI.InitRedis()
-	go ultimateAPI.InitTcpServer()
-	go ultimateAPI.InitHttpServer()
-	go ultimateAPI.InitWorldSession()
+	api.wg.Add(6)
+	go api.InitTask()
+	go api.InitDB()
+	// go api.InitRedis()
+	go api.InitTcpServer()
+	go api.InitHttpServer()
+	go api.InitWorldSession()
+	go api.InitGame()
 
-	ultimateAPI.wg.Wait()
-	log.Println(color.CyanString("UltimateAPI all init ok!"))
-	return ultimateAPI, nil
+	api.wg.Wait()
+	log.Println(color.CyanString("api all init ok!"))
+	return api, nil
 }
 
-func GetUltimateAPI() *UltimateAPI {
-	return ultimateAPI
+func Instance() *API {
+	return api
 }
 
-func (api *UltimateAPI) GetWorldSession() *WorldSession {
+func (api *API) GetWorldSession() *WorldSession {
 	return api.world_sn
 }
 
+func (api *API) GetGameMgr() *GameMgr {
+	return api.gameMgr
+}
+
 // init task and taskdispatcher
-func (api *UltimateAPI) InitTask() {
+func (api *API) InitTask() {
 	defer api.wg.Done()
 	var err error
 	if api.td, err = task.NewDispatcher(); err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(color.CyanString("UltimateAPI task init ok!"))
+	log.Println(color.CyanString("api task init ok!"))
 }
 
 // init db
-func (api *UltimateAPI) InitDB() {
+func (api *API) InitDB() {
 	defer api.wg.Done()
 	var err error
 	api.db, err = sql.Open("mysql", config.MysqlDSN)
@@ -104,10 +110,10 @@ func (api *UltimateAPI) InitDB() {
 	// 	log.Fatal(err)
 	// }
 
-	log.Printf(color.CyanString("UltimateAPI db init ok!"))
+	log.Printf(color.CyanString("api db init ok!"))
 }
 
-func (api *UltimateAPI) InitRedis() {
+func (api *API) InitRedis() {
 	defer api.wg.Done()
 	api.rds = redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddr,
@@ -119,44 +125,54 @@ func (api *UltimateAPI) InitRedis() {
 		log.Fatal(err)
 	}
 
-	log.Println(color.CyanString("UltimateAPI redis init ok"))
+	log.Println(color.CyanString("api redis init ok"))
 }
 
 // init tcp server
-func (api *UltimateAPI) InitTcpServer() {
+func (api *API) InitTcpServer() {
 	defer api.wg.Done()
 	var err error
 	if api.tcp_s, err = NewTcpServer(); err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(color.CyanString("UltimateAPI tcp_server init ok!"))
+	log.Println(color.CyanString("api tcp_server init ok!"))
 }
 
 // init http server
-func (api *UltimateAPI) InitHttpServer() {
+func (api *API) InitHttpServer() {
 	defer api.wg.Done()
 	var err error
 	if api.http_s, err = NewHttpServer(); err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(color.CyanString("UltimateAPI http_server init ok!"))
+	log.Println(color.CyanString("api http_server init ok!"))
 }
 
 // init world session
-func (api *UltimateAPI) InitWorldSession() {
+func (api *API) InitWorldSession() {
 	defer api.wg.Done()
 	var err error
 	if api.world_sn, err = NewWorldSession(); err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(color.CyanString("UltimateAPI world_session init ok!"))
+	log.Println(color.CyanString("api world_session init ok!"))
+}
+
+func (api *API) InitGame() {
+	defer api.wg.Done()
+	var err error
+	if api.gameMgr, err = NewGameMgr(); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(color.CyanString("api gameMgr init ok!"))
 }
 
 // run
-func (api *UltimateAPI) Run() {
+func (api *API) Run() {
 	go api.tcp_s.Run()
 	go api.http_s.Run()
 	go api.world_sn.Run()
@@ -170,20 +186,20 @@ func (api *UltimateAPI) Run() {
 	}()
 }
 
-func (api *UltimateAPI) Stop() {
+func (api *API) Stop() {
 	api.db.Close()
 	api.world_sn.Stop()
 	os.Exit(0)
 }
 
-func (api *UltimateAPI) GenReqNum() int {
+func (api *API) GenReqNum() int {
 	api.wg.Add(1)
 	api.reqNum = api.reqNum + 1
 	api.wg.Done()
 	return api.reqNum
 }
 
-func (api *UltimateAPI) AddTask(cb task.TaskCallback) {
+func (api *API) AddTask(cb task.TaskCallback) {
 	newReqNum := api.GenReqNum()
 	newTask, err := task.NewTask(newReqNum, cb)
 	if err != nil {
@@ -192,7 +208,7 @@ func (api *UltimateAPI) AddTask(cb task.TaskCallback) {
 	api.td.AddTask(newTask)
 }
 
-func (api *UltimateAPI) AddNewApp(app *App) error {
+func (api *API) AddNewApp(app *App) error {
 	if _, ok := api.appMap[app.AppID]; ok {
 		errStr := fmt.Sprintf("add exist app<%d>\n", app.AppID)
 		log.Printf(errStr)
@@ -233,6 +249,6 @@ func (api *UltimateAPI) AddNewApp(app *App) error {
 	return nil
 }
 
-func (api *UltimateAPI) QueryWrite(query string) {
+func (api *API) QueryWrite(query string) {
 	api.cWrite <- query
 }

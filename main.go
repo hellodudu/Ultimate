@@ -7,16 +7,16 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/Ultimate/res"
-	"github.com/hellodudu/Ultimate/server"
+	ultimate "github.com/hellodudu/Ultimate/server"
 )
 
 func main() {
-	ultimateAPI, err := ultimate.NewUltimateAPI()
+	api, err := ultimate.NewAPI()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ultimateAPI.Run()
+	api.Run()
 
 	// xmlloader
 	res.NewXmlLoader()
@@ -26,5 +26,5 @@ func main() {
 	signal.Notify(c, os.Interrupt, os.Kill)
 	sig := <-c
 	log.Printf("ultimate server closing down (signal: %v)\n", sig)
-	ultimateAPI.Stop()
+	api.Stop()
 }

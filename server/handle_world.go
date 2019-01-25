@@ -9,7 +9,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/game"
 	"github.com/hellodudu/Ultimate/proto"
 )
 
@@ -72,7 +71,7 @@ func HandleRequestPlayerInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		world.AddPlayerInfoList(msg.Info)
+		Instance().GetGameMgr().AddPlayerInfoList(msg.Info)
 	}
 }
 
@@ -84,7 +83,7 @@ func HandleRequestGuildInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		world.AddGuildInfoList(msg.Info)
+		Instance().GetGameMgr().AddGuildInfoList(msg.Info)
 	}
 }
 
@@ -133,7 +132,7 @@ func HandleArenaMatching(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		game.GetGame().GetArena().Matching(srcWorld, msg.PlayerId)
+		Instance().GetGameMgr().GetArena().Matching(srcWorld, msg.PlayerId)
 	}
 }
 
@@ -145,6 +144,18 @@ func HandleArenaAddRecord(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		game.GetGame().GetArena().AddRecord(srcWorld, msg.Record)
+		Instance().GetGameMgr().GetArena().AddRecord(srcWorld, msg.Record)
+	}
+}
+
+func HandleArenaBattleResult(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ArenaBattleResult)
+		if !ok {
+			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_ArenaBattleResult"))
+			return
+		}
+
+		Instance().GetGameMgr().GetArena().BattleResult(msg.AttackId, msg.TargetId, msg.AttackWin)
 	}
 }

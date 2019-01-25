@@ -73,13 +73,13 @@ func handleTcpConnection(con net.Conn) {
 		ok := scanner.Scan()
 		if ok {
 			byMsg := scanner.Bytes()
-			GetUltimateAPI().AddTask(func() {
-				GetUltimateAPI().GetWorldSession().HandleMessage(con, byMsg)
+			Instance().AddTask(func() {
+				Instance().GetWorldSession().HandleMessage(con, byMsg)
 			})
 		} else if err := scanner.Err(); err != nil {
 			log.Println(color.YellowString("scan error:%s", err.Error()))
 			// end of connection
-			GetUltimateAPI().GetWorldSession().DisconnectWorld(con)
+			Instance().GetWorldSession().DisconnectWorld(con)
 			break
 		} else {
 			log.Println(color.CyanString("one client connection shut down!"))

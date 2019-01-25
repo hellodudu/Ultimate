@@ -55,7 +55,7 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 
 func (w *World) LoadFromDB() {
 	query := fmt.Sprintf("select * from world where id = %d", w.Id)
-	stmt, err := GetUltimateAPI().db.PrepareContext(w.ctx, query)
+	stmt, err := Instance().db.PrepareContext(w.ctx, query)
 	if err != nil {
 		log.Println(color.YellowString("world <id:", w.Id, "> doing sql prepare failed:", err.Error()))
 		return
@@ -161,50 +161,6 @@ func (w *World) RequestWorldInfo() {
 	w.SendProtoMessage(msgG)
 }
 
-func (w *World) AddPlayerInfo(p *world_message.CrossPlayerInfo) {
-	w.mu.Lock()
-	w.mapPlayer[p.PlayerId] = p
-	w.mu.Unlock()
-
-	log.Println(color.GreenString("add player info:", p))
-}
-
-func (w *World) AddPlayerInfoList(s []*world_message.CrossPlayerInfo) {
-	if len(s) == 0 {
-		return
-	}
-
-	w.mu.Lock()
-
-	for _, v := range s {
-		w.mapPlayer[v.PlayerId] = v
-	}
-
-	w.mu.Unlock()
-}
-
-func (w *World) AddGuildInfo(g *world_message.CrossGuildInfo) {
-	w.mu.Lock()
-	w.mapGuild[g.GuildId] = g
-	w.mu.Unlock()
-
-	log.Println(color.GreenString("add guild info:", g))
-}
-
-func (w *World) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
-	if len(s) == 0 {
-		return
-	}
-
-	w.mu.Lock()
-
-	for _, v := range s {
-		w.mapGuild[v.GuildId] = v
-	}
-
-	w.mu.Unlock()
-}
-
 func (w *World) PlayUltimateRecord(src_player_id int64, src_server_id uint32, record_id int64, dst_server_id uint32) {
 	msg := &world_message.MUW_PlayUltimateRecord{
 		SrcPlayerId: src_player_id,
@@ -230,7 +186,7 @@ func (w *World) QueryWrite(query string) {
 }
 
 func (w *World) Save2DB(query string) {
-	stmt, err := GetUltimateAPI().db.PrepareContext(w.ctx, query)
+	stmt, err := Instance().db.PrepareContext(w.ctx, query)
 	if err != nil {
 		log.Println(color.YellowString("world <id:", w.Id, "> doing sql prepare failed:", err.Error()))
 		return

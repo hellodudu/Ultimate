@@ -176,6 +176,7 @@ func (api *API) Run() {
 	go api.tcp_s.Run()
 	go api.http_s.Run()
 	go api.world_sn.Run()
+	go api.gameMgr.Run()
 
 	go func() {
 		select {

@@ -30,6 +30,20 @@ func NewGameMgr() (*GameMgr, error) {
 	return game, err
 }
 
+func (g *GameMgr) Run() {
+	for {
+		select {
+		case <-g.ctx.Done():
+			log.Println(color.RedString("game mgr context done!"))
+			return
+		default:
+
+			g.arena.Run()
+
+		}
+	}
+}
+
 func (g *GameMgr) GetArena() *Arena {
 	return g.arena
 }

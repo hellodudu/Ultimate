@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/hellodudu/Ultimate/proto"
@@ -43,7 +44,12 @@ func (arena *Arena) Run() {
 
 		// matching
 		default:
+			t := time.Now()
 			arena.UpdateMatching()
+			e := time.Since(t)
+			// time.Sleep(100*time.Millisecond - e)
+			time.Sleep(time.Second - e)
+
 		}
 	}
 }
@@ -70,11 +76,11 @@ func (arena *Arena) UpdateMatching() {
 				TargetRecord: r,
 			}
 			world.SendProtoMessage(msg)
+			log.Println(color.CyanString("send msg ArenaStartBattle:", msg.TargetRecord))
 		}
 
 		delete(arena.mapMatchPool, k)
 	}
-
 }
 
 func (arena *Arena) PeekTarget(playerID int64) *world_message.ArenaRecord {
@@ -119,8 +125,9 @@ func (arena *Arena) AddRecord(w *World, rec *world_message.ArenaRecord) {
 	arena.mapMatching[rec.PlayerId] = struct{}{}
 
 	arena.mu.Unlock()
+
 }
 
 func (arena *Arena) BattleResult(atkID int64, tarID int64, win bool) {
-
+	log.Println(color.CyanString("arena battle result:", atkID, tarID, win))
 }

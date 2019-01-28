@@ -76,7 +76,6 @@ func (arena *Arena) UpdateMatching() {
 				TargetRecord: r,
 			}
 			world.SendProtoMessage(msg)
-			log.Println(color.CyanString("send msg ArenaStartBattle:", msg.TargetRecord))
 		}
 
 		delete(arena.mapMatchPool, k)
@@ -94,16 +93,14 @@ func (arena *Arena) PeekTarget(playerID int64) *world_message.ArenaRecord {
 }
 
 func (arena *Arena) Matching(w *World, playerID int64) {
-	if _, ok := arena.mapMatching[playerID]; ok {
-		return
-	}
+	if _, ok := arena.mapMatching[playerID]; !ok {
+		// request player record
+		msg := &world_message.MUW_ArenaAddRecord{
+			PlayerId: playerID,
+		}
 
-	// request player record
-	msg := &world_message.MUW_ArenaAddRecord{
-		PlayerId: playerID,
+		w.SendProtoMessage(msg)
 	}
-
-	w.SendProtoMessage(msg)
 
 	// add to match pool
 	arena.mu.Lock()

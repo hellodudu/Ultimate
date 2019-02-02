@@ -15,6 +15,7 @@ var ArenaMatchSectionNum int32 = 8 // arena section num
 type Arena struct {
 	mapRecord     map[int64]*world_message.ArenaRecord // all player's arena record
 	listMatchPool []map[int64]struct{}                 // 8 level match pool
+	listRecReq    map[int64]struct{}                   // list to request player arena record
 	chMatchWait   chan int64                           // match wait player channel
 	ctx           context.Context
 	cancel        context.CancelFunc
@@ -25,6 +26,7 @@ func NewArena(ctx context.Context) (*Arena, error) {
 	arena := &Arena{
 		mapRecord:     make(map[int64]*world_message.ArenaRecord),
 		listMatchPool: make([]map[int64]struct{}, ArenaMatchSectionNum),
+		listRecReq:    make(map[int64]struct{}, 1000),
 		chMatchWait:   make(chan int64, 1000),
 	}
 
@@ -70,7 +72,10 @@ func (arena *Arena) Run() {
 			arena.UpdateMatching(id)
 
 		default:
-			time.Sleep(time.Millisecond)
+			t := time.Now()
+			arena.UpdateRecordRequest()
+			d := time.Since(t)
+			time.Sleep(time.Millisecond - d)
 
 		}
 	}
@@ -116,20 +121,38 @@ func (arena *Arena) UpdateMatching(id int64) {
 	}
 }
 
+func (arena *Arena) UpdateRecordRequest() {
+	for k := range arena.listRecReq {
+		if _, ok := arena.mapRecord[k]; ok {
+			arena.chMatchWait <- k
+
+			arena.mu.Lock()
+			delete(arena.listRecReq, k)
+			arena.mu.Unlock()
+		}
+	}
+}
+
 // todo make a matching list
 func (arena *Arena) Matching(w *World, playerID int64) {
 	_, ok := arena.mapRecord[playerID]
-	if !ok {
+	if ok {
+		// add to match request
+		arena.chMatchWait <- playerID
+
+	} else {
 		// request player record
 		msg := &world_message.MUW_ArenaAddRecord{
 			PlayerId: playerID,
 		}
 
 		w.SendProtoMessage(msg)
-	}
 
-	// add to match request
-	arena.chMatchWait <- playerID
+		// add to record request list
+		arena.mu.Lock()
+		arena.listRecReq[playerID] = struct{}{}
+		arena.mu.Unlock()
+	}
 }
 
 func (arena *Arena) AddRecord(w *World, rec *world_message.ArenaRecord) {

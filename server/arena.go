@@ -10,24 +10,46 @@ import (
 	"github.com/hellodudu/Ultimate/proto"
 )
 
+var ArenaMatchSectionNum int32 = 8 // arena section num
+
 type Arena struct {
-	mapRecord    map[int64]*world_message.ArenaRecord // all player's arena record
-	mapMatching  map[int64]struct{}                   // all matching id
-	mapMatchPool map[int64]struct{}                   // match pool
-	ctx          context.Context
-	cancel       context.CancelFunc
-	mu           sync.Mutex
+	mapRecord     map[int64]*world_message.ArenaRecord // all player's arena record
+	listMatchPool []map[int64]struct{}                 // 8 level match pool
+	chMatchWait   chan int64                           // match wait player channel
+	ctx           context.Context
+	cancel        context.CancelFunc
+	mu            sync.Mutex
 }
 
 func NewArena(ctx context.Context) (*Arena, error) {
 	arena := &Arena{
-		mapRecord:    make(map[int64]*world_message.ArenaRecord),
-		mapMatching:  make(map[int64]struct{}),
-		mapMatchPool: make(map[int64]struct{}),
+		mapRecord:     make(map[int64]*world_message.ArenaRecord),
+		listMatchPool: make([]map[int64]struct{}, ArenaMatchSectionNum),
+		chMatchWait:   make(chan int64, 1000),
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
 	return arena, nil
+}
+
+func GetSectionIndexByScore(score int32) int32 {
+	if score <= 1000 {
+		return 0
+	} else if score <= 1100 {
+		return 1
+	} else if score <= 1200 {
+		return 2
+	} else if score <= 1300 {
+		return 3
+	} else if score <= 1400 {
+		return 4
+	} else if score <= 1500 {
+		return 5
+	} else if score <= 1600 {
+		return 6
+	} else {
+		return 7
+	}
 }
 
 func (arena *Arena) Stop() {
@@ -42,26 +64,40 @@ func (arena *Arena) Run() {
 			log.Println(color.RedString("arena context done!"))
 			return
 
-		// matching
+		// matching request
+		case id := <-arena.chMatchWait:
+			log.Println(color.CyanString("player:", id, " start arena matching!"))
+			arena.UpdateMatching(id)
+
 		default:
-			t := time.Now()
-			arena.UpdateMatching()
-			e := time.Since(t)
-			// time.Sleep(100*time.Millisecond - e)
-			time.Sleep(time.Second - e)
+			time.Sleep(time.Millisecond)
 
 		}
 	}
 }
 
-func (arena *Arena) UpdateMatching() {
-	if len(arena.mapMatching) < 2 {
+func (arena *Arena) UpdateMatching(id int64) {
+	// not enough targets
+	if len(arena.mapRecord) < 2 {
 		return
 	}
 
-	for k := range arena.mapMatchPool {
-		r := arena.PeekTarget(k)
-		if r == nil {
+	// get player arena section
+	srcRec, ok := arena.mapRecord[id]
+	if !ok {
+		log.Println(color.YellowString("cannot find player:", id, " 's arena record yet!"))
+		return
+	}
+
+	secIdx := GetSectionIndexByScore(srcRec.ArenaScore)
+	for k := range arena.listMatchPool[secIdx] {
+		// peek self then continue
+		if k == id {
+			continue
+		}
+
+		dstRec, ok := arena.mapRecord[k]
+		if !ok {
 			continue
 		}
 
@@ -73,27 +109,17 @@ func (arena *Arena) UpdateMatching() {
 		if world := Instance().GetWorldSession().GetWorldByID(info.ServerId); world != nil {
 			msg := &world_message.MUW_ArenaStartBattle{
 				AttackId:     k,
-				TargetRecord: r,
+				TargetRecord: dstRec,
 			}
 			world.SendProtoMessage(msg)
 		}
-
-		delete(arena.mapMatchPool, k)
 	}
 }
 
-func (arena *Arena) PeekTarget(playerID int64) *world_message.ArenaRecord {
-	for k := range arena.mapMatching {
-		if k != playerID {
-			return arena.mapRecord[k]
-		}
-	}
-
-	return nil
-}
-
+// todo make a matching list
 func (arena *Arena) Matching(w *World, playerID int64) {
-	if _, ok := arena.mapMatching[playerID]; !ok {
+	_, ok := arena.mapRecord[playerID]
+	if !ok {
 		// request player record
 		msg := &world_message.MUW_ArenaAddRecord{
 			PlayerId: playerID,
@@ -102,10 +128,8 @@ func (arena *Arena) Matching(w *World, playerID int64) {
 		w.SendProtoMessage(msg)
 	}
 
-	// add to match pool
-	arena.mu.Lock()
-	arena.mapMatchPool[playerID] = struct{}{}
-	arena.mu.Unlock()
+	// add to match request
+	arena.chMatchWait <- playerID
 }
 
 func (arena *Arena) AddRecord(w *World, rec *world_message.ArenaRecord) {
@@ -119,7 +143,8 @@ func (arena *Arena) AddRecord(w *World, rec *world_message.ArenaRecord) {
 	arena.mapRecord[rec.PlayerId] = rec
 
 	// add to matching cache
-	arena.mapMatching[rec.PlayerId] = struct{}{}
+	index := GetSectionIndexByScore(rec.ArenaScore)
+	arena.listMatchPool[index][rec.PlayerId] = struct{}{}
 
 	arena.mu.Unlock()
 

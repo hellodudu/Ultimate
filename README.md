@@ -6,7 +6,7 @@
 Install:
 
 ```shell
-go get github.com/hellodudu/comment
+go get github.com/hellodudu/Ultimate
 ```
 
 

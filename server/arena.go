@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/hellodudu/Ultimate/proto"
+	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
 var ArenaMatchSectionNum int32 = 8 // arena section num

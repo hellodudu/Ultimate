@@ -21,13 +21,7 @@ func NewTcpServer() (*TcpServer, error) {
 }
 
 func (server *TcpServer) Run() {
-	f, err := config.LoadIniFile("ini/config.ini")
-	if err != nil {
-		log.Println(color.RedString("cannot load ini/config.ini!"))
-		return
-	}
-
-	addr, err := config.GetIniValue(f, "listen", "TcpListenAddr")
+	addr, err := config.GetIniMgr().GetIniValue("ini/config.ini", "listen", "TcpListenAddr")
 	if err != nil {
 		log.Println(color.RedString("cannot read ini TcpListenAddr!"))
 		return

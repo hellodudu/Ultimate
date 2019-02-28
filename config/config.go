@@ -1,9 +1,6 @@
 package config
 
 import (
-	"log"
-
-	"github.com/fatih/color"
 	"github.com/go-ini/ini"
 	"github.com/gorilla/websocket"
 )
@@ -29,22 +26,51 @@ var Upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// load ini file by path
-func LoadIniFile(name string) (*ini.File, error) {
-	return ini.Load(name)
+var im *IniMgr = nil
+
+type IniMgr struct {
+	mapIniFile map[string]*ini.File
+}
+
+// get ini file by path
+func (im *IniMgr) getIniFile(name string) (*ini.File, error) {
+	if f, ok := im.mapIniFile[name]; ok {
+		return f, nil
+	}
+
+	f, err := ini.Load(name)
+	if err == nil {
+		im.mapIniFile[name] = f
+		return f, nil
+	}
+
+	return nil, err
+}
+
+func GetIniMgr() *IniMgr {
+	if im == nil {
+		im = &IniMgr{
+			mapIniFile: make(map[string]*ini.File, 256),
+		}
+	}
+
+	return im
 }
 
 // get ini value by section and key
-func GetIniValue(f *ini.File, section string, key string) (string, error) {
+func (im *IniMgr) GetIniValue(name string, section string, key string) (string, error) {
+	f, err := im.getIniFile(name)
+	if err != nil {
+		return "", err
+	}
+
 	s, err := f.GetSection(section)
 	if err != nil {
-		log.Println(color.RedString("has no section named %s!", section))
 		return "", err
 	}
 
 	k, err := s.GetKey(key)
 	if err != nil {
-		log.Println(color.RedString("has no key named %s!", key))
 		return "", err
 	}
 

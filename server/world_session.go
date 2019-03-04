@@ -13,7 +13,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/config"
+	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/utils"
 )
 
@@ -51,7 +51,7 @@ func NewWorldSession() (*WorldSession, error) {
 		mapWorld:  make(map[uint32]*World),
 		mapConn:   make(map[net.Conn]*World),
 		protoReg:  make(map[uint32]*regInfo),
-		cTimeOutW: make(chan uint32, config.WorldConnectMax),
+		cTimeOutW: make(chan uint32, global.WorldConnectMax),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -259,7 +259,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 		ws.KickWorld(id)
 	}
 
-	if uint32(len(ws.mapConn)) >= config.WorldConnectMax {
+	if uint32(len(ws.mapConn)) >= global.WorldConnectMax {
 		return nil, errors.New("world connected num full!")
 	}
 

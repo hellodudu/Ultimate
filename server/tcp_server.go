@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/hellodudu/Ultimate/config"
+	"github.com/hellodudu/Ultimate/global"
 )
 
 type TcpServer struct {
@@ -21,7 +21,7 @@ func NewTcpServer() (*TcpServer, error) {
 }
 
 func (server *TcpServer) Run() {
-	addr, err := config.GetIniMgr().GetIniValue("ini/config.ini", "listen", "TcpListenAddr")
+	addr, err := global.IniMgr.GetIniValue("config/config.ini", "listen", "TcpListenAddr")
 	if err != nil {
 		log.Println(color.RedString("cannot read ini TcpListenAddr!"))
 		return

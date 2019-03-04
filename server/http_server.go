@@ -7,7 +7,8 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/hellodudu/Ultimate/config"
+	"github.com/fatih/color"
+	"github.com/hellodudu/Ultimate/global"
 )
 
 var testChan chan interface{} = make(chan interface{}, 1)
@@ -24,7 +25,14 @@ func (server *HttpServer) Run() {
 	http.HandleFunc("/task", taskHandler)
 	http.HandleFunc("/ws", wsHandler)
 	http.HandleFunc("/bn", binaryHandler)
-	log.Fatal(http.ListenAndServe(config.HttpListenAddr, nil))
+
+	addr, err := global.IniMgr.GetIniValue("config/config.ini", "listen", "HttpListenAddr")
+	if err != nil {
+		log.Println(color.RedString("cannot read ini HttpListenAddr!"))
+		return
+	}
+
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +45,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := config.Upgrader.Upgrade(w, r, nil)
+	conn, err := global.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 	}

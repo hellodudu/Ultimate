@@ -10,7 +10,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/go-redis/redis"
-	"github.com/hellodudu/Ultimate/config"
+	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/task"
 )
 
@@ -84,7 +84,9 @@ func (api *API) InitTask() {
 func (api *API) InitDB() {
 	defer api.wg.Done()
 	var err error
-	api.db, err = sql.Open("mysql", config.MysqlDSN)
+
+	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
+	api.db, err = sql.Open("mysql", mysqlDSN)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,9 +118,9 @@ func (api *API) InitDB() {
 func (api *API) InitRedis() {
 	defer api.wg.Done()
 	api.rds = redis.NewClient(&redis.Options{
-		Addr:     config.RedisAddr,
-		Password: config.RedisPwd,
-		DB:       config.RedisDB,
+		Addr:     global.RedisAddr,
+		Password: global.RedisPwd,
+		DB:       global.RedisDB,
 	})
 
 	if _, err := api.rds.Ping().Result(); err != nil {

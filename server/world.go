@@ -11,8 +11,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/config"
-	"github.com/hellodudu/Ultimate/proto"
+	"github.com/hellodudu/Ultimate/global"
+	world_message "github.com/hellodudu/Ultimate/proto"
 	"github.com/hellodudu/Ultimate/utils"
 )
 
@@ -39,8 +39,8 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		Id:         id,
 		Name:       name,
 		Con:        con,
-		tHeartBeat: time.NewTimer(time.Duration(config.WorldHeartBeatSec) * time.Second),
-		tTimeOut:   time.NewTimer(time.Duration(config.WorldConTimeOutSec) * time.Second),
+		tHeartBeat: time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
+		tTimeOut:   time.NewTimer(time.Duration(global.WorldConTimeOutSec) * time.Second),
 		chw:        chw,
 		mapPlayer:  make(map[int64]*world_message.CrossPlayerInfo),
 		mapGuild:   make(map[int64]*world_message.CrossGuildInfo),
@@ -104,7 +104,7 @@ func (w *World) Run() {
 		case <-w.tHeartBeat.C:
 			msg := &world_message.MUW_TestConnect{}
 			w.SendProtoMessage(msg)
-			w.tHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
+			w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
 
 		// write query
 		case q := <-w.qWChan:
@@ -114,8 +114,8 @@ func (w *World) Run() {
 }
 
 func (w *World) ResetTestConnect() {
-	w.tHeartBeat.Reset(time.Duration(config.WorldHeartBeatSec) * time.Second)
-	w.tTimeOut.Reset(time.Duration(config.WorldConTimeOutSec) * time.Second)
+	w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
+	w.tTimeOut.Reset(time.Duration(global.WorldConTimeOutSec) * time.Second)
 }
 
 func (w *World) SendProtoMessage(p proto.Message) {

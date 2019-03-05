@@ -133,7 +133,6 @@ func (arena *Arena) UpdateRecordRequest() {
 	}
 }
 
-// todo make a matching list
 func (arena *Arena) Matching(w *World, playerID int64) {
 	_, ok := arena.mapRecord[playerID]
 	if ok {
@@ -155,7 +154,7 @@ func (arena *Arena) Matching(w *World, playerID int64) {
 	}
 }
 
-func (arena *Arena) AddRecord(w *World, rec *world_message.ArenaRecord) {
+func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 	if _, ok := arena.mapRecord[rec.PlayerId]; ok {
 		return
 	}
@@ -173,6 +172,28 @@ func (arena *Arena) AddRecord(w *World, rec *world_message.ArenaRecord) {
 
 }
 
+func (arena *Arena) ReorderRecord(rec *world_message.ArenaRecord, preSection, newSection int32) {
+	arena.mu.Lock()
+
+	delete(arena.listMatchPool[preSection], rec.PlayerId)
+	arena.listMatchPool[newSection][rec.PlayerId] = struct{}{}
+
+	arena.mu.Unlock()
+}
+
 func (arena *Arena) BattleResult(atkID int64, tarID int64, win bool) {
 	log.Println(color.CyanString("arena battle result:", atkID, tarID, win))
+
+	atkRec, ok := arena.mapRecord[atkID]
+	if !ok {
+		log.Println(color.YellowString("arena battle result return without record:", atkID, tarID, win))
+		return
+	}
+
+	preSection := GetSectionIndexByScore(atkRec.ArenaScore)
+	atkRec.ArenaScore += 10
+	newSection := GetSectionIndexByScore(atkRec.ArenaScore)
+	if preSection != newSection {
+		arena.ReorderRecord(atkRec, preSection, newSection)
+	}
 }

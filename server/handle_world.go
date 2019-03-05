@@ -9,7 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/proto"
+	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
 func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
@@ -144,7 +144,7 @@ func HandleArenaAddRecord(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		Instance().GetGameMgr().GetArena().AddRecord(srcWorld, msg.Record)
+		Instance().GetGameMgr().GetArena().AddRecord(msg.Record)
 	}
 }
 

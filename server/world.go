@@ -30,8 +30,8 @@ type World struct {
 	mapGuild  map[int64]*world_message.CrossGuildInfo
 	mu        sync.Mutex
 
-	qWChan  chan string
-	cDBInit chan struct{} //
+	qWChan   chan string
+	chDBInit chan struct{}
 }
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
@@ -45,7 +45,7 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		mapPlayer:  make(map[int64]*world_message.CrossPlayerInfo),
 		mapGuild:   make(map[int64]*world_message.CrossGuildInfo),
 		qWChan:     make(chan string, 100),
-		cDBInit:    make(chan struct{}, 1),
+		chDBInit:   make(chan struct{}, 1),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -76,7 +76,7 @@ func (w *World) LoadFromDB() {
 		log.Println(color.CyanString("world load query success:", id, time))
 	}
 
-	w.cDBInit <- struct{}{}
+	w.chDBInit <- struct{}{}
 }
 
 func (w *World) Stop() {
@@ -87,7 +87,7 @@ func (w *World) Stop() {
 }
 
 func (w *World) Run() {
-	<-w.cDBInit
+	<-w.chDBInit
 
 	for {
 		select {

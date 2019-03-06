@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/fatih/color"
-	"github.com/hellodudu/Ultimate/proto"
+	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
 type GameMgr struct {
@@ -27,6 +27,10 @@ func NewGameMgr() (*GameMgr, error) {
 	game.ctx, game.cancel = context.WithCancel(context.Background())
 	var err error
 	game.arena, err = NewArena(game.ctx)
+	if err == nil {
+		game.arena.LoadFromDB()
+	}
+
 	return game, err
 }
 

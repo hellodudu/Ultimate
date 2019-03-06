@@ -41,3 +41,6 @@ var (
 	MysqlPort, _ = IniMgr.GetIniValue("config/config.ini", "mysql", "port")
 	MysqlDB, _   = IniMgr.GetIniValue("config/config.ini", "mysql", "db")
 )
+
+// ultimate
+var UltimateID = turnToInt(IniMgr.GetIniValue("config/config.ini", "ultimate", "id"))

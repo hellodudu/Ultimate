@@ -2,11 +2,14 @@ package ultimate
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"reflect"
 	"sync"
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/hellodudu/Ultimate/global"
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
@@ -17,9 +20,12 @@ type Arena struct {
 	listMatchPool []map[int64]struct{}                 // 8 level match pool
 	listRecReq    map[int64]struct{}                   // list to request player arena record
 	chMatchWait   chan int64                           // match wait player channel
-	ctx           context.Context
-	cancel        context.CancelFunc
-	mu            sync.Mutex
+	endTime       int32                                `sql:"arena_end_time"`
+
+	ctx      context.Context
+	cancel   context.CancelFunc
+	mu       sync.Mutex
+	chDBInit chan struct{}
 }
 
 func NewArena(ctx context.Context) (*Arena, error) {
@@ -28,6 +34,7 @@ func NewArena(ctx context.Context) (*Arena, error) {
 		listMatchPool: make([]map[int64]struct{}, ArenaMatchSectionNum),
 		listRecReq:    make(map[int64]struct{}, 1000),
 		chMatchWait:   make(chan int64, 1000),
+		chDBInit:      make(chan struct{}, 1),
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
@@ -59,6 +66,8 @@ func (arena *Arena) Stop() {
 }
 
 func (arena *Arena) Run() {
+	<-arena.chDBInit
+
 	for {
 		select {
 		// context canceled
@@ -79,6 +88,36 @@ func (arena *Arena) Run() {
 
 		}
 	}
+}
+
+func (arena *Arena) LoadFromDB() {
+	f, ok := reflect.TypeOf(*arena).FieldByName("endTime")
+	if !ok {
+		log.Println(color.YellowString("cannot find arena's endTime field!"))
+		return
+	}
+
+	query := fmt.Sprintf("select %s from global where id = %d", f.Tag.Get("sql"), global.UltimateID)
+	stmt, err := Instance().db.PrepareContext(arena.ctx, query)
+	if err != nil {
+		log.Println(color.YellowString("arena load from db failed:", err.Error()))
+		return
+	}
+
+	rows, err := stmt.QueryContext(arena.ctx)
+	if err != nil {
+		log.Println(color.YellowString("arena load from db failed:", err.Error()))
+		return
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&arena.endTime); err != nil {
+			log.Println(color.YellowString("arena load from db failed:", err))
+		}
+		log.Println(color.CyanString("arena load from db success:", arena.endTime))
+	}
+
+	arena.chDBInit <- struct{}{}
 }
 
 func (arena *Arena) UpdateMatching(id int64) {

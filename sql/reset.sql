@@ -6,6 +6,7 @@ drop table if exists `global`;
 create table global (
     `id` int(10) not null default '0' comment 'ultimate id',
     `time_stamp` int(10) not null default '0' comment 'current time',
+    `arena_end_time` int(10) not null default '0' comment 'arena battle end time',
     primary key (`id`)
 ) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='global table';
 

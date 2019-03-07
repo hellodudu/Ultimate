@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/go-redis/redis"
@@ -43,13 +44,16 @@ func NewAPI() (*API, error) {
 		cWrite: make(chan string, 100),
 	}
 
-	api.wg.Add(6)
+	api.wg.Add(5)
 	go api.InitTask()
 	go api.InitDB()
 	// go api.InitRedis()
 	go api.InitTcpServer()
 	go api.InitHttpServer()
 	go api.InitWorldSession()
+
+	api.wg.Wait()
+	api.wg.Add(1)
 	go api.InitGame()
 
 	api.wg.Wait()
@@ -89,6 +93,29 @@ func (api *API) InitDB() {
 	api.db, err = sql.Open("mysql", mysqlDSN)
 	if err != nil {
 		log.Fatal(err)
+		return
+	}
+
+	query := "select * from global"
+	stmt, err := api.db.Prepare(query)
+	if err != nil {
+		log.Println(color.YellowString("api initdb failed:", err.Error()))
+		return
+	}
+
+	rows, err := stmt.Query()
+	if err != nil {
+		log.Println(color.YellowString("api initdb failed:", err.Error()))
+		return
+	}
+
+	if !rows.Next() {
+		query = fmt.Sprintf("replace into global set id=%d, time_stamp=%d, arena_end_time=%d", global.UltimateID, int32(time.Now().Unix()), 0)
+		if stmp, err := api.db.Prepare(query); err == nil {
+			if _, err := stmp.Exec(); err == nil {
+				log.Println(color.CyanString("query exec success:", query))
+			}
+		}
 	}
 
 	// rows, err := api.db.Query("select * from app")

@@ -51,12 +51,13 @@ func NewAPI() (*API, error) {
 	go api.InitTcpServer()
 	go api.InitHttpServer()
 	go api.InitWorldSession()
-
 	api.wg.Wait()
+
+	// game init after db init ok!
 	api.wg.Add(1)
 	go api.InitGame()
-
 	api.wg.Wait()
+
 	log.Println(color.CyanString("api all init ok!"))
 	return api, nil
 }

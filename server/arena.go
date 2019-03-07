@@ -98,15 +98,10 @@ func (arena *Arena) LoadFromDB() {
 	}
 
 	query := fmt.Sprintf("select %s from global where id = %d", f.Tag.Get("sql"), global.UltimateID)
-	stmt, err := Instance().db.PrepareContext(arena.ctx, query)
-	if err != nil {
-		log.Println(color.YellowString("arena load from db failed:", err.Error()))
-		return
-	}
 
-	rows, err := stmt.QueryContext(arena.ctx)
+	rows, err := Instance().dbMgr.Query(query)
 	if err != nil {
-		log.Println(color.YellowString("arena load from db failed:", err.Error()))
+		log.Println(color.YellowString("cannot load arena's endTime from dbMgr!"))
 		return
 	}
 

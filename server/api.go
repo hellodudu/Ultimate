@@ -1,13 +1,11 @@
 package ultimate
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/fatih/color"
 	"github.com/go-redis/redis"
@@ -21,7 +19,7 @@ var api *API = nil
 // api define
 type API struct {
 	td       *task.Dispatcher // task dispatcher
-	db       *sql.DB          // database
+	dbMgr    *DBMgr           // db manager
 	rds      *redis.Client    // redis
 	tcp_s    *TcpServer       // tcp server
 	http_s   *HttpServer      // http server
@@ -30,7 +28,6 @@ type API struct {
 	reqNum   int          // request number
 	appMap   map[int]*App // app map
 	wg       sync.WaitGroup
-	cWrite   chan string
 }
 
 func NewAPI() (*API, error) {
@@ -41,12 +38,11 @@ func NewAPI() (*API, error) {
 	api = &API{
 		reqNum: 0,
 		appMap: make(map[int]*App),
-		cWrite: make(chan string, 100),
 	}
 
 	api.wg.Add(5)
 	go api.InitTask()
-	go api.InitDB()
+	go api.InitDBMgr()
 	// go api.InitRedis()
 	go api.InitTcpServer()
 	go api.InitHttpServer()
@@ -80,67 +76,23 @@ func (api *API) InitTask() {
 	var err error
 	if api.td, err = task.NewDispatcher(); err != nil {
 		log.Fatal(err)
+		return
 	}
 
 	log.Println(color.CyanString("api task init ok!"))
 }
 
 // init db
-func (api *API) InitDB() {
+func (api *API) InitDBMgr() {
 	defer api.wg.Done()
 	var err error
 
-	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
-	api.db, err = sql.Open("mysql", mysqlDSN)
-	if err != nil {
+	if api.dbMgr, err = NewDBMgr(); err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	query := "select * from global"
-	stmt, err := api.db.Prepare(query)
-	if err != nil {
-		log.Println(color.YellowString("api initdb failed:", err.Error()))
-		return
-	}
-
-	rows, err := stmt.Query()
-	if err != nil {
-		log.Println(color.YellowString("api initdb failed:", err.Error()))
-		return
-	}
-
-	if !rows.Next() {
-		query = fmt.Sprintf("replace into global set id=%d, time_stamp=%d, arena_end_time=%d", global.UltimateID, int32(time.Now().Unix()), 0)
-		if stmp, err := api.db.Prepare(query); err == nil {
-			if _, err := stmp.Exec(); err == nil {
-				log.Println(color.CyanString("query exec success:", query))
-			}
-		}
-	}
-
-	// rows, err := api.db.Query("select * from app")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer rows.Close()
-
-	// newApp := &App{}
-	// for rows.Next() {
-	// 	if err := rows.Scan(&newApp.AppID, &newApp.AppName, &newApp.PubKey, &newApp.PriKey); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	log.Println("select result:", newApp)
-
-	// 	// add to appMap
-	// 	api.appMap[newApp.AppID] = newApp
-	// }
-
-	// if err := rows.Err(); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	log.Printf(color.CyanString("api db init ok!"))
+	log.Printf(color.CyanString("api db mgr init ok!"))
 }
 
 func (api *API) InitRedis() {
@@ -153,6 +105,7 @@ func (api *API) InitRedis() {
 
 	if _, err := api.rds.Ping().Result(); err != nil {
 		log.Fatal(err)
+		return
 	}
 
 	log.Println(color.CyanString("api redis init ok"))
@@ -207,18 +160,12 @@ func (api *API) Run() {
 	go api.http_s.Run()
 	go api.world_sn.Run()
 	go api.gameMgr.Run()
+	go api.dbMgr.Run()
 
-	go func() {
-		select {
-		default:
-		case q := <-api.cWrite:
-			api.db.Exec(q)
-		}
-	}()
 }
 
 func (api *API) Stop() {
-	api.db.Close()
+	api.dbMgr.Stop()
 	api.world_sn.Stop()
 	os.Exit(0)
 }
@@ -247,39 +194,35 @@ func (api *API) AddNewApp(app *App) error {
 	}
 
 	// todo insert into db
-	if api.db == nil {
-		errStr := "db didn't exist!"
-		log.Println(errStr)
-		return errors.New(errStr)
-	}
+	// if api.db == nil {
+	// 	errStr := "db didn't exist!"
+	// 	log.Println(errStr)
+	// 	return errors.New(errStr)
+	// }
 
-	stmt, err := api.db.Prepare("insert into app values(?, ?, ?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// stmt, err := api.db.Prepare("insert into app values(?, ?, ?, ?)")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	res, err := stmt.Exec(app.AppID, app.AppName, app.PubKey, app.PriKey)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// res, err := stmt.Exec(app.AppID, app.AppName, app.PubKey, app.PriKey)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	lastID, err := res.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// lastID, err := res.LastInsertId()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	rowAffect, err := res.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// rowAffect, err := res.RowsAffected()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	log.Printf("insert id = %d, affect rows = %d!\n", lastID, rowAffect)
+	// log.Printf("insert id = %d, affect rows = %d!\n", lastID, rowAffect)
 
 	api.appMap[app.AppID] = app
 
 	return nil
-}
-
-func (api *API) QueryWrite(query string) {
-	api.cWrite <- query
 }

@@ -30,7 +30,6 @@ type World struct {
 	mapGuild  map[int64]*world_message.CrossGuildInfo
 	mu        sync.Mutex
 
-	qWChan   chan string
 	chDBInit chan struct{}
 }
 
@@ -44,7 +43,6 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 		chw:        chw,
 		mapPlayer:  make(map[int64]*world_message.CrossPlayerInfo),
 		mapGuild:   make(map[int64]*world_message.CrossGuildInfo),
-		qWChan:     make(chan string, 100),
 		chDBInit:   make(chan struct{}, 1),
 	}
 
@@ -55,15 +53,9 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 
 func (w *World) LoadFromDB() {
 	query := fmt.Sprintf("select * from world where id = %d", w.Id)
-	stmt, err := Instance().db.PrepareContext(w.ctx, query)
+	rows, err := Instance().dbMgr.Query(query)
 	if err != nil {
-		log.Println(color.YellowString("world <id:", w.Id, "> doing sql prepare failed:", err.Error()))
-		return
-	}
-
-	rows, err := stmt.QueryContext(w.ctx)
-	if err != nil {
-		log.Println(color.YellowString("world <id:", w.Id, "> doing sql exec failed:", err.Error()))
+		log.Println(color.YellowString("world load rom db query<%s> failed:", query, err.Error()))
 		return
 	}
 
@@ -105,10 +97,6 @@ func (w *World) Run() {
 			msg := &world_message.MUW_TestConnect{}
 			w.SendProtoMessage(msg)
 			w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
-
-		// write query
-		case q := <-w.qWChan:
-			w.Save2DB(q)
 		}
 	}
 }
@@ -182,27 +170,5 @@ func (w *World) RequestUltimatePlayer(src_player_id int64, src_server_id uint32,
 }
 
 func (w *World) QueryWrite(query string) {
-	w.qWChan <- query
-}
-
-func (w *World) Save2DB(query string) {
-	stmt, err := Instance().db.PrepareContext(w.ctx, query)
-	if err != nil {
-		log.Println(color.YellowString("world <id:", w.Id, "> doing sql prepare failed:", err.Error()))
-		return
-	}
-
-	res, err := stmt.ExecContext(w.ctx)
-	if err != nil {
-		log.Println(color.YellowString("world <id:", w.Id, "> doing sql exec failed:", err.Error()))
-		return
-	}
-
-	_, err = res.RowsAffected()
-	if err != nil {
-		log.Println(color.WhiteString("world <id:", w.Id, "> doing sql rows affected failed:", err.Error()))
-		return
-	}
-
-	log.Println(color.CyanString("query successful exec:", query))
+	Instance().dbMgr.Exec(query)
 }

@@ -1,3 +1,4 @@
+
 # Ultimate server -- A game server writed by golang
 
 [![Build Status](https://travis-ci.com/hellodudu/Ultimate.svg?branch=master)](https://travis-ci.com/hellodudu/Ultimate)
@@ -5,9 +6,8 @@
 
 # Install:
 
-```shell
-go get github.com/hellodudu/Ultimate
-```
+	go get github.com/hellodudu/Ultimate
+
 
 
 # Using tools:
@@ -16,26 +16,19 @@ go get github.com/hellodudu/Ultimate
 
 # Run From Build:
 
-    * **Cross Build**: 
+* Cross Build: 
 
-    terminal:
+		env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v main.go
 
-        env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v main.go
-
-    * **Docker Build**:
+* Docker Build:
     
-    terminal:
+	    docker build -t ultimate .
 
-        docker build -t ultimate .
-
-    * **Docker Run**:
+* Docker Run:
     
-    terminal:
-
-        docker run -it -p 7030:7030 -p 8080:8080 ultimate
+	    docker run -it -p 7030:7030 -p 8080:8080 ultimate
 
 # Run From Docker Hub:
 
-    terminal:
-
-        docker run -it -p 7030:7030 -p 8080:8080 hellodudu86/ultimate:1.0
+   
+	docker run -it -p 7030:7030 -p 8080:8080 hellodudu86/ultimate:1.0

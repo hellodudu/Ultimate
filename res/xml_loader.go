@@ -27,7 +27,7 @@ type XmlLoader struct {
 
 func NewXmlLoader() *XmlLoader {
 	xmlLoader := &XmlLoader{}
-	xmlFile, err := os.Open("entity_client.xml")
+	xmlFile, err := os.Open("config/entity_client.xml")
 	if err != nil {
 		log.Println(err)
 	}
@@ -42,7 +42,7 @@ func NewXmlLoader() *XmlLoader {
 		log.Println(err)
 	}
 
-	log.Printf("Unmarshal xml success : %+v\n", xmlLoader)
+	// log.Printf("Unmarshal xml success : %+v\n", xmlLoader)
 
 	return xmlLoader
 }

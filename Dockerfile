@@ -3,4 +3,4 @@ FROM alpine
 COPY main main
 COPY config config
 COPY sql sql
-EXPOSE 7030
+CMD ["./main"]

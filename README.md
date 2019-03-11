@@ -3,14 +3,39 @@
 [![Build Status](https://travis-ci.com/hellodudu/Ultimate.svg?branch=master)](https://travis-ci.com/hellodudu/Ultimate)
 [![GoDoc](https://godoc.org/github.com/hellodudu/Ultimate?status.svg)](https://godoc.org/github.com/hellodudu/Ultimate)
 
-Install:
+# Install:
 
 ```shell
 go get github.com/hellodudu/Ultimate
 ```
 
 
-Using tools:
+# Using tools:
 
     github.com/go-sql-driver/mysql
 
+# Run From Build:
+
+    * **Cross Build**: 
+
+    terminal:
+
+        env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v main.go
+
+    * **Docker Build**:
+    
+    terminal:
+
+        docker build -t ultimate .
+
+    * **Docker Run**:
+    
+    terminal:
+
+        docker run -it -p 7030:7030 -p 8080:8080 ultimate
+
+# Run From Docker Hub:
+
+    terminal:
+
+        docker run -it -p 7030:7030 -p 8080:8080 hellodudu86/ultimate:1.0

@@ -37,6 +37,10 @@ func NewArena(ctx context.Context) (*Arena, error) {
 		chDBInit:      make(chan struct{}, 1),
 	}
 
+	for n := 0; int32(n) < ArenaMatchSectionNum; n++ {
+		arena.listMatchPool[n] = make(map[int64]struct{})
+	}
+
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
 	return arena, nil
 }

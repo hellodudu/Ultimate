@@ -318,7 +318,7 @@ func (ws *WorldSession) KickWorld(id uint32) {
 		return
 	}
 
-	log.Println(color.RedString("World<id:%d> was kicked by timeout reason!", w.Id))
+	log.Println(color.CyanString("World<id:%d> was kicked by timeout reason!", w.Id))
 	w.Stop()
 
 	ws.mu.Lock()
@@ -331,7 +331,7 @@ func (ws *WorldSession) Run() {
 	for {
 		select {
 		case <-ws.ctx.Done():
-			log.Println(color.RedString("world session context done!"))
+			log.Println(color.CyanString("world session context done!"))
 			ws.chStop <- struct{}{}
 			return
 		case wid := <-ws.chTimeOutW:

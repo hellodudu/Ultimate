@@ -85,7 +85,7 @@ func (w *World) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			log.Println(color.RedString("world<%d> context done!", w.Id))
+			log.Println(color.CyanString("world<%d> context done!", w.Id))
 			return
 
 		// connecting timeout

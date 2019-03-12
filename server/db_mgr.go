@@ -45,7 +45,7 @@ func (m *DBMgr) Run() {
 	for {
 		select {
 		case <-m.ctx.Done():
-			log.Println(color.RedString("db mgr context done!"))
+			log.Println(color.CyanString("db mgr context done!"))
 			m.chStop <- struct{}{}
 			return
 		}

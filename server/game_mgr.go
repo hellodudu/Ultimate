@@ -40,7 +40,7 @@ func (g *GameMgr) Run() {
 	for {
 		select {
 		case <-g.ctx.Done():
-			log.Println(color.RedString("game mgr context done!"))
+			log.Println(color.CyanString("game mgr context done!"))
 			return
 		}
 	}

@@ -140,7 +140,8 @@ func (ws *WorldSession) registerProto(msgID uint32, info *regInfo) {
 
 func protoUnmarshal(data []byte, m proto.Message) {
 	if err := proto.Unmarshal(data, m); err != nil {
-		log.Fatalln("Failed to parse proto msg:", err)
+		log.Println(color.RedString("Failed to parse proto msg<%T>:", m, err))
+		return
 	}
 
 	log.Printf("translate msg to proto:%T\n", m)

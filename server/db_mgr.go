@@ -18,11 +18,13 @@ type DBMgr struct {
 	ctx     context.Context
 	cancel  context.CancelFunc
 	wg      sync.WaitGroup
+	chStop  chan struct{}
 }
 
 func NewDBMgr() (*DBMgr, error) {
 	dbMgr := &DBMgr{
 		chWrite: make(chan string, 100),
+		chStop:  make(chan struct{}, 1),
 	}
 
 	dbMgr.ctx, dbMgr.cancel = context.WithCancel(context.Background())
@@ -44,15 +46,17 @@ func (m *DBMgr) Run() {
 		select {
 		case <-m.ctx.Done():
 			log.Println(color.RedString("db mgr context done!"))
+			m.chStop <- struct{}{}
 			return
 		}
 	}
 
 }
 
-func (m *DBMgr) Stop() {
+func (m *DBMgr) Stop() chan struct{} {
 	m.db.Close()
 	m.cancel()
+	return m.chStop
 }
 
 func (m *DBMgr) InitDBMgr() {

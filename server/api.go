@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"sync"
 
 	"github.com/fatih/color"
@@ -165,9 +164,8 @@ func (api *API) Run() {
 }
 
 func (api *API) Stop() {
-	api.dbMgr.Stop()
-	api.world_sn.Stop()
-	os.Exit(0)
+	<-api.dbMgr.Stop()
+	<-api.world_sn.Stop()
 }
 
 func (api *API) GenReqNum() int {

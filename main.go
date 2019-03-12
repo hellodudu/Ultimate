@@ -27,4 +27,5 @@ func main() {
 	sig := <-c
 	log.Printf("ultimate server closing down (signal: %v)\n", sig)
 	api.Stop()
+	os.Exit(0)
 }

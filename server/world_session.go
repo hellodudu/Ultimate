@@ -36,22 +36,24 @@ type regInfo struct {
 }
 
 type WorldSession struct {
-	mapWorld  map[uint32]*World // all connected world
-	mapConn   map[net.Conn]*World
-	protoReg  map[uint32]*regInfo
-	mu        sync.Mutex
-	wg        sync.WaitGroup
-	ctx       context.Context
-	cancel    context.CancelFunc
-	cTimeOutW chan uint32
+	mapWorld   map[uint32]*World // all connected world
+	mapConn    map[net.Conn]*World
+	protoReg   map[uint32]*regInfo
+	mu         sync.Mutex
+	wg         sync.WaitGroup
+	ctx        context.Context
+	cancel     context.CancelFunc
+	chTimeOutW chan uint32
+	chStop     chan struct{}
 }
 
 func NewWorldSession() (*WorldSession, error) {
 	w := &WorldSession{
-		mapWorld:  make(map[uint32]*World),
-		mapConn:   make(map[net.Conn]*World),
-		protoReg:  make(map[uint32]*regInfo),
-		cTimeOutW: make(chan uint32, global.WorldConnectMax),
+		mapWorld:   make(map[uint32]*World),
+		mapConn:    make(map[net.Conn]*World),
+		protoReg:   make(map[uint32]*regInfo),
+		chTimeOutW: make(chan uint32, global.WorldConnectMax),
+		chStop:     make(chan struct{}, 1),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -60,12 +62,13 @@ func NewWorldSession() (*WorldSession, error) {
 	return w, nil
 }
 
-func (ws *WorldSession) Stop() {
+func (ws *WorldSession) Stop() chan struct{} {
 	for _, world := range ws.mapWorld {
 		world.Stop()
 	}
 
 	ws.cancel()
+	return ws.chStop
 }
 
 func (ws *WorldSession) registerAllMessage() {
@@ -263,7 +266,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 		return nil, errors.New("world connected num full!")
 	}
 
-	w := NewWorld(id, name, con, ws.cTimeOutW)
+	w := NewWorld(id, name, con, ws.chTimeOutW)
 	ws.mu.Lock()
 	ws.mapWorld[w.Id] = w
 	ws.mapConn[w.Con] = w
@@ -328,8 +331,9 @@ func (ws *WorldSession) Run() {
 		select {
 		case <-ws.ctx.Done():
 			log.Println(color.RedString("world session context done!"))
+			ws.chStop <- struct{}{}
 			return
-		case wid := <-ws.cTimeOutW:
+		case wid := <-ws.chTimeOutW:
 			ws.KickWorld(wid)
 		}
 	}

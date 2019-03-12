@@ -32,6 +32,7 @@ type TransferNetMsg struct {
 
 // world session msg register info
 type regInfo struct {
+	lv int // debug level
 	cb func(net.Conn, *WorldSession, proto.Message)
 }
 
@@ -73,27 +74,60 @@ func (ws *WorldSession) Stop() chan struct{} {
 
 func (ws *WorldSession) registerAllMessage() {
 	// cb -- callback function
-	ws.registerProto(utils.Crc32("world_message.MWU_WorldLogon"), &regInfo{cb: HandleWorldLogon})
+	ws.registerProto(utils.Crc32("world_message.MWU_WorldLogon"), &regInfo{
+		lv: 1,
+		cb: HandleWorldLogon,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_TestConnect"), &regInfo{cb: HandleTestConnect})
+	ws.registerProto(utils.Crc32("world_message.MWU_TestConnect"), &regInfo{
+		lv: 0,
+		cb: HandleTestConnect,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_HeartBeat"), &regInfo{cb: HandleHeartBeat})
+	ws.registerProto(utils.Crc32("world_message.MWU_HeartBeat"), &regInfo{
+		lv: 0,
+		cb: HandleHeartBeat,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_WorldConnected"), &regInfo{cb: HandleWorldConnected})
+	ws.registerProto(utils.Crc32("world_message.MWU_WorldConnected"), &regInfo{
+		lv: 1,
+		cb: HandleWorldConnected,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_RequestPlayerInfo"), &regInfo{cb: HandleRequestPlayerInfo})
+	ws.registerProto(utils.Crc32("world_message.MWU_RequestPlayerInfo"), &regInfo{
+		lv: 2,
+		cb: HandleRequestPlayerInfo,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_RequestGuildInfo"), &regInfo{cb: HandleRequestGuildInfo})
+	ws.registerProto(utils.Crc32("world_message.MWU_RequestGuildInfo"), &regInfo{
+		lv: 2,
+		cb: HandleRequestGuildInfo,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_PlayUltimateRecord"), &regInfo{cb: HandlePlayUltimateRecord})
+	ws.registerProto(utils.Crc32("world_message.MWU_PlayUltimateRecord"), &regInfo{
+		lv: 2,
+		cb: HandlePlayUltimateRecord,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_RequestUltimatePlayer"), &regInfo{cb: HandleRequestUltimatePlayer})
+	ws.registerProto(utils.Crc32("world_message.MWU_RequestUltimatePlayer"), &regInfo{
+		lv: 2,
+		cb: HandleRequestUltimatePlayer,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_ArenaMatching"), &regInfo{cb: HandleArenaMatching})
+	ws.registerProto(utils.Crc32("world_message.MWU_ArenaMatching"), &regInfo{
+		lv: 2,
+		cb: HandleArenaMatching,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_ArenaAddRecord"), &regInfo{cb: HandleArenaAddRecord})
+	ws.registerProto(utils.Crc32("world_message.MWU_ArenaAddRecord"), &regInfo{
+		lv: 2,
+		cb: HandleArenaAddRecord,
+	})
 
-	ws.registerProto(utils.Crc32("world_message.MWU_ArenaBattleResult"), &regInfo{cb: HandleArenaBattleResult})
+	ws.registerProto(utils.Crc32("world_message.MWU_ArenaBattleResult"), &regInfo{
+		lv: 2,
+		cb: HandleArenaBattleResult,
+	})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {
@@ -144,7 +178,6 @@ func protoUnmarshal(data []byte, m proto.Message) {
 		return
 	}
 
-	log.Printf("translate msg to proto:%T\n", m)
 }
 
 // decode binarys to proto message
@@ -211,6 +244,11 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 		r, err := ws.getRegisterProto(protoMsgID)
 		if err != nil {
 			log.Println(color.YellowString(fmt.Sprintf("unregisted protoMsgID<%d> received!", protoMsgID)))
+		}
+
+		// debug level <= 1 will not print log to screen
+		if r.lv > 1 {
+			log.Printf("recv world proto msg:%T\n", newProto)
 		}
 
 		// callback

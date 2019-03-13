@@ -1,5 +1,5 @@
 FROM alpine
-# FROM mysql
+FROM mysql
 COPY main main
 COPY config config
 COPY sql sql

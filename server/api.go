@@ -9,6 +9,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/go-redis/redis"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/task"
 )
 
@@ -39,6 +40,10 @@ func NewAPI() (*API, error) {
 		appMap: make(map[int]*App),
 	}
 
+	if ok := logger.Init(); !ok {
+		return nil, errors.New("init log file failed!")
+	}
+
 	api.wg.Add(5)
 	go api.InitTask()
 	go api.InitDBMgr()
@@ -53,7 +58,7 @@ func NewAPI() (*API, error) {
 	go api.InitGame()
 	api.wg.Wait()
 
-	log.Println(color.CyanString("api all init ok!"))
+	logger.Info("api all init ok!")
 	return api, nil
 }
 

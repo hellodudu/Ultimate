@@ -117,8 +117,14 @@ func (arena *Arena) LoadFromDB() {
 		log.Println(color.CyanString("arena load from db success:", arena.endTime))
 	}
 
-	arena.chDBInit <- struct{}{}
+	// if arena endtime was expired, set a new endtime one month later
+	if int32(time.Now().Unix()) > arena.endTime {
+		arena.endTime = int32(time.Now().Add(time.Hour * 24 * 30).Unix())
+		query := fmt.Sprintf("update global set arena_end_time = %d", arena.endTime)
+		Instance().dbMgr.Exec(query)
+	}
 
+	arena.chDBInit <- struct{}{}
 }
 
 func (arena *Arena) UpdateMatching(id int64) {

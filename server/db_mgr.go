@@ -13,23 +13,21 @@ import (
 )
 
 type DBMgr struct {
-	db      *sql.DB
-	chWrite chan string
-	ctx     context.Context
-	cancel  context.CancelFunc
-	wg      sync.WaitGroup
-	chStop  chan struct{}
+	db     *sql.DB
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     sync.WaitGroup
+	chStop chan struct{}
 }
 
 func NewDBMgr() (*DBMgr, error) {
 	dbMgr := &DBMgr{
-		chWrite: make(chan string, 100),
-		chStop:  make(chan struct{}, 1),
+		chStop: make(chan struct{}, 1),
 	}
 
 	dbMgr.ctx, dbMgr.cancel = context.WithCancel(context.Background())
 
-	mysqlDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
+	mysqlDSN := fmt.Sprintf("%s:%s@(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
 	var err error
 	dbMgr.db, err = sql.Open("mysql", mysqlDSN)
 	if err != nil {

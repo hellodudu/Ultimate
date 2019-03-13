@@ -42,6 +42,7 @@ func NewArena(ctx context.Context) (*Arena, error) {
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
+
 	return arena, nil
 }
 
@@ -117,6 +118,7 @@ func (arena *Arena) LoadFromDB() {
 	}
 
 	arena.chDBInit <- struct{}{}
+
 }
 
 func (arena *Arena) UpdateMatching(id int64) {

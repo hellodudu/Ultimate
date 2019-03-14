@@ -54,7 +54,7 @@ func (w *World) LoadFromDB() {
 	query := fmt.Sprintf("select * from world where id = %d", w.Id)
 	rows, err := Instance().dbMgr.Query(query)
 	if err != nil {
-		logger.Warning("world load rom db query<%s> failed:", query, err)
+		logger.Warning(fmt.Sprintf("world load rom db query<%s> failed:", query, err))
 		return
 	}
 
@@ -84,7 +84,7 @@ func (w *World) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			logger.Info("world<%d> context done!", w.Id)
+			logger.Info(fmt.Sprintf("world<%d> context done!", w.Id))
 			return
 
 		// connecting timeout

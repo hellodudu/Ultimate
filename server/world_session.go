@@ -309,7 +309,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	ws.mapWorld[w.Id] = w
 	ws.mapConn[w.Con] = w
 	ws.mu.Unlock()
-	logger.Info("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con)
+	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
 	go w.Run()
 	return w, nil
 }
@@ -336,7 +336,7 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 		return
 	}
 
-	logger.Warning("World<id:%d> disconnected!", w.Id)
+	logger.Warning(fmt.Sprintf("World<id:%d> disconnected!", w.Id))
 	w.Stop()
 
 	ws.mu.Lock()
@@ -355,7 +355,7 @@ func (ws *WorldSession) KickWorld(id uint32) {
 		return
 	}
 
-	logger.Warning("World<id:%d> was kicked by timeout reason!", w.Id)
+	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", w.Id))
 	w.Stop()
 
 	ws.mu.Lock()

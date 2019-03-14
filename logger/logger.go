@@ -69,7 +69,7 @@ func Error(v ...interface{}) {
 }
 
 func Fatal(v ...interface{}) {
-	Error(v)
+	Error(v...)
 	os.Exit(1)
 }
 

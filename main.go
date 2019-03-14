@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 
@@ -25,7 +26,7 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill)
 	sig := <-c
-	logger.Print("ultimate server closing down (signal: %v)\n", sig)
+	logger.Print(fmt.Sprintf("ultimate server closing down (signal: %v)\n", sig))
 	api.Stop()
 	os.Exit(0)
 }

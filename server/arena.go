@@ -3,13 +3,12 @@ package ultimate
 import (
 	"context"
 	"fmt"
-	"log"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
@@ -77,12 +76,12 @@ func (arena *Arena) Run() {
 		select {
 		// context canceled
 		case <-arena.ctx.Done():
-			log.Println(color.RedString("arena context done!"))
+			logger.Info("arena context done!")
 			return
 
 		// matching request
 		case id := <-arena.chMatchWait:
-			log.Println(color.CyanString("player:", id, " start arena matching!"))
+			logger.Info("player:", id, " start arena matching!")
 			arena.UpdateMatching(id)
 
 		default:
@@ -98,7 +97,7 @@ func (arena *Arena) Run() {
 func (arena *Arena) LoadFromDB() {
 	f, ok := reflect.TypeOf(*arena).FieldByName("endTime")
 	if !ok {
-		log.Println(color.YellowString("cannot find arena's endTime field!"))
+		logger.Warning("cannot find arena's endTime field!")
 		return
 	}
 
@@ -106,15 +105,15 @@ func (arena *Arena) LoadFromDB() {
 
 	rows, err := Instance().dbMgr.Query(query)
 	if err != nil {
-		log.Println(color.YellowString("cannot load arena's endTime from dbMgr!"))
+		logger.Warning("cannot load arena's endTime from dbMgr!")
 		return
 	}
 
 	for rows.Next() {
 		if err := rows.Scan(&arena.endTime); err != nil {
-			log.Println(color.YellowString("arena load from db failed:", err))
+			logger.Warning("arena load from db failed:", err)
 		}
-		log.Println(color.CyanString("arena load from db success:", arena.endTime))
+		logger.Info("arena load from db success:", arena.endTime)
 	}
 
 	// if arena endtime was expired, set a new endtime one month later
@@ -136,7 +135,7 @@ func (arena *Arena) UpdateMatching(id int64) {
 	// get player arena section
 	srcRec, ok := arena.mapRecord[id]
 	if !ok {
-		log.Println(color.YellowString("cannot find player:", id, " 's arena record yet!"))
+		logger.Warning("cannot find player:", id, " 's arena record yet!")
 		return
 	}
 
@@ -228,11 +227,11 @@ func (arena *Arena) ReorderRecord(rec *world_message.ArenaRecord, preSection, ne
 }
 
 func (arena *Arena) BattleResult(atkID int64, tarID int64, win bool) {
-	log.Println(color.CyanString("arena battle result:", atkID, tarID, win))
+	logger.Info("arena battle result:", atkID, tarID, win)
 
 	atkRec, ok := arena.mapRecord[atkID]
 	if !ok {
-		log.Println(color.YellowString("arena battle result return without record:", atkID, tarID, win))
+		logger.Warning("arena battle result return without record:", atkID, tarID, win)
 		return
 	}
 

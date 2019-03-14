@@ -2,10 +2,9 @@ package ultimate
 
 import (
 	"context"
-	"log"
 	"sync"
 
-	"github.com/fatih/color"
+	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
@@ -40,7 +39,7 @@ func (g *GameMgr) Run() {
 	for {
 		select {
 		case <-g.ctx.Done():
-			log.Println(color.CyanString("game mgr context done!"))
+			logger.Info("game mgr context done!")
 			return
 		}
 	}
@@ -69,7 +68,7 @@ func (g *GameMgr) AddPlayerInfo(p *world_message.CrossPlayerInfo) {
 	g.mapPlayerInfo[p.PlayerId] = p
 	g.mu.Unlock()
 
-	log.Println(color.GreenString("add player info:", p))
+	logger.Info("add player info:", p)
 }
 
 func (g *GameMgr) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
@@ -91,7 +90,7 @@ func (g *GameMgr) AddGuildInfo(i *world_message.CrossGuildInfo) {
 	g.mapGuildInfo[i.GuildId] = i
 	g.mu.Unlock()
 
-	log.Println(color.GreenString("add guild info:", i))
+	logger.Info("add guild info:", i)
 }
 
 func (g *GameMgr) GetPlayerInfoByID(id int64) *world_message.CrossPlayerInfo {

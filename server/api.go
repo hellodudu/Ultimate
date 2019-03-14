@@ -3,10 +3,8 @@ package ultimate
 import (
 	"errors"
 	"fmt"
-	"log"
 	"sync"
 
-	"github.com/fatih/color"
 	"github.com/go-redis/redis"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/logger"
@@ -79,11 +77,11 @@ func (api *API) InitTask() {
 	defer api.wg.Done()
 	var err error
 	if api.td, err = task.NewDispatcher(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
-	log.Println(color.CyanString("api task init ok!"))
+	logger.Info("api task init ok!")
 }
 
 // init db
@@ -92,11 +90,11 @@ func (api *API) InitDBMgr() {
 	var err error
 
 	if api.dbMgr, err = NewDBMgr(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
-	log.Printf(color.CyanString("api db mgr init ok!"))
+	logger.Info("api db mgr init ok!")
 }
 
 func (api *API) InitRedis() {
@@ -108,11 +106,11 @@ func (api *API) InitRedis() {
 	})
 
 	if _, err := api.rds.Ping().Result(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
-	log.Println(color.CyanString("api redis init ok"))
+	logger.Info("api redis init ok")
 }
 
 // init tcp server
@@ -120,10 +118,10 @@ func (api *API) InitTcpServer() {
 	defer api.wg.Done()
 	var err error
 	if api.tcp_s, err = NewTcpServer(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	log.Println(color.CyanString("api tcp_server init ok!"))
+	logger.Info("api tcp_server init ok!")
 }
 
 // init http server
@@ -131,10 +129,10 @@ func (api *API) InitHttpServer() {
 	defer api.wg.Done()
 	var err error
 	if api.http_s, err = NewHttpServer(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	log.Println(color.CyanString("api http_server init ok!"))
+	logger.Info("api http_server init ok!")
 }
 
 // init world session
@@ -142,20 +140,20 @@ func (api *API) InitWorldSession() {
 	defer api.wg.Done()
 	var err error
 	if api.world_sn, err = NewWorldSession(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	log.Println(color.CyanString("api world_session init ok!"))
+	logger.Info("api world_session init ok!")
 }
 
 func (api *API) InitGame() {
 	defer api.wg.Done()
 	var err error
 	if api.gameMgr, err = NewGameMgr(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	log.Println(color.CyanString("api gameMgr init ok!"))
+	logger.Info("api gameMgr init ok!")
 }
 
 // run
@@ -184,7 +182,7 @@ func (api *API) AddTask(cb task.TaskCallback) {
 	newReqNum := api.GenReqNum()
 	newTask, err := task.NewTask(newReqNum, cb)
 	if err != nil {
-		log.Fatal("create new task error")
+		logger.Fatal("create new task error")
 	}
 	api.td.AddTask(newTask)
 }
@@ -192,7 +190,7 @@ func (api *API) AddTask(cb task.TaskCallback) {
 func (api *API) AddNewApp(app *App) error {
 	if _, ok := api.appMap[app.AppID]; ok {
 		errStr := fmt.Sprintf("add exist app<%d>\n", app.AppID)
-		log.Printf(errStr)
+		logger.Warning(errStr)
 		return errors.New(errStr)
 	}
 

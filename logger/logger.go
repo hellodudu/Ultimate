@@ -38,14 +38,6 @@ func Init() bool {
 	}
 	info = log.New(infoFile, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	warningName := fmt.Sprintf("log/%s_warning.log", fileTime)
-	warningFile, err := os.OpenFile(warningName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalln("Failed to open log file ", warningName, ":", err)
-		return false
-	}
-	warning = log.New(warningFile, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
-
 	errorName := fmt.Sprintf("log/%s_error.log", fileTime)
 	errorFile, err := os.OpenFile(errorName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -53,24 +45,30 @@ func Init() bool {
 		return false
 	}
 	error = log.New(errorFile, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	warning = error
 
 	return true
 }
 
-func Trace(s string) {
-	trace.Println(color.BlueString(s))
+func Trace(v ...interface{}) {
+	trace.Println(color.BlueString(fmt.Sprintln(v...)))
 }
 
-func Info(s string) {
-	info.Println(color.CyanString(s))
+func Info(v ...interface{}) {
+	info.Println(color.CyanString(fmt.Sprintln(v...)))
 }
 
-func Warning(s string) {
-	warning.Println(color.YellowString(s))
-	log.Println(color.YellowString(s))
+func Warning(v ...interface{}) {
+	warning.Println(color.YellowString(fmt.Sprintln(v...)))
+	log.Println(color.YellowString(fmt.Sprintln(v...)))
 }
 
-func Error(s string) {
-	error.Println(color.RedString(s))
-	log.Println(color.RedString(s))
+func Error(v ...interface{}) {
+	error.Println(color.RedString(fmt.Sprintln(v...)))
+	log.Println(color.RedString(fmt.Sprintln(v...)))
+}
+
+func Fatal(v ...interface{}) {
+	Error(v)
+	os.Exit(1)
 }

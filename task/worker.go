@@ -1,6 +1,6 @@
 package task
 
-import "log"
+import "github.com/hellodudu/Ultimate/logger"
 
 type Worker struct {
 	tasker Tasker
@@ -17,10 +17,8 @@ func (worker *Worker) AddWork(tk Tasker) {
 
 func (worker *Worker) Work() {
 	if worker.tasker.GetReq() == 0 {
-		log.Println("worker<", worker.num, ">'s task is nil")
+		logger.Info("worker<", worker.num, ">'s task is nil")
 	}
-
-	// log.Println("work proof with task:", worker.tasker.GetReq(), ", by worker number:", worker.num)
 
 	worker.tasker.Callback()
 }

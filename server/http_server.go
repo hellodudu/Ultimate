@@ -3,12 +3,11 @@ package ultimate
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/fatih/color"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/logger"
 )
 
 var testChan chan interface{} = make(chan interface{}, 1)
@@ -28,11 +27,11 @@ func (server *HttpServer) Run() {
 
 	addr, err := global.IniMgr.GetIniValue("config/config.ini", "listen", "HttpListenAddr")
 	if err != nil {
-		log.Println(color.RedString("cannot read ini HttpListenAddr!"))
+		logger.Error("cannot read ini HttpListenAddr!")
 		return
 	}
 
-	log.Fatal(http.ListenAndServe(addr, nil))
+	logger.Error(http.ListenAndServe(addr, nil))
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,19 +46,19 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := global.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 	}
 
 	for {
 		msgtype, p, err := conn.ReadMessage()
 		if err != nil {
-			log.Println(err)
+			logger.Warning(err)
 			return
 		}
 
 		res := []byte("server recv:")
 		if err := conn.WriteMessage(msgtype, append(res, p...)); err != nil {
-			log.Println(err)
+			logger.Warning(err)
 			return
 		}
 	}
@@ -69,12 +68,12 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		logger.Warning(err)
 	}
 
 	newApp := &App{}
 	if err := json.Unmarshal(body, newApp); err != nil {
-		log.Fatal(err)
+		logger.Warning(err)
 	}
 
 	// add app
@@ -85,7 +84,7 @@ func createAppHandler(w http.ResponseWriter, r *http.Request) {
 
 	retBuf, retErr := json.Marshal(newApp)
 	if retErr != nil {
-		log.Fatal("create app response json marshal error!")
+		logger.Warning("create app response json marshal error!")
 	}
 
 	w.Header().Set("Content-Type", "application/json")

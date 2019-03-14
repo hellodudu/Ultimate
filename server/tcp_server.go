@@ -5,12 +5,11 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
-	"log"
 	"net"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/logger"
 )
 
 type TcpServer struct {
@@ -23,17 +22,17 @@ func NewTcpServer() (*TcpServer, error) {
 func (server *TcpServer) Run() {
 	addr, err := global.IniMgr.GetIniValue("config/config.ini", "listen", "TcpListenAddr")
 	if err != nil {
-		log.Println(color.RedString("cannot read ini TcpListenAddr!"))
+		logger.Error("cannot read ini TcpListenAddr!")
 		return
 	}
 
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalln(err)
+		logger.Error(err)
 	}
 	defer ln.Close()
 
-	log.Println("tcp listening at ", addr)
+	logger.Info("tcp listening at ", addr)
 
 	for {
 		con, err := ln.Accept()
@@ -43,10 +42,10 @@ func (server *TcpServer) Run() {
 		}
 
 		if err != nil {
-			log.Fatal(err)
+			logger.Error(err)
 		}
 
-		log.Println(color.CyanString("a new tcp connection!"))
+		logger.Info("a new tcp connection!")
 		go handleTcpConnection(con)
 	}
 }
@@ -82,12 +81,12 @@ func handleTcpConnection(con net.Conn) {
 				Instance().GetWorldSession().HandleMessage(con, byMsg)
 			})
 		} else if err := scanner.Err(); err != nil {
-			log.Println(color.YellowString("scan error:%s", err.Error()))
+			logger.Warning("scan error:", err)
 			// end of connection
 			Instance().GetWorldSession().DisconnectWorld(con)
 			break
 		} else {
-			log.Println(color.CyanString("one client connection shut down!"))
+			logger.Info("one client connection was shut down!")
 			break
 		}
 	}

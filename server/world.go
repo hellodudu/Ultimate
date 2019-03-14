@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"log"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 	"github.com/hellodudu/Ultimate/utils"
 )
@@ -55,7 +54,7 @@ func (w *World) LoadFromDB() {
 	query := fmt.Sprintf("select * from world where id = %d", w.Id)
 	rows, err := Instance().dbMgr.Query(query)
 	if err != nil {
-		log.Println(color.YellowString("world load rom db query<%s> failed:", query, err.Error()))
+		logger.Warning("world load rom db query<%s> failed:", query, err)
 		return
 	}
 
@@ -63,9 +62,9 @@ func (w *World) LoadFromDB() {
 		var id, time int32
 		var name string
 		if err := rows.Scan(&id, &name, &time); err != nil {
-			log.Println(color.YellowString("world load query err:", err))
+			logger.Warning("world load query err:", err)
 		}
-		log.Println(color.CyanString("world load query success:", id, time))
+		logger.Info("world load query success:", id, time)
 	}
 
 	w.chDBInit <- struct{}{}
@@ -85,7 +84,7 @@ func (w *World) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			log.Println(color.CyanString("world<%d> context done!", w.Id))
+			logger.Info("world<%d> context done!", w.Id)
 			return
 
 		// connecting timeout
@@ -110,7 +109,7 @@ func (w *World) SendProtoMessage(p proto.Message) {
 	// reply message length = 4bytes size + 8bytes size BaseNetMsg + 2bytes message_name size + message_name + proto_data
 	out, err := proto.Marshal(p)
 	if err != nil {
-		log.Printf(err.Error())
+		logger.Warning(err)
 		return
 	}
 
@@ -129,13 +128,13 @@ func (w *World) SendProtoMessage(p proto.Message) {
 	copy(resp[14+len(typeName):], out)
 
 	if _, err := w.Con.Write(resp); err != nil {
-		log.Println(color.YellowString("reply message error:", err.Error()))
+		logger.Warning("reply message error:", err)
 	}
 }
 
 func (w *World) SendTransferMessage(data []byte) {
 	if _, err := w.Con.Write(data); err != nil {
-		log.Println(color.YellowString("transfer message error:", err.Error()))
+		logger.Warning("transfer message error:", err)
 	}
 }
 

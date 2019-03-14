@@ -1,10 +1,9 @@
 package task
 
 import (
-	"log"
 	"runtime"
 
-	"github.com/fatih/color"
+	"github.com/hellodudu/Ultimate/logger"
 )
 
 type workerPool struct {
@@ -23,7 +22,7 @@ func NewWorkerPool(tc chan Tasker) (*workerPool, error) {
 		workerList: make([]Worker, maxWorker),
 	}
 
-	log.Println(color.CyanString("Init max workers ", maxWorker))
+	logger.Info("Init max workers ", maxWorker)
 
 	for n := 1; n <= maxWorker; n++ {
 		worker := &Worker{}

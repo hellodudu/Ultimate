@@ -6,14 +6,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"reflect"
 	"sync"
 
-	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils"
 )
 
@@ -141,7 +140,7 @@ func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {
 
 func (ws *WorldSession) registerProto(msgID uint32, info *regInfo) {
 	if v, ok := ws.protoReg[msgID]; ok {
-		log.Printf("register proto msg_id<%d> existed! protobuf type:%v\n", msgID, v)
+		logger.Warning(fmt.Sprintf("register proto msg_id<%d> existed! protobuf type:%v\n", msgID, v))
 		return
 	}
 
@@ -174,7 +173,7 @@ func (ws *WorldSession) registerProto(msgID uint32, info *regInfo) {
 
 func protoUnmarshal(data []byte, m proto.Message) {
 	if err := proto.Unmarshal(data, m); err != nil {
-		log.Println(color.RedString("Failed to parse proto msg<%T>:", m, err))
+		logger.Error("Failed to parse proto msg:", m, err)
 		return
 	}
 
@@ -211,7 +210,7 @@ func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
 // if it is transfer msg(transfer binarys to other world), then next are binarys to be transferd
 func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	if len(data) <= 12 {
-		log.Println(color.YellowString("tcp recv data length <= 12:%s", string(data)))
+		logger.Warning("tcp recv data length <= 12:", string(data))
 		return
 	}
 
@@ -222,13 +221,13 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	copy(byBaseMsg, data[4:4+binary.Size(baseMsg)])
 	buf := &bytes.Buffer{}
 	if _, err := buf.Write(byBaseMsg); err != nil {
-		log.Println(color.YellowString("cannot read message:", byBaseMsg, " from connection:", con, " err:", err.Error()))
+		logger.Warning("cannot read message:", byBaseMsg, " from connection:", con, " err:", err)
 		return
 	}
 
 	// get top 4 bytes messageid
 	if err := binary.Read(buf, binary.LittleEndian, baseMsg); err != nil {
-		log.Println(color.YellowString("cannot read message:", byBaseMsg, " from connection:", con, " err:", err.Error()))
+		logger.Warning("cannot read message:", byBaseMsg, " from connection:", con, " err:", err)
 		return
 	}
 
@@ -236,19 +235,19 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 	if baseMsg.Id == utils.Crc32(string("MWU_DirectProtoMsg")) {
 		newProto, err := ws.decodeToProto(data)
 		if err != nil {
-			log.Println(color.YellowString(err.Error()))
+			logger.Warning(err)
 			return
 		}
 
 		protoMsgID := utils.Crc32(proto.MessageName(newProto))
 		r, err := ws.getRegisterProto(protoMsgID)
 		if err != nil {
-			log.Println(color.YellowString(fmt.Sprintf("unregisted protoMsgID<%d> received!", protoMsgID)))
+			logger.Warning(fmt.Sprintf("unregisted protoMsgID<%d> received!", protoMsgID))
 		}
 
 		// debug level <= 1 will not print log to screen
 		if r.lv > 1 {
-			log.Printf("recv world proto msg:%T\n", newProto)
+			logger.Info(fmt.Sprintf("recv world proto msg:%T\n", newProto))
 		}
 
 		// callback
@@ -263,22 +262,22 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 		copy(byTransferMsg, data[4:4+binary.Size(transferMsg)])
 		buf := &bytes.Buffer{}
 		if _, err := buf.Write(byTransferMsg); err != nil {
-			log.Println(color.YellowString("cannot read message:", byTransferMsg, " from connection:", con, " err:", err.Error()))
+			logger.Warning("cannot read message:", byTransferMsg, " from connection:", con, " err:", err)
 			return
 		}
 
 		// get top 4 bytes messageid
 		if err := binary.Read(buf, binary.LittleEndian, transferMsg); err != nil {
-			log.Println(color.YellowString("cannot read message:", byTransferMsg, " from connection:", con, " err:", err.Error()))
+			logger.Warning("cannot read message:", byTransferMsg, " from connection:", con, " err:", err)
 			return
 		}
 
-		log.Println(color.CyanString(fmt.Sprintf("recv transfer msg to world<%d> player<%d>", transferMsg.WorldID, transferMsg.PlayerID)))
+		logger.Info(fmt.Sprintf("recv transfer msg to world<%d> player<%d>", transferMsg.WorldID, transferMsg.PlayerID))
 
 		// send message to world
 		sendWorld := ws.GetWorldByID(transferMsg.WorldID)
 		if sendWorld == nil {
-			log.Println(color.YellowString(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.WorldID)))
+			logger.Warning(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.WorldID))
 			return
 		}
 
@@ -310,7 +309,7 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	ws.mapWorld[w.Id] = w
 	ws.mapConn[w.Con] = w
 	ws.mu.Unlock()
-	log.Println(color.CyanString("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
+	logger.Info("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con)
 	go w.Run()
 	return w, nil
 }
@@ -337,7 +336,7 @@ func (ws *WorldSession) DisconnectWorld(con net.Conn) {
 		return
 	}
 
-	log.Println(color.YellowString("World<id:%d> disconnected!", w.Id))
+	logger.Warning("World<id:%d> disconnected!", w.Id)
 	w.Stop()
 
 	ws.mu.Lock()
@@ -356,7 +355,7 @@ func (ws *WorldSession) KickWorld(id uint32) {
 		return
 	}
 
-	log.Println(color.CyanString("World<id:%d> was kicked by timeout reason!", w.Id))
+	logger.Warning("World<id:%d> was kicked by timeout reason!", w.Id)
 	w.Stop()
 
 	ws.mu.Lock()
@@ -369,7 +368,7 @@ func (ws *WorldSession) Run() {
 	for {
 		select {
 		case <-ws.ctx.Done():
-			log.Println(color.CyanString("world session context done!"))
+			logger.Info("world session context done!")
 			ws.chStop <- struct{}{}
 			return
 		case wid := <-ws.chTimeOutW:

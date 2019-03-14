@@ -3,8 +3,9 @@ package res
 import (
 	"encoding/xml"
 	"io/ioutil"
-	"log"
 	"os"
+
+	"github.com/hellodudu/Ultimate/logger"
 )
 
 type XmlEntityClient struct {
@@ -29,20 +30,18 @@ func NewXmlLoader() *XmlLoader {
 	xmlLoader := &XmlLoader{}
 	xmlFile, err := os.Open("config/entity_client.xml")
 	if err != nil {
-		log.Println(err)
+		logger.Warning(err.Error())
 	}
 	defer xmlFile.Close()
 
 	byXml, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
-		log.Println(err)
+		logger.Warning(err.Error())
 	}
 
 	if err := xml.Unmarshal(byXml, xmlLoader); err != nil {
-		log.Println(err)
+		logger.Warning(err.Error())
 	}
-
-	// log.Printf("Unmarshal xml success : %+v\n", xmlLoader)
 
 	return xmlLoader
 }

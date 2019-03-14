@@ -4,12 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/logger"
 )
 
 type DBMgr struct {
@@ -31,7 +30,7 @@ func NewDBMgr() (*DBMgr, error) {
 	var err error
 	dbMgr.db, err = sql.Open("mysql", mysqlDSN)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return nil, err
 	}
 
@@ -43,7 +42,7 @@ func (m *DBMgr) Run() {
 	for {
 		select {
 		case <-m.ctx.Done():
-			log.Println(color.CyanString("db mgr context done!"))
+			logger.Info("db mgr context done!")
 			m.chStop <- struct{}{}
 			return
 		}
@@ -72,13 +71,13 @@ func (m *DBMgr) LoadGlobal() {
 	query := "select * from global"
 	stmt, err := m.db.PrepareContext(m.ctx, query)
 	if err != nil {
-		log.Println(color.YellowString("api initdb failed:", err.Error()))
+		logger.Warning("api initdb failed:", err)
 		return
 	}
 
 	rows, err := stmt.QueryContext(m.ctx)
 	if err != nil {
-		log.Println(color.YellowString("api initdb failed:", err.Error()))
+		logger.Warning("api initdb failed:", err)
 		return
 	}
 
@@ -86,7 +85,7 @@ func (m *DBMgr) LoadGlobal() {
 		query = fmt.Sprintf("replace into global set id=%d, time_stamp=%d, arena_end_time=%d", global.UltimateID, int32(time.Now().Unix()), 0)
 		if stmp, err := m.db.PrepareContext(m.ctx, query); err == nil {
 			if _, err := stmp.ExecContext(m.ctx); err == nil {
-				log.Println(color.CyanString("sql global init query exec success:", query))
+				logger.Info("sql global init query exec success:", query)
 			}
 		}
 	}
@@ -95,7 +94,7 @@ func (m *DBMgr) LoadGlobal() {
 func (m *DBMgr) Exec(q string) {
 	go func() {
 		if _, err := m.db.ExecContext(m.ctx, q); err != nil {
-			log.Println(color.RedString("db query failed:", err.Error()))
+			logger.Error("db query failed:", err)
 		}
 	}()
 }
@@ -104,13 +103,13 @@ func (m *DBMgr) Query(q string) (*sql.Rows, error) {
 	return func() (*sql.Rows, error) {
 		stmt, err := m.db.PrepareContext(m.ctx, q)
 		if err != nil {
-			log.Println(color.YellowString("db query<%s> failed:", q, err.Error()))
+			logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
 			return nil, err
 		}
 
 		rows, err := stmt.QueryContext(m.ctx)
 		if err != nil {
-			log.Println(color.YellowString("db query<%s> failed:", q, err.Error()))
+			logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
 			return nil, err
 		}
 

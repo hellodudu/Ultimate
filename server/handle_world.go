@@ -2,26 +2,25 @@ package ultimate
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"reflect"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
 func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
 	msg, ok := p.(*world_message.MWU_WorldLogon)
 	if !ok {
-		log.Println(color.YellowString("Cannot assert value to message world_message.MWU_WorldLogon"))
+		logger.Warning("Cannot assert value to message world_message.MWU_WorldLogon")
 		return
 	}
 
 	world, err := ws.AddWorld(msg.WorldId, msg.WorldName, con)
 	if err != nil {
-		log.Println(color.YellowString(err.Error()), color.YellowString("<id:%d, name:%s, con:%v>", msg.WorldId, msg.WorldName, con))
+		logger.Warning(err, fmt.Sprintf("<id:%d, name:%s, con:%v>", msg.WorldId, msg.WorldName, con))
 		return
 	}
 
@@ -32,7 +31,7 @@ func HandleWorldLogon(con net.Conn, ws *WorldSession, p proto.Message) {
 	fieldID, foundID := reflect.TypeOf(*world).FieldByName("Id")
 	fieldName, foundName := reflect.TypeOf(*world).FieldByName("Name")
 	if !foundID || !foundName {
-		log.Println(color.YellowString("cannot find world's field by Id or Name"))
+		logger.Warning("cannot find world's field by Id or Name")
 		return
 	}
 
@@ -57,7 +56,7 @@ func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
 		np := p.(*world_message.MWU_WorldConnected)
 		arrWorldID := np.GetWorldId()
-		log.Println(color.CyanString("world ref<%v> connected!", arrWorldID))
+		logger.Info("world ref<%v> connected!", arrWorldID)
 
 		// world.RequestWorldInfo()
 	}
@@ -67,7 +66,7 @@ func HandleRequestPlayerInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*world_message.MWU_RequestPlayerInfo)
 		if !ok {
-			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_RequestPlayerInfo"))
+			logger.Warning("Cannot assert value to message world_message.MWU_RequestPlayerInfo")
 			return
 		}
 
@@ -79,7 +78,7 @@ func HandleRequestGuildInfo(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*world_message.MWU_RequestGuildInfo)
 		if !ok {
-			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_RequestGuildInfo"))
+			logger.Warning("Cannot assert value to message world_message.MWU_RequestGuildInfo")
 			return
 		}
 
@@ -91,7 +90,7 @@ func HandlePlayUltimateRecord(con net.Conn, ws *WorldSession, p proto.Message) {
 	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*world_message.MWU_PlayUltimateRecord)
 		if !ok {
-			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_PlayUltimateRecord"))
+			logger.Warning("Cannot assert value to message world_message.MWU_PlayUltimateRecord")
 			return
 		}
 
@@ -108,7 +107,7 @@ func HandleRequestUltimatePlayer(con net.Conn, ws *WorldSession, p proto.Message
 	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*world_message.MWU_RequestUltimatePlayer)
 		if !ok {
-			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_RequestUltimatePlayer"))
+			logger.Warning("Cannot assert value to message world_message.MWU_RequestUltimatePlayer")
 			return
 		}
 
@@ -128,7 +127,7 @@ func HandleArenaMatching(con net.Conn, ws *WorldSession, p proto.Message) {
 	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*world_message.MWU_ArenaMatching)
 		if !ok {
-			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_ArenaMatching"))
+			logger.Warning("Cannot assert value to message world_message.MWU_ArenaMatching")
 			return
 		}
 
@@ -140,7 +139,7 @@ func HandleArenaAddRecord(con net.Conn, ws *WorldSession, p proto.Message) {
 	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*world_message.MWU_ArenaAddRecord)
 		if !ok {
-			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_ArenaAddRecord"))
+			logger.Warning("Cannot assert value to message world_message.MWU_ArenaAddRecord")
 			return
 		}
 
@@ -152,7 +151,7 @@ func HandleArenaBattleResult(con net.Conn, ws *WorldSession, p proto.Message) {
 	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*world_message.MWU_ArenaBattleResult)
 		if !ok {
-			log.Println(color.YellowString("Cannot assert value to message world_message.MWU_ArenaBattleResult"))
+			logger.Warning("Cannot assert value to message world_message.MWU_ArenaBattleResult")
 			return
 		}
 

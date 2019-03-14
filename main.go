@@ -25,7 +25,7 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill)
 	sig := <-c
-	logger.Info("ultimate server closing down (signal: %v)\n", sig)
+	logger.Print("ultimate server closing down (signal: %v)\n", sig)
 	api.Stop()
 	os.Exit(0)
 }

@@ -42,7 +42,7 @@ func (m *DBMgr) Run() {
 	for {
 		select {
 		case <-m.ctx.Done():
-			logger.Info("db mgr context done!")
+			logger.Print("db mgr context done!")
 			m.chStop <- struct{}{}
 			return
 		}

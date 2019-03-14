@@ -368,7 +368,7 @@ func (ws *WorldSession) Run() {
 	for {
 		select {
 		case <-ws.ctx.Done():
-			logger.Info("world session context done!")
+			logger.Print("world session context done!")
 			ws.chStop <- struct{}{}
 			return
 		case wid := <-ws.chTimeOutW:

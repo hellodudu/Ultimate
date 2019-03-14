@@ -51,24 +51,29 @@ func Init() bool {
 }
 
 func Trace(v ...interface{}) {
-	trace.Println(color.BlueString(fmt.Sprintln(v...)))
+	trace.Println(color.BlueString(fmt.Sprint(v...)))
 }
 
 func Info(v ...interface{}) {
-	info.Println(color.CyanString(fmt.Sprintln(v...)))
+	info.Println(color.CyanString(fmt.Sprint(v...)))
 }
 
 func Warning(v ...interface{}) {
-	warning.Println(color.YellowString(fmt.Sprintln(v...)))
-	log.Println(color.YellowString(fmt.Sprintln(v...)))
+	warning.Println(color.YellowString(fmt.Sprint(v...)))
+	log.Println(color.YellowString(fmt.Sprint(v...)))
 }
 
 func Error(v ...interface{}) {
-	error.Println(color.RedString(fmt.Sprintln(v...)))
-	log.Println(color.RedString(fmt.Sprintln(v...)))
+	error.Println(color.RedString(fmt.Sprint(v...)))
+	log.Println(color.RedString(fmt.Sprint(v...)))
 }
 
 func Fatal(v ...interface{}) {
 	Error(v)
 	os.Exit(1)
+}
+
+func Print(v ...interface{}) {
+	info.Println(color.CyanString(fmt.Sprint(v...)))
+	log.Println(color.CyanString(fmt.Sprint(v...)))
 }

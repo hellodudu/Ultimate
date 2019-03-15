@@ -22,7 +22,7 @@ func Init(d bool) bool {
 	t := time.Now()
 	fileTime := fmt.Sprintf("%d-%d-%d %d-%d-%d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 
-	traceName := fmt.Sprintf("log/%s_trace.log", fileTime)
+	traceName := fmt.Sprintf("log/%s_ultimate_trace.log", fileTime)
 	traceFile, err := os.OpenFile(traceName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open log file ", traceName, ":", err)
@@ -31,7 +31,7 @@ func Init(d bool) bool {
 
 	trace = log.New(traceFile, "TRACE: ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	infoName := fmt.Sprintf("log/%s_info.log", fileTime)
+	infoName := fmt.Sprintf("log/%s_ultimate_info.log", fileTime)
 	infoFile, err := os.OpenFile(infoName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open log file ", infoName, ":", err)
@@ -39,7 +39,7 @@ func Init(d bool) bool {
 	}
 	info = log.New(infoFile, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	errorName := fmt.Sprintf("log/%s_error.log", fileTime)
+	errorName := fmt.Sprintf("log/%s_ultimate_error.log", fileTime)
 	errorFile, err := os.OpenFile(errorName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open log file ", errorName, ":", err)

@@ -24,9 +24,9 @@
     
 	    docker build -t ultimate .
 
-* Docker Run:
+* Docker Run:(on my env)
     
-	    docker run -it -p 7030:7030 -p 8080:8080 ultimate
+	    docker run -itd -v $GOPATH/src/github.com/hellodudu/Ultimate/config:/config -v $GOPATH/src/github.com/hellodudu/Ultimate/log:/log -p 7030:7030 -p 8088:8080 ultimate
 
 # Run From Docker Hub:
 

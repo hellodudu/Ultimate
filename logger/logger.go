@@ -17,9 +17,8 @@ var (
 )
 
 func Init() bool {
-	year, month, day := time.Now().Date()
-	hour, min, sec := time.Now().Clock()
-	fileTime := fmt.Sprintf("%d-%d-%d %d-%d-%d", year, month, day, hour, min, sec)
+	t := time.Now()
+	fileTime := fmt.Sprintf("%d-%d-%d %d-%d-%d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 
 	traceName := fmt.Sprintf("log/%s_trace.log", fileTime)
 	traceFile, err := os.OpenFile(traceName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)

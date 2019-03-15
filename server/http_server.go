@@ -25,7 +25,7 @@ func (server *HttpServer) Run() {
 	http.HandleFunc("/ws", wsHandler)
 	http.HandleFunc("/bn", binaryHandler)
 
-	addr, err := global.IniMgr.GetIniValue("config/config.ini", "listen", "HttpListenAddr")
+	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {
 		logger.Error("cannot read ini HttpListenAddr!")
 		return

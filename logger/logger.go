@@ -14,9 +14,11 @@ var (
 	info    *log.Logger
 	warning *log.Logger
 	error   *log.Logger
+	debug   bool
 )
 
-func Init() bool {
+func Init(d bool) bool {
+	debug = d
 	t := time.Now()
 	fileTime := fmt.Sprintf("%d-%d-%d %d-%d-%d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 
@@ -51,10 +53,16 @@ func Init() bool {
 
 func Trace(v ...interface{}) {
 	trace.Println(color.BlueString(fmt.Sprint(v...)))
+	if debug {
+		log.Println(color.BlueString(fmt.Sprint(v...)))
+	}
 }
 
 func Info(v ...interface{}) {
 	info.Println(color.CyanString(fmt.Sprint(v...)))
+	if debug {
+		log.Println(color.CyanString(fmt.Sprint(v...)))
+	}
 }
 
 func Warning(v ...interface{}) {

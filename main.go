@@ -7,7 +7,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/Ultimate/logger"
-	"github.com/hellodudu/Ultimate/res"
 	ultimate "github.com/hellodudu/Ultimate/server"
 )
 
@@ -20,7 +19,7 @@ func main() {
 	api.Run()
 
 	// xmlloader
-	res.NewXmlLoader()
+	// res.NewXmlLoader()
 
 	// server exit
 	c := make(chan os.Signal, 1)

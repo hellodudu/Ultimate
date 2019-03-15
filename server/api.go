@@ -38,7 +38,7 @@ func NewAPI() (*API, error) {
 		appMap: make(map[int]*App),
 	}
 
-	if ok := logger.Init(); !ok {
+	if ok := logger.Init(global.Debugging); !ok {
 		return nil, errors.New("init log file failed!")
 	}
 
@@ -81,7 +81,7 @@ func (api *API) InitTask() {
 		return
 	}
 
-	logger.Print("api task init ok!")
+	logger.Print("task init ok!")
 }
 
 // init db
@@ -94,7 +94,7 @@ func (api *API) InitDBMgr() {
 		return
 	}
 
-	logger.Print("api db mgr init ok!")
+	logger.Print("db_mgr init ok!")
 }
 
 func (api *API) InitRedis() {
@@ -110,7 +110,7 @@ func (api *API) InitRedis() {
 		return
 	}
 
-	logger.Print("api redis init ok")
+	logger.Print("redis init ok")
 }
 
 // init tcp server
@@ -121,7 +121,7 @@ func (api *API) InitTcpServer() {
 		logger.Fatal(err)
 	}
 
-	logger.Print("api tcp_server init ok!")
+	logger.Print("tcp_server init ok!")
 }
 
 // init http server
@@ -132,7 +132,7 @@ func (api *API) InitHttpServer() {
 		logger.Fatal(err)
 	}
 
-	logger.Print("api http_server init ok!")
+	logger.Print("http_server init ok!")
 }
 
 // init world session
@@ -143,7 +143,7 @@ func (api *API) InitWorldSession() {
 		logger.Fatal(err)
 	}
 
-	logger.Print("api world_session init ok!")
+	logger.Print("world_session init ok!")
 }
 
 func (api *API) InitGame() {
@@ -153,7 +153,7 @@ func (api *API) InitGame() {
 		logger.Fatal(err)
 	}
 
-	logger.Print("api gameMgr init ok!")
+	logger.Print("gameMgr init ok!")
 }
 
 // run

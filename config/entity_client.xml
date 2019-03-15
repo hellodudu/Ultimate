@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<root>
-	<entity id="1" name="Mở Đầu-Nhân Tộc Nam" icon="hero4" model="302" desc="Đệ tử tu tiên kế thừa huyết mạch Nữ Oa, từ nhỏ theo Hoàng Long học đạo, không thích tu hành, có niềm khao khát về thế giới hồng trần." aptitude="6" scale="1" angry_skill="1" sort_priority="501" icon_type="4" rare_icon="ui_kuality_n"/>
-	<entity id="2" name="Mở Đầu-Nhân Tộc Nữ" icon="hero3" model="300" desc="Đệ tử tu tiên kế thừa huyết mạch Nữ Oa, từ nhỏ theo Hoàng Long học đạo, không thích tu hành, có niềm khao khát về thế giới hồng trần." aptitude="6" scale="1" angry_skill="1" sort_priority="502" icon_type="4" rare_icon="ui_kuality_n"/>
-	<entity id="3" name="Yêu Tộc Nam" icon="hero4" model="302" desc="Đệ tử tu tiên kế thừa huyết mạch Nữ Oa, từ nhỏ theo Hoàng Long học đạo, không thích tu hành, có niềm khao khát về thế giới hồng trần." aptitude="6" scale="1" angry_skill="1" sort_priority="503" icon_type="4" rare_icon="ui_kuality_n"/>
-	
-</root>

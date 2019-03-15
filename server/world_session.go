@@ -247,7 +247,7 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 
 		// debug level <= 1 will not print log to screen
 		if r.lv > 1 {
-			logger.Info(fmt.Sprintf("recv world proto msg:%T\n", newProto))
+			logger.Info(fmt.Sprintf("recv world proto msg:%T", newProto))
 		}
 
 		// callback

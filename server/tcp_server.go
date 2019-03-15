@@ -20,7 +20,7 @@ func NewTcpServer() (*TcpServer, error) {
 }
 
 func (server *TcpServer) Run() {
-	addr, err := global.IniMgr.GetIniValue("config/config.ini", "listen", "TcpListenAddr")
+	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "TcpListenAddr")
 	if err != nil {
 		logger.Error("cannot read ini TcpListenAddr!")
 		return

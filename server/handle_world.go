@@ -58,7 +58,7 @@ func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 		arrWorldID := np.GetWorldId()
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
-		// world.RequestWorldInfo()
+		world.RequestWorldInfo()
 	}
 }
 

@@ -71,6 +71,10 @@ message MUW_RequestGuildInfo {
 
 }
 
+message MWU_ReplacePlayerInfo {
+    CrossPlayerInfo info = 1;
+}
+
 message CrossGuildInfo {
     int64 guild_id = 1;
     string guild_name = 2;
@@ -86,6 +90,10 @@ message CrossGuildInfo {
 
 message MWU_RequestGuildInfo {
     repeated CrossGuildInfo info = 1;
+}
+
+message MWU_ReplaceGuildInfo {
+    CrossGuildInfo info = 1;
 }
 
 message MWU_PlayUltimateRecord {

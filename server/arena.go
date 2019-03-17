@@ -139,6 +139,8 @@ func (arena *Arena) UpdateMatching(id int64) {
 		return
 	}
 
+	logger.Trace("Update Matching")
+
 	secIdx := GetSectionIndexByScore(srcRec.ArenaScore)
 	for k := range arena.listMatchPool[secIdx] {
 		// peek self then continue
@@ -151,14 +153,14 @@ func (arena *Arena) UpdateMatching(id int64) {
 			continue
 		}
 
-		info := Instance().GetGameMgr().GetPlayerInfoByID(k)
+		info := Instance().GetGameMgr().GetPlayerInfoByID(id)
 		if info == nil {
 			continue
 		}
 
 		if world := Instance().GetWorldSession().GetWorldByID(info.ServerId); world != nil {
 			msg := &world_message.MUW_ArenaStartBattle{
-				AttackId:     k,
+				AttackId:     id,
 				TargetRecord: dstRec,
 			}
 			world.SendProtoMessage(msg)

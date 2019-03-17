@@ -56,7 +56,7 @@ func NewAPI() (*API, error) {
 	go api.InitGame()
 	api.wg.Wait()
 
-	logger.Print("api all init ok!")
+	logger.Print("all init ok!")
 	return api, nil
 }
 

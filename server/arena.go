@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sort"
 	"sync"
 	"time"
 
@@ -14,8 +15,25 @@ import (
 
 var ArenaMatchSectionNum int32 = 8 // arena section num
 
+// ArenaRecord sort interface
+type SliceArenaRecord []*world_message.ArenaRecord
+
+func (s SliceArenaRecord) Len() int {
+	return len(s)
+}
+
+func (s SliceArenaRecord) Swap(a, b int) {
+	s[a], s[b] = s[b], s[a]
+}
+
+func (s SliceArenaRecord) Less(a, b int) bool {
+	return s[a].ArenaScore > s[b].ArenaScore
+}
+
+// Arean data
 type Arena struct {
 	mapRecord     map[int64]*world_message.ArenaRecord // all player's arena record
+	sliceRecord   SliceArenaRecord                     // slice of arena record sorted with ArenaScore
 	listMatchPool []map[int64]struct{}                 // 8 level match pool
 	listRecReq    map[int64]struct{}                   // list to request player arena record
 	chMatchWait   chan int64                           // match wait player channel
@@ -30,6 +48,7 @@ type Arena struct {
 func NewArena(ctx context.Context) (*Arena, error) {
 	arena := &Arena{
 		mapRecord:     make(map[int64]*world_message.ArenaRecord),
+		sliceRecord:   make(SliceArenaRecord, 0),
 		listMatchPool: make([]map[int64]struct{}, ArenaMatchSectionNum),
 		listRecReq:    make(map[int64]struct{}, 1000),
 		chMatchWait:   make(chan int64, 1000),
@@ -210,6 +229,10 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 
 	// add to record
 	arena.mapRecord[rec.PlayerId] = rec
+
+	// add to slice record sorted by ArenaRecord
+	arena.sliceRecord = append(arena.sliceRecord, rec)
+	sort.Sort(arena.sliceRecord)
 
 	// add to matching cache
 	index := GetSectionIndexByScore(rec.ArenaScore)

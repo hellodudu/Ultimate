@@ -127,6 +127,21 @@ func (ws *WorldSession) registerAllMessage() {
 		lv: 2,
 		cb: HandleArenaBattleResult,
 	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_ReplacePlayerInfo"), &regInfo{
+		lv: 1,
+		cb: HandleReplacePlayerInfo,
+	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_ReplaceGuildInfo"), &regInfo{
+		lv: 1,
+		cb: HandleReplaceGuildInfo,
+	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_RequestArenaRank"), &regInfo{
+		lv: 1,
+		cb: HandleRequestArenaRank,
+	})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {

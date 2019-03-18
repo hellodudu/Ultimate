@@ -13,7 +13,8 @@ import (
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
-var ArenaMatchSectionNum int32 = 8 // arena section num
+var ArenaMatchSectionNum int = 8 // arena section num
+var ArenaRankNumPerPage int = 10
 
 // ArenaRecord sort interface
 type SliceArenaRecord []*world_message.ArenaRecord
@@ -55,7 +56,7 @@ func NewArena(ctx context.Context) (*Arena, error) {
 		chDBInit:      make(chan struct{}, 1),
 	}
 
-	for n := 0; int32(n) < ArenaMatchSectionNum; n++ {
+	for n := 0; n < ArenaMatchSectionNum; n++ {
 		arena.listMatchPool[n] = make(map[int64]struct{})
 	}
 
@@ -157,8 +158,6 @@ func (arena *Arena) UpdateMatching(id int64) {
 		logger.Warning("cannot find player:", id, " 's arena record yet!")
 		return
 	}
-
-	logger.Trace("Update Matching")
 
 	secIdx := GetSectionIndexByScore(srcRec.ArenaScore)
 	for k := range arena.listMatchPool[secIdx] {
@@ -266,4 +265,47 @@ func (arena *Arena) BattleResult(atkID int64, tarID int64, win bool) {
 	if preSection != newSection {
 		arena.ReorderRecord(atkRec, preSection, newSection)
 	}
+}
+
+func (arena *Arena) RequestRank(id int64, page int32) {
+	if page >= 10 {
+		return
+	}
+
+	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
+	if info == nil {
+		return
+	}
+
+	world := Instance().GetWorldSession().GetWorldByID(info.ServerId)
+	if world == nil {
+		return
+	}
+
+	msg := &world_message.MUW_RequestArenaRank{
+		PlayerId: id,
+		Page:     page,
+		Infos:    make([]*world_message.ArenaTargetInfo, 0),
+	}
+
+	for n := 0 + int(page)*ArenaRankNumPerPage; n < 10+int(page)*ArenaRankNumPerPage; n++ {
+		if n >= len(arena.sliceRecord) {
+			break
+		}
+
+		r := arena.sliceRecord[n]
+		info := &world_message.ArenaTargetInfo{
+			PlayerId:     r.PlayerId,
+			PlayerName:   r.FirstGroup.Name,
+			ServerName:   r.FirstGroup.WorldName,
+			Level:        r.FirstGroup.Level,
+			PlayerScore:  r.FirstGroup.PlayerScore,
+			HeadProtrait: int32(r.FirstGroup.Protrait),
+			HeadQuality:  int32(r.FirstGroup.HeadQuality),
+			ArenaScore:   r.ArenaScore,
+		}
+		msg.Infos = append(msg.Infos, info)
+	}
+
+	world.SendProtoMessage(msg)
 }

@@ -158,3 +158,39 @@ func HandleArenaBattleResult(con net.Conn, ws *WorldSession, p proto.Message) {
 		Instance().GetGameMgr().GetArena().BattleResult(msg.AttackId, msg.TargetId, msg.AttackWin)
 	}
 }
+
+func HandleReplacePlayerInfo(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ReplacePlayerInfo)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_ReplacePlayerInfo")
+			return
+		}
+
+		Instance().GetGameMgr().AddPlayerInfo(msg.Info)
+	}
+}
+
+func HandleReplaceGuildInfo(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ReplaceGuildInfo)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_ReplaceGuildInfo")
+			return
+		}
+
+		Instance().GetGameMgr().AddGuildInfo(msg.Info)
+	}
+}
+
+func HandleRequestArenaRank(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_RequestArenaRank)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_RequestArenaRank")
+			return
+		}
+
+		Instance().GetGameMgr().GetArena().RequestRank(msg.PlayerId, msg.Page)
+	}
+}

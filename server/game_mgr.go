@@ -10,18 +10,14 @@ import (
 
 type GameMgr struct {
 	arena         *Arena // arena
-	mapPlayerInfo map[int64]*world_message.CrossPlayerInfo
-	mapGuildInfo  map[int64]*world_message.CrossGuildInfo
+	mapPlayerInfo sync.Map
+	mapGuildInfo  sync.Map
 	ctx           context.Context
 	cancel        context.CancelFunc
-	mu            sync.Mutex
 }
 
 func NewGameMgr() (*GameMgr, error) {
-	game := &GameMgr{
-		mapPlayerInfo: make(map[int64]*world_message.CrossPlayerInfo),
-		mapGuildInfo:  make(map[int64]*world_message.CrossGuildInfo),
-	}
+	game := &GameMgr{}
 
 	game.ctx, game.cancel = context.WithCancel(context.Background())
 	var err error
@@ -54,19 +50,14 @@ func (g *GameMgr) AddPlayerInfoList(s []*world_message.CrossPlayerInfo) {
 		return
 	}
 
-	g.mu.Lock()
-
 	for _, v := range s {
-		g.mapPlayerInfo[v.PlayerId] = v
+		g.mapPlayerInfo.Store(v.PlayerId, v)
 	}
 
-	g.mu.Unlock()
 }
 
 func (g *GameMgr) AddPlayerInfo(p *world_message.CrossPlayerInfo) {
-	g.mu.Lock()
-	g.mapPlayerInfo[p.PlayerId] = p
-	g.mu.Unlock()
+	g.mapPlayerInfo.Store(p.PlayerId, p)
 }
 
 func (g *GameMgr) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
@@ -74,25 +65,40 @@ func (g *GameMgr) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
 		return
 	}
 
-	g.mu.Lock()
-
 	for _, v := range s {
-		g.mapGuildInfo[v.GuildId] = v
+		g.mapGuildInfo.Store(v.GuildId, v)
 	}
 
-	g.mu.Unlock()
 }
 
 func (g *GameMgr) AddGuildInfo(i *world_message.CrossGuildInfo) {
-	g.mu.Lock()
-	g.mapGuildInfo[i.GuildId] = i
-	g.mu.Unlock()
+	g.mapGuildInfo.Store(i.GuildId, i)
 }
 
 func (g *GameMgr) GetPlayerInfoByID(id int64) *world_message.CrossPlayerInfo {
-	return g.mapPlayerInfo[id]
+	v, ok := g.mapPlayerInfo.Load(id)
+	if !ok {
+		return nil
+	}
+
+	value, ok := v.(*world_message.CrossPlayerInfo)
+	if !ok {
+		return nil
+	}
+
+	return value
 }
 
 func (g *GameMgr) GetGuildInfoByID(id int64) *world_message.CrossGuildInfo {
-	return g.mapGuildInfo[id]
+	v, ok := g.mapGuildInfo.Load(id)
+	if !ok {
+		return nil
+	}
+
+	value, ok := v.(*world_message.CrossGuildInfo)
+	if !ok {
+		return nil
+	}
+
+	return value
 }

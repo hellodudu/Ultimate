@@ -67,8 +67,6 @@ func (g *GameMgr) AddPlayerInfo(p *world_message.CrossPlayerInfo) {
 	g.mu.Lock()
 	g.mapPlayerInfo[p.PlayerId] = p
 	g.mu.Unlock()
-
-	logger.Info("add player info:", p)
 }
 
 func (g *GameMgr) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
@@ -89,8 +87,6 @@ func (g *GameMgr) AddGuildInfo(i *world_message.CrossGuildInfo) {
 	g.mu.Lock()
 	g.mapGuildInfo[i.GuildId] = i
 	g.mu.Unlock()
-
-	logger.Info("add guild info:", i)
 }
 
 func (g *GameMgr) GetPlayerInfoByID(id int64) *world_message.CrossPlayerInfo {

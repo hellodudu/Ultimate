@@ -22,7 +22,7 @@ func NewWorkerPool(tc chan Tasker) (*workerPool, error) {
 		workerList: make([]Worker, maxWorker),
 	}
 
-	logger.Info("Init max workers ", maxWorker)
+	logger.Info("init max workers ", maxWorker)
 
 	for n := 1; n <= maxWorker; n++ {
 		worker := &Worker{}

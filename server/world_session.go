@@ -36,10 +36,9 @@ type regInfo struct {
 }
 
 type WorldSession struct {
-	mapWorld   map[uint32]*World // all connected world
-	mapConn    map[net.Conn]*World
+	mapWorld   sync.Map
+	mapConn    sync.Map
 	protoReg   map[uint32]*regInfo
-	mu         sync.Mutex
 	wg         sync.WaitGroup
 	ctx        context.Context
 	cancel     context.CancelFunc
@@ -49,8 +48,6 @@ type WorldSession struct {
 
 func NewWorldSession() (*WorldSession, error) {
 	w := &WorldSession{
-		mapWorld:   make(map[uint32]*World),
-		mapConn:    make(map[net.Conn]*World),
 		protoReg:   make(map[uint32]*regInfo),
 		chTimeOutW: make(chan uint32, global.WorldConnectMax),
 		chStop:     make(chan struct{}, 1),
@@ -63,9 +60,12 @@ func NewWorldSession() (*WorldSession, error) {
 }
 
 func (ws *WorldSession) Stop() chan struct{} {
-	for _, world := range ws.mapWorld {
-		world.Stop()
-	}
+	ws.mapWorld.Range(func(_, v interface{}) bool {
+		if world, ok := v.(*World); ok {
+			world.Stop()
+		}
+		return true
+	})
 
 	ws.cancel()
 	return ws.chStop
@@ -307,82 +307,107 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 		return nil, errors.New("add world id invalid!")
 	}
 
-	if _, ok := ws.mapWorld[id]; ok {
+	if _, ok := ws.mapWorld.Load(id); ok {
 		ws.KickWorld(id)
 	}
 
-	if _, ok := ws.mapConn[con]; ok {
+	if _, ok := ws.mapConn.Load(con); ok {
 		ws.KickWorld(id)
 	}
 
-	if uint32(len(ws.mapConn)) >= global.WorldConnectMax {
+	var numConn uint32 = 0
+	ws.mapConn.Range(func(_, _ interface{}) bool {
+		numConn++
+		return true
+	})
+
+	if numConn >= global.WorldConnectMax {
 		return nil, errors.New("world connected num full!")
 	}
 
 	w := NewWorld(id, name, con, ws.chTimeOutW)
-	ws.mu.Lock()
-	ws.mapWorld[w.Id] = w
-	ws.mapConn[w.Con] = w
-	ws.mu.Unlock()
+	ws.mapWorld.Store(w.Id, w)
+	ws.mapConn.Store(w.Con, w)
 	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
 	go w.Run()
 	return w, nil
 }
 
 func (ws *WorldSession) GetWorldByID(id uint32) *World {
-	w, ok := ws.mapWorld[id]
+	v, ok := ws.mapWorld.Load(id)
 	if !ok {
 		return nil
 	}
-	return w
+
+	world, ok := v.(*World)
+	if !ok {
+		return nil
+	}
+
+	return world
 }
 
 func (ws *WorldSession) GetWorldByCon(con net.Conn) *World {
-	w, ok := ws.mapConn[con]
+	v, ok := ws.mapConn.Load(con)
 	if !ok {
 		return nil
 	}
-	return w
+
+	world, ok := v.(*World)
+	if !ok {
+		return nil
+	}
+
+	return world
 }
 
 func (ws *WorldSession) DisconnectWorld(con net.Conn) {
-	w, ok := ws.mapConn[con]
+	v, ok := ws.mapConn.Load(con)
 	if !ok {
 		return
 	}
 
-	logger.Warning(fmt.Sprintf("World<id:%d> disconnected!", w.Id))
-	w.Stop()
+	world, ok := v.(*World)
+	if !ok {
+		return
+	}
 
-	ws.mu.Lock()
-	delete(ws.mapWorld, w.Id)
-	delete(ws.mapConn, con)
-	ws.mu.Unlock()
+	logger.Warning(fmt.Sprintf("World<id:%d> disconnected!", world.Id))
+	world.Stop()
+
+	ws.mapWorld.Delete(world.Id)
+	ws.mapConn.Delete(con)
 }
 
 func (ws *WorldSession) KickWorld(id uint32) {
-	w, ok := ws.mapWorld[id]
+	v, ok := ws.mapWorld.Load(id)
 	if !ok {
 		return
 	}
 
-	if _, ok := ws.mapConn[w.Con]; !ok {
+	world, ok := v.(*World)
+	if !ok {
 		return
 	}
 
-	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", w.Id))
-	w.Stop()
+	if _, ok := ws.mapConn.Load(world.Con); !ok {
+		return
+	}
 
-	ws.mu.Lock()
-	delete(ws.mapConn, w.Con)
-	delete(ws.mapWorld, w.Id)
-	ws.mu.Unlock()
+	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.Id))
+	world.Stop()
+
+	ws.mapConn.Delete(world.Con)
+	ws.mapWorld.Delete(world.Id)
 }
 
 func (ws *WorldSession) BroadCast(msg proto.Message) {
-	for _, v := range ws.mapWorld {
-		v.SendProtoMessage(msg)
-	}
+	ws.mapWorld.Range(func(_, v interface{}) bool {
+		if world, ok := v.(*World); ok {
+			world.SendProtoMessage(msg)
+		}
+		return true
+	})
 }
 
 func (ws *WorldSession) Run() {

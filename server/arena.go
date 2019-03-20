@@ -87,23 +87,48 @@ func NewArena(ctx context.Context) (*Arena, error) {
 }
 
 func GetSectionIndexByScore(score int32) int32 {
-	if score <= 1000 {
+	if score < 1200 {
 		return 0
-	} else if score <= 1100 {
-		return 1
-	} else if score <= 1200 {
-		return 2
-	} else if score <= 1300 {
-		return 3
 	} else if score <= 1400 {
-		return 4
-	} else if score <= 1500 {
-		return 5
+		return 1
 	} else if score <= 1600 {
+		return 2
+	} else if score <= 1800 {
+		return 3
+	} else if score <= 2000 {
+		return 4
+	} else if score <= 2300 {
+		return 5
+	} else if score <= 2600 {
 		return 6
 	} else {
 		return 7
 	}
+}
+
+func GetDefaultScoreBySection(secIdx int32) int32 {
+	var def int32 = 1000
+	switch secIdx {
+	case 0:
+		def = 1000
+	case 1:
+		def = 1200
+	case 2:
+		def = 1400
+	case 3:
+		def = 1600
+	case 4:
+		def = 1800
+	case 5:
+		def = 2000
+	case 6:
+		def = 2300
+	case 7:
+		def = 2600
+	default:
+		def = 1000
+	}
+	return def
 }
 
 func (arena *Arena) Stop() {
@@ -182,6 +207,7 @@ func (arena *Arena) UpdateMatching(id int64) {
 		return
 	}
 
+	// todo find in next section
 	secIdx := GetSectionIndexByScore(srcRec.ArenaScore)
 	arena.sMatchPool[secIdx].Range(func(k, _ interface{}) bool {
 		key, ok := k.(int64)
@@ -192,8 +218,6 @@ func (arena *Arena) UpdateMatching(id int64) {
 		if key == id {
 			return true
 		}
-
-		// todo find in next section
 
 		dv, ok := arena.mapRecord.Load(key)
 		if !ok {
@@ -244,10 +268,20 @@ func (arena *Arena) UpdateRecordRequest() {
 	}
 }
 
-func (arena *Arena) Matching(w *World, playerID int64) {
-	_, ok := arena.mapRecord.Load(playerID)
+func (arena *Arena) Matching(w *World, playerID int64, arenaScore int32) {
+	v, ok := arena.mapRecord.Load(playerID)
 
 	if ok {
+		// update arena score
+		if value, ok := v.(*world_message.ArenaRecord); ok {
+			preSection := GetSectionIndexByScore(value.ArenaScore)
+			newSection := GetSectionIndexByScore(arenaScore)
+			value.ArenaScore = arenaScore
+			if preSection != newSection {
+				arena.ReorderRecord(value, preSection, newSection)
+			}
+		}
+
 		// add to match request
 		arena.chMatchWait <- playerID
 

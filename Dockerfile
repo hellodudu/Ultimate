@@ -1,6 +1,6 @@
-FROM alpine
-FROM mysql
+FROM alpine:3.8
+FROM mysql:8.0
 COPY main main
 # COPY config config
 # COPY sql sql
-CMD ["./main"]
+ENTRYPOINT ["./main"]

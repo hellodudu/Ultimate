@@ -148,6 +148,15 @@ func (w *World) RequestWorldInfo() {
 	w.SendProtoMessage(msgG)
 }
 
+func (w *World) SyncArenaSeasonEndTime() {
+	endTime := Instance().GetGameMgr().GetArena().GetEndTime()
+	msg := &world_message.MUW_SyncArenaSeasonEndTime{
+		EndTime: uint32(endTime),
+	}
+
+	w.SendProtoMessage(msg)
+}
+
 func (w *World) PlayUltimateRecord(src_player_id int64, src_server_id uint32, record_id int64, dst_server_id uint32) {
 	msg := &world_message.MUW_PlayUltimateRecord{
 		SrcPlayerId: src_player_id,

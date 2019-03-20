@@ -379,6 +379,12 @@ func (ws *WorldSession) KickWorld(id uint32) {
 	ws.mu.Unlock()
 }
 
+func (ws *WorldSession) BroadCast(msg proto.Message) {
+	for _, v := range ws.mapWorld {
+		v.SendProtoMessage(msg)
+	}
+}
+
 func (ws *WorldSession) Run() {
 	for {
 		select {

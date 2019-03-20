@@ -59,6 +59,7 @@ func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
 		world.RequestWorldInfo()
+		world.SyncArenaSeasonEndTime()
 	}
 }
 

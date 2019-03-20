@@ -15,6 +15,7 @@ import (
 
 var ArenaMatchSectionNum int = 8 // arena section num
 var ArenaRankNumPerPage int = 10
+var ArenaSeasonDays int = 30
 
 // rankRecord sort interface
 type rankRecord struct {
@@ -66,7 +67,7 @@ type Arena struct {
 	sRankRec   rankRecord // slice of arena record sorted with ArenaScore
 
 	chMatchWait chan int64 // match wait player channel
-	endTime     int32      `sql:"arena_end_time"`
+	endTime     uint32     `sql:"arena_end_time"`
 
 	ctx      context.Context
 	cancel   context.CancelFunc
@@ -131,6 +132,10 @@ func GetDefaultScoreBySection(secIdx int32) int32 {
 	return def
 }
 
+func (arena *Arena) GetEndTime() uint32 {
+	return arena.endTime
+}
+
 func (arena *Arena) Stop() {
 	arena.cancel()
 }
@@ -153,6 +158,7 @@ func (arena *Arena) Run() {
 		default:
 			t := time.Now()
 			arena.UpdateRecordRequest()
+			arena.UpdateSeasonEnd()
 			d := time.Since(t)
 			time.Sleep(time.Millisecond - d)
 
@@ -183,10 +189,8 @@ func (arena *Arena) LoadFromDB() {
 	}
 
 	// if arena endtime was expired, set a new endtime one month later
-	if int32(time.Now().Unix()) > arena.endTime {
-		arena.endTime = int32(time.Now().Add(time.Hour * 24 * 30).Unix())
-		query := fmt.Sprintf("update global set arena_end_time = %d", arena.endTime)
-		Instance().dbMgr.Exec(query)
+	if uint32(time.Now().Unix()) > arena.endTime {
+		arena.NextSeasonTime()
 	}
 
 	arena.chDBInit <- struct{}{}
@@ -266,6 +270,60 @@ func (arena *Arena) UpdateRecordRequest() {
 	for _, v := range arrDel {
 		arena.mapRecReq.Delete(v)
 	}
+}
+
+func (arena *Arena) UpdateSeasonEnd() {
+	if uint32(time.Now().Unix()) >= arena.endTime {
+		arena.SeasonEnd()
+	}
+}
+
+func (arena *Arena) NextSeasonTime() {
+	// save db
+	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(ArenaSeasonDays)
+	arena.endTime = uint32(time.Now().Add(d).Unix())
+	query := fmt.Sprintf("update global set arena_end_time = %d", int32(arena.endTime))
+	Instance().dbMgr.Exec(query)
+
+	// broadcast to all world
+	msg := &world_message.MUW_SyncArenaSeasonEndTime{
+		EndTime: uint32(arena.endTime),
+	}
+	Instance().GetWorldSession().BroadCast(msg)
+}
+
+// send top 100 reward mail
+func (arena *Arena) SeasonReward() {
+	for n := 0; n < arena.sRankRec.Length(); n++ {
+		if n >= 100 {
+			break
+		}
+
+		rec := arena.sRankRec.Get(n)
+		info := Instance().GetGameMgr().GetPlayerInfoByID(rec.PlayerId)
+		if info == nil {
+			logger.Warning("arena season end, but cannot find top", n+1, " player ", rec.PlayerId)
+			continue
+		}
+
+		world := Instance().GetWorldSession().GetWorldByID(info.ServerId)
+		if world == nil {
+			logger.Warning("arena season end, but cannot find top", n+1, " player ", rec.PlayerId, " world ", info.ServerId)
+			continue
+		}
+
+		msg := &world_message.MUW_ArenaSeasonReward{
+			PlayerId: rec.PlayerId,
+			Rank:     int32(n + 1),
+		}
+
+		world.SendProtoMessage(msg)
+	}
+}
+
+func (arena *Arena) SeasonEnd() {
+	arena.SeasonReward()
+	arena.NextSeasonTime()
 }
 
 func (arena *Arena) Matching(w *World, playerID int64, arenaScore int32) {

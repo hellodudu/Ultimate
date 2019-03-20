@@ -233,3 +233,12 @@ message MUW_RequestArenaRank {
     int32 page = 2;
     repeated ArenaTargetInfo infos = 3;
 }
+
+message MUW_SyncArenaSeasonEndTime {
+    uint32 end_time = 1;
+}
+
+message MUW_ArenaSeasonReward {
+    int64 player_id = 1;
+    int32 rank = 2;
+}

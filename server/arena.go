@@ -153,7 +153,9 @@ func (arena *Arena) Run() {
 		// matching request
 		case id := <-arena.chMatchWait:
 			logger.Info("player:", id, " start arena matching!")
-			arena.UpdateMatching(id)
+			if !arena.UpdateMatching(id) {
+				arena.chMatchWait <- id
+			}
 
 		default:
 			t := time.Now()
@@ -196,60 +198,84 @@ func (arena *Arena) LoadFromDB() {
 	arena.chDBInit <- struct{}{}
 }
 
-func (arena *Arena) UpdateMatching(id int64) {
+func (arena *Arena) UpdateMatching(id int64) bool {
 
 	// get player arena section
 	sv, ok := arena.mapRecord.Load(id)
 	if !ok {
 		logger.Warning("cannot find player:", id, " 's arena record yet!")
-		return
+		return false
 	}
 
 	srcRec, ok := sv.(*world_message.ArenaRecord)
 	if !ok {
 		logger.Warning("cannot assert to arena record!")
-		return
+		return false
 	}
 
-	// todo find in next section
-	secIdx := GetSectionIndexByScore(srcRec.ArenaScore)
-	arena.sMatchPool[secIdx].Range(func(k, _ interface{}) bool {
-		key, ok := k.(int64)
-		if !ok {
-			return true
-		}
-
-		if key == id {
-			return true
-		}
-
-		dv, ok := arena.mapRecord.Load(key)
-		if !ok {
-			return true
-		}
-
-		dstRec, ok := dv.(*world_message.ArenaRecord)
-		if !ok {
-			logger.Warning("cannot assert to arena record!")
-			return false
-		}
-
-		info := Instance().GetGameMgr().GetPlayerInfoByID(id)
-		if info == nil {
-			logger.Warning("cannot find player ", id, " s info!")
-			return false
-		}
-
-		if world := Instance().GetWorldSession().GetWorldByID(info.ServerId); world != nil {
-			msg := &world_message.MUW_ArenaStartBattle{
-				AttackId:     id,
-				TargetRecord: dstRec,
+	// function of find target
+	f := func(sec int32) *world_message.ArenaRecord {
+		var r *world_message.ArenaRecord = nil
+		arena.sMatchPool[sec].Range(func(k, _ interface{}) bool {
+			key, ok := k.(int64)
+			if !ok {
+				return true
 			}
-			world.SendProtoMessage(msg)
-		}
-		return false
-	})
 
+			if key == id {
+				return true
+			}
+
+			dv, ok := arena.mapRecord.Load(key)
+			if !ok {
+				return true
+			}
+
+			r, ok = dv.(*world_message.ArenaRecord)
+			if !ok {
+				logger.Warning("cannot assert to arena record!")
+				return false
+			}
+
+			return false
+		})
+		return r
+	}
+
+	// find in same section
+	secIdx := GetSectionIndexByScore(srcRec.ArenaScore)
+	dstRec := f(secIdx)
+
+	// find in below section
+	if dstRec == nil {
+		for n := secIdx - 1; n >= 0; n-- {
+			dstRec = f(secIdx)
+			if dstRec != nil {
+				break
+			}
+		}
+	}
+
+	// still can not find target
+	if dstRec == nil {
+		return false
+	}
+
+	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
+	if info == nil {
+		logger.Warning("cannot find player ", id, " s info!")
+		return false
+	}
+
+	if world := Instance().GetWorldSession().GetWorldByID(info.ServerId); world != nil {
+		msg := &world_message.MUW_ArenaStartBattle{
+			AttackId:     id,
+			TargetRecord: dstRec,
+		}
+		world.SendProtoMessage(msg)
+	}
+
+	return true
 }
 
 func (arena *Arena) UpdateRecordRequest() {

@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
-	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -27,7 +26,6 @@ type World struct {
 
 	mapPlayer map[int64]*world_message.CrossPlayerInfo
 	mapGuild  map[int64]*world_message.CrossGuildInfo
-	mu        sync.Mutex
 
 	chDBInit chan struct{}
 }

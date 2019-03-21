@@ -61,6 +61,7 @@ func (s *rankRecord) Add(v *world_message.ArenaRecord) {
 
 // Arean data
 type Arena struct {
+	// todo add a new map[playerid]ArenaScore, save in mysql, get ArenaScore replace in mapRecord
 	mapRecord  sync.Map   // all player's arena record
 	sMatchPool []sync.Map // 8 level match pool map[int64]struct{}
 	mapRecReq  sync.Map   // map of request player arena record map[int64]struct{}
@@ -153,8 +154,15 @@ func (arena *Arena) Run() {
 		// matching request
 		case id := <-arena.chMatchWait:
 			logger.Info("player:", id, " start arena matching!")
+
 			if !arena.UpdateMatching(id) {
-				arena.chMatchWait <- id
+				// try again 5 seconds later
+				t := time.NewTimer(5 * time.Second)
+				go func(p int64) {
+					<-t.C
+					arena.chMatchWait <- p
+					logger.Trace("player ", p, " has no target try matching again in 5 seconds!")
+				}(id)
 			}
 
 		default:
@@ -177,7 +185,7 @@ func (arena *Arena) LoadFromDB() {
 
 	query := fmt.Sprintf("select %s from global where id = %d", f.Tag.Get("sql"), global.UltimateID)
 
-	rows, err := Instance().dbMgr.Query(query)
+	rows, err := Instance().GetDBMgr().Query(query)
 	if err != nil {
 		logger.Warning("cannot load arena's endTime from dbMgr!")
 		return
@@ -309,13 +317,32 @@ func (arena *Arena) NextSeasonTime() {
 	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(ArenaSeasonDays)
 	arena.endTime = uint32(time.Now().Add(d).Unix())
 	query := fmt.Sprintf("update global set arena_end_time = %d", int32(arena.endTime))
-	Instance().dbMgr.Exec(query)
+	Instance().GetDBMgr().Exec(query)
 
 	// broadcast to all world
 	msg := &world_message.MUW_SyncArenaSeasonEndTime{
 		EndTime: uint32(arena.endTime),
 	}
 	Instance().GetWorldSession().BroadCast(msg)
+}
+
+func (arena *Arena) SaveSeasonResult() {
+	// save top 100 rank data
+	rankLen := arena.sRankRec.Length()
+	if rankLen > 100 {
+		rankLen = 100
+	}
+
+	for n := 0; n < rankLen; n++ {
+		if rec := arena.sRankRec.Get(n); rec != nil {
+			query := fmt.Sprintf("replace into arena set rank=%d, season_end_time=%d, player_id=%d", n, arena.endTime, rec.PlayerId)
+			Instance().GetDBMgr().Exec(query)
+		}
+	}
+}
+
+func (arena *Arena) NewSeasonRank() {
+	// todo clear rank
 }
 
 // send top 100 reward mail
@@ -348,8 +375,10 @@ func (arena *Arena) SeasonReward() {
 }
 
 func (arena *Arena) SeasonEnd() {
+	arena.SaveSeasonResult()
 	arena.SeasonReward()
 	arena.NextSeasonTime()
+	arena.NewSeasonRank()
 }
 
 func (arena *Arena) Matching(w *World, playerID int64, arenaScore int32) {

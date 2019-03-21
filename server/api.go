@@ -72,6 +72,10 @@ func (api *API) GetGameMgr() *GameMgr {
 	return api.gameMgr
 }
 
+func (api *API) GetDBMgr() *DBMgr {
+	return api.dbMgr
+}
+
 // init task and taskdispatcher
 func (api *API) InitTask() {
 	defer api.wg.Done()

@@ -26,7 +26,7 @@
 
 * Docker Run:(on my env)
     
-	    docker run -itd -v $GOPATH/src/github.com/hellodudu/Ultimate/config:/config -v $GOPATH/src/github.com/hellodudu/Ultimate/log:/log -p 7030:7030 -p 8088:8080 hellodudu86/ultimate:1.0 ./main
+	    docker run -itd -v $GOPATH/src/github.com/hellodudu/Ultimate/config:/config -v $GOPATH/src/github.com/hellodudu/Ultimate/log:/log -p 7030:7030 -p 8088:8080 hellodudu86/ultimate:1.0
 
 # Run From Docker Hub:
 

@@ -15,7 +15,7 @@ import (
 
 var ArenaMatchSectionNum int = 8 // arena section num
 var ArenaRankNumPerPage int = 10
-var ArenaSeasonDays int = 30
+var ArenaSeasonDays int = 4 * 7 // one season = 4 weeks
 
 // rankRecord sort interface
 type rankRecord struct {
@@ -68,6 +68,7 @@ type Arena struct {
 	sRankRec   rankRecord // slice of arena record sorted with ArenaScore
 
 	chMatchWait chan int64 // match wait player channel
+	season      int        `sql:"arena_season"`
 	endTime     uint32     `sql:"arena_end_time"`
 
 	ctx      context.Context
@@ -137,6 +138,10 @@ func (arena *Arena) GetEndTime() uint32 {
 	return arena.endTime
 }
 
+func (arena *Arena) GetSeason() int {
+	return arena.season
+}
+
 func (arena *Arena) Stop() {
 	arena.cancel()
 }
@@ -177,13 +182,19 @@ func (arena *Arena) Run() {
 }
 
 func (arena *Arena) LoadFromDB() {
-	f, ok := reflect.TypeOf(*arena).FieldByName("endTime")
+	endtime, ok := reflect.TypeOf(*arena).FieldByName("endTime")
 	if !ok {
 		logger.Warning("cannot find arena's endTime field!")
 		return
 	}
 
-	query := fmt.Sprintf("select %s from global where id = %d", f.Tag.Get("sql"), global.UltimateID)
+	season, ok := reflect.TypeOf(*arena).FieldByName("season")
+	if !ok {
+		logger.Warning("cannot find arena's season field!")
+		return
+	}
+
+	query := fmt.Sprintf("select %s, %s from global where id = %d", endtime.Tag.Get("sql"), season.Tag.Get("sql"), global.UltimateID)
 
 	rows, err := Instance().GetDBMgr().Query(query)
 	if err != nil {
@@ -200,7 +211,7 @@ func (arena *Arena) LoadFromDB() {
 
 	// if arena endtime was expired, set a new endtime one month later
 	if uint32(time.Now().Unix()) > arena.endTime {
-		arena.NextSeasonTime()
+		arena.NextSeason()
 	}
 
 	arena.chDBInit <- struct{}{}
@@ -312,15 +323,32 @@ func (arena *Arena) UpdateSeasonEnd() {
 	}
 }
 
-func (arena *Arena) NextSeasonTime() {
-	// save db
+func (arena *Arena) NextSeason() {
+	// current time
+	ct := time.Now()
+
+	// current weekday
+	cw := time.Now().Weekday()
+	if cw == 0 {
+		cw = 7
+	}
+
+	// one full season duration
 	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(ArenaSeasonDays)
-	arena.endTime = uint32(time.Now().Add(d).Unix())
-	query := fmt.Sprintf("update global set arena_end_time = %d", int32(arena.endTime))
+
+	// now elapse duration
+	e := time.Duration(time.Hour)*time.Duration(24)*time.Duration(cw-1) + time.Duration(time.Hour)*ct.Hour() + time.Duration(time.Minute)*ct.Minute() + time.Duration(time.Second)*ct.Second()
+
+	// add 30 seconds inaccuracy
+	arena.endTime = uint32(time.Now().Add(d - e + time.Duration(time.Second)*30).Unix())
+
+	// save db
+	query := fmt.Sprintf("update global set arena_end_time = %d, arena_season = %d", int32(arena.endTime), arena.season)
 	Instance().GetDBMgr().Exec(query)
 
 	// broadcast to all world
-	msg := &world_message.MUW_SyncArenaSeasonEndTime{
+	msg := &world_message.MUW_SyncArenaSeason{
+		Season:  int32(arena.season),
 		EndTime: uint32(arena.endTime),
 	}
 	Instance().GetWorldSession().BroadCast(msg)
@@ -377,7 +405,7 @@ func (arena *Arena) SeasonReward() {
 func (arena *Arena) SeasonEnd() {
 	arena.SaveSeasonResult()
 	arena.SeasonReward()
-	arena.NextSeasonTime()
+	arena.NextSeason()
 	arena.NewSeasonRank()
 }
 

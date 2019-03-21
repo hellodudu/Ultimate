@@ -337,7 +337,7 @@ func (arena *Arena) NextSeason() {
 	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(ArenaSeasonDays)
 
 	// now elapse duration
-	e := time.Duration(time.Hour)*time.Duration(24)*time.Duration(cw-1) + time.Duration(time.Hour)*ct.Hour() + time.Duration(time.Minute)*ct.Minute() + time.Duration(time.Second)*ct.Second()
+	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
 	// add 30 seconds inaccuracy
 	arena.endTime = uint32(time.Now().Add(d - e + time.Duration(time.Second)*30).Unix())

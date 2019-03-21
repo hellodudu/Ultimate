@@ -148,7 +148,9 @@ func (w *World) RequestWorldInfo() {
 
 func (w *World) SyncArenaSeasonEndTime() {
 	endTime := Instance().GetGameMgr().GetArena().GetEndTime()
-	msg := &world_message.MUW_SyncArenaSeasonEndTime{
+	season := Instance().GetGameMgr().GetArena().GetSeason()
+	msg := &world_message.MUW_SyncArenaSeason{
+		Season:  int32(season),
 		EndTime: uint32(endTime),
 	}
 

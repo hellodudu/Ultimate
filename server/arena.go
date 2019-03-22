@@ -79,13 +79,15 @@ type Arena struct {
 	mapArenaData sync.Map      // all player's arena data
 	sRankArena   rankArenaData // slice of arena record sorted with ArenaScore
 
-	mapRecord  sync.Map   // all player's arena record
-	sMatchPool []sync.Map // 8 level match pool map[int64]struct{}
-	mapRecReq  sync.Map   // map of request player arena record map[int64]struct{}
+	mapRecord    sync.Map   // all player's arena record
+	arrMatchPool []sync.Map // 8 level match pool map[playerid]struct{}
+	matchingList sync.Map   // list of matching waiting player map[playerid]struct{}
 
-	chMatchWait chan int64 // match wait player channel
-	season      int        `sql:"arena_season"`
-	endTime     uint32     `sql:"arena_end_time"`
+	mapRecordReq sync.Map // map of init player request map[playerid]time.Now() : next request time
+
+	chMatchWaitOK chan int64 // match wait player channel
+	season        int        `sql:"arena_season"`
+	endTime       uint32     `sql:"arena_end_time"`
 
 	ctx      context.Context
 	cancel   context.CancelFunc
@@ -94,10 +96,10 @@ type Arena struct {
 
 func NewArena(ctx context.Context) (*Arena, error) {
 	arena := &Arena{
-		sRankArena:  rankArenaData{item: make([]*arenaData, 0)},
-		sMatchPool:  make([]sync.Map, ArenaMatchSectionNum),
-		chMatchWait: make(chan int64, 1000),
-		chDBInit:    make(chan struct{}, 1),
+		sRankArena:    rankArenaData{item: make([]*arenaData, 0)},
+		arrMatchPool:  make([]sync.Map, ArenaMatchSectionNum),
+		chMatchWaitOK: make(chan int64, 1000),
+		chDBInit:      make(chan struct{}, 1),
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
@@ -173,7 +175,7 @@ func (arena *Arena) Run() {
 			return
 
 		// matching request
-		case id := <-arena.chMatchWait:
+		case id := <-arena.chMatchWaitOK:
 			logger.Info("player:", id, " start arena matching!")
 
 			ok, err := arena.UpdateMatching(id)
@@ -186,14 +188,15 @@ func (arena *Arena) Run() {
 				t := time.NewTimer(5 * time.Second)
 				go func(p int64) {
 					<-t.C
-					arena.chMatchWait <- p
+					arena.chMatchWaitOK <- p
 					logger.Trace("player ", p, " has no target try matching again in 5 seconds!")
 				}(id)
 			}
 
 		default:
 			t := time.Now()
-			arena.UpdateRecordRequest()
+			arena.UpdateRequestRecord()
+			arena.UpdateMatchingList()
 			arena.UpdateSeasonEnd()
 			d := time.Since(t)
 			time.Sleep(time.Millisecond - d)
@@ -246,6 +249,9 @@ func (arena *Arena) LoadFromDB() {
 		logger.Info("load from arena success:", data)
 
 		arena.mapArenaData.Store(data.playerid, data)
+
+		// add to record request list, delay 20s to start request
+		arena.mapRecordReq.Store(data.playerid, time.Now().Add(time.Second*20))
 	}
 
 	// if arena endtime was expired, set a new endtime one season later
@@ -282,7 +288,7 @@ func (arena *Arena) UpdateMatching(id int64) (bool, error) {
 	// function of find target
 	f := func(sec int32) *world_message.ArenaRecord {
 		var r *world_message.ArenaRecord = nil
-		arena.sMatchPool[sec].Range(func(k, _ interface{}) bool {
+		arena.arrMatchPool[sec].Range(func(k, _ interface{}) bool {
 			key, ok := k.(int64)
 			if !ok {
 				return true
@@ -344,23 +350,70 @@ func (arena *Arena) UpdateMatching(id int64) (bool, error) {
 	return true, nil
 }
 
-func (arena *Arena) UpdateRecordRequest() {
+func (arena *Arena) UpdateRequestRecord() {
 	var arrDel []int64
-	arena.mapRecReq.Range(func(k, _ interface{}) bool {
+	var arrDelay []int64
+
+	arena.mapRecordReq.Range(func(k, v interface{}) bool {
+		id := k.(int64)
+		t := v.(time.Time)
+
+		// already has a record
+		if _, ok := arena.mapRecord.Load(id); ok {
+			arrDel = append(arrDel, id)
+			return true
+		}
+
+		// it's not right time to send request
+		if time.Now().Unix() < t.Unix() {
+			return true
+		}
+
+		info := Instance().GetGameMgr().GetPlayerInfoByID(id)
+		if info == nil {
+			return true
+		}
+
+		world := Instance().GetWorldSession().GetWorldByID(info.ServerId)
+		if world == nil {
+			return true
+		}
+
+		// send request and try again 1 minutes later
+		msg := &world_message.MUW_ArenaAddRecord{
+			PlayerId: id,
+		}
+		world.SendProtoMessage(msg)
+		arrDelay = append(arrDelay, id)
+		return true
+	})
+
+	for _, v := range arrDel {
+		arena.mapRecordReq.Delete(v)
+	}
+
+	for _, v := range arrDelay {
+		arena.mapRecordReq.Store(v, time.Now().Add(time.Minute))
+	}
+}
+
+func (arena *Arena) UpdateMatchingList() {
+	var arrDel []int64
+	arena.matchingList.Range(func(k, _ interface{}) bool {
 		key, ok := k.(int64)
 		if !ok {
 			return true
 		}
 
 		if _, ok := arena.mapRecord.Load(key); ok {
-			arena.chMatchWait <- key
+			arena.chMatchWaitOK <- key
 			arrDel = append(arrDel, key)
 		}
 		return true
 	})
 
 	for _, v := range arrDel {
-		arena.mapRecReq.Delete(v)
+		arena.matchingList.Delete(v)
 	}
 }
 
@@ -457,23 +510,19 @@ func (arena *Arena) SeasonEnd() {
 	arena.NewSeasonRank()
 }
 
-func (arena *Arena) Matching(w *World, playerID int64) {
+func (arena *Arena) Matching(playerID int64) {
 	_, ok := arena.mapRecord.Load(playerID)
 
 	if ok {
 		// add to match request
-		arena.chMatchWait <- playerID
+		arena.chMatchWaitOK <- playerID
 
 	} else {
-		// request player record
-		msg := &world_message.MUW_ArenaAddRecord{
-			PlayerId: playerID,
-		}
+		// request record
+		arena.mapRecordReq.Store(playerID, time.Now())
 
-		w.SendProtoMessage(msg)
-
-		// add to record request list
-		arena.mapRecReq.Store(playerID, struct{}{})
+		// add to matching wait list
+		arena.matchingList.Store(playerID, struct{}{})
 	}
 }
 
@@ -508,7 +557,7 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 
 		// add to matching cache
 		index := GetSectionIndexByScore(data.score)
-		arena.sMatchPool[index].Store(rec.PlayerId, struct{}{})
+		arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
 
 		// save to db
 		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reach_time = %d", data.playerid, data.score, data.reach_time)
@@ -517,8 +566,8 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 }
 
 func (arena *Arena) ReorderRecord(id int64, preSection, newSection int32) {
-	arena.sMatchPool[preSection].Delete(id)
-	arena.sMatchPool[newSection].Store(id, struct{}{})
+	arena.arrMatchPool[preSection].Delete(id)
+	arena.arrMatchPool[newSection].Store(id, struct{}{})
 
 }
 

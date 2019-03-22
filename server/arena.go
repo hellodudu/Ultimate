@@ -262,13 +262,13 @@ func (arena *Arena) UpdateMatching(id int64) (bool, error) {
 	d, ok := arena.mapArenaData.Load(id)
 	if !ok {
 		logger.Warning("cannot find player:", id, " 's arena data!")
-		return false, errors.New(fmt.Sprintf("cannot find player %d", id, " 's arena data!"))
+		return false, errors.New(fmt.Sprintf("cannot find player %d 's arena data!", id))
 	}
 
 	data, ok := d.(*arenaData)
 	if !ok {
 		logger.Warning("cannot assert player's arenadata!")
-		return false, errors.New(fmt.Sprintf("cannot assert player %d", id, " 's arenadata!"))
+		return false, errors.New(fmt.Sprintf("cannot assert player %d 's arena data!", id))
 	}
 
 	// function of find target

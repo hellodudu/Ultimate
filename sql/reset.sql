@@ -22,7 +22,7 @@ create table world (
 drop table if exists `arena`;
 create table arena (
     `player_id` bigint(20) not null default '-1' comment 'player id',
-    `rank` int(5) not null default '0' comment 'arena rank by season',
-    `season` int(10) not null default '0' comment 'arena season',
+    `score` int(10) not null default '0' comment 'arena score',
+    `reach_time` int(10) not null default '0' comment 'arena score update time',
     primary key (`player_id`)
 ) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='arena';

@@ -132,7 +132,7 @@ func HandleArenaMatching(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		Instance().GetGameMgr().GetArena().Matching(srcWorld, msg.PlayerId, msg.ArenaScore)
+		Instance().GetGameMgr().GetArena().Matching(srcWorld, msg.PlayerId)
 	}
 }
 

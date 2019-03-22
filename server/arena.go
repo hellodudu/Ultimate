@@ -248,9 +248,17 @@ func (arena *Arena) LoadFromDB() {
 		arena.mapArenaData.Store(data.playerid, data)
 	}
 
-	// if arena endtime was expired, set a new endtime one month later
-	if uint32(time.Now().Unix()) > arena.endTime {
+	// if arena endtime was expired, set a new endtime one season later
+	if arena.endTime == 0 {
 		arena.NextSeason()
+
+		// if season end time has gone past, call SeasonEnd() 10 minutes later(wait for all world connected)
+	} else if uint32(time.Now().Unix()) > arena.endTime {
+		t := time.NewTimer(1 * time.Minute)
+		go func() {
+			<-t.C
+			arena.SeasonEnd()
+		}()
 	}
 
 	arena.chDBInit <- struct{}{}
@@ -503,7 +511,7 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 		arena.sMatchPool[index].Store(rec.PlayerId, struct{}{})
 
 		// save to db
-		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reach_time = %d where player_id = %d", data.playerid, data.score, data.reach_time, data.playerid)
+		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reach_time = %d", data.playerid, data.score, data.reach_time)
 		Instance().GetDBMgr().Exec(query)
 	}
 }
@@ -538,6 +546,10 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 		if preSection != newSection {
 			arena.ReorderRecord(attack, preSection, newSection)
 		}
+
+		// save to db
+		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reach_time = %d", data.playerid, data.score, data.reach_time)
+		Instance().GetDBMgr().Exec(query)
 
 		// rank change
 		arena.sRankArena.Sort()

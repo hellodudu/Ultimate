@@ -19,10 +19,11 @@ create table world (
     primary key (`id`)
 ) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='world';
 
-drop table if exists `arena`;
-create table arena (
+drop table if exists `arena_player`;
+create table arena_player (
     `player_id` bigint(20) not null default '-1' comment 'player id',
     `score` int(10) not null default '0' comment 'arena score',
     `reach_time` int(10) not null default '0' comment 'arena score update time',
+    `last_target` bigint(20) not null default '-1' comment 'same target cannot be met twice',
     primary key (`player_id`)
-) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='arena';
+) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='arena player';

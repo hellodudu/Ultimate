@@ -12,20 +12,20 @@ import (
 )
 
 // global var
-var api *API = nil
+var api *API
 
-// api define
+// API define
 type API struct {
-	td       *task.Dispatcher // task dispatcher
-	dbMgr    *DBMgr           // db manager
-	rds      *redis.Client    // redis
-	tcp_s    *TcpServer       // tcp server
-	http_s   *HttpServer      // http server
-	world_sn *WorldSession    // world session
-	gameMgr  *GameMgr
-	reqNum   int          // request number
-	appMap   map[int]*App // app map
-	wg       sync.WaitGroup
+	td        *task.Dispatcher // task dispatcher
+	dbMgr     *DBMgr           // db manager
+	rds       *redis.Client    // redis
+	tcpServ   *TcpServer       // tcp server
+	httpServ  *HttpServer      // http server
+	worldSesn *WorldSession    // world session
+	gameMgr   *GameMgr
+	reqNum    int          // request number
+	appMap    map[int]*App // app map
+	wg        sync.WaitGroup
 }
 
 func NewAPI() (*API, error) {
@@ -39,7 +39,7 @@ func NewAPI() (*API, error) {
 	}
 
 	if ok := logger.Init(global.Debugging); !ok {
-		return nil, errors.New("init log file failed!")
+		return nil, errors.New("init log file failed")
 	}
 
 	api.wg.Add(5)
@@ -65,7 +65,7 @@ func Instance() *API {
 }
 
 func (api *API) GetWorldSession() *WorldSession {
-	return api.world_sn
+	return api.worldSesn
 }
 
 func (api *API) GetGameMgr() *GameMgr {
@@ -121,7 +121,7 @@ func (api *API) InitRedis() {
 func (api *API) InitTcpServer() {
 	defer api.wg.Done()
 	var err error
-	if api.tcp_s, err = NewTcpServer(); err != nil {
+	if api.tcpServ, err = NewTcpServer(); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -132,7 +132,7 @@ func (api *API) InitTcpServer() {
 func (api *API) InitHttpServer() {
 	defer api.wg.Done()
 	var err error
-	if api.http_s, err = NewHttpServer(); err != nil {
+	if api.httpServ, err = NewHttpServer(); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -143,7 +143,7 @@ func (api *API) InitHttpServer() {
 func (api *API) InitWorldSession() {
 	defer api.wg.Done()
 	var err error
-	if api.world_sn, err = NewWorldSession(); err != nil {
+	if api.worldSesn, err = NewWorldSession(); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -162,9 +162,9 @@ func (api *API) InitGame() {
 
 // run
 func (api *API) Run() {
-	go api.tcp_s.Run()
-	go api.http_s.Run()
-	go api.world_sn.Run()
+	go api.tcpServ.Run()
+	go api.httpServ.Run()
+	go api.worldSesn.Run()
 	go api.gameMgr.Run()
 	go api.dbMgr.Run()
 
@@ -172,7 +172,7 @@ func (api *API) Run() {
 
 func (api *API) Stop() {
 	<-api.dbMgr.Stop()
-	<-api.world_sn.Stop()
+	<-api.worldSesn.Stop()
 }
 
 func (api *API) GenReqNum() int {

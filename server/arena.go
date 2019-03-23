@@ -14,10 +14,10 @@ import (
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
 
-var ArenaMatchSectionNum int = 8 // arena section num
-var ArenaRankNumPerPage int = 10
-var ArenaSeasonDays int = 4 * 7    // one season = 4 weeks
-var ArenaDefaultScore int32 = 1000 // default arena score
+var arenaMatchSectionNum = 8 // arena section num
+var arenaRankNumPerPage = 10
+var arenaSeasonDays = 4 * 7  // one season = 4 weeks
+var arenaDefaultScore = 1000 // default arena score
 
 // rankRecord sort interface
 type rankArenaData struct {
@@ -31,11 +31,11 @@ func (s *rankArenaData) Sort() {
 	sort.Sort(s)
 }
 
-func (s rankArenaData) Len() int {
+func (s *rankArenaData) Len() int {
 	return len(s.item)
 }
 
-func (s rankArenaData) Length() int {
+func (s *rankArenaData) Length() int {
 	s.rwLock.RLock()
 	defer s.rwLock.RUnlock()
 	return len(s.item)
@@ -45,17 +45,17 @@ func (s *rankArenaData) Swap(a, b int) {
 	s.item[a], s.item[b] = s.item[b], s.item[a]
 }
 
-func (s rankArenaData) Less(a, b int) bool {
+func (s *rankArenaData) Less(a, b int) bool {
 	if s.item[a].score == s.item[b].score {
-		if s.item[a].reach_time == s.item[b].reach_time {
+		if s.item[a].reachTime == s.item[b].reachTime {
 			return s.item[a].playerid < s.item[b].playerid
 		}
-		return s.item[a].reach_time < s.item[b].reach_time
+		return s.item[a].reachTime < s.item[b].reachTime
 	}
 	return s.item[a].score > s.item[b].score
 }
 
-func (s rankArenaData) Get(n int) *arenaData {
+func (s *rankArenaData) Get(n int) *arenaData {
 	s.rwLock.RLock()
 	defer s.rwLock.RUnlock()
 	return s.item[n]
@@ -71,10 +71,11 @@ func (s *rankArenaData) Add(v *arenaData) {
 type arenaData struct {
 	playerid   int64 `sql:"player_id"`
 	score      int32 `sql:"score"`
-	reach_time int32 `sql:"reach_time"`
+	reachTime  int32 `sql:"reach_time"`
+	lastTarget int64 `sql:"last_target"` // target cannot be last one
 }
 
-// Arean data
+// Arena data
 type Arena struct {
 	mapArenaData sync.Map      // all player's arena data
 	sRankArena   rankArenaData // slice of arena record sorted with ArenaScore
@@ -97,7 +98,7 @@ type Arena struct {
 func NewArena(ctx context.Context) (*Arena, error) {
 	arena := &Arena{
 		sRankArena:    rankArenaData{item: make([]*arenaData, 0)},
-		arrMatchPool:  make([]sync.Map, ArenaMatchSectionNum),
+		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
 		chMatchWaitOK: make(chan int64, 1000),
 		chDBInit:      make(chan struct{}, 1),
 	}
@@ -234,7 +235,7 @@ func (arena *Arena) LoadFromDB() {
 		logger.Info("load from global success end_time = ", arena.endTime, ", season = ", arena.season)
 	}
 
-	query = fmt.Sprintf("select * from arena")
+	query = fmt.Sprintf("select * from arena_player")
 	rows, err = Instance().GetDBMgr().Query(query)
 	if err != nil {
 		logger.Warning("cannot load mysql table arena!", err)
@@ -243,7 +244,7 @@ func (arena *Arena) LoadFromDB() {
 
 	for rows.Next() {
 		data := &arenaData{}
-		if err := rows.Scan(&data.playerid, &data.score, &data.reach_time); err != nil {
+		if err := rows.Scan(&data.playerid, &data.score, &data.reachTime, &data.lastTarget); err != nil {
 			logger.Warning("load table arena failed:", err)
 		}
 		logger.Info("load from arena success:", data)
@@ -276,13 +277,13 @@ func (arena *Arena) UpdateMatching(id int64) (bool, error) {
 	d, ok := arena.mapArenaData.Load(id)
 	if !ok {
 		logger.Warning("cannot find player:", id, " 's arena data!")
-		return false, errors.New(fmt.Sprintf("cannot find player %d 's arena data!", id))
+		return false, errors.New(fmt.Sprintf("cannot find player %d 's arena data", id))
 	}
 
 	data, ok := d.(*arenaData)
 	if !ok {
 		logger.Warning("cannot assert player's arenadata!")
-		return false, errors.New(fmt.Sprintf("cannot assert player %d 's arena data!", id))
+		return false, errors.New(fmt.Sprintf("cannot assert player %d 's arena data", id))
 	}
 
 	// function of find target
@@ -294,7 +295,13 @@ func (arena *Arena) UpdateMatching(id int64) (bool, error) {
 				return true
 			}
 
+			// cannot be self
 			if key == id {
+				return true
+			}
+
+			// cannot be last target
+			if key == data.lastTarget {
 				return true
 			}
 
@@ -434,7 +441,7 @@ func (arena *Arena) NextSeason() {
 	}
 
 	// one full season duration
-	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(ArenaSeasonDays)
+	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(arenaSeasonDays)
 
 	// now elapse duration
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
@@ -453,21 +460,6 @@ func (arena *Arena) NextSeason() {
 		EndTime: uint32(arena.endTime),
 	}
 	Instance().GetWorldSession().BroadCast(msg)
-}
-
-func (arena *Arena) SaveSeasonResult() {
-	// save top 100 rank data
-	rankLen := arena.sRankArena.Length()
-	if rankLen > 100 {
-		rankLen = 100
-	}
-
-	for n := 0; n < rankLen; n++ {
-		if data := arena.sRankArena.Get(n); data != nil {
-			query := fmt.Sprintf("replace into arena set rank=%d, season_end_time=%d, player_id=%d", n, arena.endTime, data.playerid)
-			Instance().GetDBMgr().Exec(query)
-		}
-	}
 }
 
 func (arena *Arena) NewSeasonRank() {
@@ -504,7 +496,6 @@ func (arena *Arena) SeasonReward() {
 }
 
 func (arena *Arena) SeasonEnd() {
-	arena.SaveSeasonResult()
 	arena.SeasonReward()
 	arena.NextSeason()
 	arena.NewSeasonRank()
@@ -536,15 +527,16 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 		// add new record and arena data
 		data := &arenaData{
 			playerid:   rec.PlayerId,
-			score:      ArenaDefaultScore,
-			reach_time: int32(time.Now().Unix()),
+			score:      int32(arenaDefaultScore),
+			reachTime:  int32(time.Now().Unix()),
+			lastTarget: -1,
 		}
 
 		// use exist arena data first
 		if s, ok := arena.mapArenaData.Load(rec.PlayerId); ok {
 			if d, ok := s.(*arenaData); ok {
 				data.score = d.score
-				data.reach_time = d.reach_time
+				data.reachTime = d.reachTime
 			}
 		}
 
@@ -560,7 +552,7 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 		arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
 
 		// save to db
-		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reach_time = %d", data.playerid, data.score, data.reach_time)
+		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reachTime = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
 		Instance().GetDBMgr().Exec(query)
 	}
 }
@@ -590,14 +582,14 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 		// section change
 		preSection := GetSectionIndexByScore(data.score)
 		data.score += 10
-		data.reach_time = int32(time.Now().Unix())
+		data.reachTime = int32(time.Now().Unix())
 		newSection := GetSectionIndexByScore(data.score)
 		if preSection != newSection {
 			arena.ReorderRecord(attack, preSection, newSection)
 		}
 
 		// save to db
-		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reach_time = %d", data.playerid, data.score, data.reach_time)
+		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reachTime = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
 		Instance().GetDBMgr().Exec(query)
 
 		// rank change
@@ -605,7 +597,7 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 		logger.Trace("after sort rank rec :")
 		for n := 0; n < arena.sRankArena.Length(); n++ {
 			t := arena.sRankArena.Get(n)
-			logger.Trace("player id = ", t.playerid, ", arena score = ", t.score, ", reach time = ", t.reach_time)
+			logger.Trace("player id = ", t.playerid, ", arena score = ", t.score, ", reach time = ", t.reachTime)
 		}
 	}
 }
@@ -631,7 +623,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		Infos:    make([]*world_message.ArenaTargetInfo, 0),
 	}
 
-	for n := 0 + int(page)*ArenaRankNumPerPage; n < 10+int(page)*ArenaRankNumPerPage; n++ {
+	for n := 0 + int(page)*arenaRankNumPerPage; n < 10+int(page)*arenaRankNumPerPage; n++ {
 		if n >= arena.sRankArena.Length() {
 			break
 		}

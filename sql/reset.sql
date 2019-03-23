@@ -7,7 +7,7 @@ create table global (
     `id` int(10) not null default '0' comment 'ultimate id',
     `time_stamp` int(10) not null default '0' comment 'current time',
     `arena_season` int(10) not null default '0' comment 'arena seasons',
-    `arena_end_time` int(10) not null default '0' comment 'arena battle end time',
+    `arena_season_end_time` int(10) not null default '0' comment 'arena season end time',
     primary key (`id`)
 ) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='global table';
 

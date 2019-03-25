@@ -672,7 +672,7 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 		arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
 
 		// save to db
-		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reachTime = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
+		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
 		Instance().GetDBMgr().Exec(query)
 	}
 }
@@ -693,7 +693,9 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 		return
 	}
 
+	// record target into last target
 	data := d.(*arenaData)
+	data.lastTarget = target
 
 	if win {
 		// section change
@@ -706,7 +708,7 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 		}
 
 		// save to db
-		query := fmt.Sprintf("replace into arena set player_id = %d, score = %d, reachTime = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
+		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
 		Instance().GetDBMgr().Exec(query)
 
 		// rank change
@@ -725,12 +727,6 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		return
 	}
 
-	d, ok := arena.mapArenaData.Load(id)
-	if !ok {
-		return
-	}
-	data := d.(*arenaData)
-
 	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
 	if info == nil {
 		return
@@ -744,20 +740,23 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 	msg := &world_message.MUW_RequestArenaRank{
 		PlayerId:      id,
 		Page:          page,
-		Score:         data.score,
+		Score:         int32(arenaDefaultScore),
 		Rank:          -1,
 		SeasonEndTime: arena.seasonEndTime,
 		Infos:         make([]*world_message.ArenaTargetInfo, 0),
 	}
 
 	// get player rank
-	if arenaData := arena.arrRankArena.Get(arena.arrRankArena.Len() - 1); arenaData != nil {
-		if data.score >= arenaData.score {
-			size := arena.arrRankArena.Length()
-			for n := 0; n < size; n++ {
-				if rankData := arena.arrRankArena.Get(n); rankData.playerid == id {
-					msg.Rank = int32(n)
-					break
+	if d, ok := arena.mapArenaData.Load(id); ok {
+		data := d.(*arenaData)
+		if arenaData := arena.arrRankArena.Get(arena.arrRankArena.Len() - 1); arenaData != nil {
+			if data.score >= arenaData.score {
+				size := arena.arrRankArena.Length()
+				for n := 0; n < size; n++ {
+					if rankData := arena.arrRankArena.Get(n); rankData.playerid == id {
+						msg.Rank = int32(n)
+						break
+					}
 				}
 			}
 		}

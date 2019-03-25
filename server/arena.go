@@ -85,10 +85,10 @@ type Arena struct {
 
 	mapRecordReq sync.Map // map of init player request map[playerid]time.Now() : next request time
 
-	chMatchWaitOK    chan int64 // match wait player channel
-	season           int        `sql:"arena_season"`
-	seasonEndTime    uint32     `sql:"arena_season_end_time"`
-	reqNewRecordTime uint32     // every monday request new player's record
+	chMatchWaitOK chan int64 // match wait player channel
+	season        int        `sql:"arena_season"`
+	seasonEndTime uint32     `sql:"arena_season_end_time"`
+	weekEndTime   uint32     // every monday request new player's record and send weekly reward
 
 	ctx      context.Context
 	cancel   context.CancelFunc
@@ -98,11 +98,11 @@ type Arena struct {
 // NewArena create new arena
 func NewArena(ctx context.Context) (*Arena, error) {
 	arena := &Arena{
-		arrRankArena:     rankArenaData{item: make([]*arenaData, 0)},
-		arrMatchPool:     make([]sync.Map, arenaMatchSectionNum),
-		chMatchWaitOK:    make(chan int64, 1000),
-		chDBInit:         make(chan struct{}, 1),
-		reqNewRecordTime: 0,
+		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
+		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
+		chMatchWaitOK: make(chan int64, 1000),
+		chDBInit:      make(chan struct{}, 1),
+		weekEndTime:   0,
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
@@ -204,6 +204,7 @@ func (arena *Arena) Run() {
 			t := time.Now()
 			arena.updateRequestRecord()
 			arena.updateMatchingList()
+			arena.updateWeeklyReward()
 			arena.updateTime()
 			d := time.Since(t)
 			time.Sleep(time.Millisecond - d)
@@ -236,10 +237,10 @@ func (arena *Arena) LoadFromDB() {
 	}
 
 	for rows.Next() {
-		if err := rows.Scan(&arena.seasonEndTime, &arena.reqNewRecordTime, &arena.season); err != nil {
+		if err := rows.Scan(&arena.seasonEndTime, &arena.weekEndTime, &arena.season); err != nil {
 			logger.Error("load table global failed:", err)
 		}
-		logger.Info("load from global success end_time = ", arena.seasonEndTime, ", season = ", arena.season, ", reqNewRecordTime = ", arena.reqNewRecordTime)
+		logger.Info("load from global success end_time = ", arena.seasonEndTime, ", season = ", arena.season, ", weekEndTime = ", arena.weekEndTime)
 	}
 
 	// load from arena_player
@@ -264,8 +265,22 @@ func (arena *Arena) LoadFromDB() {
 		arena.mapRecordReq.Store(data.playerid, time.Now().Add(time.Second*20))
 	}
 
-	// if arena seasonEndTime was expired, set a new seasonEndTime one season later
 	now := uint32(time.Now().Unix())
+
+	// if arena weekEndTime was expired, set a new time one week later
+	if arena.weekEndTime == 0 {
+		arena.weekEnd()
+
+		// if weekEndTime has gone past, call weekEnd() 9 minutes later(wait for all world connected)
+	} else if now > arena.weekEndTime {
+		t := time.NewTimer(9 * time.Minute)
+		go func() {
+			<-t.C
+			arena.weekEnd()
+		}()
+	}
+
+	// if arena seasonEndTime was expired, set a new seasonEndTime one season later
 	if arena.seasonEndTime == 0 {
 		arena.nextSeason()
 
@@ -275,19 +290,6 @@ func (arena *Arena) LoadFromDB() {
 		go func() {
 			<-t.C
 			arena.seasonEnd()
-		}()
-	}
-
-	// if arena reqNewRecordTime was expired, set a new time one week later
-	if arena.reqNewRecordTime == 0 {
-		arena.requestNewPlayerRecord()
-
-		// if reqNewRecordTime has gone past, call requestNewPlayerRecord() 10 minutes later(wait for all world connected)
-	} else if now > arena.reqNewRecordTime {
-		t := time.NewTimer(10 * time.Minute)
-		go func() {
-			<-t.C
-			arena.requestNewPlayerRecord()
 		}()
 	}
 
@@ -417,35 +419,37 @@ func (arena *Arena) updateRequestRecord() {
 }
 
 func (arena *Arena) updateMatchingList() {
-	var arrDel []int64
 	arena.matchingList.Range(func(k, _ interface{}) bool {
 		key := k.(int64)
 
 		if _, ok := arena.mapRecord.Load(key); ok {
 			arena.chMatchWaitOK <- key
-			arrDel = append(arrDel, key)
+			arena.matchingList.Delete(key)
 		}
 		return true
 	})
+}
 
-	for _, v := range arrDel {
-		arena.matchingList.Delete(v)
-	}
+func (arena *Arena) updateWeeklyReward() {
+
 }
 
 func (arena *Arena) updateTime() {
 	t := uint32(time.Now().Unix())
+
+	// week end
+	if t >= arena.weekEndTime {
+		arena.weekEnd()
+	}
+
+	// season end
 	if t >= arena.seasonEndTime {
 		arena.seasonEnd()
 	}
-
-	// todo request new player record
-	if t >= arena.reqNewRecordTime {
-		arena.requestNewPlayerRecord()
-	}
 }
 
-func (arena *Arena) requestNewPlayerRecord() {
+// every monday request new player record and send weekly reward
+func (arena *Arena) weekEnd() {
 	// current time
 	ct := time.Now()
 
@@ -461,11 +465,11 @@ func (arena *Arena) requestNewPlayerRecord() {
 	// now elapse duration
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
-	// add 30 seconds inaccuracy
-	arena.reqNewRecordTime = uint32(ct.Add(d - e + time.Duration(time.Second)*30).Unix())
+	// add 10 seconds inaccuracy
+	arena.weekEndTime = uint32(ct.Add(d - e + time.Duration(time.Second)*10).Unix())
 
 	// save db
-	query := fmt.Sprintf("update global set arena_request_new_record_time = %d where id = %d", int32(arena.reqNewRecordTime), global.UltimateID)
+	query := fmt.Sprintf("update global set arena_request_new_record_time = %d where id = %d", int32(arena.weekEndTime), global.UltimateID)
 	Instance().GetDBMgr().Exec(query)
 
 	// send request with time delay, 50 request per second
@@ -489,6 +493,53 @@ func (arena *Arena) requestNewPlayerRecord() {
 
 		arena.mapRecordReq.Store(v, ct.Add(time.Second*time.Duration(k/50)))
 	}
+
+	// send weekly reward
+	var mapReward map[*arenaData]time.Time
+	var index int
+	arena.mapArenaData.Range(func(_, v interface{}) bool {
+		data := v.(*arenaData)
+		mapReward[data] = time.Now().Add(time.Second * time.Duration(index/50))
+		index++
+		return true
+	})
+
+	go func(m map[*arenaData]time.Time) {
+		for {
+			if len(m) == 0 {
+				return
+			}
+
+			t := time.Now()
+
+			for k, v := range m {
+				if t.Unix() >= v.Unix() {
+					info := Instance().GetGameMgr().GetPlayerInfoByID(k.playerid)
+					if info == nil {
+						delete(m, k)
+						continue
+					}
+
+					world := Instance().GetWorldSession().GetWorldByID(info.ServerId)
+					if world == nil {
+						delete(m, k)
+						continue
+					}
+
+					msg := &world_message.MUW_ArenaWeeklyReward{
+						PlayerId: k.playerid,
+						Score:    k.score,
+					}
+
+					world.SendProtoMessage(msg)
+					delete(m, k)
+				}
+			}
+
+			d := time.Since(t)
+			time.Sleep(time.Millisecond - d)
+		}
+	}(mapReward)
 }
 
 func (arena *Arena) nextSeason() {
@@ -674,6 +725,12 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		return
 	}
 
+	d, ok := arena.mapArenaData.Load(id)
+	if !ok {
+		return
+	}
+	data := d.(*arenaData)
+
 	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
 	if info == nil {
 		return
@@ -685,11 +742,28 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 	}
 
 	msg := &world_message.MUW_RequestArenaRank{
-		PlayerId: id,
-		Page:     page,
-		Infos:    make([]*world_message.ArenaTargetInfo, 0),
+		PlayerId:      id,
+		Page:          page,
+		Score:         data.score,
+		Rank:          -1,
+		SeasonEndTime: arena.seasonEndTime,
+		Infos:         make([]*world_message.ArenaTargetInfo, 0),
 	}
 
+	// get player rank
+	if arenaData := arena.arrRankArena.Get(arena.arrRankArena.Len() - 1); arenaData != nil {
+		if data.score >= arenaData.score {
+			size := arena.arrRankArena.Length()
+			for n := 0; n < size; n++ {
+				if rankData := arena.arrRankArena.Get(n); rankData.playerid == id {
+					msg.Rank = int32(n)
+					break
+				}
+			}
+		}
+	}
+
+	// rank player data
 	for n := 0 + int(page)*arenaRankNumPerPage; n < 10+int(page)*arenaRankNumPerPage; n++ {
 		if n >= arena.arrRankArena.Length() {
 			break

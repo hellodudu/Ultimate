@@ -229,12 +229,20 @@ message MWU_RequestArenaRank {
 message MUW_RequestArenaRank {
     int64 player_id = 1;
     int32 page = 2;
-    repeated ArenaTargetInfo infos = 3;
+    int32 rank = 3;
+    int32 score = 4;
+    uint32 season_end_time = 5;
+    repeated ArenaTargetInfo infos = 6;
 }
 
 message MUW_SyncArenaSeason {
     int32 season = 1;
     uint32 end_time = 2;
+}
+
+message MUW_ArenaWeeklyReward {
+    int64 player_id = 1;
+    int32 score = 2;
 }
 
 message MUW_ArenaSeasonReward {

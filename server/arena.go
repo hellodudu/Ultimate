@@ -228,7 +228,7 @@ func (arena *Arena) LoadFromDB() {
 	// }
 
 	// load from global
-	query := fmt.Sprintf("select arena_season, arena_request_new_record_time, arena_season_end_time from global where id = %d", global.UltimateID)
+	query := fmt.Sprintf("select arena_season, arena_week_end_time, arena_season_end_time from global where id = %d", global.UltimateID)
 
 	rows, err := Instance().GetDBMgr().Query(query)
 	if err != nil {
@@ -469,7 +469,7 @@ func (arena *Arena) weekEnd() {
 	arena.weekEndTime = uint32(ct.Add(d - e + time.Duration(time.Second)*10).Unix())
 
 	// save db
-	query := fmt.Sprintf("update global set arena_request_new_record_time = %d where id = %d", int32(arena.weekEndTime), global.UltimateID)
+	query := fmt.Sprintf("update global set arena_week_end_time = %d where id = %d", int32(arena.weekEndTime), global.UltimateID)
 	Instance().GetDBMgr().Exec(query)
 
 	// send request with time delay, 50 request per second
@@ -495,7 +495,7 @@ func (arena *Arena) weekEnd() {
 	}
 
 	// send weekly reward
-	var mapReward map[*arenaData]time.Time
+	mapReward := make(map[*arenaData]time.Time)
 	var index int
 	arena.mapArenaData.Range(func(_, v interface{}) bool {
 		data := v.(*arenaData)
@@ -658,6 +658,7 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 			d := s.(*arenaData)
 			data.score = d.score
 			data.reachTime = d.reachTime
+			data.lastTarget = d.lastTarget
 		}
 
 		arena.mapArenaData.Store(rec.PlayerId, data)

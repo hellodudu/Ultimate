@@ -82,7 +82,7 @@ func (m *DBMgr) LoadGlobal() {
 	}
 
 	if !rows.Next() {
-		query = fmt.Sprintf("replace into global set id=%d, time_stamp=%d, arena_end_time=%d", global.UltimateID, int32(time.Now().Unix()), 0)
+		query = fmt.Sprintf("replace into global set id=%d, time_stamp=%d, arena_season=%d, arena_week_end_time=%d, arena_season_end_time=%d", global.UltimateID, int32(time.Now().Unix()), 0, 0, 0)
 		if stmp, err := m.db.PrepareContext(m.ctx, query); err == nil {
 			if _, err := stmp.ExecContext(m.ctx); err == nil {
 				logger.Info("sql global init query exec success:", query)

@@ -188,7 +188,7 @@ func (ws *WorldSession) registerProto(msgID uint32, info *regInfo) {
 
 func protoUnmarshal(data []byte, m proto.Message) {
 	if err := proto.Unmarshal(data, m); err != nil {
-		logger.Error("Failed to parse proto msg:", m, err)
+		logger.Warning("Failed to parse proto msg:", m, err)
 		return
 	}
 

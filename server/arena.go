@@ -697,7 +697,10 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 
 	// record target into last target
 	data := d.(*arenaData)
-	data.lastTarget = target
+
+	if target > 0 {
+		data.lastTarget = target
+	}
 
 	if win {
 		// section change

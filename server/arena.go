@@ -349,11 +349,6 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 		}
 	}
 
-	// still can not find target
-	if dstRec == nil {
-		return false, nil
-	}
-
 	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
 	if info == nil {
 		logger.Warning("cannot find player ", id, " s info!")
@@ -362,9 +357,15 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 
 	if world := Instance().GetWorldSession().GetWorldByID(info.ServerId); world != nil {
 		msg := &world_message.MUW_ArenaStartBattle{
-			AttackId:     id,
-			TargetRecord: dstRec,
+			AttackId: id,
 		}
+
+		if dstRec == nil {
+			msg.Bot = true
+		} else {
+			msg.TargetRecord = dstRec
+		}
+
 		world.SendProtoMessage(msg)
 	}
 
@@ -714,11 +715,6 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 
 		// rank change
 		arena.arrRankArena.Sort()
-		logger.Trace("after sort rank rec :")
-		for n := 0; n < arena.arrRankArena.Length(); n++ {
-			t := arena.arrRankArena.Get(n)
-			logger.Trace("player id = ", t.playerid, ", arena score = ", t.score, ", reach time = ", t.reachTime)
-		}
 	}
 }
 

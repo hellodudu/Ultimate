@@ -201,6 +201,11 @@ message MWU_ArenaMatching {
 message MUW_ArenaStartBattle {
 	int64 attack_id = 1;
 	ArenaRecord target_record = 2;
+    bool bot = 3;
+}
+
+message MUW_ArenaStartBattleWithBot {
+    int64 attack_id = 1;
 }
 
 message MWU_ArenaBattleResult {

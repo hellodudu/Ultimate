@@ -45,7 +45,6 @@ func (server *TcpServer) Run() {
 			logger.Error(err)
 		}
 
-		logger.Info("a new tcp connection!")
 		go handleTCPConnection(con)
 
 	}
@@ -53,6 +52,8 @@ func (server *TcpServer) Run() {
 
 func handleTCPConnection(conn net.Conn) {
 	defer conn.Close()
+
+	logger.Info("a new tcp connection!")
 	conn.(*net.TCPConn).SetKeepAlive(true)
 	conn.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
 

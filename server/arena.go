@@ -755,6 +755,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 				for n := 0; n < size; n++ {
 					if rankData := arena.arrRankArena.Get(n); rankData.playerid == id {
 						msg.Rank = int32(n)
+						msg.Score = data.score
 						break
 					}
 				}

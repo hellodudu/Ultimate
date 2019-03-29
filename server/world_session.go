@@ -36,14 +36,15 @@ type regInfo struct {
 }
 
 type WorldSession struct {
-	mapWorld   sync.Map
-	mapConn    sync.Map
-	protoReg   map[uint32]*regInfo
-	wg         sync.WaitGroup
-	ctx        context.Context
-	cancel     context.CancelFunc
-	chTimeOutW chan uint32
-	chStop     chan struct{}
+	mapWorld      sync.Map
+	mapConn       sync.Map
+	mapRefWorldID sync.Map
+	protoReg      map[uint32]*regInfo
+	wg            sync.WaitGroup
+	ctx           context.Context
+	cancel        context.CancelFunc
+	chTimeOutW    chan uint32
+	chStop        chan struct{}
 }
 
 func NewWorldSession() (*WorldSession, error) {
@@ -331,8 +332,23 @@ func (ws *WorldSession) AddWorld(id uint32, name string, con net.Conn) (*World, 
 	return w, nil
 }
 
+func (ws *WorldSession) AddWorldRef(id uint32, refID []uint32) {
+	for _, v := range refID {
+		ws.mapRefWorldID.Store(v, id)
+	}
+}
+
+func (ws *WorldSession) getWorldRefID(id uint32) uint32 {
+	if v, ok := ws.mapRefWorldID.Load(id); ok {
+		return v.(uint32)
+	}
+
+	return 0
+}
+
 func (ws *WorldSession) GetWorldByID(id uint32) *World {
-	v, ok := ws.mapWorld.Load(id)
+	worldID := ws.getWorldRefID(id)
+	v, ok := ws.mapWorld.Load(worldID)
 	if !ok {
 		return nil
 	}

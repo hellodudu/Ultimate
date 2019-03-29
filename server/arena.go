@@ -196,7 +196,6 @@ func (arena *Arena) Run() {
 				go func(p int64) {
 					<-t.C
 					arena.chMatchWaitOK <- p
-					logger.Trace("player ", p, " has no target try matching again in 5 seconds!")
 				}(id)
 			}
 
@@ -379,12 +378,6 @@ func (arena *Arena) updateRequestRecord() {
 	arena.mapRecordReq.Range(func(k, v interface{}) bool {
 		id := k.(int64)
 		t := v.(time.Time)
-
-		// already has a record
-		if _, ok := arena.mapRecord.Load(id); ok {
-			arrDel = append(arrDel, id)
-			return true
-		}
 
 		// it's not right time to send request
 		if time.Now().Unix() < t.Unix() {

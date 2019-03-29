@@ -77,9 +77,9 @@ func handleTCPConnection(conn net.Conn) {
 		}
 
 		// data
-		msgData := make([]byte, msgLen+4)
+		msgData := make([]byte, msgLen)
 		copy(msgData, b[:])
-		if _, err := io.ReadFull(conn, msgData[4:]); err != nil {
+		if _, err := io.ReadFull(conn, msgData); err != nil {
 			logger.Warning("tcp recv error:", err)
 			continue
 		}

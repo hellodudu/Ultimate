@@ -196,7 +196,7 @@ func protoUnmarshal(data []byte, m proto.Message) {
 
 // decode binarys to proto message
 func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
-	byProto := data[12:]
+	byProto := data[8:]
 	protoNameLen := binary.LittleEndian.Uint16(byProto[:2])
 
 	if uint16(len(byProto)) < 2+protoNameLen {
@@ -220,20 +220,19 @@ func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
 	return newProto, nil
 }
 
-// top 4 bytes are msgSize, next 8 bytes are BaseNetMsg
+// top 8 bytes are BaseNetMsg
 // if it is protobuf msg, then next 2 bytes are proto name length, the next is proto name, final is proto data.
 // if it is transfer msg(transfer binarys to other world), then next are binarys to be transferd
 func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
-	if len(data) <= 12 {
-		logger.Warning("tcp recv data length <= 12:", string(data))
+	if len(data) <= 8 {
+		logger.Warning("tcp recv data length <= 8:", string(data))
 		return
 	}
 
 	baseMsg := &BaseNetMsg{}
 	byBaseMsg := make([]byte, binary.Size(baseMsg))
 
-	// discard top 4 bytes(message size)
-	copy(byBaseMsg, data[4:4+binary.Size(baseMsg)])
+	copy(byBaseMsg, data[:binary.Size(baseMsg)])
 	buf := &bytes.Buffer{}
 	if _, err := buf.Write(byBaseMsg); err != nil {
 		logger.Warning("cannot read message:", byBaseMsg, " from connection:", con, " err:", err)
@@ -273,8 +272,7 @@ func (ws *WorldSession) HandleMessage(con net.Conn, data []byte) {
 		transferMsg := &TransferNetMsg{}
 		byTransferMsg := make([]byte, binary.Size(transferMsg))
 
-		// discard top 4 bytes(message size)
-		copy(byTransferMsg, data[4:4+binary.Size(transferMsg)])
+		copy(byTransferMsg, data[:binary.Size(transferMsg)])
 		buf := &bytes.Buffer{}
 		if _, err := buf.Write(byTransferMsg); err != nil {
 			logger.Warning("cannot read message:", byTransferMsg, " from connection:", con, " err:", err)

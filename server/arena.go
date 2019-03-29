@@ -60,6 +60,15 @@ func (s *rankArenaData) Get(n int) *arenaData {
 	return s.item[n]
 }
 
+func (s *rankArenaData) GetBottom() *arenaData {
+	s.rwLock.RLock()
+	defer s.rwLock.RUnlock()
+	if s.Len() == 0 {
+		return nil
+	}
+	return s.item[len(s.item)-1]
+}
+
 func (s *rankArenaData) Add(v *arenaData) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
@@ -373,7 +382,6 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 
 func (arena *Arena) updateRequestRecord() {
 	var arrDel []int64
-	var arrDelay []int64
 
 	arena.mapRecordReq.Range(func(k, v interface{}) bool {
 		id := k.(int64)
@@ -399,16 +407,12 @@ func (arena *Arena) updateRequestRecord() {
 			PlayerId: id,
 		}
 		world.SendProtoMessage(msg)
-		arrDelay = append(arrDelay, id)
+		arrDel = append(arrDel, id)
 		return true
 	})
 
 	for _, v := range arrDel {
 		arena.mapRecordReq.Delete(v)
-	}
-
-	for _, v := range arrDelay {
-		arena.mapRecordReq.Store(v, time.Now().Add(time.Minute))
 	}
 }
 
@@ -742,7 +746,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 	// get player rank
 	if d, ok := arena.mapArenaData.Load(id); ok {
 		data := d.(*arenaData)
-		if arenaData := arena.arrRankArena.Get(arena.arrRankArena.Len() - 1); arenaData != nil {
+		if arenaData := arena.arrRankArena.GetBottom(); arenaData != nil {
 			if data.score >= arenaData.score {
 				size := arena.arrRankArena.Length()
 				for n := 0; n < size; n++ {

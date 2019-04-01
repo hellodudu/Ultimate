@@ -163,38 +163,6 @@ func (ws *WorldSession) registerProto(msgID uint32, info *regInfo) {
 	ws.protoReg[msgID] = info
 }
 
-// func binaryUnmarshal(data []byte) {
-// 	msg := &MSG_MWU_WorldLogon{}
-// 	byData := make([]byte, binary.Size(msg))
-
-// 	// discard top 4 bytes(message size)
-// 	copy(byData, data[4:])
-
-// 	buf := &bytes.Buffer{}
-// 	if _, err := buf.Write(byData); err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	// get top 4 bytes messageid
-// 	msgID := binary.LittleEndian.Uint32(buf.Bytes()[:4])
-// 	if msgID == utils.Crc32(string("MWU_WorldLogon")) {
-// 		if err := binary.Read(buf, binary.LittleEndian, msg); err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		log.Printf("world<id:%d, name:%s> logon!\n", msg.WorldID, msg.WorldName)
-// 	}
-
-// 	log.Printf("translate msg:%+v\n", msg)
-// }
-
-func protoUnmarshal(data []byte, m proto.Message) {
-	if err := proto.Unmarshal(data, m); err != nil {
-		logger.Warning("Failed to parse proto msg:", m, err)
-		return
-	}
-
-}
-
 // decode binarys to proto message
 func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
 	byProto := data[8:]
@@ -217,7 +185,11 @@ func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
 		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it!" + protoTypeName))
 	}
 
-	protoUnmarshal(protoData, newProto)
+	if err := proto.Unmarshal(protoData, newProto); err != nil {
+		logger.Warning("Failed to parse proto msg:", newProto, err)
+		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it") + protoTypeName)
+	}
+
 	return newProto, nil
 }
 

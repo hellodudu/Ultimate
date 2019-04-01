@@ -265,7 +265,6 @@ func (arena *Arena) LoadFromDB() {
 			logger.Warning("load table arena failed:", err)
 			continue
 		}
-		logger.Info("load from arena success:", data)
 
 		arena.mapArenaData.Store(data.playerid, data)
 

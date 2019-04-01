@@ -90,27 +90,27 @@ func (ws *WorldSession) registerAllMessage() {
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_WorldConnected"), &regInfo{
-		lv: 1,
+		lv: 2,
 		cb: HandleWorldConnected,
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_RequestPlayerInfo"), &regInfo{
-		lv: 2,
+		lv: 1,
 		cb: HandleRequestPlayerInfo,
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_RequestGuildInfo"), &regInfo{
-		lv: 2,
+		lv: 1,
 		cb: HandleRequestGuildInfo,
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_PlayUltimateRecord"), &regInfo{
-		lv: 2,
+		lv: 1,
 		cb: HandlePlayUltimateRecord,
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_RequestUltimatePlayer"), &regInfo{
-		lv: 2,
+		lv: 1,
 		cb: HandleRequestUltimatePlayer,
 	})
 
@@ -120,7 +120,7 @@ func (ws *WorldSession) registerAllMessage() {
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_ArenaAddRecord"), &regInfo{
-		lv: 2,
+		lv: 1,
 		cb: HandleArenaAddRecord,
 	})
 

@@ -187,7 +187,7 @@ func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
 
 	if err := proto.Unmarshal(protoData, newProto); err != nil {
 		logger.Warning("Failed to parse proto msg:", newProto, err)
-		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it") + protoTypeName)
+		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it" + protoTypeName))
 	}
 
 	return newProto, nil

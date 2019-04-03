@@ -626,6 +626,9 @@ func (arena *Arena) Matching(playerID int64) {
 		// add to match request
 		arena.chMatchWaitOK <- playerID
 
+		// request newlest record after 5 seconds
+		arena.mapRecordReq.Store(playerID, time.Now().Add(time.Second*5))
+
 	} else {
 		// request record
 		arena.mapRecordReq.Store(playerID, time.Now())

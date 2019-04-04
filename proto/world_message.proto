@@ -254,3 +254,15 @@ message MUW_ArenaSeasonReward {
     int64 player_id = 1;
     int32 rank = 2;
 }
+
+service Greeter {
+    rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloReply {
+    string message = 1;
+}

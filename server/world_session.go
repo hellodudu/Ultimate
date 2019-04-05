@@ -169,25 +169,25 @@ func (ws *WorldSession) decodeToProto(data []byte) (proto.Message, error) {
 	protoNameLen := binary.LittleEndian.Uint16(byProto[:2])
 
 	if uint16(len(byProto)) < 2+protoNameLen {
-		return nil, errors.New("recv proto msg length < 2+protoNameLen:" + string(byProto))
+		return nil, fmt.Errorf("recv proto msg length < 2+protoNameLen:" + string(byProto))
 	}
 
 	protoTypeName := string(byProto[2 : 2+protoNameLen])
 	protoData := byProto[2+protoNameLen:]
 	pType := proto.MessageType(protoTypeName)
 	if pType == nil {
-		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it!" + protoTypeName))
+		return nil, fmt.Errorf("invalid message<%s>, won't deal with it", protoTypeName)
 	}
 
 	// unmarshal
 	newProto, ok := reflect.New(pType.Elem()).Interface().(proto.Message)
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it!" + protoTypeName))
+		return nil, fmt.Errorf("invalid message<%s>, won't deal with it", protoTypeName)
 	}
 
 	if err := proto.Unmarshal(protoData, newProto); err != nil {
 		logger.Warning("Failed to parse proto msg:", newProto, err)
-		return nil, errors.New(fmt.Sprintf("invalid message<%s>, won't deal with it" + protoTypeName))
+		return nil, fmt.Errorf("invalid message<%s>, won't deal with it", protoTypeName)
 	}
 
 	return newProto, nil

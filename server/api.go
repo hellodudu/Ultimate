@@ -171,6 +171,7 @@ func (api *API) Run() {
 }
 
 func (api *API) Stop() {
+	api.tcpServ.Stop()
 	<-api.dbMgr.Stop()
 	<-api.worldSesn.Stop()
 }

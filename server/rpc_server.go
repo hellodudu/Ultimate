@@ -1,38 +1,80 @@
+package ultimate
+
 import (
+	"context"
 	"log"
 	"net"
+	"sync"
 
-	"github.com/grpc/grpc-go"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
+	"google.golang.org/grpc"
 )
 
 type RpcServer struct {
+	s  map[*grpc.Server]struct{}
+	ln net.Listener
+	mu sync.Mutex
 }
 
 func NewRpcServer() (*RpcServer, error) {
-	return &RpcServer{}, nil
-}
+	s := &RpcServer{
+		s: make(map[*grpc.Server]struct{}),
+	}
 
-func (server *RpcServer) Run() {
 	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "RpcListenAddr")
 	if err != nil {
 		logger.Error("cannot read ini RpcListenAddr!")
-		return
+		return nil, err
 	}
 
-	lis, err := net.Listen("tcp", addr)
+	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		logger.Error("rpc server failed to listen: %v", err)
-		return
+		return nil, err
 	}
 
-	s := grpc.NewServer()
-	world_message.RegisterGreeterServer(s, &server{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	logger.Print("rpc server listening at ", addr)
+
+	s.ln = ln
+	return s, nil
 }
 
+// SayHello implements helloworld.GreeterServer
+func (s *RpcServer) SayHello(ctx context.Context, in *world_message.HelloRequest) (*world_message.HelloReply, error) {
+	logger.Info("Received: %v", in.Name)
+	return &world_message.HelloReply{Message: "Reply " + in.Name}, nil
+}
 
+func (server *RpcServer) Run() {
+
+	// greet service
+	go func() {
+		s := grpc.NewServer()
+
+		server.mu.Lock()
+		server.s[s] = struct{}{}
+		server.mu.Unlock()
+
+		world_message.RegisterGreeterServer(s, &RpcServer{})
+		if err := s.Serve(server.ln); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+			return
+		}
+
+	}()
+
+}
+
+func (server *RpcServer) Stop() {
+	server.mu.Lock()
+
+	for s := range server.s {
+		s.Stop()
+		delete(server.s, s)
+	}
+
+	server.mu.Unlock()
+	server.ln.Close()
+}

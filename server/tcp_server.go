@@ -32,7 +32,7 @@ func (server *TcpServer) Run() {
 	}
 	defer ln.Close()
 
-	logger.Info("tcp listening at ", addr)
+	logger.Info("tcp server listening at ", addr)
 
 	for {
 		con, err := ln.Accept()

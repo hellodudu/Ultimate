@@ -31,7 +31,7 @@ func NewRpcServer() (*RpcServer, error) {
 
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
-		logger.Error("rpc server failed to listen: %v", err)
+		logger.Error("rpc server failed to listen: ", err)
 		return nil, err
 	}
 
@@ -43,7 +43,7 @@ func NewRpcServer() (*RpcServer, error) {
 
 // SayHello implements helloworld.GreeterServer
 func (s *RpcServer) SayHello(ctx context.Context, in *world_message.HelloRequest) (*world_message.HelloReply, error) {
-	logger.Info("Received: %v", in.Name)
+	logger.Info("Received: ", in.Name)
 	return &world_message.HelloReply{Message: "Reply " + in.Name}, nil
 }
 
@@ -59,7 +59,7 @@ func (server *RpcServer) Run() {
 
 		world_message.RegisterGreeterServer(s, &RpcServer{})
 		if err := s.Serve(server.ln); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+			log.Fatalf("failed to serve: ", err)
 			return
 		}
 

@@ -55,7 +55,7 @@ func (server *TcpServer) Run() {
 				if max := 1 * time.Second; tempDelay > max {
 					tempDelay = max
 				}
-				logger.Warning("accept error: %v; retrying in %v", err, tempDelay)
+				logger.Warning("accept error: ", err, ", retrying in ", tempDelay)
 				time.Sleep(tempDelay)
 				continue
 			}

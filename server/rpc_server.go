@@ -2,7 +2,6 @@ package ultimate
 
 import (
 	"context"
-	"log"
 	"net"
 	"sync"
 
@@ -59,7 +58,7 @@ func (server *RpcServer) Run() {
 
 		world_message.RegisterGreeterServer(s, &RpcServer{})
 		if err := s.Serve(server.ln); err != nil {
-			log.Fatalf("failed to serve: ", err)
+			logger.Error("failed to serve: ", err)
 			return
 		}
 

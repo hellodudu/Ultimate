@@ -17,6 +17,9 @@ type RpcServer struct {
 	mu sync.Mutex
 }
 
+type rpcResponser struct {
+}
+
 func NewRpcServer() (*RpcServer, error) {
 	s := &RpcServer{
 		s: make(map[*grpc.Server]struct{}),
@@ -41,29 +44,36 @@ func NewRpcServer() (*RpcServer, error) {
 }
 
 // SayHello implements helloworld.GreeterServer
-func (s *RpcServer) SayHello(ctx context.Context, in *world_message.HelloRequest) (*world_message.HelloReply, error) {
+func (s *rpcResponser) SayHello(ctx context.Context, in *world_message.HelloRequest) (*world_message.HelloReply, error) {
 	logger.Info("Received: ", in.Name)
 	return &world_message.HelloReply{Message: "Reply " + in.Name}, nil
 }
 
+func (s *rpcResponser) GetScore(ctx context.Context, in *world_message.GetScoreRequest) (*world_message.GetScoreReply, error) {
+	logger.Info("Received: ", in.Id)
+	arena := Instance().GetGameMgr().GetArena()
+	data, err := arena.GetArenaData(in.Id)
+	if err != nil {
+		logger.Error(err.Error())
+		return nil, err
+	}
+
+	return &world_message.GetScoreReply{Score: data.score}, nil
+}
+
 func (server *RpcServer) Run() {
+	s := grpc.NewServer()
 
-	// greet service
-	go func() {
-		s := grpc.NewServer()
+	server.mu.Lock()
+	server.s[s] = struct{}{}
+	server.mu.Unlock()
 
-		server.mu.Lock()
-		server.s[s] = struct{}{}
-		server.mu.Unlock()
-
-		world_message.RegisterGreeterServer(s, &RpcServer{})
-		if err := s.Serve(server.ln); err != nil {
-			logger.Error("failed to serve: ", err)
-			return
-		}
-
-	}()
-
+	world_message.RegisterGreeterServer(s, &rpcResponser{})
+	world_message.RegisterInviterServer(s, &rpcResponser{})
+	if err := s.Serve(server.ln); err != nil {
+		logger.Error("failed to service rpc Greeter: ", err)
+		return
+	}
 }
 
 func (server *RpcServer) Stop() {

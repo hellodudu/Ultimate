@@ -38,4 +38,13 @@ func main() {
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting: %s", r.Message)
+
+	i := world_message.NewInviterClient(conn)
+	nctx, ncancel := context.WithTimeout(context.Background(), time.Second)
+	defer ncancel()
+	ir, err := i.GetScore(nctx, &world_message.GetScoreRequest{Id: 1201616684167725058})
+	if err != nil {
+		log.Fatalf("could not invite: %v", err)
+	}
+	log.Printf("Inviter: %d", ir.Score)
 }

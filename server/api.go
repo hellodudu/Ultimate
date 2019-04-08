@@ -20,6 +20,7 @@ type API struct {
 	dbMgr     *DBMgr           // db manager
 	rds       *redis.Client    // redis
 	tcpServ   *TcpServer       // tcp server
+	rpcServ   *RpcServer       // rpc server
 	httpServ  *HttpServer      // http server
 	worldSesn *WorldSession    // world session
 	gameMgr   *GameMgr
@@ -42,11 +43,12 @@ func NewAPI() (*API, error) {
 		return nil, errors.New("init log file failed")
 	}
 
-	api.wg.Add(5)
+	api.wg.Add(6)
 	go api.InitTask()
 	go api.InitDBMgr()
 	// go api.InitRedis()
-	go api.InitTcpServer()
+	go api.InitTCPServer()
+	go api.InitRPCServer()
 	go api.InitHttpServer()
 	go api.InitWorldSession()
 	api.wg.Wait()
@@ -117,8 +119,8 @@ func (api *API) InitRedis() {
 	logger.Print("redis init ok")
 }
 
-// init tcp server
-func (api *API) InitTcpServer() {
+// InitTCPServer init
+func (api *API) InitTCPServer() {
 	defer api.wg.Done()
 	var err error
 	if api.tcpServ, err = NewTcpServer(); err != nil {
@@ -126,6 +128,17 @@ func (api *API) InitTcpServer() {
 	}
 
 	logger.Print("tcp_server init ok!")
+}
+
+// InitRPCServer init
+func (api *API) InitRPCServer() {
+	defer api.wg.Done()
+	var err error
+	if api.rpcServ, err = NewRpcServer(); err != nil {
+		logger.Fatal(err)
+	}
+
+	logger.Print("rpc_server init ok!")
 }
 
 // init http server
@@ -163,6 +176,7 @@ func (api *API) InitGame() {
 // run
 func (api *API) Run() {
 	go api.tcpServ.Run()
+	go api.rpcServ.Run()
 	go api.httpServ.Run()
 	go api.worldSesn.Run()
 	go api.gameMgr.Run()
@@ -171,6 +185,8 @@ func (api *API) Run() {
 }
 
 func (api *API) Stop() {
+	api.rpcServ.Stop()
+	api.tcpServ.Stop()
 	<-api.dbMgr.Stop()
 	<-api.worldSesn.Stop()
 }

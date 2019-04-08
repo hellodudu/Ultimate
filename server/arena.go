@@ -83,42 +83,6 @@ type arenaData struct {
 	lastTarget int64  `sql:"last_target"` // target cannot be last one
 }
 
-// Arena data
-type Arena struct {
-	mapArenaData sync.Map      // all player's arena data
-	arrRankArena rankArenaData // slice of arena record sorted with ArenaScore
-
-	mapRecord    sync.Map   // all player's arena record
-	arrMatchPool []sync.Map // 8 level match pool map[playerid]struct{}
-	matchingList sync.Map   // list of matching waiting player map[playerid]struct{}
-
-	mapRecordReq sync.Map // map of init player request map[playerid]time.Now() : next request time
-
-	chMatchWaitOK chan int64 // match wait player channel
-	season        int        `sql:"arena_season"`
-	seasonEndTime uint32     `sql:"arena_season_end_time"`
-	weekEndTime   uint32     // every monday request new player's record and send weekly reward
-
-	ctx      context.Context
-	cancel   context.CancelFunc
-	chDBInit chan struct{}
-}
-
-// NewArena create new arena
-func NewArena(ctx context.Context) (*Arena, error) {
-	arena := &Arena{
-		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
-		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
-		chMatchWaitOK: make(chan int64, 1000),
-		chDBInit:      make(chan struct{}, 1),
-		weekEndTime:   0,
-	}
-
-	arena.ctx, arena.cancel = context.WithCancel(ctx)
-
-	return arena, nil
-}
-
 func getSectionIndexByScore(score int32) int32 {
 	if score < 1200 {
 		return 0
@@ -162,6 +126,51 @@ func getDefaultScoreBySection(secIdx int32) int32 {
 		def = 1000
 	}
 	return def
+}
+
+// Arena data
+type Arena struct {
+	mapArenaData sync.Map      // all player's arena data
+	arrRankArena rankArenaData // slice of arena record sorted with ArenaScore
+
+	mapRecord    sync.Map   // all player's arena record
+	arrMatchPool []sync.Map // 8 level match pool map[playerid]struct{}
+	matchingList sync.Map   // list of matching waiting player map[playerid]struct{}
+
+	mapRecordReq sync.Map // map of init player request map[playerid]time.Now() : next request time
+
+	chMatchWaitOK chan int64 // match wait player channel
+	season        int        `sql:"arena_season"`
+	seasonEndTime uint32     `sql:"arena_season_end_time"`
+	weekEndTime   uint32     // every monday request new player's record and send weekly reward
+
+	ctx      context.Context
+	cancel   context.CancelFunc
+	chDBInit chan struct{}
+}
+
+// NewArena create new arena
+func NewArena(ctx context.Context) (*Arena, error) {
+	arena := &Arena{
+		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
+		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
+		chMatchWaitOK: make(chan int64, 1000),
+		chDBInit:      make(chan struct{}, 1),
+		weekEndTime:   0,
+	}
+
+	arena.ctx, arena.cancel = context.WithCancel(ctx)
+
+	return arena, nil
+}
+
+func (arena *Arena) GetArenaData(id int64) (*arenaData, error) {
+	v, ok := arena.mapArenaData.Load(id)
+	if !ok {
+		return nil, fmt.Errorf("cannot find arena data with id %d", id)
+	}
+
+	return v.(*arenaData), nil
 }
 
 // GetSeasonEndTime get season end time

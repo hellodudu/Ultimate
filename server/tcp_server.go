@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/hellodudu/Ultimate/global"
@@ -13,41 +14,89 @@ import (
 var tcpReadBufMax = 1024 * 100
 
 type TcpServer struct {
+	conns      map[net.Conn]struct{}
+	ln         net.Listener
+	mutexConns sync.Mutex
+	wgConns    sync.WaitGroup
 }
 
 func NewTcpServer() (*TcpServer, error) {
-	return &TcpServer{}, nil
-}
+	s := &TcpServer{
+		conns: make(map[net.Conn]struct{}),
+	}
 
-func (server *TcpServer) Run() {
 	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "TcpListenAddr")
 	if err != nil {
-		logger.Error("cannot read ini TcpListenAddr!")
-		return
+		return nil, err
 	}
 
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
-		logger.Error(err)
+		return nil, err
 	}
-	defer ln.Close()
 
-	logger.Info("tcp listening at ", addr)
+	logger.Info("tcp server listening at ", addr)
 
+	s.ln = ln
+	return s, nil
+}
+
+func (server *TcpServer) Run() {
+	var tempDelay time.Duration
 	for {
-		con, err := ln.Accept()
-		if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
-			time.Sleep(100 * time.Millisecond)
+		conn, err := server.ln.Accept()
+		if err != nil {
+			if ne, ok := err.(net.Error); ok && ne.Temporary() {
+				if tempDelay == 0 {
+					tempDelay = 5 * time.Millisecond
+				} else {
+					tempDelay *= 2
+				}
+				if max := 1 * time.Second; tempDelay > max {
+					tempDelay = max
+				}
+				logger.Warning("accept error: ", err, ", retrying in ", tempDelay)
+				time.Sleep(tempDelay)
+				continue
+			}
+			return
+		}
+		tempDelay = 0
+
+		server.mutexConns.Lock()
+		if len(server.conns) >= 5000 {
+			server.mutexConns.Unlock()
+			conn.Close()
+			logger.Warning("too many connections")
 			continue
 		}
+		server.conns[conn] = struct{}{}
+		server.mutexConns.Unlock()
 
-		if err != nil {
-			logger.Error(err)
-		}
+		server.wgConns.Add(1)
 
-		go handleTCPConnection(con)
+		go func() {
+			handleTCPConnection(conn)
 
+			server.mutexConns.Lock()
+			delete(server.conns, conn)
+			server.mutexConns.Unlock()
+
+			server.wgConns.Done()
+		}()
 	}
+}
+
+func (server *TcpServer) Stop() {
+	server.wgConns.Wait()
+	server.ln.Close()
+
+	server.mutexConns.Lock()
+	for conn := range server.conns {
+		conn.Close()
+	}
+	server.conns = nil
+	server.mutexConns.Unlock()
 }
 
 func handleTCPConnection(conn net.Conn) {
@@ -91,48 +140,3 @@ func handleTCPConnection(conn net.Conn) {
 		})
 	}
 }
-
-// func handleTcpConnection(con net.Conn) {
-// 	defer con.Close()
-
-// 	con.(*net.TCPConn).SetKeepAlive(true)
-// 	con.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
-// 	scanner := bufio.NewScanner(con)
-
-// 	// first 4 bytes represent tcp package size, split it
-// 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-// 		if atEOF {
-// 			return advance, token, io.EOF
-// 		}
-
-// 		logger.Trace("tcp recv data length = ", len(data))
-
-// 		if len(data) > 4 {
-// 			length := uint32(0)
-// 			binary.Read(bytes.NewReader(data[:4]), binary.LittleEndian, &length)
-// 			logger.Trace("tcp actual data size:", length)
-// 			if int(length)+4 <= len(data) {
-// 				return int(length) + 4, data[:int(length)+4], nil
-// 			}
-// 		}
-// 		return
-// 	})
-
-// 	for {
-// 		ok := scanner.Scan()
-// 		if ok {
-// 			byMsg := scanner.Bytes()
-// 			Instance().AddTask(func() {
-// 				Instance().GetWorldSession().HandleMessage(con, byMsg)
-// 			})
-// 		} else if err := scanner.Err(); err != nil {
-// 			logger.Warning("scan error:", err)
-// 			// end of connection
-// 			Instance().GetWorldSession().DisconnectWorld(con)
-// 			break
-// 		} else {
-// 			logger.Info("one client connection was shut down!")
-// 			break
-// 		}
-// 	}
-// }

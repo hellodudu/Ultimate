@@ -204,10 +204,6 @@ message MUW_ArenaStartBattle {
     bool bot = 3;
 }
 
-message MUW_ArenaStartBattleWithBot {
-    int64 attack_id = 1;
-}
-
 message MWU_ArenaBattleResult {
 	int64 attack_id = 1;
 	int64 target_id = 2;
@@ -253,4 +249,29 @@ message MUW_ArenaWeeklyReward {
 message MUW_ArenaSeasonReward {
     int64 player_id = 1;
     int32 rank = 2;
+}
+
+// service
+service Greeter {
+    rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloReply {
+    string message = 1;
+}
+
+service Inviter {
+    rpc GetScore (GetScoreRequest) returns (GetScoreReply) {}
+}
+
+message GetScoreRequest {
+    int64 id = 1;
+}
+
+message GetScoreReply {
+    int32 score = 1;
 }

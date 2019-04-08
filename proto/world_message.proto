@@ -204,10 +204,6 @@ message MUW_ArenaStartBattle {
     bool bot = 3;
 }
 
-message MUW_ArenaStartBattleWithBot {
-    int64 attack_id = 1;
-}
-
 message MWU_ArenaBattleResult {
 	int64 attack_id = 1;
 	int64 target_id = 2;

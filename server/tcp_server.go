@@ -1,6 +1,7 @@
 package ultimate
 
 import (
+	"context"
 	"encoding/binary"
 	"io"
 	"net"
@@ -18,6 +19,8 @@ type TcpServer struct {
 	ln         net.Listener
 	mutexConns sync.Mutex
 	wgConns    sync.WaitGroup
+	ctx        context.Context
+	cancel     context.CancelFunc
 }
 
 func NewTcpServer() (*TcpServer, error) {
@@ -38,6 +41,7 @@ func NewTcpServer() (*TcpServer, error) {
 	logger.Info("tcp server listening at ", addr)
 
 	s.ln = ln
+	s.ctx, s.cancel = context.WithCancel(context.Background())
 	return s, nil
 }
 
@@ -76,7 +80,7 @@ func (server *TcpServer) Run() {
 		server.wgConns.Add(1)
 
 		go func() {
-			handleTCPConnection(conn)
+			handleTCPConnection(server.ctx, conn)
 
 			server.mutexConns.Lock()
 			delete(server.conns, conn)
@@ -88,6 +92,7 @@ func (server *TcpServer) Run() {
 }
 
 func (server *TcpServer) Stop() {
+	server.cancel()
 	server.wgConns.Wait()
 	server.ln.Close()
 
@@ -99,7 +104,7 @@ func (server *TcpServer) Stop() {
 	server.mutexConns.Unlock()
 }
 
-func handleTCPConnection(conn net.Conn) {
+func handleTCPConnection(ctx context.Context, conn net.Conn) {
 	defer conn.Close()
 
 	logger.Info("a new tcp connection!")
@@ -107,6 +112,13 @@ func handleTCPConnection(conn net.Conn) {
 	conn.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
 
 	for {
+		select {
+		case <-ctx.Done():
+			logger.Print("tcp connection context done!")
+			return
+		default:
+		}
+
 		// read len
 		b := make([]byte, 4)
 		if _, err := io.ReadFull(conn, b); err != nil {

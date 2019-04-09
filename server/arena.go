@@ -221,7 +221,6 @@ func (arena *Arena) Run() {
 			t := time.Now()
 			arena.updateRequestRecord()
 			arena.updateMatchingList()
-			arena.updateWeeklyReward()
 			arena.updateTime()
 			d := time.Since(t)
 			time.Sleep(time.Millisecond - d)
@@ -434,10 +433,6 @@ func (arena *Arena) updateMatchingList() {
 		}
 		return true
 	})
-}
-
-func (arena *Arena) updateWeeklyReward() {
-
 }
 
 func (arena *Arena) updateTime() {

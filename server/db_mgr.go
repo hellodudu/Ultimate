@@ -34,7 +34,7 @@ func NewDBMgr() (*DBMgr, error) {
 		return nil, err
 	}
 
-	dbMgr.InitDBMgr()
+	dbMgr.initDBMgr()
 	return dbMgr, nil
 }
 
@@ -56,16 +56,16 @@ func (m *DBMgr) Stop() chan struct{} {
 	return m.chStop
 }
 
-func (m *DBMgr) InitDBMgr() {
+func (m *DBMgr) initDBMgr() {
 
 	m.wg.Add(1)
-	go m.LoadGlobal()
+	go m.loadGlobal()
 
 	m.wg.Wait()
 
 }
 
-func (m *DBMgr) LoadGlobal() {
+func (m *DBMgr) loadGlobal() {
 	defer m.wg.Done()
 
 	query := "select * from global"

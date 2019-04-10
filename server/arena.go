@@ -289,10 +289,10 @@ func (arena *Arena) LoadFromDB() {
 		// if weekEndTime has gone past, call weekEnd() 9 minutes later(wait for all world connected)
 	} else if now > arena.weekEndTime {
 		t := time.NewTimer(9 * time.Minute)
-		go func() {
-			<-t.C
+		go func(ct *time.Timer) {
+			<-ct.C
 			arena.weekEnd()
-		}()
+		}(t)
 	}
 
 	// if arena seasonEndTime was expired, set a new seasonEndTime one season later
@@ -302,10 +302,10 @@ func (arena *Arena) LoadFromDB() {
 		// if season end time has gone past, call seasonEnd() 10 minutes later(wait for all world connected)
 	} else if now > arena.seasonEndTime {
 		t := time.NewTimer(10 * time.Minute)
-		go func() {
-			<-t.C
+		go func(ct *time.Timer) {
+			<-ct.C
 			arena.seasonEnd()
-		}()
+		}(t)
 	}
 
 	// all init ok

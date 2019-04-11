@@ -79,15 +79,15 @@ func (server *TcpServer) Run() {
 
 		server.wgConns.Add(1)
 
-		go func() {
-			handleTCPConnection(server.ctx, conn)
+		go func(c net.Conn) {
+			server.handleTCPConnection(c)
 
 			server.mutexConns.Lock()
-			delete(server.conns, conn)
+			delete(server.conns, c)
 			server.mutexConns.Unlock()
 
 			server.wgConns.Done()
-		}()
+		}(conn)
 	}
 }
 
@@ -104,7 +104,7 @@ func (server *TcpServer) Stop() {
 	server.mutexConns.Unlock()
 }
 
-func handleTCPConnection(ctx context.Context, conn net.Conn) {
+func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 	defer conn.Close()
 
 	logger.Info("a new tcp connection!")
@@ -113,7 +113,7 @@ func handleTCPConnection(ctx context.Context, conn net.Conn) {
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-server.ctx.Done():
 			logger.Print("tcp connection context done!")
 			return
 		default:

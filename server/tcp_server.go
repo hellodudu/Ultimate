@@ -147,8 +147,9 @@ func handleTCPConnection(ctx context.Context, conn net.Conn) {
 		}
 
 		// handle message
-		Instance().AddTask(func() {
-			Instance().GetWorldSession().HandleMessage(conn, msgData)
-		})
+		// Instance().AddTask(func() {
+		// 	Instance().GetWorldSession().HandleMessage(conn, msgData)
+		// })
+		Instance().GetWorldSession().HandleMessage(conn, msgData)
 	}
 }

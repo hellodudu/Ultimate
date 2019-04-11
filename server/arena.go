@@ -86,17 +86,17 @@ type arenaData struct {
 func getSectionIndexByScore(score int32) int32 {
 	if score < 1200 {
 		return 0
-	} else if score <= 1400 {
+	} else if score <= 1500 {
 		return 1
-	} else if score <= 1600 {
-		return 2
 	} else if score <= 1800 {
+		return 2
+	} else if score <= 2100 {
 		return 3
-	} else if score <= 2000 {
+	} else if score <= 2500 {
 		return 4
-	} else if score <= 2300 {
+	} else if score <= 3000 {
 		return 5
-	} else if score <= 2600 {
+	} else if score <= 3600 {
 		return 6
 	} else {
 		return 7
@@ -111,17 +111,17 @@ func getDefaultScoreBySection(secIdx int32) int32 {
 	case 1:
 		def = 1200
 	case 2:
-		def = 1400
+		def = 1500
 	case 3:
-		def = 1600
-	case 4:
 		def = 1800
+	case 4:
+		def = 2100
 	case 5:
-		def = 2000
+		def = 2500
 	case 6:
-		def = 2300
+		def = 3000
 	case 7:
-		def = 2600
+		def = 3600
 	default:
 		def = 1000
 	}

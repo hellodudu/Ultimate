@@ -191,13 +191,13 @@ func (arena *Arena) GetRecordNum() int {
 	return n
 }
 
-func (arena *Arena) GetRecordByID(id int64) (*world_message.CrossPlayerInfo, error) {
+func (arena *Arena) GetRecordByID(id int64) (*world_message.ArenaRecord, error) {
 	v, ok := arena.mapRecord.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena record with id %d", id)
 	}
 
-	return v.(*world_message.CrossPlayerInfo), nil
+	return v.(*world_message.ArenaRecord), nil
 }
 
 func (arena *Arena) GetMatchingList() []int64 {
@@ -256,6 +256,7 @@ func (arena *Arena) Run() {
 			if !ok {
 				// try again 5 seconds later
 				t := time.NewTimer(5 * time.Second)
+				logger.Info("player:", id, " will retry matching in 5 seconds")
 				go func(p int64) {
 					<-t.C
 					arena.chMatchWaitOK <- p

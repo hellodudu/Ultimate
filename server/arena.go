@@ -45,13 +45,13 @@ func (s *rankArenaData) Swap(a, b int) {
 }
 
 func (s *rankArenaData) Less(a, b int) bool {
-	if s.item[a].score == s.item[b].score {
-		if s.item[a].reachTime == s.item[b].reachTime {
-			return s.item[a].playerid < s.item[b].playerid
+	if s.item[a].Score == s.item[b].Score {
+		if s.item[a].ReachTime == s.item[b].ReachTime {
+			return s.item[a].Playerid < s.item[b].Playerid
 		}
-		return s.item[a].reachTime < s.item[b].reachTime
+		return s.item[a].ReachTime < s.item[b].ReachTime
 	}
-	return s.item[a].score > s.item[b].score
+	return s.item[a].Score > s.item[b].Score
 }
 
 func (s *rankArenaData) Get(n int) *arenaData {
@@ -77,10 +77,10 @@ func (s *rankArenaData) Add(v *arenaData) {
 
 // arena player data
 type arenaData struct {
-	playerid   int64  `sql:"player_id"`
-	score      int32  `sql:"score"`
-	reachTime  uint32 `sql:"reach_time"`
-	lastTarget int64  `sql:"last_target"` // target cannot be last one
+	Playerid   int64  `sql:"player_id" json:"player_id"`
+	Score      int32  `sql:"score" json:"score"`
+	ReachTime  uint32 `sql:"reach_time" json:"reach_time"`
+	LastTarget int64  `sql:"last_target" json:"last_target"` // target cannot be last one
 }
 
 func getSectionIndexByScore(score int32) int32 {
@@ -173,7 +173,7 @@ func (arena *Arena) GetArenaDataNum() int {
 	return n
 }
 
-func (arena *Arena) GetArenaDataByID(id int64) (*arenaData, error) {
+func (arena *Arena) GetDataByID(id int64) (*arenaData, error) {
 	v, ok := arena.mapArenaData.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena data with id %d", id)
@@ -191,6 +191,15 @@ func (arena *Arena) GetRecordNum() int {
 	return n
 }
 
+func (arena *Arena) GetRecordByID(id int64) (*world_message.CrossPlayerInfo, error) {
+	v, ok := arena.mapRecord.Load(id)
+	if !ok {
+		return nil, fmt.Errorf("cannot find arena record with id %d", id)
+	}
+
+	return v.(*world_message.CrossPlayerInfo), nil
+}
+
 func (arena *Arena) GetMatchingList() []int64 {
 	l := make([]int64, 0)
 	arena.matchingList.Range(func(k, _ interface{}) bool {
@@ -200,10 +209,10 @@ func (arena *Arena) GetMatchingList() []int64 {
 	return l
 }
 
-func (arena *Arena) GetRecordReqList() map[int64]time.Time {
-	m := make(map[int64]time.Time)
+func (arena *Arena) GetRecordReqList() map[int64]uint32 {
+	m := make(map[int64]uint32)
 	arena.mapRecordReq.Range(func(k, v interface{}) bool {
-		m[k.(int64)] = v.(time.Time)
+		m[k.(int64)] = uint32(v.(time.Time).Unix())
 		return true
 	})
 	return m
@@ -305,15 +314,15 @@ func (arena *Arena) LoadFromDB() {
 
 	for rows.Next() {
 		data := &arenaData{}
-		if err := rows.Scan(&data.playerid, &data.score, &data.reachTime, &data.lastTarget); err != nil {
+		if err := rows.Scan(&data.Playerid, &data.Score, &data.ReachTime, &data.LastTarget); err != nil {
 			logger.Warning("load table arena failed:", err)
 			continue
 		}
 
-		arena.mapArenaData.Store(data.playerid, data)
+		arena.mapArenaData.Store(data.Playerid, data)
 
 		// add to record request list, delay 20s to start request
-		arena.mapRecordReq.Store(data.playerid, time.Now().Add(time.Second*20))
+		arena.mapRecordReq.Store(data.Playerid, time.Now().Add(time.Second*20))
 	}
 
 	now := uint32(time.Now().Unix())
@@ -371,7 +380,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 			}
 
 			// cannot be last target
-			if key == data.lastTarget {
+			if key == data.LastTarget {
 				return true
 			}
 
@@ -387,7 +396,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	}
 
 	// find in same section
-	secIdx := getSectionIndexByScore(data.score)
+	secIdx := getSectionIndexByScore(data.Score)
 	dstRec := f(secIdx)
 
 	// find in below section
@@ -551,7 +560,7 @@ func (arena *Arena) weekEnd() {
 
 			for k, v := range m {
 				if t.Unix() >= v.Unix() {
-					info := Instance().GetGameMgr().GetPlayerInfoByID(k.playerid)
+					info := Instance().GetGameMgr().GetPlayerInfoByID(k.Playerid)
 					if info == nil {
 						delete(m, k)
 						continue
@@ -564,8 +573,8 @@ func (arena *Arena) weekEnd() {
 					}
 
 					msg := &world_message.MUW_ArenaWeeklyReward{
-						PlayerId: k.playerid,
-						Score:    k.score,
+						PlayerId: k.Playerid,
+						Score:    k.Score,
 					}
 
 					world.SendProtoMessage(msg)
@@ -615,8 +624,8 @@ func (arena *Arena) newSeasonRank() {
 	// set all player's score to default
 	arena.mapArenaData.Range(func(k, v interface{}) bool {
 		value := v.(*arenaData)
-		def := getDefaultScoreBySection(getSectionIndexByScore(value.score))
-		value.score = def
+		def := getDefaultScoreBySection(getSectionIndexByScore(value.Score))
+		value.Score = def
 		return true
 	})
 
@@ -631,20 +640,20 @@ func (arena *Arena) seasonReward() {
 		}
 
 		data := arena.arrRankArena.Get(n)
-		info := Instance().GetGameMgr().GetPlayerInfoByID(data.playerid)
+		info := Instance().GetGameMgr().GetPlayerInfoByID(data.Playerid)
 		if info == nil {
-			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.playerid)
+			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.Playerid)
 			continue
 		}
 
 		world := Instance().GetWorldSession().GetWorldByID(info.ServerId)
 		if world == nil {
-			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.playerid, " world ", info.ServerId)
+			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.Playerid, " world ", info.ServerId)
 			continue
 		}
 
 		msg := &world_message.MUW_ArenaSeasonReward{
-			PlayerId: data.playerid,
+			PlayerId: data.Playerid,
 			Rank:     int32(n + 1),
 		}
 
@@ -687,18 +696,18 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 	} else {
 		// add new record and arena data
 		data := &arenaData{
-			playerid:   rec.PlayerId,
-			score:      int32(arenaDefaultScore),
-			reachTime:  uint32(time.Now().Unix()),
-			lastTarget: -1,
+			Playerid:   rec.PlayerId,
+			Score:      int32(arenaDefaultScore),
+			ReachTime:  uint32(time.Now().Unix()),
+			LastTarget: -1,
 		}
 
 		// use exist arena data first
 		if s, ok := arena.mapArenaData.Load(rec.PlayerId); ok {
 			d := s.(*arenaData)
-			data.score = d.score
-			data.reachTime = d.reachTime
-			data.lastTarget = d.lastTarget
+			data.Score = d.Score
+			data.ReachTime = d.ReachTime
+			data.LastTarget = d.LastTarget
 		}
 
 		arena.mapArenaData.Store(rec.PlayerId, data)
@@ -709,11 +718,11 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 		arena.arrRankArena.Sort()
 
 		// add to matching cache
-		index := getSectionIndexByScore(data.score)
+		index := getSectionIndexByScore(data.Score)
 		arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
 
 		// save to db
-		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
+		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.Playerid, data.Score, data.ReachTime, data.LastTarget)
 		Instance().GetDBMgr().Exec(query)
 	}
 }
@@ -738,21 +747,21 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 	data := d.(*arenaData)
 
 	if target > 0 {
-		data.lastTarget = target
+		data.LastTarget = target
 	}
 
 	if win {
 		// section change
-		preSection := getSectionIndexByScore(data.score)
-		data.score += 10
-		data.reachTime = uint32(time.Now().Unix())
-		newSection := getSectionIndexByScore(data.score)
+		preSection := getSectionIndexByScore(data.Score)
+		data.Score += 10
+		data.ReachTime = uint32(time.Now().Unix())
+		newSection := getSectionIndexByScore(data.Score)
 		if preSection != newSection {
 			arena.reorderRecord(attack, preSection, newSection)
 		}
 
 		// save to db
-		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.playerid, data.score, data.reachTime, data.lastTarget)
+		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.Playerid, data.Score, data.ReachTime, data.LastTarget)
 		Instance().GetDBMgr().Exec(query)
 
 		// rank change
@@ -789,12 +798,12 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 	if d, ok := arena.mapArenaData.Load(id); ok {
 		data := d.(*arenaData)
 		if arenaData := arena.arrRankArena.GetBottom(); arenaData != nil {
-			if data.score >= arenaData.score {
+			if data.Score >= arenaData.Score {
 				size := arena.arrRankArena.Length()
 				for n := 0; n < size; n++ {
-					if rankData := arena.arrRankArena.Get(n); rankData.playerid == id {
+					if rankData := arena.arrRankArena.Get(n); rankData.Playerid == id {
 						msg.Rank = int32(n)
-						msg.Score = data.score
+						msg.Score = data.Score
 						break
 					}
 				}
@@ -809,7 +818,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		}
 
 		r := arena.arrRankArena.Get(n)
-		v, ok := arena.mapRecord.Load(r.playerid)
+		v, ok := arena.mapRecord.Load(r.Playerid)
 		if !ok {
 			continue
 		}
@@ -824,7 +833,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 			PlayerScore:  value.FirstGroup.PlayerScore,
 			HeadProtrait: int32(value.FirstGroup.Protrait),
 			HeadQuality:  int32(value.FirstGroup.HeadQuality),
-			ArenaScore:   r.score,
+			ArenaScore:   r.Score,
 		}
 		msg.Infos = append(msg.Infos, info)
 	}

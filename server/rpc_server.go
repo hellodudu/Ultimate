@@ -52,13 +52,13 @@ func (s *rpcResponser) SayHello(ctx context.Context, in *world_message.HelloRequ
 func (s *rpcResponser) GetScore(ctx context.Context, in *world_message.GetScoreRequest) (*world_message.GetScoreReply, error) {
 	logger.Info("Received: ", in.Id)
 	arena := Instance().GetGameMgr().GetArena()
-	data, err := arena.GetArenaDataByID(in.Id)
+	data, err := arena.GetDataByID(in.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, err
 	}
 
-	return &world_message.GetScoreReply{Score: data.score}, nil
+	return &world_message.GetScoreReply{Score: data.Score}, nil
 }
 
 func (server *RpcServer) Run() {

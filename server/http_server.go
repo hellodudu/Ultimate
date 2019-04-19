@@ -84,8 +84,10 @@ func (server *HttpServer) Run() {
 	expvar.Publish("arena_player_data_num", expvar.Func(getArenaPlayerDataNum))
 	expvar.Publish("arena_record_num", expvar.Func(getArenaRecordNum))
 
-	http.HandleFunc("/arena_player_data", arenaPlayerDataHandler)
+	http.HandleFunc("/arena_get_player_data", arenaGetPlayerDataHandler)
 	http.HandleFunc("/arena_matching_list", arenaMatchingListHandler)
+	http.HandleFunc("/arena_record_req_list", arenaRecordReqListHandler)
+	http.HandleFunc("/arena_get_record", arenaGetRecordHandler)
 
 	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {
@@ -162,7 +164,7 @@ func binaryHandler(w http.ResponseWriter, r *http.Request) {
 	Instance().GetWorldSession().HandleMessage(nil, data)
 }
 
-func arenaPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
+func arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		logger.Warning(err)
@@ -170,14 +172,17 @@ func arenaPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct{ id int64 }
-	if err := json.Unmarshal(body, req); err != nil {
+	var req struct {
+		ID int64 `json:"id"`
+	}
+
+	if err := json.Unmarshal(body, &req); err != nil {
 		logger.Warning(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	d, err := Instance().GetGameMgr().GetArena().GetArenaDataByID(req.id)
+	d, err := Instance().GetGameMgr().GetArena().GetDataByID(req.ID)
 	if err != nil {
 		logger.Warning(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -192,7 +197,49 @@ func arenaPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 func arenaMatchingListHandler(w http.ResponseWriter, r *http.Request) {
 	l := Instance().GetGameMgr().GetArena().GetMatchingList()
 
+	var resp struct {
+		ID []int64 `json:"id"`
+	}
+
+	resp.ID = l[:]
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(l)
+	json.NewEncoder(w).Encode(resp)
+}
+
+func arenaRecordReqListHandler(w http.ResponseWriter, r *http.Request) {
+	m := Instance().GetGameMgr().GetArena().GetRecordReqList()
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(m)
+}
+
+func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		logger.Warning(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		ID int64 `json:"id"`
+	}
+
+	if err := json.Unmarshal(body, &req); err != nil {
+		logger.Warning(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	d, err := Instance().GetGameMgr().GetArena().GetRecordByID(req.ID)
+	if err != nil {
+		logger.Warning(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(d)
 }

@@ -164,13 +164,49 @@ func NewArena(ctx context.Context) (*Arena, error) {
 	return arena, nil
 }
 
-func (arena *Arena) GetArenaData(id int64) (*arenaData, error) {
+func (arena *Arena) GetArenaDataNum() int {
+	n := 0
+	arena.mapArenaData.Range(func(_, _ interface{}) bool {
+		n++
+		return true
+	})
+	return n
+}
+
+func (arena *Arena) GetArenaDataByID(id int64) (*arenaData, error) {
 	v, ok := arena.mapArenaData.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena data with id %d", id)
 	}
 
 	return v.(*arenaData), nil
+}
+
+func (arena *Arena) GetRecordNum() int {
+	n := 0
+	arena.mapRecord.Range(func(_, _ interface{}) bool {
+		n++
+		return true
+	})
+	return n
+}
+
+func (arena *Arena) GetMatchingList() []int64 {
+	l := make([]int64, 0)
+	arena.matchingList.Range(func(k, _ interface{}) bool {
+		l = append(l, k.(int64))
+		return true
+	})
+	return l
+}
+
+func (arena *Arena) GetRecordReqList() map[int64]time.Time {
+	m := make(map[int64]time.Time)
+	arena.mapRecordReq.Range(func(k, v interface{}) bool {
+		m[k.(int64)] = v.(time.Time)
+		return true
+	})
+	return m
 }
 
 // GetSeasonEndTime get season end time

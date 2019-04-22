@@ -12,7 +12,7 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 )
 
-var tcpReadBufMax = 1024 * 100
+var tcpReadBufMax = 1024 * 1024 * 2
 
 type TcpServer struct {
 	conns      map[net.Conn]struct{}

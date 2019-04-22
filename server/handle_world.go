@@ -47,6 +47,11 @@ func HandleTestConnect(con net.Conn, ws *WorldSession, p proto.Message) {
 
 func HandleHeartBeat(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
+		if t := int32(time.Now().Unix()); t == -1 {
+			logger.Warning("Heart beat get time err")
+			return
+		}
+
 		reply := &world_message.MUW_HeartBeat{BattleTime: uint32(time.Now().Unix())}
 		world.SendProtoMessage(reply)
 	}

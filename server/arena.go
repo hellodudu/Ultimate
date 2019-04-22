@@ -277,18 +277,6 @@ func (arena *Arena) Run() {
 
 // LoadFromDB load arena data from db
 func (arena *Arena) LoadFromDB() {
-	// seasonEndTime, ok := reflect.TypeOf(*arena).FieldByName("seasonEndTime")
-	// if !ok {
-	// 	logger.Warning("cannot find arena's seasonEndTime field!")
-	// 	return
-	// }
-
-	// season, ok := reflect.TypeOf(*arena).FieldByName("season")
-	// if !ok {
-	// 	logger.Warning("cannot find arena's season field!")
-	// 	return
-	// }
-
 	// load from global
 	query := fmt.Sprintf("select arena_season, arena_week_end_time, arena_season_end_time from global where id = %d", global.UltimateID)
 
@@ -299,7 +287,7 @@ func (arena *Arena) LoadFromDB() {
 	}
 
 	for rows.Next() {
-		if err := rows.Scan(&arena.seasonEndTime, &arena.weekEndTime, &arena.season); err != nil {
+		if err := rows.Scan(&arena.season, &arena.weekEndTime, &arena.seasonEndTime); err != nil {
 			logger.Error("load table global failed:", err)
 		}
 		logger.Info("load from global success end_time = ", arena.seasonEndTime, ", season = ", arena.season, ", weekEndTime = ", arena.weekEndTime)

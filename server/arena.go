@@ -781,16 +781,19 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 // RequestRank request rank by world, max page is 10
 func (arena *Arena) RequestRank(id int64, page int32) {
 	if page >= 10 {
+		logger.Warning("player ", id, " request rank error: page ", page)
 		return
 	}
 
 	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
 	if info == nil {
+		logger.Warning("player ", id, " request rank error: cannot find player info")
 		return
 	}
 
 	world := Instance().GetWorldSession().GetWorldByID(info.ServerId)
 	if world == nil {
+		logger.Warning("player ", id, " request rank error: cannot find world ", info.ServerId)
 		return
 	}
 

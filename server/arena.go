@@ -610,11 +610,31 @@ func (arena *Arena) nextSeason() {
 }
 
 func (arena *Arena) newSeasonRank() {
-	// set all player's score to default
+	// people who's section > 4, set score to 4 section default score
+	// people who's section <= 4, set score to section - 1 default score
 	arena.mapArenaData.Range(func(k, v interface{}) bool {
 		value := v.(*arenaData)
-		def := getDefaultScoreBySection(getSectionIndexByScore(value.Score))
-		value.Score = def
+		oldSec := getSectionIndexByScore(value.Score)
+
+		newSec := func(s int32) int32 {
+			if s > 4 {
+				return 4
+			}
+
+			if s == 0 {
+				return 0
+			}
+
+			return s - 1
+		}(oldSec)
+
+		newScore := getDefaultScoreBySection(newSec)
+		value.Score = newScore
+
+		if oldSec != newSec {
+			arena.arrMatchPool[oldSec].Delete(value.Playerid)
+			arena.arrMatchPool[newSec].Store(value.Playerid, struct{}{})
+		}
 		return true
 	})
 

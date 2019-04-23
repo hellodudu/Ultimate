@@ -12,9 +12,23 @@
 
 * 返回(json)
 
-    "arena_player_data_num": 参与鸿蒙的玩家数量(已有鸿蒙数据)
+```
+    {
+    "arena_player_data_num": 1,
+    "arena_record_num": 0,
+    "cmdline": [
+        "/var/folders/d2/sj12ms557b5_tq5yg83vhxf40000gn/T/go-build443476864/b001/exe/main"
+    ],
+    "cores": 4,
+    "gcpause": 0,
+    "goroutine": 24,
+    ...
+    }
+```
 
-    "arena_record_num": 玩家镜像数量
+> arena_player_data_num:参与鸿蒙的玩家数量(已有鸿蒙数据)
+> arena_record_num:玩家镜像数量
+> ...其他系统信息
 
 ## 单个玩家鸿蒙数据
 

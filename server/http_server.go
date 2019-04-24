@@ -3,6 +3,7 @@ package ultimate
 import (
 	"encoding/json"
 	"expvar"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
@@ -88,6 +89,8 @@ func (server *HttpServer) Run() {
 	http.HandleFunc("/arena_matching_list", arenaMatchingListHandler)
 	http.HandleFunc("/arena_record_req_list", arenaRecordReqListHandler)
 	http.HandleFunc("/arena_get_record", arenaGetRecordHandler)
+	http.HandleFunc("/player_info", getPlayerInfoHandler)
+	http.HandleFunc("/guild_info", getGuildInfoHandler)
 
 	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {
@@ -238,6 +241,60 @@ func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Warning(err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(d)
+}
+
+func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		logger.Warning(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		ID int64 `json:"id"`
+	}
+
+	if err := json.Unmarshal(body, &req); err != nil {
+		logger.Warning(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	d := Instance().GetGameMgr().GetPlayerInfoByID(req.ID)
+	if d == nil {
+		w.Write([]byte(fmt.Sprintf("cannot find player info by id:", req.ID)))
+		return
+	}
+
+	json.NewEncoder(w).Encode(d)
+}
+
+func getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		logger.Warning(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		ID int64 `json:"id"`
+	}
+
+	if err := json.Unmarshal(body, &req); err != nil {
+		logger.Warning(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	d := Instance().GetGameMgr().GetGuildInfoByID(req.ID)
+	if d == nil {
+		w.Write([]byte(fmt.Sprintf("cannot find guild info by id:", req.ID)))
 		return
 	}
 

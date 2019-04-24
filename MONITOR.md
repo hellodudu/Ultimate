@@ -113,3 +113,43 @@
 ```
     {"player_id":281483566645250...}
 ```
+
+## 单个玩家info
+
+* 接口(http post)
+
+```
+    http://127.0.0.1:8080/player_info
+```
+
+* 参数
+
+```
+    {"id": 281483566645249} 
+```
+
+* 返回(json)
+
+```
+    {"player_id":281483566645249,"server_id":1,"gender":1,"race":1,"head_quality":1,"player_name":"慕无情","guild_id":281474976710657,"last_logoff_time":1295053538,"online":true,"level":100,"player_score":3603,"history_score":3603,"hero_type_id":[4294967295,5,1029,4294967295,4294967295,4294967295],"fashion_id":[4294967295,4294967295,4294967295,4294967295,4294967295,4294967295],"mount_type_id":[4294967295,4294967295,4294967295,4294967295,4294967295,4294967295],"rune_type_id":[101,501,4294967295,4294967295],"state_flag":[0,0,0,0,0,0],"return_player_id":-1,"last_square_action_time":4294967295}
+```
+
+## 单个帮会info
+
+* 接口(http post)
+
+```
+    http://127.0.0.1:8080/guild_info
+```
+
+* 参数
+
+```
+    {"id": 281474976710657} 
+```
+
+* 返回(json)
+
+```
+    {"guild_id":281474976710657,"guild_name":"1","server_id":1,"master_id":281483566645249,"master_name":"慕无情","create_time":1295053602,"hall_level":1,"score":36,"castle_score":1000,"member_num":1}
+```

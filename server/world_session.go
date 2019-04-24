@@ -115,7 +115,7 @@ func (ws *WorldSession) registerAllMessage() {
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_ArenaMatching"), &regInfo{
-		lv: 2,
+		lv: 1,
 		cb: HandleArenaMatching,
 	})
 
@@ -125,7 +125,7 @@ func (ws *WorldSession) registerAllMessage() {
 	})
 
 	ws.registerProto(utils.Crc32("world_message.MWU_ArenaBattleResult"), &regInfo{
-		lv: 2,
+		lv: 1,
 		cb: HandleArenaBattleResult,
 	})
 

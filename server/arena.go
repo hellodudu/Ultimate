@@ -246,8 +246,6 @@ func (arena *Arena) Run() {
 
 		// matching request
 		case id := <-arena.chMatchWaitOK:
-			logger.Info("player:", id, " start arena matching!")
-
 			ok, err := arena.updateMatching(id)
 			if err != nil {
 				continue
@@ -744,8 +742,6 @@ func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {
 
 // BattleResult battle end
 func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
-	logger.Info("arena battle result:", attack, target, win)
-
 	d, ok := arena.mapArenaData.Load(attack)
 	if !ok {
 		logger.Warning("cannot find attack ", attack, " 's arena data!")

@@ -267,7 +267,7 @@ func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	d := Instance().GetGameMgr().GetPlayerInfoByID(req.ID)
 	if d == nil {
-		w.Write([]byte(fmt.Sprintf("cannot find player info by id:", req.ID)))
+		w.Write([]byte(fmt.Sprintf("cannot find player info by id: %d", req.ID)))
 		return
 	}
 
@@ -294,7 +294,7 @@ func getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	d := Instance().GetGameMgr().GetGuildInfoByID(req.ID)
 	if d == nil {
-		w.Write([]byte(fmt.Sprintf("cannot find guild info by id:", req.ID)))
+		w.Write([]byte(fmt.Sprintf("cannot find guild info by id: %d", req.ID)))
 		return
 	}
 

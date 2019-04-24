@@ -170,8 +170,7 @@ func binaryHandler(w http.ResponseWriter, r *http.Request) {
 func arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -180,15 +179,13 @@ func arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.Unmarshal(body, &req); err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
 	d, err := Instance().GetGameMgr().GetArena().GetDataByID(req.ID)
 	if err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -222,8 +219,7 @@ func arenaRecordReqListHandler(w http.ResponseWriter, r *http.Request) {
 func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -232,15 +228,13 @@ func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.Unmarshal(body, &req); err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
 	d, err := Instance().GetGameMgr().GetArena().GetRecordByID(req.ID)
 	if err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -250,8 +244,7 @@ func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
 func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -260,8 +253,7 @@ func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.Unmarshal(body, &req); err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -277,8 +269,7 @@ func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 func getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -287,8 +278,7 @@ func getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.Unmarshal(body, &req); err != nil {
-		logger.Warning(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 

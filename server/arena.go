@@ -218,6 +218,21 @@ func (arena *Arena) GetRecordReqList() map[int64]uint32 {
 	return m
 }
 
+func (arena *Arena) GetRankListByPage(page int) []*arenaData {
+	r := make([]*arenaData, 0)
+
+	for n := 0 + int(page)*arenaRankNumPerPage; n < 10+int(page)*arenaRankNumPerPage; n++ {
+		if n >= arena.arrRankArena.Length() {
+			break
+		}
+
+		d := arena.arrRankArena.Get(n)
+		r = append(r, d)
+	}
+
+	return r
+}
+
 // GetSeasonEndTime get season end time
 func (arena *Arena) GetSeasonEndTime() uint32 {
 	return arena.seasonEndTime

@@ -69,6 +69,58 @@ func (s *rankArenaData) GetBottom() *arenaData {
 	return s.item[len(s.item)-1]
 }
 
+func (s *rankArenaData) GetIndexBefore100(d *arenaData) int {
+	s.rwLock.RLock()
+	defer s.rwLock.RUnlock()
+
+	rank := -1
+	for n := 0; n < len(s.item); n++ {
+		if n >= 100 {
+			break
+		}
+
+		if s.item[n].Playerid == d.Playerid {
+			rank = n
+			break
+		}
+	}
+
+	return rank
+}
+
+func (s *rankArenaData) GetTop100() []*arenaData {
+	s.rwLock.RLock()
+	defer s.rwLock.RUnlock()
+
+	l := make([]*arenaData, 0)
+	for n := 0; n < len(s.item); n++ {
+		if n >= 100 {
+			break
+		}
+
+		l = append(l, s.item[n])
+	}
+
+	return l
+}
+
+func (s *rankArenaData) GetListByPage(page int) []*arenaData {
+	l := make([]*arenaData, 0)
+
+	s.rwLock.RLock()
+	defer s.rwLock.RUnlock()
+
+	for n := 0 + int(page)*arenaRankNumPerPage; n < 10+int(page)*arenaRankNumPerPage; n++ {
+		if n >= s.Len() {
+			break
+		}
+
+		l = append(l, s.item[n])
+	}
+
+	return l
+}
+
 func (s *rankArenaData) Add(v *arenaData) {
 	s.rwLock.Lock()
 	defer s.rwLock.Unlock()
@@ -219,18 +271,7 @@ func (arena *Arena) GetRecordReqList() map[int64]uint32 {
 }
 
 func (arena *Arena) GetRankListByPage(page int) []*arenaData {
-	r := make([]*arenaData, 0)
-
-	for n := 0 + int(page)*arenaRankNumPerPage; n < 10+int(page)*arenaRankNumPerPage; n++ {
-		if n >= arena.arrRankArena.Length() {
-			break
-		}
-
-		d := arena.arrRankArena.Get(n)
-		r = append(r, d)
-	}
-
-	return r
+	return arena.arrRankArena.GetListByPage(page)
 }
 
 // GetSeasonEndTime get season end time
@@ -547,7 +588,7 @@ func (arena *Arena) weekEnd() {
 	var index int
 	arena.mapArenaData.Range(func(_, v interface{}) bool {
 		data := v.(*arenaData)
-		mapReward[data] = time.Now().Add(time.Second * time.Duration(index/50))
+		mapReward[data] = time.Now().Add(time.Second * time.Duration(2+index/50))
 		index++
 		return true
 	})
@@ -656,12 +697,9 @@ func (arena *Arena) newSeasonRank() {
 
 // send top 100 reward mail
 func (arena *Arena) seasonReward() {
-	for n := 0; n < arena.arrRankArena.Length(); n++ {
-		if n >= 100 {
-			break
-		}
+	l := arena.arrRankArena.GetTop100()
 
-		data := arena.arrRankArena.Get(n)
+	for n, data := range l {
 		info := Instance().GetGameMgr().GetPlayerInfoByID(data.Playerid)
 		if info == nil {
 			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.Playerid)
@@ -820,27 +858,13 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 	// get player rank
 	if d, ok := arena.mapArenaData.Load(id); ok {
 		data := d.(*arenaData)
-		if arenaData := arena.arrRankArena.GetBottom(); arenaData != nil {
-			if data.Score >= arenaData.Score {
-				size := arena.arrRankArena.Length()
-				for n := 0; n < size; n++ {
-					if rankData := arena.arrRankArena.Get(n); rankData.Playerid == id {
-						msg.Rank = int32(n)
-						msg.Score = data.Score
-						break
-					}
-				}
-			}
-		}
+		msg.Score = data.Score
+		msg.Rank = int32(arena.arrRankArena.GetIndexBefore100(data))
 	}
 
 	// rank player data
-	for n := 0 + int(page)*arenaRankNumPerPage; n < 10+int(page)*arenaRankNumPerPage; n++ {
-		if n >= arena.arrRankArena.Length() {
-			break
-		}
-
-		r := arena.arrRankArena.Get(n)
+	l := arena.arrRankArena.GetListByPage(int(page))
+	for _, r := range l {
 		v, ok := arena.mapRecord.Load(r.Playerid)
 		if !ok {
 			continue

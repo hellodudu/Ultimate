@@ -1,5 +1,5 @@
 
-# Ultimate server -- A game server writed by golang
+# Ultimate server -- A game server written by golang
 
 [![Build Status](https://travis-ci.com/hellodudu/Ultimate.svg?branch=master)](https://travis-ci.com/hellodudu/Ultimate)
 [![GoDoc](https://godoc.org/github.com/hellodudu/Ultimate?status.svg)](https://godoc.org/github.com/hellodudu/Ultimate)

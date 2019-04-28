@@ -7,7 +7,7 @@ proto:
 	protoc -I=proto --go_out=plugins=grpc:proto proto/world_message.proto
 
 .PHONY: build
-build: proto
+build:
 
 	env GOOS=linux GOARCH=amd64 go build main.go
 

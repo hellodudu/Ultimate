@@ -584,16 +584,26 @@ func (arena *Arena) weekEnd() {
 	}
 
 	// send weekly reward
-	mapReward := make(map[*arenaData]time.Time)
+	type rewardWeek struct {
+		s int32
+		t time.Time
+	}
+
+	mapReward := make(map[int64]*rewardWeek)
 	var index int
 	arena.mapArenaData.Range(func(_, v interface{}) bool {
 		data := v.(*arenaData)
-		mapReward[data] = time.Now().Add(time.Second * time.Duration(2+index/50))
+
+		r := &rewardWeek{}
+		r.s = data.Score
+		r.t = time.Now().Add(time.Second * time.Duration(2+index/50))
+
+		mapReward[data.Playerid] = r
 		index++
 		return true
 	})
 
-	go func(m map[*arenaData]time.Time) {
+	go func(m map[int64]*rewardWeek) {
 		for {
 			if len(m) == 0 {
 				return
@@ -602,8 +612,8 @@ func (arena *Arena) weekEnd() {
 			t := time.Now()
 
 			for k, v := range m {
-				if t.Unix() >= v.Unix() {
-					info := Instance().GetGameMgr().GetPlayerInfoByID(k.Playerid)
+				if t.Unix() >= v.t.Unix() {
+					info := Instance().GetGameMgr().GetPlayerInfoByID(k)
 					if info == nil {
 						delete(m, k)
 						continue
@@ -616,8 +626,8 @@ func (arena *Arena) weekEnd() {
 					}
 
 					msg := &world_message.MUW_ArenaWeeklyReward{
-						PlayerId: k.Playerid,
-						Score:    k.Score,
+						PlayerId: k,
+						Score:    v.s,
 					}
 
 					world.SendProtoMessage(msg)

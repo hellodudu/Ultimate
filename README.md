@@ -11,11 +11,6 @@
 	go get github.com/hellodudu/Ultimate
 
 
-
-# Using tools:
-
-    github.com/go-sql-driver/mysql
-
 # Makefile:
 
 * Proto: 

@@ -1,9 +1,12 @@
 FROM alpine:3.8
 RUN apk add tzdata
-# FROM mysql:8.0
-COPY main main
-# COPY config config
-# COPY sql sql
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY main /app/main
+
 RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo 'Asia/Shanghai' >/etc/timezone 
-ENTRYPOINT ["./main"]
+
+ENTRYPOINT ["/app/main"]

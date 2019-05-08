@@ -16,21 +16,22 @@
 
     github.com/go-sql-driver/mysql
 
-# Run From Build:
+# Makefile:
 
-* Cross Build: 
+* Proto: 
 
-		env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v main.go
+		make proto
 
 * Docker Build:
     
-	    docker build -t ultimate .
+	    make build
 
-* Docker Run:(on my env)
+* Run
     
-	    docker run -itd -v $GOPATH/src/github.com/hellodudu/Ultimate/config:/config -v $GOPATH/src/github.com/hellodudu/Ultimate/log:/log -p 7030:7030 -p 8088:8080 hellodudu86/ultimate:1.0
+	    make run
+
 
 # Run From Docker Hub:
 
    
-	docker run -it -p 7030:7030 -p 8080:8080 hellodudu86/ultimate:1.0
+	docker run -it -p 7030:7030 -p 8080:8080 hellodudu86/ultimate

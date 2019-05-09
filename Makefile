@@ -16,5 +16,5 @@ test:
 
 .PHONY: run
 run:
-	docker run -it -v config:/config -v log:/log -p 7030:7030 -p 8080:8080 ultimate
+	docker run -it -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate
 

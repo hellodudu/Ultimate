@@ -888,7 +888,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 			ServerName:   value.FirstGroup.WorldName,
 			Level:        value.FirstGroup.Level,
 			PlayerScore:  value.FirstGroup.PlayerScore,
-			HeadProtrait: int32(value.FirstGroup.Protrait),
+			HeadProtrait: int32(value.FirstGroup.HeadProtrait),
 			HeadQuality:  int32(value.FirstGroup.HeadQuality),
 			ArenaScore:   r.Score,
 		}

@@ -202,3 +202,15 @@ func HandleRequestArenaRank(con net.Conn, ws *WorldSession, p proto.Message) {
 		Instance().GetGameMgr().GetArena().RequestRank(msg.PlayerId, msg.Page)
 	}
 }
+
+func HandleAddInvite(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_AddInvite)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_AddInvite")
+			return
+		}
+
+		Instance().GetGameMgr().GetInvite().AddInvite(msg.NewbieId, msg.InviterId)
+	}
+}

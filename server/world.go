@@ -138,7 +138,7 @@ func (w *World) SendTransferMessage(data []byte) {
 
 func (w *World) RequestWorldInfo() {
 	// request player info
-	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 100}
+	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 20}
 	w.SendProtoMessage(msgP)
 
 	// request guild info

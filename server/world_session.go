@@ -143,6 +143,16 @@ func (ws *WorldSession) registerAllMessage() {
 		lv: 1,
 		cb: HandleRequestArenaRank,
 	})
+
+	ws.registerProto(util.Crc32("world_message.MWU_AddInvite"), &regInfo{
+		lv: 1,
+		cb: HandleAddInvite,
+	})
+
+	ws.registerProto(util.Crc32("world_message.MWU_CheckInvite"), &regInfo{
+		lv: 1,
+		cb: HandleCheckInvite,
+	})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {

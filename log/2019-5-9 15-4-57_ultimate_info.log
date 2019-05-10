@@ -1,0 +1,16 @@
+INFO: 2019/05/09 15:04:57 logger.go:84: world_session init ok!
+INFO: 2019/05/09 15:04:57 logger.go:62: tcp server listening at :7030
+INFO: 2019/05/09 15:04:57 logger.go:84: tcp_server init ok!
+INFO: 2019/05/09 15:04:57 logger.go:62: init max workers 2
+INFO: 2019/05/09 15:04:57 logger.go:84: task init ok!
+INFO: 2019/05/09 15:04:57 logger.go:84: rpc server listening at :7080
+INFO: 2019/05/09 15:04:57 logger.go:84: http_server init ok!
+INFO: 2019/05/09 15:04:57 logger.go:84: rpc_server init ok!
+INFO: 2019/05/09 15:04:57 logger.go:84: db_mgr init ok!
+INFO: 2019/05/09 15:04:57 logger.go:62: load from global success end_time = 1559491230, season = 1, weekEndTime = 1557676810
+INFO: 2019/05/09 15:04:57 logger.go:84: gameMgr init ok!
+INFO: 2019/05/09 15:04:57 logger.go:84: all init ok!
+INFO: 2019/05/09 15:04:59 logger.go:84: ultimate server closing down (signal: interrupt)
+INFO: 2019/05/09 15:04:59 logger.go:84: db mgr context done!
+INFO: 2019/05/09 15:04:59 logger.go:84: world session context done!
+INFO: 2019/05/09 15:04:59 logger.go:84: server exit safely

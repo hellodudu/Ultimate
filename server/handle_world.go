@@ -214,3 +214,15 @@ func HandleAddInvite(con net.Conn, ws *WorldSession, p proto.Message) {
 		Instance().GetGameMgr().GetInvite().AddInvite(msg.NewbieId, msg.InviterId)
 	}
 }
+
+func HandleCheckInviteResult(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_CheckInviteResult)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_CheckInviteResult")
+			return
+		}
+
+		Instance().GetGameMgr().GetInvite().CheckInviteResult(msg.NewbieId, msg.InviterId, msg.ErrorCode)
+	}
+}

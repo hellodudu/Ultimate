@@ -85,3 +85,25 @@ func (invite *Invite) AddInvite(newbieId int64, inviterId int64) {
 		world.SendProtoMessage(msg)
 	}
 }
+
+func (invite *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode int32) {
+	if newbieId == -1 {
+		return
+	}
+
+	newbieInfo := Instance().GetGameMgr().GetPlayerInfoByID(newbieId)
+	if newbieInfo == nil {
+		logger.Warning("CheckInviteResult cannot find newbie info:", newbieId)
+		return
+	}
+
+	if world := Instance().GetWorldSession().GetWorldByID(newbieInfo.ServerId); world != nil {
+		msg := &world_message.MUW_AddInviteResult{
+			NewbieId:  newbieId,
+			InviterId: inviterId,
+			ErrorCode: errorCode,
+		}
+
+		world.SendProtoMessage(msg)
+	}
+}

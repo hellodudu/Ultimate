@@ -251,6 +251,19 @@ message MUW_ArenaSeasonReward {
     int32 rank = 2;
 }
 
+message ArenaChampion {
+    int32 rank = 1;
+    int64 player_id = 2;
+    int32 score = 3;
+    string player_name = 4;
+    string server_name = 5;
+    uint32 master_id = 6;
+}
+
+message MUW_ArenaChampion {
+    repeated ArenaChampion data = 1;
+}
+
 //////////////////////////////////////
 // invite
 message MUW_CheckInvite {

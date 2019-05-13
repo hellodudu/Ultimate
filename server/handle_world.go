@@ -67,6 +67,7 @@ func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 
 		world.RequestWorldInfo()
 		world.SyncArenaSeasonEndTime()
+		world.SyncArenaChampion()
 	}
 }
 

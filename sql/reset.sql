@@ -28,3 +28,12 @@ create table arena_player (
     `last_target` bigint(20) not null default '-1' comment 'same target cannot be met twice',
     primary key (`player_id`)
 ) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='arena player';
+
+drop table if exists `arena_champion`;
+create table arena_champion (
+    `rank` smallint(5) not null default '0' comment 'arena rank from 1 to 3',
+    `player_id` bigint(20) not null default '-1' comment 'playerid',
+    `score` int(10) not null default '0' comment 'arena score',
+    `arena_season` int(10) not null default '0' comment 'arena seasons', 
+    primary key (`rank`)
+) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='arena champion';

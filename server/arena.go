@@ -88,13 +88,13 @@ func (s *rankArenaData) GetIndexBefore100(d *arenaData) int {
 	return rank
 }
 
-func (s *rankArenaData) GetTop100() []*arenaData {
+func (s *rankArenaData) GetTop(top int) []*arenaData {
 	s.rwLock.RLock()
 	defer s.rwLock.RUnlock()
 
 	l := make([]*arenaData, 0)
 	for n := 0; n < len(s.item); n++ {
-		if n >= 100 {
+		if n >= top {
 			break
 		}
 
@@ -133,6 +133,13 @@ type arenaData struct {
 	Score      int32  `sql:"score" json:"score"`
 	ReachTime  uint32 `sql:"reach_time" json:"reach_time"`
 	LastTarget int64  `sql:"last_target" json:"last_target"` // target cannot be last one
+}
+
+// champion data
+type championData struct {
+	rank     int   `sql:"rank" json:"rank"`
+	playerID int64 `sql:"player_id" json:"player_id"`
+	score    int   `sql:"score" json:"score"`
 }
 
 func getSectionIndexByScore(score int32) int32 {
@@ -196,6 +203,9 @@ type Arena struct {
 	seasonEndTime uint32     `sql:"arena_season_end_time"`
 	weekEndTime   uint32     // every monday request new player's record and send weekly reward
 
+	championList []*championData // top 3 champion data
+	cpLock       sync.RWMutex    // champion read write lock
+
 	ctx      context.Context
 	cancel   context.CancelFunc
 	chDBInit chan struct{}
@@ -209,6 +219,7 @@ func NewArena(ctx context.Context) (*Arena, error) {
 		chMatchWaitOK: make(chan int64, 1000),
 		chDBInit:      make(chan struct{}, 1),
 		weekEndTime:   0,
+		championList:  make([]*championData, 0),
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
@@ -345,6 +356,24 @@ func (arena *Arena) LoadFromDB() {
 			logger.Error("load table global failed:", err)
 		}
 		logger.Info("load from global success end_time = ", arena.seasonEndTime, ", season = ", arena.season, ", weekEndTime = ", arena.weekEndTime)
+	}
+
+	// load from arena_champion
+	query = fmt.Sprintf("select * from arena_champion")
+	rows, err = Instance().GetDBMgr().Query(query)
+	if err != nil {
+		logger.Error("cannot load mysql table arena_champion!")
+		return
+	}
+
+	for rows.Next() {
+		data := &championData{}
+		if err := rows.Scan(&data.rank, &data.playerID, &data.score); err != nil {
+			logger.Error("load table arena_champion failed:", err)
+			return
+		}
+		logger.Info("load from arena_champion success:", data)
+		arena.championList = append(arena.championList, data)
 	}
 
 	// load from arena_player
@@ -705,11 +734,72 @@ func (arena *Arena) newSeasonRank() {
 	arena.arrRankArena.Sort()
 }
 
+// save top 3 champion id
+func (arena *Arena) saveChampion() {
+	list := arena.arrRankArena.GetTop(3)
+
+	arena.cpLock.Lock()
+	arena.championList = nil
+
+	for k, v := range list {
+		data := &championData{
+			rank:     k,
+			playerID: v.Playerid,
+			score:    int(v.Score),
+		}
+		arena.championList = append(arena.championList, data)
+	}
+	arena.cpLock.Unlock()
+
+	// save to db
+	query := "delete from arena_champion"
+	Instance().GetDBMgr().Exec(query)
+
+	for _, v := range arena.championList {
+		query = fmt.Sprintf("replace into arena_champion set rank = %d, player_id = %d, score = %d, arena_season = %d", v.rank, v.playerID, v.score, arena.season)
+		Instance().GetDBMgr().Exec(query)
+	}
+
+	// broadcast to all world
+	msg := &world_message.MUW_ArenaChampion{
+		Data: make([]*world_message.ArenaChampion, 0),
+	}
+
+	arena.cpLock.RLock()
+	for _, v := range arena.championList {
+		champion := &world_message.ArenaChampion{
+			Rank:     int32(v.rank),
+			PlayerId: v.playerID,
+			Score:    int32(v.score),
+		}
+
+		rec, err := arena.GetRecordByID(v.PlayerID)
+		if err != nil {
+			logger.Warning("saveChampion cannot get player's ArenaRecord:", v.PlayerID)
+			continue
+		}
+
+		champion.PlayerName = rec.FirstGroup.Name
+		champion.ServerName = rec.FirstGroup.WorldName
+		for _, val := range rec.FirstGroup.HeroRecord {
+			if val.EntityId > 0 && val.EntityId < 1000 {
+				champion.MasterId = val.EntityId
+				break
+			}
+		}
+
+		msg.Data = append(msg.Data, champion)
+	}
+
+	arena.cpLock.RUnlock()
+	Instance().GetWorldSession().BroadCast(msg)
+}
+
 // send top 100 reward mail
 func (arena *Arena) seasonReward() {
-	l := arena.arrRankArena.GetTop100()
+	list := arena.arrRankArena.GetTop(100)
 
-	for n, data := range l {
+	for n, data := range list {
 		info := Instance().GetGameMgr().GetPlayerInfoByID(data.Playerid)
 		if info == nil {
 			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.Playerid)
@@ -732,6 +822,7 @@ func (arena *Arena) seasonReward() {
 }
 
 func (arena *Arena) seasonEnd() {
+	arena.saveChampion()
 	arena.seasonReward()
 	arena.nextSeason()
 	arena.newSeasonRank()

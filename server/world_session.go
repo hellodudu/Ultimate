@@ -153,6 +153,11 @@ func (ws *WorldSession) registerAllMessage() {
 		lv: 1,
 		cb: HandleCheckInviteResult,
 	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_InviteRecharge"), &regInfo{
+		lv: 1,
+		cb: HandleInviteRecharge,
+	})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {

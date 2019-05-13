@@ -275,6 +275,20 @@ message MUW_AddInviteResult {
     int32 error_code = 3;
 }
 
+message MWU_InviteRecharge {
+    int64 newbie_id = 1;
+    string newbie_name = 2;
+    int64 inviter_id = 3;
+    int32 diamond_gift = 4;
+}
+
+message MUW_InviteRecharge {
+    int64 newbie_id = 1;
+    string newbie_name = 2;
+    int64 inviter_id = 3;
+    int32 diamond_gift = 4;
+}
+
 // service
 service Greeter {
     rpc SayHello (HelloRequest) returns (HelloReply) {}

@@ -107,3 +107,34 @@ func (invite *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCo
 		world.SendProtoMessage(msg)
 	}
 }
+
+func (invite *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int64, diamondGift int32) {
+	if newbieId == -1 {
+		return
+	}
+
+	if inviterId == -1 {
+		return
+	}
+
+	if diamondGift <= 0 {
+		return
+	}
+
+	inviterInfo := Instance().GetGameMgr().GetPlayerInfoByID(inviterId)
+	if inviterInfo == nil {
+		logger.Warning("InviteRecharge cannot find inviter info:", inviterId)
+		return
+	}
+
+	if world := Instance().GetWorldSession().GetWorldByID(inviterInfo.ServerId); world != nil {
+		msg := &world_message.MUW_InviteRecharge{
+			NewbieId:    newbieId,
+			NewbieName:  newbieName,
+			InviterId:   inviterId,
+			DiamondGift: diamondGift,
+		}
+
+		world.SendProtoMessage(msg)
+	}
+}

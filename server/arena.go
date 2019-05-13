@@ -295,6 +295,39 @@ func (arena *Arena) GetSeason() int {
 	return arena.season
 }
 
+func (arena *Arena) GetChampion() []*world_message.ArenaChampion {
+	arena.cpLock.RLock()
+	defer arena.cpLock.RUnlock()
+
+	championRet := make([]*world_message.ArenaChampion, 0)
+	for _, v := range arena.championList {
+		champion := &world_message.ArenaChampion{
+			Rank:     int32(v.rank),
+			PlayerId: v.playerID,
+			Score:    int32(v.score),
+		}
+
+		rec, err := arena.GetRecordByID(v.playerID)
+		if err != nil {
+			logger.Warning("saveChampion cannot get player's ArenaRecord:", v.playerID)
+			continue
+		}
+
+		champion.PlayerName = rec.FirstGroup.Name
+		champion.ServerName = rec.FirstGroup.WorldName
+		for _, val := range rec.FirstGroup.HeroRecord {
+			if val.EntityId > 0 && val.EntityId < 1000 {
+				champion.MasterId = val.EntityId
+				break
+			}
+		}
+
+		championRet = append(championRet, champion)
+	}
+
+	return championRet
+}
+
 // Stop stop
 func (arena *Arena) Stop() {
 	arena.cancel()
@@ -762,36 +795,9 @@ func (arena *Arena) saveChampion() {
 
 	// broadcast to all world
 	msg := &world_message.MUW_ArenaChampion{
-		Data: make([]*world_message.ArenaChampion, 0),
+		Data: arena.GetChampion(),
 	}
 
-	arena.cpLock.RLock()
-	for _, v := range arena.championList {
-		champion := &world_message.ArenaChampion{
-			Rank:     int32(v.rank),
-			PlayerId: v.playerID,
-			Score:    int32(v.score),
-		}
-
-		rec, err := arena.GetRecordByID(v.PlayerID)
-		if err != nil {
-			logger.Warning("saveChampion cannot get player's ArenaRecord:", v.PlayerID)
-			continue
-		}
-
-		champion.PlayerName = rec.FirstGroup.Name
-		champion.ServerName = rec.FirstGroup.WorldName
-		for _, val := range rec.FirstGroup.HeroRecord {
-			if val.EntityId > 0 && val.EntityId < 1000 {
-				champion.MasterId = val.EntityId
-				break
-			}
-		}
-
-		msg.Data = append(msg.Data, champion)
-	}
-
-	arena.cpLock.RUnlock()
 	Instance().GetWorldSession().BroadCast(msg)
 }
 

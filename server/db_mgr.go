@@ -94,7 +94,7 @@ func (m *DBMgr) loadGlobal() {
 func (m *DBMgr) Exec(q string) {
 	go func() {
 		if _, err := m.db.ExecContext(m.ctx, q); err != nil {
-			logger.Error("db query failed:", err)
+			logger.Error(fmt.Sprintf("db exec<%s> failed:", q), err)
 		}
 	}()
 }

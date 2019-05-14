@@ -114,6 +114,11 @@ func (ws *WorldSession) registerAllMessage() {
 		cb: HandleRequestUltimatePlayer,
 	})
 
+	ws.registerProto(utils.Crc32("world_message.MWU_ViewFormation"), &regInfo{
+		lv: 1,
+		cb: HandleViewFormation,
+	})
+
 	ws.registerProto(utils.Crc32("world_message.MWU_ArenaMatching"), &regInfo{
 		lv: 1,
 		cb: HandleArenaMatching,

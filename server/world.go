@@ -185,6 +185,16 @@ func (w *World) RequestUltimatePlayer(src_player_id int64, src_server_id uint32,
 	w.SendProtoMessage(msg)
 }
 
+func (w *World) ViewFormation(src_player_id int64, src_server_id uint32, dst_player_id int64, dst_server_id uint32) {
+	msg := &world_message.MUW_ViewFormation{
+		SrcPlayerId: src_player_id,
+		SrcServerId: src_server_id,
+		DstPlayerId: dst_player_id,
+		DstServerId: dst_server_id,
+	}
+	w.SendProtoMessage(msg)
+}
+
 func (w *World) QueryWrite(query string) {
 	Instance().dbMgr.Exec(query)
 }

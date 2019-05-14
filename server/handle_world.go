@@ -120,12 +120,47 @@ func HandleRequestUltimatePlayer(con net.Conn, ws *WorldSession, p proto.Message
 			return
 		}
 
+		dstInfo := Instance().GetGameMgr().GetPlayerInfoByID(msg.DstPlayerId)
 		dstWorld := ws.GetWorldByID(msg.DstServerId)
+		if dstInfo == nil {
+			return
+		}
+
+		if int(msg.DstServerId) == -1 {
+			dstWorld = ws.GetWorldByID(dstInfo.ServerId)
+		}
+
 		if dstWorld == nil {
 			return
 		}
 
-		dstWorld.RequestUltimatePlayer(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, msg.DstServerId)
+		dstWorld.RequestUltimatePlayer(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, dstInfo.ServerId)
+	}
+}
+
+func HandleViewFormation(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ViewFormation)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_ViewFormation")
+			return
+		}
+
+		dstInfo := Instance().GetGameMgr().GetPlayerInfoByID(msg.DstPlayerId)
+		dstWorld := ws.GetWorldByID(msg.DstServerId)
+		if dstInfo == nil {
+			return
+		}
+
+		if int(msg.DstServerId) == -1 {
+			dstWorld = ws.GetWorldByID(dstInfo.ServerId)
+		}
+
+		if dstWorld == nil {
+			return
+		}
+
+		dstWorld.ViewFormation(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, dstInfo.ServerId)
 	}
 }
 

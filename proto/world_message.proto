@@ -124,6 +124,20 @@ message MUW_RequestUltimatePlayer {
 	uint32 dst_server_id = 4;
 }
 
+message MWU_ViewFormation {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 dst_player_id = 3;
+	uint32 dst_server_id = 4;
+}
+
+message MUW_ViewFormation {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 dst_player_id = 3;
+	uint32 dst_server_id = 4;
+}
+
 // 镜像
 message HeroRecord {
 	uint32 entity_id = 1;

@@ -776,7 +776,7 @@ func (arena *Arena) saveChampion() {
 
 	for k, v := range list {
 		data := &championData{
-			rank:     k,
+			rank:     k + 1,
 			playerID: v.Playerid,
 			score:    int(v.Score),
 		}

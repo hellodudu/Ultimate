@@ -302,7 +302,7 @@ func (arena *Arena) GetChampion() []*world_message.ArenaChampion {
 	championRet := make([]*world_message.ArenaChampion, 0)
 	for _, v := range arena.championList {
 		champion := &world_message.ArenaChampion{
-			Rank:     int32(v.rank),
+			Rank:     int32(v.rank) + 1,
 			PlayerId: v.playerID,
 			Score:    int32(v.score),
 		}
@@ -776,7 +776,7 @@ func (arena *Arena) saveChampion() {
 
 	for k, v := range list {
 		data := &championData{
-			rank:     k + 1,
+			rank:     k,
 			playerID: v.Playerid,
 			score:    int(v.Score),
 		}

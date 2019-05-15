@@ -163,6 +163,7 @@ func (w *World) SyncArenaChampion() {
 	}
 
 	w.SendProtoMessage(msg)
+	logger.Info("sync arena champion to world<id:", w.Id, ", name:", w.Name, ">")
 }
 
 func (w *World) PlayUltimateRecord(src_player_id int64, src_server_id uint32, record_id int64, dst_server_id uint32) {

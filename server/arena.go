@@ -309,7 +309,7 @@ func (arena *Arena) GetChampion() []*world_message.ArenaChampion {
 
 		rec, err := arena.GetRecordByID(v.playerID)
 		if err != nil {
-			logger.Warning("saveChampion cannot get player's ArenaRecord:", v.playerID)
+			logger.Warning("GetChampion cannot get player's ArenaRecord:", v.playerID)
 			continue
 		}
 
@@ -401,7 +401,8 @@ func (arena *Arena) LoadFromDB() {
 
 	for rows.Next() {
 		data := &championData{}
-		if err := rows.Scan(&data.rank, &data.playerID, &data.score); err != nil {
+		var season int
+		if err := rows.Scan(&data.rank, &data.playerID, &data.score, &season); err != nil {
 			logger.Error("load table arena_champion failed:", err)
 			return
 		}

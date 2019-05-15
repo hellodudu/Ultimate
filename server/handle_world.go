@@ -59,15 +59,26 @@ func HandleHeartBeat(con net.Conn, ws *WorldSession, p proto.Message) {
 
 func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
-		np := p.(*world_message.MWU_WorldConnected)
-		arrWorldID := np.GetWorldId()
+		arrWorldID := p.(*world_message.MWU_WorldConnected).WorldId
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
 		ws.AddWorldRef(world.Id, arrWorldID)
 
 		world.RequestWorldInfo()
 		world.SyncArenaSeasonEndTime()
-		world.SyncArenaChampion()
+
+		// 20s later sync arena champion
+		t := time.NewTimer(20 * time.Second)
+		go func(id uint32) {
+			<-t.C
+			w := Instance().GetWorldSession().GetWorldByID(id)
+			if w == nil {
+				logger.Warning("world<", id, "> disconnected, cannot sync arena champion")
+				return
+			}
+
+			w.SyncArenaChampion()
+		}(world.Id)
 	}
 }
 

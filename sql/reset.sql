@@ -35,5 +35,5 @@ create table arena_champion (
     `player_id` bigint(20) not null default '-1' comment 'playerid',
     `score` int(10) not null default '0' comment 'arena score',
     `arena_season` int(10) not null default '0' comment 'arena seasons', 
-    primary key (`rank`)
+    primary key (`champion_rank`)
 ) engine=innodb default charset=utf8mb4 collate utf8mb4_general_ci comment='arena champion';

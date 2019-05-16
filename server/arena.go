@@ -839,7 +839,7 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 
 // RequestRank request rank by world, max page is 10
 func (arena *Arena) RequestRank(id int64, page int32) {
-	if page >= 10 {
+	if page >= 10 || page < 0 {
 		logger.Warning("player ", id, " request rank error: page ", page)
 		return
 	}
@@ -893,6 +893,10 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 			ArenaScore:   r.Score,
 		}
 		msg.Infos = append(msg.Infos, info)
+	}
+
+	if msg.Page >= 10 {
+		logger.Warning("reply arena request rank pages error:", msg.Page)
 	}
 
 	world.SendProtoMessage(msg)

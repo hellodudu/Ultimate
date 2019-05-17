@@ -10,6 +10,7 @@ import (
 
 type GameMgr struct {
 	arena         *Arena // arena
+	invite        *Invite
 	mapPlayerInfo sync.Map
 	mapGuildInfo  sync.Map
 	ctx           context.Context
@@ -26,11 +27,17 @@ func NewGameMgr() (*GameMgr, error) {
 		game.arena.LoadFromDB()
 	}
 
+	game.invite, err = NewInvite(game.ctx)
+	if err == nil {
+		game.invite.LoadFromDB()
+	}
+
 	return game, err
 }
 
 func (g *GameMgr) Run() {
 	go g.arena.Run()
+	go g.invite.Run()
 
 	for {
 		select {
@@ -43,6 +50,10 @@ func (g *GameMgr) Run() {
 
 func (g *GameMgr) GetArena() *Arena {
 	return g.arena
+}
+
+func (g *GameMgr) GetInvite() *Invite {
+	return g.invite
 }
 
 func (g *GameMgr) AddPlayerInfoList(s []*world_message.CrossPlayerInfo) {

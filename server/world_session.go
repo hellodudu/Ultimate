@@ -114,6 +114,11 @@ func (ws *WorldSession) registerAllMessage() {
 		cb: HandleRequestUltimatePlayer,
 	})
 
+	ws.registerProto(utils.Crc32("world_message.MWU_ViewFormation"), &regInfo{
+		lv: 1,
+		cb: HandleViewFormation,
+	})
+
 	ws.registerProto(utils.Crc32("world_message.MWU_ArenaMatching"), &regInfo{
 		lv: 1,
 		cb: HandleArenaMatching,
@@ -142,6 +147,21 @@ func (ws *WorldSession) registerAllMessage() {
 	ws.registerProto(utils.Crc32("world_message.MWU_RequestArenaRank"), &regInfo{
 		lv: 1,
 		cb: HandleRequestArenaRank,
+	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_AddInvite"), &regInfo{
+		lv: 1,
+		cb: HandleAddInvite,
+	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_CheckInviteResult"), &regInfo{
+		lv: 1,
+		cb: HandleCheckInviteResult,
+	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_InviteRecharge"), &regInfo{
+		lv: 1,
+		cb: HandleInviteRecharge,
 	})
 }
 

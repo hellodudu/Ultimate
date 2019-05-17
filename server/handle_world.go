@@ -59,14 +59,26 @@ func HandleHeartBeat(con net.Conn, ws *WorldSession, p proto.Message) {
 
 func HandleWorldConnected(con net.Conn, ws *WorldSession, p proto.Message) {
 	if world := ws.GetWorldByCon(con); world != nil {
-		np := p.(*world_message.MWU_WorldConnected)
-		arrWorldID := np.GetWorldId()
+		arrWorldID := p.(*world_message.MWU_WorldConnected).WorldId
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
 		ws.AddWorldRef(world.Id, arrWorldID)
 
 		world.RequestWorldInfo()
 		world.SyncArenaSeasonEndTime()
+
+		// 20s later sync arena champion
+		t := time.NewTimer(20 * time.Second)
+		go func(id uint32) {
+			<-t.C
+			w := Instance().GetWorldSession().GetWorldByID(id)
+			if w == nil {
+				logger.Warning("world<", id, "> disconnected, cannot sync arena champion")
+				return
+			}
+
+			w.SyncArenaChampion()
+		}(world.Id)
 	}
 }
 
@@ -119,12 +131,47 @@ func HandleRequestUltimatePlayer(con net.Conn, ws *WorldSession, p proto.Message
 			return
 		}
 
+		dstInfo := Instance().GetGameMgr().GetPlayerInfoByID(msg.DstPlayerId)
 		dstWorld := ws.GetWorldByID(msg.DstServerId)
+		if dstInfo == nil {
+			return
+		}
+
+		if int32(msg.DstServerId) == -1 {
+			dstWorld = ws.GetWorldByID(dstInfo.ServerId)
+		}
+
 		if dstWorld == nil {
 			return
 		}
 
-		dstWorld.RequestUltimatePlayer(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, msg.DstServerId)
+		dstWorld.RequestUltimatePlayer(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, dstInfo.ServerId)
+	}
+}
+
+func HandleViewFormation(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ViewFormation)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_ViewFormation")
+			return
+		}
+
+		dstInfo := Instance().GetGameMgr().GetPlayerInfoByID(msg.DstPlayerId)
+		dstWorld := ws.GetWorldByID(msg.DstServerId)
+		if dstInfo == nil {
+			return
+		}
+
+		if int32(msg.DstServerId) == -1 {
+			dstWorld = ws.GetWorldByID(dstInfo.ServerId)
+		}
+
+		if dstWorld == nil {
+			return
+		}
+
+		dstWorld.ViewFormation(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, dstInfo.ServerId)
 	}
 }
 
@@ -200,5 +247,41 @@ func HandleRequestArenaRank(con net.Conn, ws *WorldSession, p proto.Message) {
 		}
 
 		Instance().GetGameMgr().GetArena().RequestRank(msg.PlayerId, msg.Page)
+	}
+}
+
+func HandleAddInvite(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_AddInvite)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_AddInvite")
+			return
+		}
+
+		Instance().GetGameMgr().GetInvite().AddInvite(msg.NewbieId, msg.InviterId)
+	}
+}
+
+func HandleCheckInviteResult(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_CheckInviteResult)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_CheckInviteResult")
+			return
+		}
+
+		Instance().GetGameMgr().GetInvite().CheckInviteResult(msg.NewbieId, msg.InviterId, msg.ErrorCode)
+	}
+}
+
+func HandleInviteRecharge(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_InviteRecharge)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_InviteRecharge")
+			return
+		}
+
+		Instance().GetGameMgr().GetInvite().InviteRecharge(msg.NewbieId, msg.NewbieName, msg.InviterId, msg.DiamondGift)
 	}
 }

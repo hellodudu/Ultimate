@@ -138,7 +138,7 @@ func (w *World) SendTransferMessage(data []byte) {
 
 func (w *World) RequestWorldInfo() {
 	// request player info
-	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 100}
+	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 20}
 	w.SendProtoMessage(msgP)
 
 	// request guild info
@@ -157,6 +157,15 @@ func (w *World) SyncArenaSeasonEndTime() {
 	w.SendProtoMessage(msg)
 }
 
+func (w *World) SyncArenaChampion() {
+	msg := &world_message.MUW_ArenaChampion{
+		Data: Instance().GetGameMgr().GetArena().GetChampion(),
+	}
+
+	w.SendProtoMessage(msg)
+	logger.Info("sync arena champion to world<id:", w.Id, ", name:", w.Name, ">")
+}
+
 func (w *World) PlayUltimateRecord(src_player_id int64, src_server_id uint32, record_id int64, dst_server_id uint32) {
 	msg := &world_message.MUW_PlayUltimateRecord{
 		SrcPlayerId: src_player_id,
@@ -169,6 +178,16 @@ func (w *World) PlayUltimateRecord(src_player_id int64, src_server_id uint32, re
 
 func (w *World) RequestUltimatePlayer(src_player_id int64, src_server_id uint32, dst_player_id int64, dst_server_id uint32) {
 	msg := &world_message.MUW_RequestUltimatePlayer{
+		SrcPlayerId: src_player_id,
+		SrcServerId: src_server_id,
+		DstPlayerId: dst_player_id,
+		DstServerId: dst_server_id,
+	}
+	w.SendProtoMessage(msg)
+}
+
+func (w *World) ViewFormation(src_player_id int64, src_server_id uint32, dst_player_id int64, dst_server_id uint32) {
+	msg := &world_message.MUW_ViewFormation{
 		SrcPlayerId: src_player_id,
 		SrcServerId: src_server_id,
 		DstPlayerId: dst_player_id,

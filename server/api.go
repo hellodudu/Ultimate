@@ -17,12 +17,12 @@ var api *API
 // API define
 type API struct {
 	td        *task.Dispatcher // task dispatcher
-	dbMgr     *DBMgr           // db manager
+	dbMgr     *Datastore       // db manager
 	rds       *redis.Client    // redis
 	tcpServ   *TcpServer       // tcp server
 	rpcServ   *RpcServer       // rpc server
 	httpServ  *HttpServer      // http server
-	worldSesn *WorldSession    // world session
+	worldSesn *WorldMgr        // world session
 	gameMgr   *GameMgr
 	reqNum    int          // request number
 	appMap    map[int]*App // app map
@@ -45,12 +45,12 @@ func NewAPI() (*API, error) {
 
 	api.wg.Add(6)
 	go api.InitTask()
-	go api.InitDBMgr()
+	go api.InitDatastore()
 	// go api.InitRedis()
 	go api.InitTCPServer()
 	go api.InitRPCServer()
 	go api.InitHttpServer()
-	go api.InitWorldSession()
+	go api.InitWorldMgr()
 	api.wg.Wait()
 
 	// game init after db init ok!
@@ -66,7 +66,7 @@ func Instance() *API {
 	return api
 }
 
-func (api *API) GetWorldSession() *WorldSession {
+func (api *API) GetWorldMgr() *WorldMgr {
 	return api.worldSesn
 }
 
@@ -74,7 +74,7 @@ func (api *API) GetGameMgr() *GameMgr {
 	return api.gameMgr
 }
 
-func (api *API) GetDBMgr() *DBMgr {
+func (api *API) GetDatastore() *Datastore {
 	return api.dbMgr
 }
 
@@ -91,11 +91,11 @@ func (api *API) InitTask() {
 }
 
 // init db
-func (api *API) InitDBMgr() {
+func (api *API) InitDatastore() {
 	defer api.wg.Done()
 	var err error
 
-	if api.dbMgr, err = NewDBMgr(); err != nil {
+	if api.dbMgr, err = NewDatastore(); err != nil {
 		logger.Fatal(err)
 		return
 	}
@@ -153,10 +153,10 @@ func (api *API) InitHttpServer() {
 }
 
 // init world session
-func (api *API) InitWorldSession() {
+func (api *API) InitWorldMgr() {
 	defer api.wg.Done()
 	var err error
-	if api.worldSesn, err = NewWorldSession(); err != nil {
+	if api.worldSesn, err = NewWorldMgr(); err != nil {
 		logger.Fatal(err)
 	}
 

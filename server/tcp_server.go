@@ -148,8 +148,8 @@ func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 
 		// handle message
 		// Instance().AddTask(func() {
-		// 	Instance().GetWorldSession().HandleMessage(conn, msgData)
+		// 	Instance().GetWorldMgr().HandleMessage(conn, msgData)
 		// })
-		Instance().GetWorldSession().HandleMessage(conn, msgData)
+		Instance().GetWorldMgr().HandleMessage(conn, msgData)
 	}
 }

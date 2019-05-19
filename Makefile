@@ -19,3 +19,7 @@ test:
 run:
 	docker run -it -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate:$(v)
 
+.PHONY: docker_push
+docker_push:
+	docker tag ultimate hellodudu86/ultimate:$(v)
+	docker push hellodudu86/ultimate:$(v)

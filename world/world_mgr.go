@@ -1,4 +1,4 @@
-package ultimate
+package world
 
 import (
 	"bytes"
@@ -324,8 +324,8 @@ func (ws *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (*World, erro
 	return w, nil
 }
 
-func (ws *WorldMgr) AddWorldRef(id uint32, refID []uint32) {
-	for _, v := range refID {
+func (ws *WorldMgr) AddWorldRef(id uint32, ref []uint32) {
+	for _, v := range ref {
 		ws.mapRefWorldID.Store(v, id)
 	}
 }

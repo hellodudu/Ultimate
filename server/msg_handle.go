@@ -1,4 +1,4 @@
-package ultimate
+package server
 
 import (
 	"fmt"
@@ -36,7 +36,8 @@ func HandleWorldLogon(con net.Conn, ws *WorldMgr, p proto.Message) {
 	}
 
 	query := fmt.Sprintf("replace into world(%s, %s, last_connect_time) values(%d, \"%s\", %d)", fieldID.Tag.Get("sql"), fieldName.Tag.Get("sql"), world.Id, world.Name, int32(time.Now().Unix()))
-	world.QueryWrite(query)
+
+	Instance().dbMgr.Exec(query)
 }
 
 func HandleTestConnect(con net.Conn, ws *WorldMgr, p proto.Message) {
@@ -62,10 +63,25 @@ func HandleWorldConnected(con net.Conn, ws *WorldMgr, p proto.Message) {
 		arrWorldID := p.(*world_message.MWU_WorldConnected).WorldId
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
+		// add reference world id
 		ws.AddWorldRef(world.Id, arrWorldID)
 
-		world.RequestWorldInfo()
-		world.SyncArenaSeasonEndTime()
+		// request player info
+		msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 20}
+		world.SendProtoMessage(msgP)
+
+		// request guild info
+		msgG := &world_message.MUW_RequestGuildInfo{}
+		world.SendProtoMessage(msgG)
+
+		// sync arena data
+		endTime := Instance().GetGameMgr().GetArena().GetSeasonEndTime()
+		season := Instance().GetGameMgr().GetArena().GetSeason()
+		msgArena := &world_message.MUW_SyncArenaSeason{
+			Season:  int32(season),
+			EndTime: uint32(endTime),
+		}
+		world.SendProtoMessage(msgArena)
 
 		// 20s later sync arena champion
 		t := time.NewTimer(20 * time.Second)
@@ -77,7 +93,12 @@ func HandleWorldConnected(con net.Conn, ws *WorldMgr, p proto.Message) {
 				return
 			}
 
-			w.SyncArenaChampion()
+			msg := &world_message.MUW_ArenaChampion{
+				Data: Instance().GetGameMgr().GetArena().GetChampion(),
+			}
+
+			w.SendProtoMessage(msg)
+			logger.Info("sync arena champion to world<id:", w.Id, ", name:", w.Name, ">")
 		}(world.Id)
 	}
 }
@@ -119,7 +140,13 @@ func HandlePlayUltimateRecord(con net.Conn, ws *WorldMgr, p proto.Message) {
 			return
 		}
 
-		dstWorld.PlayUltimateRecord(msg.SrcPlayerId, msg.SrcServerId, msg.RecordId, msg.DstServerId)
+		msgSend := &world_message.MUW_PlayUltimateRecord{
+			SrcPlayerId: msg.SrcPlayerId,
+			SrcServerId: msg.SrcServerId,
+			RecordId:    msg.RecordId,
+			DstServerId: msg.DstServerId,
+		}
+		dstWorld.SendProtoMessage(msgSend)
 	}
 }
 
@@ -145,7 +172,13 @@ func HandleRequestUltimatePlayer(con net.Conn, ws *WorldMgr, p proto.Message) {
 			return
 		}
 
-		dstWorld.RequestUltimatePlayer(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, dstInfo.ServerId)
+		msgSend := &world_message.MUW_RequestUltimatePlayer{
+			SrcPlayerId: msg.SrcPlayerId,
+			SrcServerId: msg.SrcServerId,
+			DstPlayerId: msg.DstPlayerId,
+			DstServerId: dstInfo.ServerId,
+		}
+		dstWorld.SendProtoMessage(msgSend)
 	}
 }
 
@@ -171,7 +204,14 @@ func HandleViewFormation(con net.Conn, ws *WorldMgr, p proto.Message) {
 			return
 		}
 
-		dstWorld.ViewFormation(msg.SrcPlayerId, msg.SrcServerId, msg.DstPlayerId, dstInfo.ServerId)
+		msgSend := &world_message.MUW_ViewFormation{
+			SrcPlayerId: msg.SrcPlayerId,
+			SrcServerId: msg.SrcServerId,
+			DstPlayerId: msg.DstPlayerId,
+			DstServerId: dstInfo.ServerId,
+		}
+		dstWorld.SendProtoMessage(msgSend)
+
 	}
 }
 

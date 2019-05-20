@@ -1,4 +1,4 @@
-package ultimate
+package world
 
 import (
 	"context"
@@ -44,11 +44,11 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
-	w.LoadFromDB()
+	w.loadFromDB()
 	return w
 }
 
-func (w *World) LoadFromDB() {
+func (w *World) loadFromDB() {
 	query := fmt.Sprintf("select * from world where id = %d", w.Id)
 	rows, err := Instance().dbMgr.Query(query)
 	if err != nil {
@@ -134,68 +134,4 @@ func (w *World) SendTransferMessage(data []byte) {
 	if _, err := w.Con.Write(data); err != nil {
 		logger.Warning("transfer message error:", err)
 	}
-}
-
-func (w *World) RequestWorldInfo() {
-	// request player info
-	msgP := &world_message.MUW_RequestPlayerInfo{MinLevel: 20}
-	w.SendProtoMessage(msgP)
-
-	// request guild info
-	msgG := &world_message.MUW_RequestGuildInfo{}
-	w.SendProtoMessage(msgG)
-}
-
-func (w *World) SyncArenaSeasonEndTime() {
-	endTime := Instance().GetGameMgr().GetArena().GetSeasonEndTime()
-	season := Instance().GetGameMgr().GetArena().GetSeason()
-	msg := &world_message.MUW_SyncArenaSeason{
-		Season:  int32(season),
-		EndTime: uint32(endTime),
-	}
-
-	w.SendProtoMessage(msg)
-}
-
-func (w *World) SyncArenaChampion() {
-	msg := &world_message.MUW_ArenaChampion{
-		Data: Instance().GetGameMgr().GetArena().GetChampion(),
-	}
-
-	w.SendProtoMessage(msg)
-	logger.Info("sync arena champion to world<id:", w.Id, ", name:", w.Name, ">")
-}
-
-func (w *World) PlayUltimateRecord(src_player_id int64, src_server_id uint32, record_id int64, dst_server_id uint32) {
-	msg := &world_message.MUW_PlayUltimateRecord{
-		SrcPlayerId: src_player_id,
-		SrcServerId: src_server_id,
-		RecordId:    record_id,
-		DstServerId: dst_server_id,
-	}
-	w.SendProtoMessage(msg)
-}
-
-func (w *World) RequestUltimatePlayer(src_player_id int64, src_server_id uint32, dst_player_id int64, dst_server_id uint32) {
-	msg := &world_message.MUW_RequestUltimatePlayer{
-		SrcPlayerId: src_player_id,
-		SrcServerId: src_server_id,
-		DstPlayerId: dst_player_id,
-		DstServerId: dst_server_id,
-	}
-	w.SendProtoMessage(msg)
-}
-
-func (w *World) ViewFormation(src_player_id int64, src_server_id uint32, dst_player_id int64, dst_server_id uint32) {
-	msg := &world_message.MUW_ViewFormation{
-		SrcPlayerId: src_player_id,
-		SrcServerId: src_server_id,
-		DstPlayerId: dst_player_id,
-		DstServerId: dst_server_id,
-	}
-	w.SendProtoMessage(msg)
-}
-
-func (w *World) QueryWrite(query string) {
-	Instance().dbMgr.Exec(query)
 }

@@ -1,4 +1,4 @@
-package ultimate
+package game
 
 import (
 	"context"
@@ -9,16 +9,13 @@ import (
 )
 
 type Invite struct {
-	ctx      context.Context
-	cancel   context.CancelFunc
-	chDBInit chan struct{}
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // NewInvite create new Invite
 func NewInvite(ctx context.Context) (*Invite, error) {
-	invite := &Invite{
-		chDBInit: make(chan struct{}, 1),
-	}
+	invite := &Invite{}
 
 	invite.ctx, invite.cancel = context.WithCancel(ctx)
 
@@ -32,7 +29,6 @@ func (invite *Invite) Stop() {
 
 // Run run
 func (invite *Invite) Run() {
-	<-invite.chDBInit
 
 	for {
 		select {
@@ -48,13 +44,6 @@ func (invite *Invite) Run() {
 			time.Sleep(time.Millisecond - d)
 		}
 	}
-}
-
-// LoadFromDB load invite data from db
-func (invite *Invite) LoadFromDB() {
-
-	// all init ok
-	invite.chDBInit <- struct{}{}
 }
 
 func (invite *Invite) updateTime() {

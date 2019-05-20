@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 	"github.com/hellodudu/Ultimate/utils"
 )
 
-type World struct {
-	Id         uint32      `sql:"id"`   // world id
-	Name       string      `sql:"name"` // world name
-	Con        net.Conn    // connection
+type world struct {
+	id         uint32   `sql:"id"`   // world id
+	name       string   `sql:"name"` // world name
+	con        net.Conn // connection
+	datastore  iface.IDatastore
 	tHeartBeat *time.Timer // connection heart beat
 	tTimeOut   *time.Timer // connection time out
 	ctx        context.Context
@@ -30,13 +31,14 @@ type World struct {
 	chDBInit chan struct{}
 }
 
-func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
-	w := &World{
-		Id:         id,
-		Name:       name,
-		Con:        con,
-		tHeartBeat: time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
-		tTimeOut:   time.NewTimer(time.Duration(global.WorldConTimeOutSec) * time.Second),
+func NewWorld(id uint32, name string, con net.Conn, chw chan uint32, datastore iface.IDatastore) iface.IWorld {
+	w := &world{
+		id:         id,
+		name:       name,
+		con:        con,
+		datastore:  datastore,
+		tHeartBeat: time.NewTimer(time.Duration(global.worldHeartBeatSec) * time.Second),
+		tTimeOut:   time.NewTimer(time.Duration(global.worldConTimeOutSec) * time.Second),
 		chw:        chw,
 		mapPlayer:  make(map[int64]*world_message.CrossPlayerInfo),
 		mapGuild:   make(map[int64]*world_message.CrossGuildInfo),
@@ -48,9 +50,17 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32) *World {
 	return w
 }
 
-func (w *World) loadFromDB() {
-	query := fmt.Sprintf("select * from world where id = %d", w.Id)
-	rows, err := Instance().dbMgr.Query(query)
+func (w *world) ID() uint32 {
+	return w.id
+}
+
+func (w *world) Name() string {
+	return w.name
+}
+
+func (w *world) loadFromDB() {
+	query := fmt.Sprintf("select * from world where id = %d", w.id)
+	rows, err := w.datastore.Query(query)
 	if err != nil {
 		logger.Warning(fmt.Sprintf("world load rom db query<%s> failed:", query), err)
 		return
@@ -68,42 +78,42 @@ func (w *World) loadFromDB() {
 	w.chDBInit <- struct{}{}
 }
 
-func (w *World) Stop() {
+func (w *world) Stop() {
 	w.tHeartBeat.Stop()
 	w.tTimeOut.Stop()
 	w.cancel()
-	w.Con.Close()
+	w.con.Close()
 }
 
-func (w *World) Run() {
+func (w *world) Run() {
 	<-w.chDBInit
 
 	for {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			logger.Info(fmt.Sprintf("world<%d> context done!", w.Id))
+			logger.Info(fmt.Sprintf("world<%d> context done!", w.id))
 			return
 
 		// connecting timeout
 		case <-w.tTimeOut.C:
-			w.chw <- w.Id
+			w.chw <- w.id
 
 		// Heart Beat
 		case <-w.tHeartBeat.C:
 			msg := &world_message.MUW_TestConnect{}
 			w.SendProtoMessage(msg)
-			w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
+			w.tHeartBeat.Reset(time.Duration(global.worldHeartBeatSec) * time.Second)
 		}
 	}
 }
 
-func (w *World) ResetTestConnect() {
-	w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
-	w.tTimeOut.Reset(time.Duration(global.WorldConTimeOutSec) * time.Second)
+func (w *world) ResetTestConnect() {
+	w.tHeartBeat.Reset(time.Duration(global.worldHeartBeatSec) * time.Second)
+	w.tTimeOut.Reset(time.Duration(global.worldConTimeOutSec) * time.Second)
 }
 
-func (w *World) SendProtoMessage(p proto.Message) {
+func (w *world) SendProtoMessage(p proto.Message) {
 	// reply message length = 4bytes size + 8bytes size BaseNetMsg + 2bytes message_name size + message_name + proto_data
 	out, err := proto.Marshal(p)
 	if err != nil {
@@ -125,13 +135,13 @@ func (w *World) SendProtoMessage(p proto.Message) {
 	copy(resp[14:14+len(typeName)], []byte(typeName))
 	copy(resp[14+len(typeName):], out)
 
-	if _, err := w.Con.Write(resp); err != nil {
+	if _, err := w.con.Write(resp); err != nil {
 		logger.Warning("reply message error:", err)
 	}
 }
 
-func (w *World) SendTransferMessage(data []byte) {
-	if _, err := w.Con.Write(data); err != nil {
+func (w *world) SendTransferMessage(data []byte) {
+	if _, err := w.con.Write(data); err != nil {
 		logger.Warning("transfer message error:", err)
 	}
 }

@@ -1,4 +1,4 @@
-package ultimate
+package datastore
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 )
 
@@ -19,23 +20,23 @@ type Datastore struct {
 	chStop chan struct{}
 }
 
-func NewDatastore() (*Datastore, error) {
-	dbMgr := &Datastore{
+func NewDatastore() (iface.IDatastore, error) {
+	datastore := &Datastore{
 		chStop: make(chan struct{}, 1),
 	}
 
-	dbMgr.ctx, dbMgr.cancel = context.WithCancel(context.Background())
+	datastore.ctx, datastore.cancel = context.WithCancel(context.Background())
 
 	mysqlDSN := fmt.Sprintf("%s:%s@(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
 	var err error
-	dbMgr.db, err = sql.Open("mysql", mysqlDSN)
+	datastore.db, err = sql.Open("mysql", mysqlDSN)
 	if err != nil {
 		logger.Fatal(err)
 		return nil, err
 	}
 
-	dbMgr.initDatastore()
-	return dbMgr, nil
+	datastore.initDatastore()
+	return datastore, nil
 }
 
 func (m *Datastore) Run() {

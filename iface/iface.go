@@ -1,11 +1,26 @@
 package iface
 
 import (
+	"database/sql"
 	"net"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/Ultimate/iface"
 	pb "github.com/hellodudu/Ultimate/proto"
 )
+
+type IApi interface {
+	WorldMgr() iface.IWorldMgr
+	GameMgr() iface.IGameMgr
+	DataStore() iface.IDataStore
+}
+
+type IDatastore interface {
+	Exec(q string)
+	Query(q string) (*sql.Rows, error)
+	Run()
+	Stop() chan struct{}
+}
 
 type IWorldMgr interface {
 	AddWorld(id uint32, name string, con net.Conn) (IWorld, error)
@@ -20,6 +35,8 @@ type IWorldMgr interface {
 }
 
 type IWorld interface {
+	ID() uint32
+	Name() string
 	ResetTestConnect()
 	Run()
 	SendProtoMessage(p proto.Message)
@@ -27,7 +44,13 @@ type IWorld interface {
 	Stop()
 }
 
+type IMsgParser interface {
+	ParserMessage(con net.Conn, data []byte)
+}
+
 type IGameMgr interface {
+	Arena() IArena
+	Invite() IInvite
 	AddGuildInfo(i *pb.CrossGuildInfo)
 	AddGuildInfoList(s []*pb.CrossGuildInfo)
 	AddPlayerInfo(p *pb.CrossPlayerInfo)
@@ -41,6 +64,7 @@ type IArena interface {
 	AddRecord(rec *pb.ArenaRecord)
 	BattleResult(attack int64, target int64, win bool)
 	GetArenaDataNum() int
+	GetChampion() []*pb.ArenaChampion
 	GetDataByID(id int64) (*arenaData, error)
 	GetMatchingList() []int64
 	GetRankListByPage(page int) []*arenaData

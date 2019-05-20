@@ -4,13 +4,14 @@ import (
 	"context"
 	"sync"
 
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	world_message "github.com/hellodudu/Ultimate/proto"
+	pb "github.com/hellodudu/Ultimate/proto"
 )
 
 type GameMgr struct {
-	arena         *Arena // arena
-	invite        *Invite
+	arena         iface.IArena
+	invite        iface.IInvite
 	mapPlayerInfo sync.Map
 	mapGuildInfo  sync.Map
 	ctx           context.Context
@@ -35,6 +36,14 @@ func NewGameMgr() (*GameMgr, error) {
 	return game, err
 }
 
+func (g *GameMgr) Arena() iface.IArena {
+	return g.arena
+}
+
+func (g *GameMgr) Invite() iface.IInvite {
+	return g.invite
+}
+
 func (g *GameMgr) Run() {
 	go g.arena.Run()
 	go g.invite.Run()
@@ -56,7 +65,7 @@ func (g *GameMgr) GetInvite() *Invite {
 	return g.invite
 }
 
-func (g *GameMgr) AddPlayerInfoList(s []*world_message.CrossPlayerInfo) {
+func (g *GameMgr) AddPlayerInfoList(s []*pb.CrossPlayerInfo) {
 	if len(s) == 0 {
 		return
 	}
@@ -67,11 +76,11 @@ func (g *GameMgr) AddPlayerInfoList(s []*world_message.CrossPlayerInfo) {
 
 }
 
-func (g *GameMgr) AddPlayerInfo(p *world_message.CrossPlayerInfo) {
+func (g *GameMgr) AddPlayerInfo(p *pb.CrossPlayerInfo) {
 	g.mapPlayerInfo.Store(p.PlayerId, p)
 }
 
-func (g *GameMgr) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
+func (g *GameMgr) AddGuildInfoList(s []*pb.CrossGuildInfo) {
 	if len(s) == 0 {
 		return
 	}
@@ -82,17 +91,17 @@ func (g *GameMgr) AddGuildInfoList(s []*world_message.CrossGuildInfo) {
 
 }
 
-func (g *GameMgr) AddGuildInfo(i *world_message.CrossGuildInfo) {
+func (g *GameMgr) AddGuildInfo(i *pb.CrossGuildInfo) {
 	g.mapGuildInfo.Store(i.GuildId, i)
 }
 
-func (g *GameMgr) GetPlayerInfoByID(id int64) *world_message.CrossPlayerInfo {
+func (g *GameMgr) GetPlayerInfoByID(id int64) *pb.CrossPlayerInfo {
 	v, ok := g.mapPlayerInfo.Load(id)
 	if !ok {
 		return nil
 	}
 
-	value, ok := v.(*world_message.CrossPlayerInfo)
+	value, ok := v.(*pb.CrossPlayerInfo)
 	if !ok {
 		return nil
 	}
@@ -100,13 +109,13 @@ func (g *GameMgr) GetPlayerInfoByID(id int64) *world_message.CrossPlayerInfo {
 	return value
 }
 
-func (g *GameMgr) GetGuildInfoByID(id int64) *world_message.CrossGuildInfo {
+func (g *GameMgr) GetGuildInfoByID(id int64) *pb.CrossGuildInfo {
 	v, ok := g.mapGuildInfo.Load(id)
 	if !ok {
 		return nil
 	}
 
-	value, ok := v.(*world_message.CrossGuildInfo)
+	value, ok := v.(*pb.CrossGuildInfo)
 	if !ok {
 		return nil
 	}

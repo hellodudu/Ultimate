@@ -6,7 +6,9 @@ import (
 	"sync"
 
 	"github.com/go-redis/redis"
+	datastore "github.com/hellodudu/Ultimate/db"
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/task"
 )
@@ -16,20 +18,21 @@ var api *API
 
 // API define
 type API struct {
-	td        *task.Dispatcher // task dispatcher
-	dbMgr     *Datastore       // db manager
-	rds       *redis.Client    // redis
-	tcpServ   *TcpServer       // tcp server
-	rpcServ   *RpcServer       // rpc server
-	httpServ  *HttpServer      // http server
-	worldSesn *WorldMgr        // world session
-	gameMgr   *GameMgr
-	reqNum    int          // request number
-	appMap    map[int]*App // app map
-	wg        sync.WaitGroup
+	td *task.Dispatcher // task dispatcher
+	ds iface.IDatastore // datastore
+	wm iface.IWorldMgr  // world manager
+	gm iface.IGameMgr   // game manager
+
+	rds      *redis.Client // redis
+	tcpServ  *TcpServer    // tcp server
+	rpcServ  *RpcServer    // rpc server
+	httpServ *HttpServer   // http server
+	reqNum   int           // request number
+	appMap   map[int]*App  // app map
+	wg       sync.WaitGroup
 }
 
-func NewAPI() (*API, error) {
+func NewAPI() (iface.IApi, error) {
 	if api != nil {
 		return api, nil
 	}
@@ -66,16 +69,16 @@ func Instance() *API {
 	return api
 }
 
-func (api *API) GetWorldMgr() *WorldMgr {
-	return api.worldSesn
+func (api *API) WorldMgr() iface.IWorldMgr {
+	return api.wm
 }
 
-func (api *API) GetGameMgr() *GameMgr {
-	return api.gameMgr
+func (api *API) GameMgr() iface.IGameMgr {
+	return api.gm
 }
 
-func (api *API) GetDatastore() *Datastore {
-	return api.dbMgr
+func (api *API) Datastore() iface.IDatastore {
+	return api.ds
 }
 
 // init task and taskdispatcher
@@ -95,7 +98,7 @@ func (api *API) InitDatastore() {
 	defer api.wg.Done()
 	var err error
 
-	if api.dbMgr, err = NewDatastore(); err != nil {
+	if api.ds, err = datastore.NewDatastore(); err != nil {
 		logger.Fatal(err)
 		return
 	}
@@ -156,7 +159,7 @@ func (api *API) InitHttpServer() {
 func (api *API) InitWorldMgr() {
 	defer api.wg.Done()
 	var err error
-	if api.worldSesn, err = NewWorldMgr(); err != nil {
+	if api.wm, err = NewWorldMgr(); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -166,11 +169,11 @@ func (api *API) InitWorldMgr() {
 func (api *API) InitGame() {
 	defer api.wg.Done()
 	var err error
-	if api.gameMgr, err = NewGameMgr(); err != nil {
+	if api.gm, err = NewGameMgr(); err != nil {
 		logger.Fatal(err)
 	}
 
-	logger.Print("gameMgr init ok!")
+	logger.Print("gm init ok!")
 }
 
 // run
@@ -178,17 +181,17 @@ func (api *API) Run() {
 	go api.tcpServ.Run()
 	go api.rpcServ.Run()
 	go api.httpServ.Run()
-	go api.worldSesn.Run()
-	go api.gameMgr.Run()
-	go api.dbMgr.Run()
+	go api.wm.Run()
+	go api.gm.Run()
+	go api.ds.Run()
 
 }
 
 func (api *API) Stop() {
 	api.rpcServ.Stop()
 	api.tcpServ.Stop()
-	<-api.dbMgr.Stop()
-	<-api.worldSesn.Stop()
+	<-api.ds.Stop()
+	<-api.wm.Stop()
 }
 
 func (api *API) GenReqNum() int {

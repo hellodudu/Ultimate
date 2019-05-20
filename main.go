@@ -12,12 +12,12 @@ import (
 )
 
 func main() {
-	api, err := ultimate.NewAPI()
+	umt, err := ultimate.NewUltimate()
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	api.Run()
+	umt.Run()
 
 	// xmlloader
 	// res.NewXmlLoader()
@@ -31,7 +31,7 @@ func main() {
 
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
-			api.Stop()
+			umt.Stop()
 			logger.Print("server exit safely")
 			return
 		case syscall.SIGHUP:

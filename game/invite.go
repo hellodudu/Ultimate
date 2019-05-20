@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
@@ -14,7 +15,7 @@ type Invite struct {
 }
 
 // NewInvite create new Invite
-func NewInvite(ctx context.Context) (*Invite, error) {
+func NewInvite(ctx context.Context) (iface.IInvite, error) {
 	invite := &Invite{}
 
 	invite.ctx, invite.cancel = context.WithCancel(ctx)

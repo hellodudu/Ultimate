@@ -9,7 +9,9 @@ import (
 	pb "github.com/hellodudu/Ultimate/proto"
 )
 
-type IApi interface {
+type IUltimate interface {
+	Run()
+	Stop()
 	WorldMgr() iface.IWorldMgr
 	GameMgr() iface.IGameMgr
 	DataStore() iface.IDataStore

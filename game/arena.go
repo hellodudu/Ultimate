@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 )
@@ -212,7 +213,7 @@ type Arena struct {
 }
 
 // NewArena create new arena
-func NewArena(ctx context.Context) (*Arena, error) {
+func NewArena(ctx context.Context) (iface.IArena, error) {
 	arena := &Arena{
 		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
 		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
@@ -223,6 +224,7 @@ func NewArena(ctx context.Context) (*Arena, error) {
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
+	go arena.loadFromDB()
 
 	return arena, nil
 }
@@ -373,8 +375,8 @@ func (arena *Arena) Run() {
 	}
 }
 
-// LoadFromDB load arena data from db
-func (arena *Arena) LoadFromDB() {
+// loadFromDB load arena data from db
+func (arena *Arena) loadFromDB() {
 	// load from global
 	query := fmt.Sprintf("select arena_season, arena_week_end_time, arena_season_end_time from global where id = %d", global.UltimateID)
 

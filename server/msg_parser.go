@@ -18,15 +18,15 @@ import (
 
 // base net message type define
 type baseNetMsg struct {
-	Id   uint32 // message name crc32
-	Size uint32 // message size
+	id   uint32 // message name crc32
+	size uint32 // message size
 }
 
 // transfer message type
 type transferNetMsg struct {
 	baseNetMsg
-	WorldID  uint32 // world to recv message
-	PlayerID int64  // player to recv message
+	worldID  uint32 // world to recv message
+	playerID int64  // player to recv message
 }
 
 // ProtoHandler handle function
@@ -34,13 +34,15 @@ type ProtoHandler func(net.Conn, proto.Message)
 
 type MsgParser struct {
 	protoHandler map[uint32]ProtoHandler
-	api          iface.IApi
+	gm           iface.IGameMgr
+	wm           iface.IWorldMgr
 }
 
-func NewMsgParser(api iface.IApi) *MsgHandle {
+func NewMsgParser(gm iface.IGameMgr, wm iface.IWorldMgr) *MsgParser {
 	m := &MsgParser{
 		protoHandler: make(map[uint32]ProtoHandler),
-		api:          api,
+		gm:           gm,
+		wm:           wm,
 	}
 
 	m.registerAllMessage()
@@ -151,7 +153,7 @@ func (m *MsgParser) ParserMessage(con net.Conn, data []byte) {
 	}
 
 	// proto message
-	if baseMsg.Id == utils.Crc32(string("MWU_DirectProtoMsg")) {
+	if baseMsg.id == utils.Crc32(string("MWU_DirectProtoMsg")) {
 		newProto, err := m.decodeToProto(data)
 		if err != nil {
 			logger.Warning(err)
@@ -168,7 +170,7 @@ func (m *MsgParser) ParserMessage(con net.Conn, data []byte) {
 		fn(con, newProto)
 
 		// transfer message
-	} else if baseMsg.Id == utils.Crc32(string("MWU_TransferMsg")) {
+	} else if baseMsg.id == utils.Crc32(string("MWU_TransferMsg")) {
 		transferMsg := &transferNetMsg{}
 		byTransferMsg := make([]byte, binary.Size(transferMsg))
 
@@ -186,9 +188,9 @@ func (m *MsgParser) ParserMessage(con net.Conn, data []byte) {
 		}
 
 		// send message to world
-		sendWorld := m.worldMgr.GetWorldByID(transferMsg.WorldID)
+		sendWorld := m.worldMgr.GetWorldByID(transferMsg.worldID)
 		if sendWorld == nil {
-			logger.Warning(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.WorldID))
+			logger.Warning(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.worldID))
 			return
 		}
 
@@ -204,7 +206,7 @@ func (m *MsgParser) handleWorldLogon(con net.Conn, p proto.Message) {
 		return
 	}
 
-	world, err := m.api.WorldMgr().AddWorld(msg.WorldId, msg.WorldName, con)
+	world, err := m.wm.AddWorld(msg.WorldId, msg.WorldName, con)
 	if err != nil {
 		logger.Warning(err, fmt.Sprintf("<id:%d, name:%s, con:%v>", msg.WorldId, msg.WorldName, con))
 		return
@@ -216,13 +218,13 @@ func (m *MsgParser) handleWorldLogon(con net.Conn, p proto.Message) {
 }
 
 func (m *MsgParser) handleTestConnect(con net.Conn, p proto.Message) {
-	if world := m.api.WorldMgr().GetWorldByCon(con); world != nil {
+	if world := m.wm.GetWorldByCon(con); world != nil {
 		world.ResetTestConnect()
 	}
 }
 
 func (m *MsgParser) handleHeartBeat(con net.Conn, p proto.Message) {
-	if world := m.api.WorldMgr().GetWorldByCon(con); world != nil {
+	if world := m.wm.GetWorldByCon(con); world != nil {
 		if t := int32(time.Now().Unix()); t == -1 {
 			logger.Warning("Heart beat get time err")
 			return
@@ -234,12 +236,12 @@ func (m *MsgParser) handleHeartBeat(con net.Conn, p proto.Message) {
 }
 
 func (m *MsgParser) handleWorldConnected(con net.Conn, p proto.Message) {
-	if world := m.api.WorldMgr().GetWorldByCon(con); world != nil {
+	if world := m.wm.GetWorldByCon(con); world != nil {
 		arrWorldID := p.(*pb.MWU_WorldConnected).WorldId
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
 		// add reference world id
-		m.api.WorldMgr().AddWorldRef(world.Id, arrWorldID)
+		m.wm.AddWorldRef(world.Id, arrWorldID)
 
 		// request player info
 		msgP := &pb.MUW_RequestPlayerInfo{MinLevel: 20}
@@ -262,14 +264,14 @@ func (m *MsgParser) handleWorldConnected(con net.Conn, p proto.Message) {
 		t := time.NewTimer(20 * time.Second)
 		go func(id uint32) {
 			<-t.C
-			w := m.api.WorldMgr().GetWorldByID(id)
+			w := m.wm.GetWorldByID(id)
 			if w == nil {
 				logger.Warning("world<", id, "> disconnected, cannot sync arena champion")
 				return
 			}
 
 			msg := &pb.MUW_ArenaChampion{
-				Data: m.api.GameMgr().Arena().GetChampion(),
+				Data: m.gm.Arena().GetChampion(),
 			}
 
 			w.SendProtoMessage(msg)
@@ -279,38 +281,38 @@ func (m *MsgParser) handleWorldConnected(con net.Conn, p proto.Message) {
 }
 
 func (m *MsgParser) handleRequestPlayerInfo(con net.Conn, p proto.Message) {
-	if world := m.api.WorldMgr().GetWorldByCon(con); world != nil {
+	if world := m.wm.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*pb.MWU_RequestPlayerInfo)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_RequestPlayerInfo")
 			return
 		}
 
-		m.api.GameMgr().AddPlayerInfoList(msg.Info)
+		m.gm.AddPlayerInfoList(msg.Info)
 	}
 }
 
 func (m *MsgParser) handleRequestGuildInfo(con net.Conn, p proto.Message) {
-	if world := m.api.WorldMgr().GetWorldByCon(con); world != nil {
+	if world := m.wm.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*pb.MWU_RequestGuildInfo)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_RequestGuildInfo")
 			return
 		}
 
-		m.api.GameMgr().AddGuildInfoList(msg.Info)
+		m.gm.AddGuildInfoList(msg.Info)
 	}
 }
 
 func (m *MsgParser) handlePlayUltimateRecord(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_PlayUltimateRecord)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_PlayUltimateRecord")
 			return
 		}
 
-		dstWorld := m.api.WorldMgr().GetWorldByID(msg.DstServerId)
+		dstWorld := m.wm.GetWorldByID(msg.DstServerId)
 		if dstWorld == nil {
 			return
 		}
@@ -326,21 +328,21 @@ func (m *MsgParser) handlePlayUltimateRecord(con net.Conn, p proto.Message) {
 }
 
 func (m *MsgParser) handleRequestUltimatePlayer(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_RequestUltimatePlayer)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_RequestUltimatePlayer")
 			return
 		}
 
-		dstInfo := m.api.GameMgr().GetPlayerInfoByID(msg.DstPlayerId)
-		dstWorld := m.api.WorldMgr().GetWorldByID(msg.DstServerId)
+		dstInfo := m.gm.GetPlayerInfoByID(msg.DstPlayerId)
+		dstWorld := m.wm.GetWorldByID(msg.DstServerId)
 		if dstInfo == nil {
 			return
 		}
 
 		if int32(msg.DstServerId) == -1 {
-			dstWorld = m.api.WorldMgr().GetWorldByID(dstInfo.ServerId)
+			dstWorld = m.wm.GetWorldByID(dstInfo.ServerId)
 		}
 
 		if dstWorld == nil {
@@ -358,21 +360,21 @@ func (m *MsgParser) handleRequestUltimatePlayer(con net.Conn, p proto.Message) {
 }
 
 func (m *MsgParser) handleViewFormation(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ViewFormation)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_ViewFormation")
 			return
 		}
 
-		dstInfo := m.api.GameMgr().GetPlayerInfoByID(msg.DstPlayerId)
-		dstWorld := m.api.WorldMgr().GetWorldByID(msg.DstServerId)
+		dstInfo := m.gm.GetPlayerInfoByID(msg.DstPlayerId)
+		dstWorld := m.wm.GetWorldByID(msg.DstServerId)
 		if dstInfo == nil {
 			return
 		}
 
 		if int32(msg.DstServerId) == -1 {
-			dstWorld = m.api.WorldMgr().GetWorldByID(dstInfo.ServerId)
+			dstWorld = m.wm.GetWorldByID(dstInfo.ServerId)
 		}
 
 		if dstWorld == nil {
@@ -393,109 +395,109 @@ func (m *MsgParser) handleViewFormation(con net.Conn, p proto.Message) {
 // arena battle
 //////////////////////////////
 func (m *MsgParser) handleArenaMatching(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ArenaMatching)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_ArenaMatching")
 			return
 		}
 
-		api.GameMgr().Arena().Matching(msg.PlayerId)
+		gm.Arena().Matching(msg.PlayerId)
 	}
 }
 
 func (m *MsgParser) handleArenaAddRecord(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ArenaAddRecord)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_ArenaAddRecord")
 			return
 		}
 
-		api.GameMgr().Arena().AddRecord(msg.Record)
+		m.gm.Arena().AddRecord(msg.Record)
 	}
 }
 
 func (m *MsgParser) handleArenaBattleResult(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ArenaBattleResult)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_ArenaBattleResult")
 			return
 		}
 
-		m.api.GameMgr().Arena().BattleResult(msg.AttackId, msg.TargetId, msg.AttackWin)
+		m.gm.Arena().BattleResult(msg.AttackId, msg.TargetId, msg.AttackWin)
 	}
 }
 
 func (m *MsgParser) handleReplacePlayerInfo(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ReplacePlayerInfo)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_ReplacePlayerInfo")
 			return
 		}
 
-		m.api.GameMgr().AddPlayerInfo(msg.Info)
+		m.gm.AddPlayerInfo(msg.Info)
 	}
 }
 
 func (m *MsgParser) handleReplaceGuildInfo(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ReplaceGuildInfo)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_ReplaceGuildInfo")
 			return
 		}
 
-		m.api.GameMgr().AddGuildInfo(msg.Info)
+		m.gm.AddGuildInfo(msg.Info)
 	}
 }
 
 func (m *MsgParser) handleRequestArenaRank(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_RequestArenaRank)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_RequestArenaRank")
 			return
 		}
 
-		m.api.GameMgr().Arena().RequestRank(msg.PlayerId, msg.Page)
+		m.gm.Arena().RequestRank(msg.PlayerId, msg.Page)
 	}
 }
 
 func (m *MsgParser) handleAddInvite(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_AddInvite)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_AddInvite")
 			return
 		}
 
-		m.api.GameMgr().Invite().AddInvite(msg.NewbieId, msg.InviterId)
+		m.gm.Invite().AddInvite(msg.NewbieId, msg.InviterId)
 	}
 }
 
 func (m *MsgParser) handleCheckInviteResult(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_CheckInviteResult)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_CheckInviteResult")
 			return
 		}
 
-		m.api.GameMgr().Invite().CheckInviteResult(msg.NewbieId, msg.InviterId, msg.ErrorCode)
+		m.gm.Invite().CheckInviteResult(msg.NewbieId, msg.InviterId, msg.ErrorCode)
 	}
 }
 
 func (m *MsgParser) handleInviteRecharge(con net.Conn, p proto.Message) {
-	if srcWorld := m.api.WorldMgr().GetWorldByCon(con); srcWorld != nil {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_InviteRecharge)
 		if !ok {
 			logger.Warning("Cannot assert value to message pb.MWU_InviteRecharge")
 			return
 		}
 
-		m.api.GameMgr().Invite().InviteRecharge(msg.NewbieId, msg.NewbieName, msg.InviterId, msg.DiamondGift)
+		m.gm.Invite().InviteRecharge(msg.NewbieId, msg.NewbieName, msg.InviterId, msg.DiamondGift)
 	}
 }

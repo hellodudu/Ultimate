@@ -163,6 +163,11 @@ func (ws *WorldSession) registerAllMessage() {
 		lv: 1,
 		cb: HandleInviteRecharge,
 	})
+
+	ws.registerProto(utils.Crc32("world_message.MWU_ArenaChampionOnline"), &regInfo{
+		lv: 1,
+		cb: HandleArenaChampionOnline,
+	})
 }
 
 func (ws *WorldSession) getRegisterProto(msgID uint32) (*regInfo, error) {

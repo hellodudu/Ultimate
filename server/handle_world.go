@@ -285,3 +285,21 @@ func HandleInviteRecharge(con net.Conn, ws *WorldSession, p proto.Message) {
 		Instance().GetGameMgr().GetInvite().InviteRecharge(msg.NewbieId, msg.NewbieName, msg.InviterId, msg.DiamondGift)
 	}
 }
+
+func HandleArenaChampionOnline(con net.Conn, ws *WorldSession, p proto.Message) {
+	if srcWorld := ws.GetWorldByCon(con); srcWorld != nil {
+		msg, ok := p.(*world_message.MWU_ArenaChampionOnline)
+		if !ok {
+			logger.Warning("Cannot assert value to message world_message.MWU_ArenaChampionOnline")
+			return
+		}
+
+		msgSend := &world_message.MUW_ArenaChampionOnline{
+			PlayerId:   msg.PlayerId,
+			PlayerName: msg.PlayerName,
+			ServerName: msg.ServerName,
+		}
+
+		ws.BroadCast(msgSend)
+	}
+}

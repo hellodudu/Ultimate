@@ -278,6 +278,18 @@ message MUW_ArenaChampion {
     repeated ArenaChampion data = 1;
 }
 
+message MWU_ArenaChampionOnline {
+    int64 player_id = 1;
+    string player_name = 2;
+    string server_name = 3;
+}
+
+message MUW_ArenaChampionOnline {
+    int64 player_id = 1;
+    string player_name = 2;
+    string server_name = 3;
+}
+
 //////////////////////////////////////
 // invite
 message MUW_CheckInvite {

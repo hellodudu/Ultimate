@@ -1,4 +1,4 @@
-package ultimate
+package server
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 )
 
@@ -55,26 +56,24 @@ func getLastGCPauseTime() interface{} {
 	return gcPause
 }
 
-func getArenaPlayerDataNum() interface{} {
-	return Instance().GetGameMgr().GetArena().GetArenaDataNum()
+func (s *HttpServer) getArenaPlayerDataNum() interface{} {
+	return s.gm.Arena().GetArenaDataNum()
 }
 
-func getArenaRecordNum() interface{} {
-	return Instance().GetGameMgr().GetArena().GetRecordNum()
+func (s *HttpServer) getArenaRecordNum() interface{} {
+	return s.gm.Arena().GetRecordNum()
 }
 
 type HttpServer struct {
+	gm iface.IGameMgr
 }
 
-func NewHttpServer() (*HttpServer, error) {
-	return &HttpServer{}, nil
+func NewHttpServer(gm iface.IGameMgr) *HttpServer {
+	return &HttpServer{gm: gm}
 }
 
-func (server *HttpServer) Run() {
-	http.HandleFunc("/create_app", createAppHandler)
-	http.HandleFunc("/task", taskHandler)
+func (s *HttpServer) Run() {
 	http.HandleFunc("/ws", wsHandler)
-	http.HandleFunc("/bn", binaryHandler)
 
 	expvar.Publish("ticktime", expvar.Func(calculateUptime))
 	expvar.Publish("version", expvar.Func(currentGoVersion))
@@ -82,16 +81,16 @@ func (server *HttpServer) Run() {
 	expvar.Publish("os", expvar.Func(getGoOS))
 	expvar.Publish("goroutine", expvar.Func(getNumGoroutins))
 	expvar.Publish("gcpause", expvar.Func(getLastGCPauseTime))
-	expvar.Publish("arena_player_data_num", expvar.Func(getArenaPlayerDataNum))
-	expvar.Publish("arena_record_num", expvar.Func(getArenaRecordNum))
+	expvar.Publish("arena_player_data_num", expvar.Func(s.getArenaPlayerDataNum))
+	expvar.Publish("arena_record_num", expvar.Func(s.getArenaRecordNum))
 
-	http.HandleFunc("/arena_get_player_data", arenaGetPlayerDataHandler)
-	http.HandleFunc("/arena_matching_list", arenaMatchingListHandler)
-	http.HandleFunc("/arena_record_req_list", arenaRecordReqListHandler)
-	http.HandleFunc("/arena_get_record", arenaGetRecordHandler)
-	http.HandleFunc("/arena_rank_list", arenaGetRankListHandler)
-	http.HandleFunc("/player_info", getPlayerInfoHandler)
-	http.HandleFunc("/guild_info", getGuildInfoHandler)
+	http.HandleFunc("/arena_get_player_data", s.arenaGetPlayerDataHandler)
+	http.HandleFunc("/arena_matching_list", s.arenaMatchingListHandler)
+	http.HandleFunc("/arena_record_req_list", s.arenaRecordReqListHandler)
+	http.HandleFunc("/arena_get_record", s.arenaGetRecordHandler)
+	http.HandleFunc("/arena_rank_list", s.arenaGetRankListHandler)
+	http.HandleFunc("/player_info", s.getPlayerInfoHandler)
+	http.HandleFunc("/guild_info", s.getGuildInfoHandler)
 
 	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {
@@ -101,15 +100,6 @@ func (server *HttpServer) Run() {
 
 	logger.Error(http.ListenAndServe(addr, nil))
 
-}
-
-func taskHandler(w http.ResponseWriter, r *http.Request) {
-	c := make(chan struct{}, 1)
-	Instance().AddTask(func() {
-		w.Write([]byte("taskHandler Callback!"))
-		c <- struct{}{}
-	})
-	<-c
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -133,42 +123,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func createAppHandler(w http.ResponseWriter, r *http.Request) {
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		logger.Warning(err)
-	}
-
-	newApp := &App{}
-	if err := json.Unmarshal(body, newApp); err != nil {
-		logger.Warning(err)
-	}
-
-	// add app
-	if err := Instance().AddNewApp(newApp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	retBuf, retErr := json.Marshal(newApp)
-	if retErr != nil {
-		logger.Warning("create app response json marshal error!")
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(retBuf)
-}
-
-// for test
-func binaryHandler(w http.ResponseWriter, r *http.Request) {
-	data := []byte{58, 0, 0, 0, 94, 144, 225, 39, 10, 52, 10, 9, 104, 101, 108, 108, 111, 100, 117, 100, 117, 16, 161, 96, 26, 21, 104, 101, 108, 108, 111, 100, 117, 100, 117, 56, 54, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109, 34, 13, 10, 11, 49, 51, 52, 48, 49, 48, 51, 57, 50, 57, 55}
-
-	Instance().GetWorldSession().HandleMessage(nil, data)
-}
-
-func arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HttpServer) arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -184,7 +139,7 @@ func arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := Instance().GetGameMgr().GetArena().GetDataByID(req.ID)
+	d, err := s.gm.Arena().GetDataByID(req.ID)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
@@ -195,29 +150,29 @@ func arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(d)
 }
 
-func arenaMatchingListHandler(w http.ResponseWriter, r *http.Request) {
-	l := Instance().GetGameMgr().GetArena().GetMatchingList()
+func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Request) {
+	list := s.gm.Arena().GetMatchingList()
 
 	var resp struct {
 		ID []int64 `json:"id"`
 	}
 
-	resp.ID = l[:]
+	resp.ID = list[:]
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }
 
-func arenaRecordReqListHandler(w http.ResponseWriter, r *http.Request) {
-	m := Instance().GetGameMgr().GetArena().GetRecordReqList()
+func (s *HttpServer) arenaRecordReqListHandler(w http.ResponseWriter, r *http.Request) {
+	m := s.gm.Arena().GetRecordReqList()
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(m)
 }
 
-func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HttpServer) arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -233,7 +188,7 @@ func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := Instance().GetGameMgr().GetArena().GetRecordByID(req.ID)
+	d, err := s.gm.Arena().GetRecordByID(req.ID)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
@@ -242,7 +197,7 @@ func arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(d)
 }
 
-func arenaGetRankListHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -258,11 +213,11 @@ func arenaGetRankListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d := Instance().GetGameMgr().GetArena().GetRankListByPage(req.Page)
+	d := s.gm.Arena().GetRankListByPage(req.Page)
 	json.NewEncoder(w).Encode(d)
 }
 
-func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -278,7 +233,7 @@ func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d := Instance().GetGameMgr().GetPlayerInfoByID(req.ID)
+	d := s.gm.GetPlayerInfoByID(req.ID)
 	if d == nil {
 		w.Write([]byte(fmt.Sprintf("cannot find player info by id: %d", req.ID)))
 		return
@@ -287,7 +242,7 @@ func getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(d)
 }
 
-func getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -303,7 +258,7 @@ func getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d := Instance().GetGameMgr().GetGuildInfoByID(req.ID)
+	d := s.gm.GetGuildInfoByID(req.ID)
 	if d == nil {
 		w.Write([]byte(fmt.Sprintf("cannot find guild info by id: %d", req.ID)))
 		return

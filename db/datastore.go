@@ -1,4 +1,4 @@
-package ultimate
+package datastore
 
 import (
 	"context"
@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 )
 
-type DBMgr struct {
+type Datastore struct {
 	db     *sql.DB
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -19,26 +20,26 @@ type DBMgr struct {
 	chStop chan struct{}
 }
 
-func NewDBMgr() (*DBMgr, error) {
-	dbMgr := &DBMgr{
+func NewDatastore() (iface.IDatastore, error) {
+	datastore := &Datastore{
 		chStop: make(chan struct{}, 1),
 	}
 
-	dbMgr.ctx, dbMgr.cancel = context.WithCancel(context.Background())
+	datastore.ctx, datastore.cancel = context.WithCancel(context.Background())
 
 	mysqlDSN := fmt.Sprintf("%s:%s@(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
 	var err error
-	dbMgr.db, err = sql.Open("mysql", mysqlDSN)
+	datastore.db, err = sql.Open("mysql", mysqlDSN)
 	if err != nil {
 		logger.Fatal(err)
 		return nil, err
 	}
 
-	dbMgr.initDBMgr()
-	return dbMgr, nil
+	datastore.initDatastore()
+	return datastore, nil
 }
 
-func (m *DBMgr) Run() {
+func (m *Datastore) Run() {
 	for {
 		select {
 		case <-m.ctx.Done():
@@ -50,13 +51,13 @@ func (m *DBMgr) Run() {
 
 }
 
-func (m *DBMgr) Stop() chan struct{} {
+func (m *Datastore) Stop() chan struct{} {
 	m.db.Close()
 	m.cancel()
 	return m.chStop
 }
 
-func (m *DBMgr) initDBMgr() {
+func (m *Datastore) initDatastore() {
 
 	m.wg.Add(1)
 	go m.loadGlobal()
@@ -65,7 +66,7 @@ func (m *DBMgr) initDBMgr() {
 
 }
 
-func (m *DBMgr) loadGlobal() {
+func (m *Datastore) loadGlobal() {
 	defer m.wg.Done()
 
 	query := "select * from global"
@@ -91,7 +92,7 @@ func (m *DBMgr) loadGlobal() {
 	}
 }
 
-func (m *DBMgr) Exec(q string) {
+func (m *Datastore) Exec(q string) {
 	go func() {
 		if _, err := m.db.ExecContext(m.ctx, q); err != nil {
 			logger.Error(fmt.Sprintf("db exec<%s> failed:", q), err)
@@ -99,7 +100,7 @@ func (m *DBMgr) Exec(q string) {
 	}()
 }
 
-func (m *DBMgr) Query(q string) (*sql.Rows, error) {
+func (m *Datastore) Query(q string) (*sql.Rows, error) {
 	return func() (*sql.Rows, error) {
 		stmt, err := m.db.PrepareContext(m.ctx, q)
 		if err != nil {

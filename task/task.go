@@ -5,10 +5,10 @@ import "net"
 type TaskCallback func(net.Conn, []byte)
 
 type TaskReqInfo struct {
-	id   int
-	con  net.Conn
-	data []byte
-	cb   TaskCallback
+	ID   int
+	Con  net.Conn
+	Data []byte
+	CB   TaskCallback
 }
 
 type Tasker interface {
@@ -17,15 +17,15 @@ type Tasker interface {
 }
 
 type task struct {
-	req TaskReqInfo
+	req *TaskReqInfo
 }
 
 func (t *task) GetReq() int {
-	return t.req.id
+	return t.req.ID
 }
 
 func (t *task) Callback() {
-	t.req.cb(t.req.con, t.req.data)
+	t.req.CB(t.req.Con, t.req.Data)
 }
 
 func NewTask(req *TaskReqInfo) Tasker {

@@ -10,24 +10,12 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pb "github.com/hellodudu/Ultimate/proto"
 	"github.com/hellodudu/Ultimate/utils"
 )
-
-// base net message type define
-type baseNetMsg struct {
-	id   uint32 // message name crc32
-	size uint32 // message size
-}
-
-// transfer message type
-type transferNetMsg struct {
-	baseNetMsg
-	worldID  uint32 // world to recv message
-	playerID int64  // player to recv message
-}
 
 // ProtoHandler handle function
 type ProtoHandler func(net.Conn, proto.Message)
@@ -136,7 +124,7 @@ func (m *MsgParser) ParserMessage(con net.Conn, data []byte) {
 		return
 	}
 
-	baseMsg := &baseNetMsg{}
+	baseMsg := &global.BaseNetMsg{}
 	byBaseMsg := make([]byte, binary.Size(baseMsg))
 
 	copy(byBaseMsg, data[:binary.Size(baseMsg)])
@@ -153,7 +141,7 @@ func (m *MsgParser) ParserMessage(con net.Conn, data []byte) {
 	}
 
 	// proto message
-	if baseMsg.id == utils.Crc32(string("MWU_DirectProtoMsg")) {
+	if baseMsg.ID == utils.Crc32(string("MWU_DirectProtoMsg")) {
 		newProto, err := m.decodeToProto(data)
 		if err != nil {
 			logger.Warning(err)
@@ -170,8 +158,8 @@ func (m *MsgParser) ParserMessage(con net.Conn, data []byte) {
 		fn(con, newProto)
 
 		// transfer message
-	} else if baseMsg.id == utils.Crc32(string("MWU_TransferMsg")) {
-		transferMsg := &transferNetMsg{}
+	} else if baseMsg.ID == utils.Crc32(string("MWU_TransferMsg")) {
+		transferMsg := &global.TransferNetMsg{}
 		byTransferMsg := make([]byte, binary.Size(transferMsg))
 
 		copy(byTransferMsg, data[:binary.Size(transferMsg)])
@@ -188,9 +176,9 @@ func (m *MsgParser) ParserMessage(con net.Conn, data []byte) {
 		}
 
 		// send message to world
-		sendWorld := m.worldMgr.GetWorldByID(transferMsg.worldID)
+		sendWorld := m.wm.GetWorldByID(transferMsg.WorldID)
 		if sendWorld == nil {
-			logger.Warning(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.worldID))
+			logger.Warning(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.WorldID))
 			return
 		}
 
@@ -241,7 +229,7 @@ func (m *MsgParser) handleWorldConnected(con net.Conn, p proto.Message) {
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
 		// add reference world id
-		m.wm.AddWorldRef(world.Id, arrWorldID)
+		m.wm.AddWorldRef(world.ID(), arrWorldID)
 
 		// request player info
 		msgP := &pb.MUW_RequestPlayerInfo{MinLevel: 20}
@@ -402,7 +390,7 @@ func (m *MsgParser) handleArenaMatching(con net.Conn, p proto.Message) {
 			return
 		}
 
-		gm.Arena().Matching(msg.PlayerId)
+		m.gm.Arena().Matching(msg.PlayerId)
 	}
 }
 

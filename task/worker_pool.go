@@ -18,7 +18,7 @@ func NewWorkerPool(tc chan Tasker) (*workerPool, error) {
 
 	pool := &workerPool{
 		taskerChan: tc,
-		workerChan: make(chan *Worker),
+		workerChan: make(chan *Worker, maxWorker),
 		workerList: make([]Worker, maxWorker),
 	}
 

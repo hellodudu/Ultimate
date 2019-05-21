@@ -40,7 +40,7 @@ func NewWorldMgr(datastore iface.IDatastore) (*WorldMgr, error) {
 
 func (wm *WorldMgr) Stop() chan struct{} {
 	wm.mapWorld.Range(func(_, v interface{}) bool {
-		if world, ok := v.(*World); ok {
+		if world, ok := v.(iface.IWorld); ok {
 			world.Stop()
 		}
 		return true
@@ -50,7 +50,7 @@ func (wm *WorldMgr) Stop() chan struct{} {
 	return wm.chStop
 }
 
-func (wm *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (*World, error) {
+func (wm *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (iface.IWorld, error) {
 	var invalidID int32 = -1
 	if id == uint32(invalidID) {
 		return nil, errors.New("add world id invalid!")
@@ -76,15 +76,15 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (*World, erro
 
 	// new world
 	w := NewWorld(id, name, con, wm.chTimeOutW, wm.datastore)
-	wm.mapWorld.Store(w.Id, w)
-	wm.mapConn.Store(w.Con, w)
-	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.Id, w.Name, w.Con))
+	wm.mapWorld.Store(w.ID(), w)
+	wm.mapConn.Store(w.Con(), w)
+	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.ID(), w.Name(), w.Con()))
 
 	// world run
 	go w.Run()
 
 	// save to db
-	query := fmt.Sprintf("replace into world(id, name, last_connect_time) values(%d, \"%s\", %d)", world.ID(), world.Name(), int32(time.Now().Unix()))
+	query := fmt.Sprintf("replace into world(id, name, last_connect_time) values(%d, \"%s\", %d)", w.ID(), w.Name(), int32(time.Now().Unix()))
 	wm.datastore.Exec(query)
 
 	return w, nil
@@ -104,14 +104,14 @@ func (wm *WorldMgr) getWorldRefID(id uint32) uint32 {
 	return 0
 }
 
-func (wm *WorldMgr) GetWorldByID(id uint32) *World {
+func (wm *WorldMgr) GetWorldByID(id uint32) iface.IWorld {
 	worldID := wm.getWorldRefID(id)
 	v, ok := wm.mapWorld.Load(worldID)
 	if !ok {
 		return nil
 	}
 
-	world, ok := v.(*World)
+	world, ok := v.(iface.IWorld)
 	if !ok {
 		return nil
 	}
@@ -119,13 +119,13 @@ func (wm *WorldMgr) GetWorldByID(id uint32) *World {
 	return world
 }
 
-func (wm *WorldMgr) GetWorldByCon(con net.Conn) *World {
+func (wm *WorldMgr) GetWorldByCon(con net.Conn) iface.IWorld {
 	v, ok := wm.mapConn.Load(con)
 	if !ok {
 		return nil
 	}
 
-	world, ok := v.(*World)
+	world, ok := v.(iface.IWorld)
 	if !ok {
 		return nil
 	}
@@ -139,15 +139,15 @@ func (wm *WorldMgr) DisconnectWorld(con net.Conn) {
 		return
 	}
 
-	world, ok := v.(*World)
+	world, ok := v.(iface.IWorld)
 	if !ok {
 		return
 	}
 
-	logger.Warning(fmt.Sprintf("World<id:%d> disconnected!", world.Id))
+	logger.Warning(fmt.Sprintf("World<id:%d> disconnected!", world.ID()))
 	world.Stop()
 
-	wm.mapWorld.Delete(world.Id)
+	wm.mapWorld.Delete(world.ID())
 	wm.mapConn.Delete(con)
 }
 
@@ -157,25 +157,25 @@ func (wm *WorldMgr) KickWorld(id uint32) {
 		return
 	}
 
-	world, ok := v.(*World)
+	world, ok := v.(iface.IWorld)
 	if !ok {
 		return
 	}
 
-	if _, ok := wm.mapConn.Load(world.Con); !ok {
+	if _, ok := wm.mapConn.Load(world.Con()); !ok {
 		return
 	}
 
-	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.Id))
+	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.ID()))
 	world.Stop()
 
-	wm.mapConn.Delete(world.Con)
-	wm.mapWorld.Delete(world.Id)
+	wm.mapConn.Delete(world.Con())
+	wm.mapWorld.Delete(world.ID())
 }
 
 func (wm *WorldMgr) BroadCast(msg proto.Message) {
 	wm.mapWorld.Range(func(_, v interface{}) bool {
-		if world, ok := v.(*World); ok {
+		if world, ok := v.(iface.IWorld); ok {
 			world.SendProtoMessage(msg)
 		}
 		return true

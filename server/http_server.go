@@ -68,8 +68,8 @@ type HttpServer struct {
 	gm iface.IGameMgr
 }
 
-func NewHttpServer(gm iface.IGameMgr) (*HttpServer, error) {
-	return &HttpServer{gm: gm}, nil
+func NewHttpServer(gm iface.IGameMgr) *HttpServer {
+	return &HttpServer{gm: gm}
 }
 
 func (s *HttpServer) Run() {

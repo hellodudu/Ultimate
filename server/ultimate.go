@@ -2,7 +2,6 @@ package server
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/go-redis/redis"
@@ -14,9 +13,6 @@ import (
 	"github.com/hellodudu/Ultimate/task"
 	"github.com/hellodudu/Ultimate/world"
 )
-
-// global var
-var umt *ultimate
 
 // ultimate define
 type ultimate struct {
@@ -30,20 +26,11 @@ type ultimate struct {
 	tcpServ  *TcpServer    // tcp server
 	rpcServ  *RpcServer    // rpc server
 	httpServ *HttpServer   // http server
-	reqNum   int           // request number
-	appMap   map[int]*App  // app map
 	wg       sync.WaitGroup
 }
 
 func NewUltimate() (iface.IUltimate, error) {
-	if umt != nil {
-		return umt, nil
-	}
-
-	umt = &ultimate{
-		reqNum: 0,
-		appMap: make(map[int]*App),
-	}
+	umt := &ultimate{}
 
 	if ok := logger.Init(global.Debugging); !ok {
 		return nil, errors.New("init log file failed")
@@ -92,11 +79,10 @@ func (umt *ultimate) InitDatastore() {
 		logger.Fatal(err)
 		return
 	}
-	logger.Print("db_mgr init ok!")
+	logger.Print("datastore init ok!")
 }
 
 func (umt *ultimate) InitRedis() {
-	defer umt.wg.Done()
 	umt.rds = redis.NewClient(&redis.Options{
 		Addr:     global.RedisAddr,
 		Password: global.RedisPwd,
@@ -112,9 +98,8 @@ func (umt *ultimate) InitRedis() {
 }
 
 func (umt *ultimate) InitMsgParser() {
-	var err error
-	if umt.mp, err = NewMsgParser(umt.gm, umt.wm); err != nil {
-		logger.Fatal(err)
+	if umt.mp = NewMsgParser(umt.gm, umt.wm); umt.mp == nil {
+		logger.Fatal("cannot new msg_parser")
 	}
 
 	logger.Print("msg parser init ok!")
@@ -132,7 +117,6 @@ func (umt *ultimate) InitTCPServer() {
 
 // InitRPCServer init
 func (umt *ultimate) InitRPCServer() {
-	defer umt.wg.Done()
 	var err error
 	if umt.rpcServ, err = NewRpcServer(umt.gm); err != nil {
 		logger.Fatal(err)
@@ -143,10 +127,8 @@ func (umt *ultimate) InitRPCServer() {
 
 // init http server
 func (umt *ultimate) InitHttpServer() {
-	defer umt.wg.Done()
-	var err error
-	if umt.httpServ, err = NewHttpServer(); err != nil {
-		logger.Fatal(err)
+	if umt.httpServ = NewHttpServer(umt.gm); umt.httpServ == nil {
+		logger.Fatal("cannot new http_server")
 	}
 
 	logger.Print("http_server init ok!")
@@ -187,52 +169,4 @@ func (umt *ultimate) Stop() {
 	umt.tcpServ.Stop()
 	<-umt.ds.Stop()
 	<-umt.wm.Stop()
-}
-
-func (umt *ultimate) GenReqNum() int {
-	umt.wg.Add(1)
-	umt.reqNum = umt.reqNum + 1
-	umt.wg.Done()
-	return umt.reqNum
-}
-
-func (umt *ultimate) AddNewApp(app *App) error {
-	if _, ok := umt.appMap[app.AppID]; ok {
-		errStr := fmt.Sprintf("add exist app<%d>\n", app.AppID)
-		logger.Warning(errStr)
-		return errors.New(errStr)
-	}
-
-	// todo insert into db
-	// if umt.db == nil {
-	// 	errStr := "db didn't exist!"
-	// 	log.Println(errStr)
-	// 	return errors.New(errStr)
-	// }
-
-	// stmt, err := umt.db.Prepare("insert into app values(?, ?, ?, ?)")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// res, err := stmt.Exec(app.AppID, app.AppName, app.PubKey, app.PriKey)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// lastID, err := res.LastInsertId()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// rowAffect, err := res.RowsAffected()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// log.Printf("insert id = %d, affect rows = %d!\n", lastID, rowAffect)
-
-	umt.appMap[app.AppID] = app
-
-	return nil
 }

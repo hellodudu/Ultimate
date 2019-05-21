@@ -5,7 +5,6 @@ import (
 	"net"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/iface"
 	pb "github.com/hellodudu/Ultimate/proto"
 	"github.com/hellodudu/Ultimate/task"
 )
@@ -13,9 +12,9 @@ import (
 type IUltimate interface {
 	Run()
 	Stop()
-	WorldMgr() iface.IWorldMgr
-	GameMgr() iface.IGameMgr
-	DataStore() iface.IDataStore
+	WorldMgr() IWorldMgr
+	GameMgr() IGameMgr
+	Datastore() IDatastore
 }
 
 type IDispatcher interface {
@@ -44,6 +43,7 @@ type IWorldMgr interface {
 type IWorld interface {
 	ID() uint32
 	Name() string
+	Con() net.Conn
 	ResetTestConnect()
 	Run()
 	SendProtoMessage(p proto.Message)
@@ -72,15 +72,14 @@ type IArena interface {
 	BattleResult(attack int64, target int64, win bool)
 	GetArenaDataNum() int
 	GetChampion() []*pb.ArenaChampion
-	GetDataByID(id int64) (*arenaData, error)
+	GetDataByID(id int64) (interface{}, error) // ret: (*arenaData, error)
 	GetMatchingList() []int64
-	GetRankListByPage(page int) []*arenaData
+	GetRankListByPage(page int) interface{} //ret: []*arenaData
 	GetRecordByID(id int64) (*pb.ArenaRecord, error)
 	GetRecordNum() int
 	GetRecordReqList() map[int64]uint32
 	GetSeason() int
 	GetSeasonEndTime() uint32
-	LoadFromDB()
 	Matching(playerID int64)
 	RequestRank(id int64, page int32)
 	Run()

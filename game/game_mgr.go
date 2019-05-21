@@ -57,11 +57,11 @@ func (g *GameMgr) Run() {
 	}
 }
 
-func (g *GameMgr) GetArena() *Arena {
+func (g *GameMgr) GetArena() iface.IArena {
 	return g.arena
 }
 
-func (g *GameMgr) GetInvite() *Invite {
+func (g *GameMgr) GetInvite() iface.IInvite {
 	return g.invite
 }
 

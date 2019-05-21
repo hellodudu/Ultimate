@@ -37,6 +37,6 @@ func (td *Dispatcher) genReqID() int {
 
 // AddTask add new task to taskchan
 func (td *Dispatcher) AddTask(req *TaskReqInfo) {
-	req.id = td.genReq()
+	req.ID = td.genReqID()
 	td.taskerChan <- NewTask(req)
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
@@ -37,8 +38,8 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32, datastore i
 		name:       name,
 		con:        con,
 		datastore:  datastore,
-		tHeartBeat: time.NewTimer(time.Duration(global.worldHeartBeatSec) * time.Second),
-		tTimeOut:   time.NewTimer(time.Duration(global.worldConTimeOutSec) * time.Second),
+		tHeartBeat: time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
+		tTimeOut:   time.NewTimer(time.Duration(global.WorldConTimeOutSec) * time.Second),
 		chw:        chw,
 		mapPlayer:  make(map[int64]*world_message.CrossPlayerInfo),
 		mapGuild:   make(map[int64]*world_message.CrossGuildInfo),
@@ -56,6 +57,10 @@ func (w *world) ID() uint32 {
 
 func (w *world) Name() string {
 	return w.name
+}
+
+func (w *world) Con() net.Conn {
+	return w.con
 }
 
 func (w *world) loadFromDB() {
@@ -103,14 +108,14 @@ func (w *world) Run() {
 		case <-w.tHeartBeat.C:
 			msg := &world_message.MUW_TestConnect{}
 			w.SendProtoMessage(msg)
-			w.tHeartBeat.Reset(time.Duration(global.worldHeartBeatSec) * time.Second)
+			w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
 		}
 	}
 }
 
 func (w *world) ResetTestConnect() {
-	w.tHeartBeat.Reset(time.Duration(global.worldHeartBeatSec) * time.Second)
-	w.tTimeOut.Reset(time.Duration(global.worldConTimeOutSec) * time.Second)
+	w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
+	w.tTimeOut.Reset(time.Duration(global.WorldConTimeOutSec) * time.Second)
 }
 
 func (w *world) SendProtoMessage(p proto.Message) {
@@ -122,14 +127,14 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	}
 
 	typeName := proto.MessageName(p)
-	baseMsg := &BaseNetMsg{}
+	baseMsg := &global.BaseNetMsg{}
 	msgSize := binary.Size(baseMsg) + 2 + len(typeName) + len(out)
-	baseMsg.Id = utils.Crc32("MUW_DirectProtoMsg")
+	baseMsg.ID = utils.Crc32("MUW_DirectProtoMsg")
 	baseMsg.Size = uint32(msgSize)
 
 	var resp []byte = make([]byte, 4+msgSize)
 	binary.LittleEndian.PutUint32(resp[:4], uint32(msgSize))
-	binary.LittleEndian.PutUint32(resp[4:8], baseMsg.Id)
+	binary.LittleEndian.PutUint32(resp[4:8], baseMsg.ID)
 	binary.LittleEndian.PutUint32(resp[8:12], baseMsg.Size)
 	binary.LittleEndian.PutUint16(resp[12:12+2], uint16(len(typeName)))
 	copy(resp[14:14+len(typeName)], []byte(typeName))

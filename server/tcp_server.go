@@ -153,9 +153,9 @@ func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 		}
 
 		server.dispatcher.AddTask(&task.TaskReqInfo{
-			con:  conn,
-			data: msgData,
-			cb:   server.parser.ParserMessage,
+			Con:  conn,
+			Data: msgData,
+			CB:   server.parser.ParserMessage,
 		})
 	}
 }

@@ -244,7 +244,7 @@ func (arena *Arena) GetArenaDataNum() int {
 	return n
 }
 
-func (arena *Arena) GetDataByID(id int64) (*arenaData, error) {
+func (arena *Arena) GetDataByID(id int64) (interface{}, error) {
 	v, ok := arena.mapArenaData.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena data with id %d", id)
@@ -289,7 +289,7 @@ func (arena *Arena) GetRecordReqList() map[int64]uint32 {
 	return m
 }
 
-func (arena *Arena) GetRankListByPage(page int) []*arenaData {
+func (arena *Arena) GetRankListByPage(page int) interface{} {
 	return arena.arrRankArena.GetListByPage(page)
 }
 

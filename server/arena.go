@@ -508,7 +508,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	// find in below section
 	if dstRec == nil {
 		for n := secIdx - 1; n >= 0; n-- {
-			dstRec = f(secIdx)
+			dstRec = f(n)
 			if dstRec != nil {
 				break
 			}

@@ -1,59 +1,6 @@
 package iface
 
-import (
-	"database/sql"
-	"net"
-
-	"github.com/golang/protobuf/proto"
-	pb "github.com/hellodudu/Ultimate/proto"
-	"github.com/hellodudu/Ultimate/task"
-)
-
-type IUltimate interface {
-	Run()
-	Stop()
-	WorldMgr() IWorldMgr
-	GameMgr() IGameMgr
-	Datastore() IDatastore
-}
-
-type IDispatcher interface {
-	AddTask(*task.TaskReqInfo)
-}
-
-type IDatastore interface {
-	Exec(q string)
-	Query(q string) (*sql.Rows, error)
-	Run()
-	Stop() chan struct{}
-}
-
-type IWorldMgr interface {
-	AddWorld(id uint32, name string, con net.Conn) (IWorld, error)
-	AddWorldRef(id uint32, ref []uint32)
-	BroadCast(msg proto.Message)
-	DisconnectWorld(con net.Conn)
-	GetWorldByCon(con net.Conn) IWorld
-	GetWorldByID(id uint32) IWorld
-	KickWorld(id uint32)
-	Run()
-	Stop() chan struct{}
-}
-
-type IWorld interface {
-	ID() uint32
-	Name() string
-	Con() net.Conn
-	ResetTestConnect()
-	Run()
-	SendProtoMessage(p proto.Message)
-	SendTransferMessage(data []byte)
-	Stop()
-}
-
-type IMsgParser interface {
-	ParserMessage(con net.Conn, data []byte)
-}
+import pb "github.com/hellodudu/Ultimate/proto"
 
 type IGameMgr interface {
 	Arena() IArena

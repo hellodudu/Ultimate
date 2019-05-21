@@ -23,3 +23,8 @@ run:
 docker_push:
 	docker tag ultimate hellodudu86/ultimate:$(v)
 	docker push hellodudu86/ultimate:$(v)
+
+.PHONY: docker_rm
+docker_rm:
+	docker rmi hellodudu86/ultimate:$(v)
+	docker rmi ultimate:$(v)

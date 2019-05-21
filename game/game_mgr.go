@@ -18,22 +18,22 @@ type GameMgr struct {
 	cancel        context.CancelFunc
 }
 
-func NewGameMgr() (iface.IGameMgr, error) {
-	game := &GameMgr{}
+func NewGameMgr(wm iface.IWorldMgr, ds iface.IDatastore) (iface.IGameMgr, error) {
+	gm := &GameMgr{}
 
-	game.ctx, game.cancel = context.WithCancel(context.Background())
+	gm.ctx, gm.cancel = context.WithCancel(context.Background())
 	var err error
-	game.arena, err = NewArena(game.ctx)
+	gm.arena, err = NewArena(gm.ctx, gm, wm, ds)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	game.invite, err = NewInvite(game.ctx)
+	gm.invite, err = NewInvite(gm.ctx, gm, wm)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	return game, err
+	return gm, err
 }
 
 func (g *GameMgr) Arena() iface.IArena {

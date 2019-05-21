@@ -190,6 +190,9 @@ func getDefaultScoreBySection(secIdx int32) int32 {
 
 // Arena data
 type Arena struct {
+	gm           iface.IGameMgr
+	wm           iface.IWorldMgr
+	ds           iface.IDatastore
 	mapArenaData sync.Map      // all player's arena data
 	arrRankArena rankArenaData // slice of arena record sorted with ArenaScore
 
@@ -213,8 +216,11 @@ type Arena struct {
 }
 
 // NewArena create new arena
-func NewArena(ctx context.Context) (iface.IArena, error) {
+func NewArena(ctx context.Context, gm iface.IGameMgr, wm iface.IWorldMgr, ds iface.IDatastore) (iface.IArena, error) {
 	arena := &Arena{
+		gm:            gm,
+		wm:            wm,
+		ds:            ds,
 		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
 		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
 		chMatchWaitOK: make(chan int64, 1000),
@@ -380,7 +386,7 @@ func (arena *Arena) loadFromDB() {
 	// load from global
 	query := fmt.Sprintf("select arena_season, arena_week_end_time, arena_season_end_time from global where id = %d", global.UltimateID)
 
-	rows, err := Instance().GetDatastore().Query(query)
+	rows, err := arena.ds.Query(query)
 	if err != nil {
 		logger.Error("cannot load mysql table global!")
 		return
@@ -395,7 +401,7 @@ func (arena *Arena) loadFromDB() {
 
 	// load from arena_champion
 	query = fmt.Sprintf("select * from arena_champion")
-	rows, err = Instance().GetDatastore().Query(query)
+	rows, err = arena.ds.Query(query)
 	if err != nil {
 		logger.Error("cannot load mysql table arena_champion!")
 		return
@@ -414,7 +420,7 @@ func (arena *Arena) loadFromDB() {
 
 	// load from arena_player
 	query = fmt.Sprintf("select * from arena_player")
-	rows, err = Instance().GetDatastore().Query(query)
+	rows, err = arena.ds.Query(query)
 	if err != nil {
 		logger.Error("cannot load mysql table arena!", err)
 		return
@@ -517,13 +523,13 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 		}
 	}
 
-	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
+	info := arena.gm.GetPlayerInfoByID(id)
 	if info == nil {
 		logger.Warning("cannot find player ", id, " s info!")
 		return false, nil
 	}
 
-	if world := Instance().GetWorldMgr().GetWorldByID(info.ServerId); world != nil {
+	if world := arena.wm.GetWorldByID(info.ServerId); world != nil {
 		msg := &world_message.MUW_ArenaStartBattle{
 			AttackId: id,
 		}
@@ -552,12 +558,12 @@ func (arena *Arena) updateRequestRecord() {
 			return true
 		}
 
-		info := Instance().GetGameMgr().GetPlayerInfoByID(id)
+		info := arena.gm.GetPlayerInfoByID(id)
 		if info == nil {
 			return true
 		}
 
-		world := Instance().GetWorldMgr().GetWorldByID(info.ServerId)
+		world := arena.wm.GetWorldByID(info.ServerId)
 		if world == nil {
 			return true
 		}
@@ -624,7 +630,7 @@ func (arena *Arena) weekEnd() {
 
 	// save db
 	query := fmt.Sprintf("update global set arena_week_end_time = %d where id = %d", int32(arena.weekEndTime), global.UltimateID)
-	Instance().GetDatastore().Exec(query)
+	arena.ds.Exec(query)
 
 	// send request with time delay, 50 request per second
 	var arrReq []int64
@@ -635,12 +641,12 @@ func (arena *Arena) weekEnd() {
 	})
 
 	for k, v := range arrReq {
-		info := Instance().GetGameMgr().GetPlayerInfoByID(v)
+		info := arena.gm.GetPlayerInfoByID(v)
 		if info == nil {
 			continue
 		}
 
-		world := Instance().GetWorldMgr().GetWorldByID(info.ServerId)
+		world := arena.wm.GetWorldByID(info.ServerId)
 		if world == nil {
 			continue
 		}
@@ -678,13 +684,13 @@ func (arena *Arena) weekEnd() {
 
 			for k, v := range m {
 				if t.Unix() >= v.t.Unix() {
-					info := Instance().GetGameMgr().GetPlayerInfoByID(k)
+					info := arena.gm.GetPlayerInfoByID(k)
 					if info == nil {
 						delete(m, k)
 						continue
 					}
 
-					world := Instance().GetWorldMgr().GetWorldByID(info.ServerId)
+					world := arena.wm.GetWorldByID(info.ServerId)
 					if world == nil {
 						delete(m, k)
 						continue
@@ -728,14 +734,14 @@ func (arena *Arena) nextSeason() {
 
 	// save db
 	query := fmt.Sprintf("update global set arena_season_end_time = %d, arena_season = %d where id = %d", int32(arena.seasonEndTime), arena.season, global.UltimateID)
-	Instance().GetDatastore().Exec(query)
+	arena.ds.Exec(query)
 
 	// broadcast to all world
 	msg := &world_message.MUW_SyncArenaSeason{
 		Season:  int32(arena.season),
 		EndTime: uint32(arena.seasonEndTime),
 	}
-	Instance().GetWorldMgr().BroadCast(msg)
+	arena.wm.BroadCast(msg)
 }
 
 func (arena *Arena) newSeasonRank() {
@@ -789,11 +795,11 @@ func (arena *Arena) saveChampion() {
 
 	// save to db
 	query := "delete from arena_champion"
-	Instance().GetDatastore().Exec(query)
+	arena.ds.Exec(query)
 
 	for _, v := range arena.championList {
 		query = fmt.Sprintf("replace into arena_champion set champion_rank = %d, player_id = %d, score = %d, arena_season = %d", v.rank, v.playerID, v.score, arena.season)
-		Instance().GetDatastore().Exec(query)
+		arena.ds.Exec(query)
 	}
 
 	// broadcast to all world
@@ -801,7 +807,7 @@ func (arena *Arena) saveChampion() {
 		Data: arena.GetChampion(),
 	}
 
-	Instance().GetWorldMgr().BroadCast(msg)
+	arena.wm.BroadCast(msg)
 }
 
 // send top 100 reward mail
@@ -809,13 +815,13 @@ func (arena *Arena) seasonReward() {
 	list := arena.arrRankArena.GetTop(100)
 
 	for n, data := range list {
-		info := Instance().GetGameMgr().GetPlayerInfoByID(data.Playerid)
+		info := arena.gm.GetPlayerInfoByID(data.Playerid)
 		if info == nil {
 			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.Playerid)
 			continue
 		}
 
-		world := Instance().GetWorldMgr().GetWorldByID(info.ServerId)
+		world := arena.wm.GetWorldByID(info.ServerId)
 		if world == nil {
 			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.Playerid, " world ", info.ServerId)
 			continue
@@ -893,7 +899,7 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 
 		// save to db
 		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.Playerid, data.Score, data.ReachTime, data.LastTarget)
-		Instance().GetDatastore().Exec(query)
+		arena.ds.Exec(query)
 	}
 }
 
@@ -930,7 +936,7 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 
 		// save to db
 		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.Playerid, data.Score, data.ReachTime, data.LastTarget)
-		Instance().GetDatastore().Exec(query)
+		arena.ds.Exec(query)
 
 		// rank change
 		arena.arrRankArena.Sort()
@@ -944,13 +950,13 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		return
 	}
 
-	info := Instance().GetGameMgr().GetPlayerInfoByID(id)
+	info := arena.gm.GetPlayerInfoByID(id)
 	if info == nil {
 		logger.Warning("player ", id, " request rank error: cannot find player info")
 		return
 	}
 
-	world := Instance().GetWorldMgr().GetWorldByID(info.ServerId)
+	world := arena.wm.GetWorldByID(info.ServerId)
 	if world == nil {
 		logger.Warning("player ", id, " request rank error: cannot find world ", info.ServerId)
 		return

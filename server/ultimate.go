@@ -12,6 +12,7 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/task"
+	"github.com/hellodudu/Ultimate/world"
 )
 
 // global var
@@ -23,15 +24,15 @@ type ultimate struct {
 	ds iface.IDatastore // datastore
 	wm iface.IWorldMgr  // world manager
 	gm iface.IGameMgr   // game manager
+	mp iface.IMsgParser // msg parser
 
-	rds       *redis.Client // redis
-	tcpServ   *TcpServer    // tcp server
-	rpcServ   *RpcServer    // rpc server
-	httpServ  *HttpServer   // http server
-	msgParser *MsgParser    // msg parser
-	reqNum    int           // request number
-	appMap    map[int]*App  // app map
-	wg        sync.WaitGroup
+	rds      *redis.Client // redis
+	tcpServ  *TcpServer    // tcp server
+	rpcServ  *RpcServer    // rpc server
+	httpServ *HttpServer   // http server
+	reqNum   int           // request number
+	appMap   map[int]*App  // app map
+	wg       sync.WaitGroup
 }
 
 func NewUltimate() (iface.IUltimate, error) {
@@ -48,21 +49,14 @@ func NewUltimate() (iface.IUltimate, error) {
 		return nil, errors.New("init log file failed")
 	}
 
-	umt.wg.Add(6)
-	go umt.InitTask()
-	go umt.InitDatastore()
-	// go umt.InitRedis()
-	go umt.InitTCPServer()
-	go umt.InitRPCServer()
-	go umt.InitHttpServer()
-	go umt.InitWorldMgr()
-	umt.wg.Wait()
-
-	// game init after db init ok!
-	umt.wg.Add(1)
+	umt.InitDatastore()
+	umt.InitTask()
+	umt.InitWorldMgr()
 	umt.InitGame()
 	umt.InitMsgParser()
-	umt.wg.Wait()
+	umt.InitTCPServer()
+	umt.InitRPCServer()
+	umt.InitHttpServer()
 
 	logger.Print("all init ok!")
 	return umt, nil
@@ -82,7 +76,6 @@ func (umt *ultimate) Datastore() iface.IDatastore {
 
 // init task and taskdispatcher
 func (umt *ultimate) InitTask() {
-	defer umt.wg.Done()
 	var err error
 	if umt.td, err = task.NewDispatcher(); err != nil {
 		logger.Fatal(err)
@@ -94,14 +87,11 @@ func (umt *ultimate) InitTask() {
 
 // init db
 func (umt *ultimate) InitDatastore() {
-	defer umt.wg.Done()
 	var err error
-
 	if umt.ds, err = datastore.NewDatastore(); err != nil {
 		logger.Fatal(err)
 		return
 	}
-
 	logger.Print("db_mgr init ok!")
 }
 
@@ -122,9 +112,8 @@ func (umt *ultimate) InitRedis() {
 }
 
 func (umt *ultimate) InitMsgParser() {
-	defer umt.wg.Done()
 	var err error
-	if umt.msgParser, err = NewMsgParser(); err != nil {
+	if umt.mp, err = NewMsgParser(umt.gm, umt.wm); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -133,9 +122,8 @@ func (umt *ultimate) InitMsgParser() {
 
 // InitTCPServer init
 func (umt *ultimate) InitTCPServer() {
-	defer umt.wg.Done()
 	var err error
-	if umt.tcpServ, err = NewTcpServer(); err != nil {
+	if umt.tcpServ, err = NewTcpServer(umt.mp); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -166,9 +154,8 @@ func (umt *ultimate) InitHttpServer() {
 
 // init world session
 func (umt *ultimate) InitWorldMgr() {
-	defer umt.wg.Done()
 	var err error
-	if umt.wm, err = NewWorldMgr(); err != nil {
+	if umt.wm, err = world.NewWorldMgr(umt.ds); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -176,9 +163,8 @@ func (umt *ultimate) InitWorldMgr() {
 }
 
 func (umt *ultimate) InitGame() {
-	defer umt.wg.Done()
 	var err error
-	if umt.gm, err = game.NewGameMgr(); err != nil {
+	if umt.gm, err = game.NewGameMgr(umt.wm, umt.ds); err != nil {
 		logger.Fatal(err)
 	}
 

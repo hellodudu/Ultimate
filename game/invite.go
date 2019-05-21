@@ -10,13 +10,18 @@ import (
 )
 
 type Invite struct {
+	gm     iface.IGameMgr
+	wm     iface.IWorldMgr
 	ctx    context.Context
 	cancel context.CancelFunc
 }
 
 // NewInvite create new Invite
-func NewInvite(ctx context.Context) (iface.IInvite, error) {
-	invite := &Invite{}
+func NewInvite(ctx context.Context, gm iface.IGameMgr, wm iface.IWorldMgr) (iface.IInvite, error) {
+	invite := &Invite{
+		gm: gm,
+		wm: wm,
+	}
 
 	invite.ctx, invite.cancel = context.WithCancel(ctx)
 

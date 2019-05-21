@@ -20,11 +20,11 @@ var umt *ultimate
 
 // ultimate define
 type ultimate struct {
-	td *task.Dispatcher // task dispatcher
-	ds iface.IDatastore // datastore
-	wm iface.IWorldMgr  // world manager
-	gm iface.IGameMgr   // game manager
-	mp iface.IMsgParser // msg parser
+	td iface.IDispatcher // task dispatcher
+	ds iface.IDatastore  // datastore
+	wm iface.IWorldMgr   // world manager
+	gm iface.IGameMgr    // game manager
+	mp iface.IMsgParser  // msg parser
 
 	rds      *redis.Client // redis
 	tcpServ  *TcpServer    // tcp server
@@ -123,7 +123,7 @@ func (umt *ultimate) InitMsgParser() {
 // InitTCPServer init
 func (umt *ultimate) InitTCPServer() {
 	var err error
-	if umt.tcpServ, err = NewTcpServer(umt.mp); err != nil {
+	if umt.tcpServ, err = NewTcpServer(umt.mp, umt.td); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -134,7 +134,7 @@ func (umt *ultimate) InitTCPServer() {
 func (umt *ultimate) InitRPCServer() {
 	defer umt.wg.Done()
 	var err error
-	if umt.rpcServ, err = NewRpcServer(); err != nil {
+	if umt.rpcServ, err = NewRpcServer(umt.gm); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -194,15 +194,6 @@ func (umt *ultimate) GenReqNum() int {
 	umt.reqNum = umt.reqNum + 1
 	umt.wg.Done()
 	return umt.reqNum
-}
-
-func (umt *ultimate) AddTask(cb task.TaskCallback) {
-	newReqNum := umt.GenReqNum()
-	newTask, err := task.NewTask(newReqNum, cb)
-	if err != nil {
-		logger.Fatal("create new task error")
-	}
-	umt.td.AddTask(newTask)
 }
 
 func (umt *ultimate) AddNewApp(app *App) error {

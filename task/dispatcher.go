@@ -1,7 +1,13 @@
 package task
 
+import (
+	"sync"
+)
+
 // Dispatcher define
 type Dispatcher struct {
+	mu         sync.Mutex
+	reqID      int
 	taskerChan chan Tasker
 	workerPool *workerPool
 }
@@ -9,6 +15,7 @@ type Dispatcher struct {
 // NewDispatcher return new dispatcher
 func NewDispatcher() (*Dispatcher, error) {
 	td := &Dispatcher{
+		reqID:      0,
 		taskerChan: make(chan Tasker, 100),
 		workerPool: nil,
 	}
@@ -21,7 +28,15 @@ func NewDispatcher() (*Dispatcher, error) {
 	return td, nil
 }
 
+func (td *Dispatcher) genReqID() int {
+	defer td.mu.Unlock()
+	td.mu.Lock()
+	td.reqID++
+	return td.reqID
+}
+
 // AddTask add new task to taskchan
-func (td *Dispatcher) AddTask(tasker Tasker) {
-	td.taskerChan <- tasker
+func (td *Dispatcher) AddTask(req *TaskReqInfo) {
+	req.id = td.genReq()
+	td.taskerChan <- NewTask(req)
 }

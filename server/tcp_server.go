@@ -11,6 +11,7 @@ import (
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	"github.com/hellodudu/Ultimate/task"
 )
 
 var tcpReadBufMax = 1024 * 1024 * 2
@@ -19,16 +20,18 @@ type TcpServer struct {
 	conns      map[net.Conn]struct{}
 	ln         net.Listener
 	parser     iface.IMsgParser
+	dispatcher iface.IDispatcher
 	mutexConns sync.Mutex
 	wgConns    sync.WaitGroup
 	ctx        context.Context
 	cancel     context.CancelFunc
 }
 
-func NewTcpServer(parser iface.IMsgParser) (*TcpServer, error) {
+func NewTcpServer(parser iface.IMsgParser, dispatcher iface.IDispatcher) (*TcpServer, error) {
 	s := &TcpServer{
-		conns:  make(map[net.Conn]struct{}),
-		parser: parser,
+		conns:      make(map[net.Conn]struct{}),
+		parser:     parser,
+		dispatcher: dispatcher,
 	}
 
 	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "TcpListenAddr")
@@ -149,10 +152,10 @@ func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 			continue
 		}
 
-		// handle message
-		// Instance().AddTask(func() {
-		// 	Instance().GetWorldMgr().HandleMessage(conn, msgData)
-		// })
-		Instance().GetWorldMgr().ParserMessage(conn, msgData)
+		server.dispatcher.AddTask(&task.TaskReqInfo{
+			con:  conn,
+			data: msgData,
+			cb:   server.parser.ParserMessage,
+		})
 	}
 }

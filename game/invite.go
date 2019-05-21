@@ -65,13 +65,13 @@ func (invite *Invite) AddInvite(newbieId int64, inviterId int64) {
 		return
 	}
 
-	inviterInfo := Instance().GetGameMgr().GetPlayerInfoByID(inviterId)
+	inviterInfo := invite.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
 		logger.Warning("AddInvite cannot find inviter info:", inviterId)
 		return
 	}
 
-	if world := Instance().GetWorldMgr().GetWorldByID(inviterInfo.ServerId); world != nil {
+	if world := invite.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
 		msg := &world_message.MUW_CheckInvite{
 			NewbieId:  newbieId,
 			InviterId: inviterId,
@@ -86,13 +86,13 @@ func (invite *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCo
 		return
 	}
 
-	newbieInfo := Instance().GetGameMgr().GetPlayerInfoByID(newbieId)
+	newbieInfo := invite.gm.GetPlayerInfoByID(newbieId)
 	if newbieInfo == nil {
 		logger.Warning("CheckInviteResult cannot find newbie info:", newbieId)
 		return
 	}
 
-	if world := Instance().GetWorldMgr().GetWorldByID(newbieInfo.ServerId); world != nil {
+	if world := invite.wm.GetWorldByID(newbieInfo.ServerId); world != nil {
 		msg := &world_message.MUW_AddInviteResult{
 			NewbieId:  newbieId,
 			InviterId: inviterId,
@@ -116,13 +116,13 @@ func (invite *Invite) InviteRecharge(newbieId int64, newbieName string, inviterI
 		return
 	}
 
-	inviterInfo := Instance().GetGameMgr().GetPlayerInfoByID(inviterId)
+	inviterInfo := invite.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
 		logger.Warning("InviteRecharge cannot find inviter info:", inviterId)
 		return
 	}
 
-	if world := Instance().GetWorldMgr().GetWorldByID(inviterInfo.ServerId); world != nil {
+	if world := invite.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
 		msg := &world_message.MUW_InviteRecharge{
 			NewbieId:    newbieId,
 			NewbieName:  newbieName,

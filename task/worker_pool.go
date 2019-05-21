@@ -26,12 +26,8 @@ func NewWorkerPool(tc chan Tasker) (*workerPool, error) {
 
 	for n := 1; n <= maxWorker; n++ {
 		worker := &Worker{}
-		worker.Init(n)
 		pool.workerList = append(pool.workerList, *worker)
-
-		go func(p *workerPool, w *Worker) {
-			p.workerChan <- w
-		}(pool, worker)
+		pool.workerChan <- worker
 	}
 
 	go pool.Run()

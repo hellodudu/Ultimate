@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/hellodudu/Ultimate/global"
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
 	"google.golang.org/grpc"
@@ -13,16 +14,19 @@ import (
 
 type RpcServer struct {
 	s  map[*grpc.Server]struct{}
+	gm iface.IGameMgr
 	ln net.Listener
 	mu sync.Mutex
 }
 
 type rpcResponser struct {
+	gm iface.IGameMgr
 }
 
-func NewRpcServer() (*RpcServer, error) {
+func NewRpcServer(gm iface.IGameMgr) (*RpcServer, error) {
 	s := &RpcServer{
-		s: make(map[*grpc.Server]struct{}),
+		s:  make(map[*grpc.Server]struct{}),
+		gm: gm,
 	}
 
 	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "RpcListenAddr")
@@ -51,8 +55,7 @@ func (s *rpcResponser) SayHello(ctx context.Context, in *world_message.HelloRequ
 
 func (s *rpcResponser) GetScore(ctx context.Context, in *world_message.GetScoreRequest) (*world_message.GetScoreReply, error) {
 	logger.Info("Received: ", in.Id)
-	arena := Instance().GetGameMgr().GetArena()
-	data, err := arena.GetDataByID(in.Id)
+	data, err := s.gm.Arena().GetDataByID(in.Id)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil, err
@@ -68,8 +71,8 @@ func (server *RpcServer) Run() {
 	server.s[s] = struct{}{}
 	server.mu.Unlock()
 
-	world_message.RegisterGreeterServer(s, &rpcResponser{})
-	world_message.RegisterInviterServer(s, &rpcResponser{})
+	world_message.RegisterGreeterServer(s, &rpcResponser{gm: server.gm})
+	world_message.RegisterInviterServer(s, &rpcResponser{gm: server.gm})
 	if err := s.Serve(server.ln); err != nil {
 		logger.Error("failed to service rpc Greeter: ", err)
 		return

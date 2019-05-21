@@ -1,25 +1,33 @@
 package task
 
-type TaskCallback func()
+import "net"
+
+type TaskCallback func(net.Conn, []byte)
+
+type TaskReqInfo struct {
+	id   int
+	con  net.Conn
+	data []byte
+	cb   TaskCallback
+}
 
 type Tasker interface {
 	Callback()
 	GetReq() int
 }
 
-type Task struct {
-	req int // request number
-	cb  TaskCallback
+type task struct {
+	req TaskReqInfo
 }
 
-func (task *Task) GetReq() int {
-	return task.req
+func (t *task) GetReq() int {
+	return t.req.id
 }
 
-func (task *Task) Callback() {
-	task.cb()
+func (t *task) Callback() {
+	t.req.cb(t.req.con, t.req.data)
 }
 
-func NewTask(req int, cb TaskCallback) (*Task, error) {
-	return &Task{req: req, cb: cb}, nil
+func NewTask(req *TaskReqInfo) Tasker {
+	return &task{req: req}
 }

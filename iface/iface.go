@@ -7,6 +7,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
 	pb "github.com/hellodudu/Ultimate/proto"
+	"github.com/hellodudu/Ultimate/task"
 )
 
 type IUltimate interface {
@@ -15,6 +16,10 @@ type IUltimate interface {
 	WorldMgr() iface.IWorldMgr
 	GameMgr() iface.IGameMgr
 	DataStore() iface.IDataStore
+}
+
+type IDispatcher interface {
+	AddTask(*task.TaskReqInfo)
 }
 
 type IDatastore interface {

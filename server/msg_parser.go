@@ -464,7 +464,16 @@ func (m *MsgParser) handleAddInvite(con net.Conn, p proto.Message) {
 			return
 		}
 
-		m.gm.Invite().AddInvite(msg.NewbieId, msg.InviterId)
+		ret := m.gm.Invite().AddInvite(msg.NewbieId, msg.InviterId)
+		if ret != 0 {
+			msgRet := &pb.MUW_AddInviteResult{
+				NewbieId:  msg.NewbieId,
+				InviterId: msg.InviterId,
+				ErrorCode: ret,
+			}
+
+			srcWorld.SendProtoMessage(msgRet)
+		}
 	}
 }
 

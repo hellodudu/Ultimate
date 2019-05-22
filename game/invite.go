@@ -56,19 +56,19 @@ func (invite *Invite) updateTime() {
 
 }
 
-func (invite *Invite) AddInvite(newbieId int64, inviterId int64) {
+func (invite *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 	if newbieId == -1 {
-		return
+		return 3
 	}
 
 	if inviterId == -1 {
-		return
+		return 3
 	}
 
 	inviterInfo := invite.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
 		logger.Warning("AddInvite cannot find inviter info:", inviterId)
-		return
+		return 3
 	}
 
 	if world := invite.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
@@ -78,7 +78,10 @@ func (invite *Invite) AddInvite(newbieId int64, inviterId int64) {
 		}
 
 		world.SendProtoMessage(msg)
+		return 0
 	}
+
+	return 3
 }
 
 func (invite *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode int32) {

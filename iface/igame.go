@@ -34,7 +34,7 @@ type IArena interface {
 }
 
 type IInvite interface {
-	AddInvite(newbieId int64, inviterId int64)
+	AddInvite(newbieId int64, inviterId int64) int32
 	CheckInviteResult(newbieId int64, inviterId int64, errorCode int32)
 	InviteRecharge(newbieId int64, newbieName string, inviterId int64, diamondGift int32)
 	Run()

@@ -272,6 +272,7 @@ message ArenaChampion {
     string player_name = 4;
     string server_name = 5;
     uint32 master_id = 6;
+    int32 fashion_id = 7;
 }
 
 message MUW_ArenaChampion {

@@ -326,6 +326,7 @@ func (arena *Arena) GetChampion() []*world_message.ArenaChampion {
 		for _, val := range rec.FirstGroup.HeroRecord {
 			if val.EntityId > 0 && val.EntityId < 1000 {
 				champion.MasterId = val.EntityId
+				champion.FashionId = val.FashionId
 				break
 			}
 		}

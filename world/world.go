@@ -146,6 +146,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 }
 
 func (w *world) SendTransferMessage(data []byte) {
+	logger.Trace("send transfer msg: ", data, ", remote addr:", w.con.RemoteAddr().String())
 	if _, err := w.con.Write(data); err != nil {
 		logger.Warning("transfer message error:", err)
 	}

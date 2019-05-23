@@ -98,9 +98,9 @@ func (server *TcpServer) Run() {
 }
 
 func (server *TcpServer) Stop() {
+	server.ln.Close()
 	server.cancel()
 	server.wgConns.Wait()
-	server.ln.Close()
 
 	server.mutexConns.Lock()
 	for conn := range server.conns {
@@ -113,7 +113,7 @@ func (server *TcpServer) Stop() {
 func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 	defer conn.Close()
 
-	logger.Info("a new tcp connection!")
+	logger.Info("a new tcp connection with remote addr:", conn.RemoteAddr().String())
 	conn.(*net.TCPConn).SetKeepAlive(true)
 	conn.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
 
@@ -146,7 +146,6 @@ func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 
 		// data
 		msgData := make([]byte, msgLen)
-		copy(msgData, b[:])
 		if _, err := io.ReadFull(conn, msgData); err != nil {
 			logger.Warning("tcp recv error:", err)
 			continue

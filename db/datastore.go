@@ -18,11 +18,13 @@ type Datastore struct {
 	cancel context.CancelFunc
 	wg     sync.WaitGroup
 	chStop chan struct{}
+	chExec chan string
 }
 
 func NewDatastore() (iface.IDatastore, error) {
 	datastore := &Datastore{
 		chStop: make(chan struct{}, 1),
+		chExec: make(chan string, 1000),
 	}
 
 	datastore.ctx, datastore.cancel = context.WithCancel(context.Background())
@@ -46,6 +48,10 @@ func (m *Datastore) Run() {
 			logger.Print("db mgr context done!")
 			m.chStop <- struct{}{}
 			return
+		case query := <-m.chExec:
+			if _, err := m.db.ExecContext(m.ctx, query); err != nil {
+				logger.Error(fmt.Sprintf("db exec<%s> failed:", query), err)
+			}
 		}
 	}
 
@@ -93,11 +99,7 @@ func (m *Datastore) loadGlobal() {
 }
 
 func (m *Datastore) Exec(q string) {
-	go func() {
-		if _, err := m.db.ExecContext(m.ctx, q); err != nil {
-			logger.Error(fmt.Sprintf("db exec<%s> failed:", q), err)
-		}
-	}()
+	m.chExec <- q
 }
 
 func (m *Datastore) Query(q string) (*sql.Rows, error) {

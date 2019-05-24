@@ -1,5 +1,5 @@
 
-GOPATH:=$(shell go env GOPATH)
+# GOPATH:=$(shell go env GOPATH)
 v ?= latest
 
 .PHONY: build
@@ -17,7 +17,7 @@ test:
 
 .PHONY: run
 run:
-	docker run -it -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate:$(v)
+	docker run -itd -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate:$(v)
 
 .PHONY: docker_push
 docker_push:
@@ -28,3 +28,7 @@ docker_push:
 docker_rm:
 	docker rmi hellodudu86/ultimate:$(v)
 	docker rmi ultimate:$(v)
+
+.PHONY: stop
+stop:
+	docker stop $(shell docker ps -q  --filter ancestor=ultimate)

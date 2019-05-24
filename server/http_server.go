@@ -89,6 +89,7 @@ func (s *HttpServer) Run() {
 	http.HandleFunc("/arena_record_req_list", s.arenaRecordReqListHandler)
 	http.HandleFunc("/arena_get_record", s.arenaGetRecordHandler)
 	http.HandleFunc("/arena_rank_list", s.arenaGetRankListHandler)
+	http.HandleFunc("/arena_save_champion", s.arenaSaveChampion)
 	http.HandleFunc("/player_info", s.getPlayerInfoHandler)
 	http.HandleFunc("/guild_info", s.getGuildInfoHandler)
 
@@ -215,6 +216,10 @@ func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Requ
 
 	d := s.gm.Arena().GetRankListByPage(req.Page)
 	json.NewEncoder(w).Encode(d)
+}
+
+func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {
+	s.gm.Arena().SaveChampion()
 }
 
 func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {

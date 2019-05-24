@@ -778,7 +778,7 @@ func (arena *Arena) newSeasonRank() {
 }
 
 // save top 3 champion id
-func (arena *Arena) saveChampion() {
+func (arena *Arena) SaveChampion() {
 	list := arena.arrRankArena.GetTop(3)
 
 	arena.cpLock.Lock()
@@ -801,6 +801,7 @@ func (arena *Arena) saveChampion() {
 	for _, v := range arena.championList {
 		query = fmt.Sprintf("replace into arena_champion set champion_rank = %d, player_id = %d, score = %d, arena_season = %d", v.rank, v.playerID, v.score, arena.season)
 		arena.ds.Exec(query)
+		logger.Trace("datastore exec:", query)
 	}
 
 	// broadcast to all world
@@ -838,7 +839,7 @@ func (arena *Arena) seasonReward() {
 }
 
 func (arena *Arena) seasonEnd() {
-	arena.saveChampion()
+	arena.SaveChampion()
 	arena.seasonReward()
 	arena.nextSeason()
 	arena.newSeasonRank()

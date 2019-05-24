@@ -31,6 +31,7 @@ type IArena interface {
 	RequestRank(id int64, page int32)
 	Run()
 	Stop()
+	SaveChampion()
 }
 
 type IInvite interface {

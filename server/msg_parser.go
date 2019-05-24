@@ -343,7 +343,7 @@ func (m *MsgParser) handleRequestUltimatePlayer(con net.Conn, p proto.Message) {
 			SrcPlayerId: msg.SrcPlayerId,
 			SrcServerId: msg.SrcServerId,
 			DstPlayerId: msg.DstPlayerId,
-			DstServerId: dstInfo.ServerId,
+			DstServerId: dstWorld.ID(),
 		}
 		dstWorld.SendProtoMessage(msgSend)
 	}

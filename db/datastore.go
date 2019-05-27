@@ -4,19 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	"github.com/jinzhu/gorm"
 )
 
 type Datastore struct {
-	db     *sql.DB
+	db     *gorm.DB
 	ctx    context.Context
 	cancel context.CancelFunc
-	wg     sync.WaitGroup
 	chStop chan struct{}
 	chExec chan string
 }
@@ -31,7 +30,7 @@ func NewDatastore() (iface.IDatastore, error) {
 
 	mysqlDSN := fmt.Sprintf("%s:%s@(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
 	var err error
-	datastore.db, err = sql.Open("mysql", mysqlDSN)
+	datastore.db, err = gorm.Open("mysql", mysqlSDN)
 	if err != nil {
 		logger.Fatal(err)
 		return nil, err
@@ -64,17 +63,10 @@ func (m *Datastore) Stop() chan struct{} {
 }
 
 func (m *Datastore) initDatastore() {
-
-	m.wg.Add(1)
-	go m.loadGlobal()
-
-	m.wg.Wait()
-
+	m.loadGlobal()
 }
 
 func (m *Datastore) loadGlobal() {
-	defer m.wg.Done()
-
 	query := "select * from global"
 	stmt, err := m.db.PrepareContext(m.ctx, query)
 	if err != nil {

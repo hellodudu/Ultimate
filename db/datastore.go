@@ -12,12 +12,25 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Global mysql table global
+type Global struct {
+	gorm.Model
+	Id                 int `gorm:"type:int(10);primary_key;column:id"`
+	TimeStamp          int `gorm:"type:int(10);column:time_stamp"`
+	ArenaSeason        int `gorm:"type:int(10);column:arena_season"`
+	ArenaWeekEndTime   int `gorm:"type:int(10);column:arena_week_end_time"`
+	ArenaSeasonEndTime int `gorm:"type:int(10);column:arena_season_end_time"`
+}
+
 type Datastore struct {
 	db     *gorm.DB
 	ctx    context.Context
 	cancel context.CancelFunc
 	chStop chan struct{}
 	chExec chan string
+
+	// table
+	global *Global
 }
 
 func NewDatastore() (iface.IDatastore, error) {
@@ -67,6 +80,9 @@ func (m *Datastore) initDatastore() {
 }
 
 func (m *Datastore) loadGlobal() {
+
+	m.db.AutoMigrate(&m.global)
+
 	query := "select * from global"
 	stmt, err := m.db.PrepareContext(m.ctx, query)
 	if err != nil {

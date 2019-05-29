@@ -14,12 +14,16 @@ import (
 
 // Global mysql table global
 type Global struct {
-	gorm.Model
-	Id                 int `gorm:"type:int(10);primary_key;column:id"`
-	TimeStamp          int `gorm:"type:int(10);column:time_stamp"`
-	ArenaSeason        int `gorm:"type:int(10);column:arena_season"`
-	ArenaWeekEndTime   int `gorm:"type:int(10);column:arena_week_end_time"`
-	ArenaSeasonEndTime int `gorm:"type:int(10);column:arena_season_end_time"`
+	Id                 int `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
+	TimeStamp          int `gorm:"type:int(10);column:time_stamp;default:0;not null"`
+	ArenaSeason        int `gorm:"type:int(10);column:arena_season;default:0;not null"`
+	ArenaWeekEndTime   int `gorm:"type:int(10);column:arena_week_end_timede;default:0;not null"`
+	ArenaSeasonEndTime int `gorm:"type:int(10);column:arena_season_end_time;default:0;not null"`
+}
+
+// TableName set global table name to be `global`
+func (Global) TableName() string {
+	return "global"
 }
 
 type Datastore struct {
@@ -43,7 +47,7 @@ func NewDatastore() (iface.IDatastore, error) {
 
 	mysqlDSN := fmt.Sprintf("%s:%s@(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
 	var err error
-	datastore.db, err = gorm.Open("mysql", mysqlSDN)
+	datastore.db, err = gorm.Open("mysql", mysqlDSN)
 	if err != nil {
 		logger.Fatal(err)
 		return nil, err
@@ -60,10 +64,10 @@ func (m *Datastore) Run() {
 			logger.Print("db mgr context done!")
 			m.chStop <- struct{}{}
 			return
-		case query := <-m.chExec:
-			if _, err := m.db.ExecContext(m.ctx, query); err != nil {
-				logger.Error(fmt.Sprintf("db exec<%s> failed:", query), err)
-			}
+		case _ = <-m.chExec:
+			// if _, err := m.db.ExecContext(m.ctx, query); err != nil {
+			// 	logger.Error(fmt.Sprintf("db exec<%s> failed:", query), err)
+			// }
 		}
 	}
 
@@ -80,30 +84,20 @@ func (m *Datastore) initDatastore() {
 }
 
 func (m *Datastore) loadGlobal() {
-
-	m.db.AutoMigrate(&m.global)
-
-	query := "select * from global"
-	stmt, err := m.db.PrepareContext(m.ctx, query)
-	if err != nil {
-		logger.Warning("api initdb failed:", err)
-		return
+	m.global = &Global{
+		Id:                 global.UltimateID,
+		TimeStamp:          int(int32(time.Now().Unix())),
+		ArenaSeason:        0,
+		ArenaWeekEndTime:   0,
+		ArenaSeasonEndTime: 0,
 	}
 
-	rows, err := stmt.QueryContext(m.ctx)
-	if err != nil {
-		logger.Warning("api initdb failed:", err)
-		return
+	m.db.AutoMigrate(m.global)
+	if m.db.FirstOrCreate(m.global, global.UltimateID).RecordNotFound() {
+		m.db.Create(m.global)
 	}
 
-	if !rows.Next() {
-		query = fmt.Sprintf("replace into global set id=%d, time_stamp=%d, arena_season=%d, arena_week_end_time=%d, arena_season_end_time=%d", global.UltimateID, int32(time.Now().Unix()), 0, 0, 0)
-		if stmp, err := m.db.PrepareContext(m.ctx, query); err == nil {
-			if _, err := stmp.ExecContext(m.ctx); err == nil {
-				logger.Info("sql global init query exec success:", query)
-			}
-		}
-	}
+	logger.Info("datastore loadGlobal success:", m.global)
 }
 
 func (m *Datastore) Exec(q string) {
@@ -111,19 +105,20 @@ func (m *Datastore) Exec(q string) {
 }
 
 func (m *Datastore) Query(q string) (*sql.Rows, error) {
-	return func() (*sql.Rows, error) {
-		stmt, err := m.db.PrepareContext(m.ctx, q)
-		if err != nil {
-			logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
-			return nil, err
-		}
+	return nil, fmt.Errorf("test error")
+	// return func() (*sql.Rows, error) {
+	// 	stmt, err := m.db.PrepareContext(m.ctx, q)
+	// 	if err != nil {
+	// 		logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
+	// 		return nil, err
+	// 	}
 
-		rows, err := stmt.QueryContext(m.ctx)
-		if err != nil {
-			logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
-			return nil, err
-		}
+	// 	rows, err := stmt.QueryContext(m.ctx)
+	// 	if err != nil {
+	// 		logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
+	// 		return nil, err
+	// 	}
 
-		return rows, nil
-	}()
+	// 	return rows, nil
+	// }()
 }

@@ -12,20 +12,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Global mysql table global
-type Global struct {
-	Id                 int `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
-	TimeStamp          int `gorm:"type:int(10);column:time_stamp;default:0;not null"`
-	ArenaSeason        int `gorm:"type:int(10);column:arena_season;default:0;not null"`
-	ArenaWeekEndTime   int `gorm:"type:int(10);column:arena_week_end_timede;default:0;not null"`
-	ArenaSeasonEndTime int `gorm:"type:int(10);column:arena_season_end_time;default:0;not null"`
-}
-
-// TableName set global table name to be `global`
-func (Global) TableName() string {
-	return "global"
-}
-
 type Datastore struct {
 	db     *gorm.DB
 	ctx    context.Context
@@ -34,7 +20,7 @@ type Datastore struct {
 	chExec chan string
 
 	// table
-	global *Global
+	global *iface.TableGlobal
 }
 
 func NewDatastore() (iface.IDatastore, error) {
@@ -55,6 +41,14 @@ func NewDatastore() (iface.IDatastore, error) {
 
 	datastore.initDatastore()
 	return datastore, nil
+}
+
+func (m *Datastore) DB() *gorm.DB {
+	return m.db
+}
+
+func (m *Datastore) TableGlobal() *iface.TableGlobal {
+	return m.global
 }
 
 func (m *Datastore) Run() {
@@ -84,7 +78,7 @@ func (m *Datastore) initDatastore() {
 }
 
 func (m *Datastore) loadGlobal() {
-	m.global = &Global{
+	m.global = &iface.TableGlobal{
 		Id:                 global.UltimateID,
 		TimeStamp:          int(int32(time.Now().Unix())),
 		ArenaSeason:        0,

@@ -630,8 +630,12 @@ func (arena *Arena) weekEnd() {
 	arena.weekEndTime = uint32(ct.Add(d - e + time.Duration(time.Second)*10).Unix())
 
 	// save db
-	query := fmt.Sprintf("update global set arena_week_end_time = %d where id = %d", int32(arena.weekEndTime), global.UltimateID)
-	arena.ds.Exec(query)
+	// query := fmt.Sprintf("update global set arena_week_end_time = %d where id = %d", int32(arena.weekEndTime), global.UltimateID)
+	// arena.ds.Exec(query)
+
+	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
+		ArenaWeekEndTime: arena.weekEndTime,
+	})
 
 	// send request with time delay, 50 request per second
 	var arrReq []int64
@@ -734,8 +738,13 @@ func (arena *Arena) nextSeason() {
 	arena.season++
 
 	// save db
-	query := fmt.Sprintf("update global set arena_season_end_time = %d, arena_season = %d where id = %d", int32(arena.seasonEndTime), arena.season, global.UltimateID)
-	arena.ds.Exec(query)
+	// query := fmt.Sprintf("update global set arena_season_end_time = %d, arena_season = %d where id = %d", int32(arena.seasonEndTime), arena.season, global.UltimateID)
+	// arena.ds.Exec(query)
+
+	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
+		ArenaSeasonEndTime: arena.seasonEndTime,
+		ArenaSeason:        arena.season,
+	})
 
 	// broadcast to all world
 	msg := &world_message.MUW_SyncArenaSeason{

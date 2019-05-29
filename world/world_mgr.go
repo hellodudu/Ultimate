@@ -83,9 +83,8 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (iface.IWorld
 	// world run
 	go w.Run()
 
-	// save to db
-	query := fmt.Sprintf("replace into world(id, name, last_connect_time) values(%d, \"%s\", %d)", w.ID(), w.Name(), int32(time.Now().Unix()))
-	wm.datastore.Exec(query)
+	w.lastConTime = int(time.Now().Unix())
+	wm.datastore.DB().Save(w)
 
 	return w, nil
 }

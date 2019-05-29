@@ -16,15 +16,16 @@ import (
 )
 
 type world struct {
-	id         uint32   `sql:"id"`   // world id
-	name       string   `sql:"name"` // world name
-	con        net.Conn // connection
-	datastore  iface.IDatastore
-	tHeartBeat *time.Timer // connection heart beat
-	tTimeOut   *time.Timer // connection time out
-	ctx        context.Context
-	cancel     context.CancelFunc
-	chw        chan uint32
+	id          uint32   `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
+	name        string   `gorm:"type:varchar(32);column:name;default:;not null"`
+	lastConTime int      `gorm:"type:int(10);column:last_connect_time;default:0;not null"`
+	con         net.Conn // connection
+	datastore   iface.IDatastore
+	tHeartBeat  *time.Timer // connection heart beat
+	tTimeOut    *time.Timer // connection time out
+	ctx         context.Context
+	cancel      context.CancelFunc
+	chw         chan uint32
 
 	mapPlayer map[int64]*world_message.CrossPlayerInfo
 	mapGuild  map[int64]*world_message.CrossGuildInfo
@@ -34,16 +35,17 @@ type world struct {
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32, datastore iface.IDatastore) iface.IWorld {
 	w := &world{
-		id:         id,
-		name:       name,
-		con:        con,
-		datastore:  datastore,
-		tHeartBeat: time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
-		tTimeOut:   time.NewTimer(time.Duration(global.WorldConTimeOutSec) * time.Second),
-		chw:        chw,
-		mapPlayer:  make(map[int64]*world_message.CrossPlayerInfo),
-		mapGuild:   make(map[int64]*world_message.CrossGuildInfo),
-		chDBInit:   make(chan struct{}, 1),
+		id:          id,
+		name:        name,
+		lastConTime: 0,
+		con:         con,
+		datastore:   datastore,
+		tHeartBeat:  time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
+		tTimeOut:    time.NewTimer(time.Duration(global.WorldConTimeOutSec) * time.Second),
+		chw:         chw,
+		mapPlayer:   make(map[int64]*world_message.CrossPlayerInfo),
+		mapGuild:    make(map[int64]*world_message.CrossGuildInfo),
+		chDBInit:    make(chan struct{}, 1),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())

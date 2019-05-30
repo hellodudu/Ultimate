@@ -122,7 +122,6 @@ func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 		case <-server.ctx.Done():
 			logger.Print("tcp connection context done!")
 			return
-		default:
 		}
 
 		// read len

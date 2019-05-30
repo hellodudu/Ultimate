@@ -141,10 +141,10 @@ func (arenaData) TableName() string {
 
 // champion data
 type championData struct {
-	rank     int   `gorm:"type:smallint(5);primary_key;column:champion_rank;default:0;not null"`
-	playerID int64 `gorm:"type:bigint(20);column:player_id;default:-1;not null"`
-	score    int   `gorm:"type:int(10);column:score;default:0;not null"`
-	season   int   `gorm:"type:int(10);column:arena_season;default:0;not null"`
+	Rank     int   `gorm:"type:smallint(5);primary_key;column:champion_rank;default:0;not null"`
+	PlayerID int64 `gorm:"type:bigint(20);column:player_id;default:-1;not null"`
+	Score    int   `gorm:"type:int(10);column:score;default:0;not null"`
+	Season   int   `gorm:"type:int(10);column:arena_season;default:0;not null"`
 }
 
 func (championData) TableName() string {
@@ -318,14 +318,14 @@ func (arena *Arena) GetChampion() []*world_message.ArenaChampion {
 	championRet := make([]*world_message.ArenaChampion, 0)
 	for _, v := range arena.championList {
 		champion := &world_message.ArenaChampion{
-			Rank:     int32(v.rank) + 1,
-			PlayerId: v.playerID,
-			Score:    int32(v.score),
+			Rank:     int32(v.Rank) + 1,
+			PlayerId: v.PlayerID,
+			Score:    int32(v.Score),
 		}
 
-		rec, err := arena.GetRecordByID(v.playerID)
+		rec, err := arena.GetRecordByID(v.PlayerID)
 		if err != nil {
-			logger.Warning("GetChampion cannot get player's ArenaRecord:", v.playerID)
+			logger.Warning("GetChampion cannot get player's ArenaRecord:", v.PlayerID)
 			continue
 		}
 
@@ -759,10 +759,10 @@ func (arena *Arena) SaveChampion() {
 
 	for k, v := range list {
 		data := &championData{
-			rank:     k,
-			playerID: v.Playerid,
-			score:    int(v.Score),
-			season:   arena.Season(),
+			Rank:     k,
+			PlayerID: v.Playerid,
+			Score:    int(v.Score),
+			Season:   arena.Season(),
 		}
 		arena.championList = append(arena.championList, data)
 	}

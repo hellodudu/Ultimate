@@ -37,7 +37,7 @@ func NewDatastore() (iface.IDatastore, error) {
 		return nil, err
 	}
 
-	// datastore.db.LogMode(true)
+	datastore.db.LogMode(true)
 
 	datastore.initDatastore()
 	return datastore, nil

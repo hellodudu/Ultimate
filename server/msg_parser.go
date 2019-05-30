@@ -242,8 +242,8 @@ func (m *MsgParser) handleWorldConnected(con net.Conn, p proto.Message) {
 		world.SendProtoMessage(msgG)
 
 		// sync arena data
-		endTime := m.gm.Arena().GetSeasonEndTime()
-		season := m.gm.Arena().GetSeason()
+		endTime := m.gm.Arena().SeasonEndTime()
+		season := m.gm.Arena().Season()
 		msgArena := &pb.MUW_SyncArenaSeason{
 			Season:  int32(season),
 			EndTime: uint32(endTime),

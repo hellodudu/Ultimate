@@ -25,8 +25,9 @@ type IArena interface {
 	GetRecordByID(id int64) (*pb.ArenaRecord, error)
 	GetRecordNum() int
 	GetRecordReqList() map[int64]uint32
-	GetSeason() int
-	GetSeasonEndTime() uint32
+	Season() int
+	SeasonEndTime() int
+	WeekEndTime() int
 	Matching(playerID int64)
 	RequestRank(id int64, page int32)
 	Run()

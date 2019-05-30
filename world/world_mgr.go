@@ -83,7 +83,7 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (iface.IWorld
 	// world run
 	go w.Run()
 
-	w.lastConTime = int(time.Now().Unix())
+	w.SetLastConTime(int(time.Now().Unix()))
 	wm.datastore.DB().Save(w)
 
 	return w, nil

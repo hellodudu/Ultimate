@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	world_message "github.com/hellodudu/Ultimate/proto"
@@ -130,17 +129,26 @@ func (s *rankArenaData) Add(v *arenaData) {
 
 // arena player data
 type arenaData struct {
-	Playerid   int64  `sql:"player_id" json:"player_id"`
-	Score      int32  `sql:"score" json:"score"`
-	ReachTime  uint32 `sql:"reach_time" json:"reach_time"`
-	LastTarget int64  `sql:"last_target" json:"last_target"` // target cannot be last one
+	Playerid   int64  `gorm:"type:bigint(20);primary_key;column:player_id;default:-1;not null"`
+	Score      int32  `gorm:"type:int(10);column:score;default:0;not null"`
+	ReachTime  uint32 `gorm:"type:int(10);column:reach_time;default:0;not null"`
+	LastTarget int64  `gorm:"type:bigint(20);column:last_target;default:-1;not null"` // target cannot be last one
+}
+
+func (arenaData) TableName() string {
+	return "arena_player"
 }
 
 // champion data
 type championData struct {
-	rank     int   `sql:"rank" json:"rank"`
-	playerID int64 `sql:"player_id" json:"player_id"`
-	score    int   `sql:"score" json:"score"`
+	rank     int   `gorm:"type:smallint(5);primary_key;column:champion_rank;default:0;not null"`
+	playerID int64 `gorm:"type:bigint(20);column:player_id;default:-1;not null"`
+	score    int   `gorm:"type:int(10);column:score;default:0;not null"`
+	season   int   `gorm:"type:int(10);column:arena_season;default:0;not null"`
+}
+
+func (championData) TableName() string {
+	return "arena_champion"
 }
 
 func getSectionIndexByScore(score int32) int32 {
@@ -203,9 +211,6 @@ type Arena struct {
 	mapRecordReq sync.Map // map of init player request map[playerid]time.Now() : next request time
 
 	chMatchWaitOK chan int64 // match wait player channel
-	season        int        `sql:"arena_season"`
-	seasonEndTime uint32     `sql:"arena_season_end_time"`
-	weekEndTime   uint32     // every monday request new player's record and send weekly reward
 
 	championList []*championData // top 3 champion data
 	cpLock       sync.RWMutex    // champion read write lock
@@ -225,7 +230,6 @@ func NewArena(ctx context.Context, gm iface.IGameMgr, wm iface.IWorldMgr, ds ifa
 		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
 		chMatchWaitOK: make(chan int64, 1000),
 		chDBInit:      make(chan struct{}, 1),
-		weekEndTime:   0,
 		championList:  make([]*championData, 0),
 	}
 
@@ -293,14 +297,18 @@ func (arena *Arena) GetRankListByPage(page int) interface{} {
 	return arena.arrRankArena.GetListByPage(page)
 }
 
-// GetSeasonEndTime get season end time
-func (arena *Arena) GetSeasonEndTime() uint32 {
-	return arena.seasonEndTime
+// SeasonEndTime get season end time
+func (arena *Arena) SeasonEndTime() int {
+	return arena.ds.TableGlobal().ArenaSeasonEndTime
 }
 
-// GetSeason get season
-func (arena *Arena) GetSeason() int {
-	return arena.season
+// Season get season
+func (arena *Arena) Season() int {
+	return arena.ds.TableGlobal().ArenaSeason
+}
+
+func (arena *Arena) WeekEndTime() int {
+	return arena.ds.TableGlobal().ArenaWeekEndTime
 }
 
 func (arena *Arena) GetChampion() []*world_message.ArenaChampion {
@@ -384,70 +392,31 @@ func (arena *Arena) Run() {
 
 // loadFromDB load arena data from db
 func (arena *Arena) loadFromDB() {
-	// load from global
-	query := fmt.Sprintf("select arena_season, arena_week_end_time, arena_season_end_time from global where id = %d", global.UltimateID)
-
-	rows, err := arena.ds.Query(query)
-	if err != nil {
-		logger.Error("cannot load mysql table global!")
-		return
-	}
-
-	for rows.Next() {
-		if err := rows.Scan(&arena.season, &arena.weekEndTime, &arena.seasonEndTime); err != nil {
-			logger.Error("load table global failed:", err)
-		}
-		logger.Info("load from global success end_time = ", arena.seasonEndTime, ", season = ", arena.season, ", weekEndTime = ", arena.weekEndTime)
-	}
 
 	// load from arena_champion
-	query = fmt.Sprintf("select * from arena_champion")
-	rows, err = arena.ds.Query(query)
-	if err != nil {
-		logger.Error("cannot load mysql table arena_champion!")
-		return
-	}
-
-	for rows.Next() {
-		data := &championData{}
-		var season int
-		if err := rows.Scan(&data.rank, &data.playerID, &data.score, &season); err != nil {
-			logger.Error("load table arena_champion failed:", err)
-			return
-		}
-		logger.Info("load from arena_champion success:", data)
-		arena.championList = append(arena.championList, data)
-	}
+	arena.ds.DB().AutoMigrate(championData{})
+	arena.ds.DB().Find(&arena.championList)
 
 	// load from arena_player
-	query = fmt.Sprintf("select * from arena_player")
-	rows, err = arena.ds.Query(query)
-	if err != nil {
-		logger.Error("cannot load mysql table arena!", err)
-		return
-	}
+	var arenaDataList []*arenaData
+	arena.ds.DB().AutoMigrate(arenaData{})
+	arena.ds.DB().Find(&arenaDataList)
 
-	for rows.Next() {
-		data := &arenaData{}
-		if err := rows.Scan(&data.Playerid, &data.Score, &data.ReachTime, &data.LastTarget); err != nil {
-			logger.Warning("load table arena failed:", err)
-			continue
-		}
-
-		arena.mapArenaData.Store(data.Playerid, data)
+	for _, v := range arenaDataList {
+		arena.mapArenaData.Store(v.Playerid, v)
 
 		// add to record request list, delay 20s to start request
-		arena.mapRecordReq.Store(data.Playerid, time.Now().Add(time.Second*20))
+		arena.mapRecordReq.Store(v.Playerid, time.Now().Add(time.Second*20))
 	}
 
-	now := uint32(time.Now().Unix())
+	now := int(time.Now().Unix())
 
 	// if arena weekEndTime was expired, set a new time one week later
-	if arena.weekEndTime == 0 {
+	if arena.WeekEndTime() == 0 {
 		arena.weekEnd()
 
 		// if weekEndTime has gone past, call weekEnd() 9 minutes later(wait for all world connected)
-	} else if now > arena.weekEndTime {
+	} else if now > arena.WeekEndTime() {
 		t := time.NewTimer(9 * time.Minute)
 		go func(ct *time.Timer) {
 			<-ct.C
@@ -456,11 +425,11 @@ func (arena *Arena) loadFromDB() {
 	}
 
 	// if arena seasonEndTime was expired, set a new seasonEndTime one season later
-	if arena.seasonEndTime == 0 {
+	if arena.SeasonEndTime() == 0 {
 		arena.nextSeason()
 
 		// if season end time has gone past, call seasonEnd() 10 minutes later(wait for all world connected)
-	} else if now > arena.seasonEndTime {
+	} else if now > arena.SeasonEndTime() {
 		t := time.NewTimer(10 * time.Minute)
 		go func(ct *time.Timer) {
 			<-ct.C
@@ -596,15 +565,15 @@ func (arena *Arena) updateMatchingList() {
 }
 
 func (arena *Arena) updateTime() {
-	t := uint32(time.Now().Unix())
+	t := int(time.Now().Unix())
 
 	// week end
-	if t >= arena.weekEndTime {
+	if t >= arena.WeekEndTime() {
 		arena.weekEnd()
 	}
 
 	// season end
-	if t >= arena.seasonEndTime {
+	if t >= arena.SeasonEndTime() {
 		arena.seasonEnd()
 	}
 }
@@ -627,14 +596,11 @@ func (arena *Arena) weekEnd() {
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
 	// add 10 seconds inaccuracy
-	arena.weekEndTime = uint32(ct.Add(d - e + time.Duration(time.Second)*10).Unix())
-
-	// save db
-	// query := fmt.Sprintf("update global set arena_week_end_time = %d where id = %d", int32(arena.weekEndTime), global.UltimateID)
-	// arena.ds.Exec(query)
+	arena.ds.TableGlobal().ArenaWeekEndTime = int(ct.Add(d - e + time.Duration(time.Second)*10).Unix())
 
 	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
-		ArenaWeekEndTime: arena.weekEndTime,
+		ArenaWeekEndTime: arena.ds.TableGlobal().ArenaWeekEndTime,
+		TimeStamp:        int(time.Now().Unix()),
 	})
 
 	// send request with time delay, 50 request per second
@@ -734,22 +700,20 @@ func (arena *Arena) nextSeason() {
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
 	// add 30 seconds inaccuracy
-	arena.seasonEndTime = uint32(ct.Add(d - e + time.Duration(time.Second)*30).Unix())
-	arena.season++
+	arena.ds.TableGlobal().ArenaSeasonEndTime = int(ct.Add(d - e + time.Duration(time.Second)*30).Unix())
+	arena.ds.TableGlobal().ArenaSeason++
 
-	// save db
-	// query := fmt.Sprintf("update global set arena_season_end_time = %d, arena_season = %d where id = %d", int32(arena.seasonEndTime), arena.season, global.UltimateID)
-	// arena.ds.Exec(query)
-
+	// save to db
 	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
-		ArenaSeasonEndTime: arena.seasonEndTime,
-		ArenaSeason:        arena.season,
+		ArenaSeasonEndTime: arena.SeasonEndTime(),
+		ArenaSeason:        arena.Season(),
+		TimeStamp:          int(time.Now().Unix()),
 	})
 
 	// broadcast to all world
 	msg := &world_message.MUW_SyncArenaSeason{
-		Season:  int32(arena.season),
-		EndTime: uint32(arena.seasonEndTime),
+		Season:  int32(arena.Season()),
+		EndTime: uint32(arena.SeasonEndTime()),
 	}
 	arena.wm.BroadCast(msg)
 }
@@ -798,20 +762,15 @@ func (arena *Arena) SaveChampion() {
 			rank:     k,
 			playerID: v.Playerid,
 			score:    int(v.Score),
+			season:   arena.Season(),
 		}
 		arena.championList = append(arena.championList, data)
 	}
 	arena.cpLock.Unlock()
 
 	// save to db
-	query := "delete from arena_champion"
-	arena.ds.Exec(query)
-
-	for _, v := range arena.championList {
-		query = fmt.Sprintf("replace into arena_champion set champion_rank = %d, player_id = %d, score = %d, arena_season = %d", v.rank, v.playerID, v.score, arena.season)
-		arena.ds.Exec(query)
-		logger.Trace("datastore exec:", query)
-	}
+	arena.ds.DB().Delete(championData{})
+	arena.ds.DB().Save(arena.championList)
 
 	// broadcast to all world
 	msg := &world_message.MUW_ArenaChampion{
@@ -909,8 +868,7 @@ func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
 		arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
 
 		// save to db
-		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.Playerid, data.Score, data.ReachTime, data.LastTarget)
-		arena.ds.Exec(query)
+		arena.ds.DB().Save(data)
 	}
 }
 
@@ -946,8 +904,7 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 		}
 
 		// save to db
-		query := fmt.Sprintf("replace into arena_player set player_id = %d, score = %d, reach_time = %d, last_target = %d", data.Playerid, data.Score, data.ReachTime, data.LastTarget)
-		arena.ds.Exec(query)
+		arena.ds.DB().Save(data)
 
 		// rank change
 		arena.arrRankArena.Sort()
@@ -978,7 +935,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		Page:          page,
 		Score:         int32(arenaDefaultScore),
 		Rank:          -1,
-		SeasonEndTime: arena.seasonEndTime,
+		SeasonEndTime: uint32(arena.SeasonEndTime()),
 		Infos:         make([]*world_message.ArenaTargetInfo, 0),
 	}
 

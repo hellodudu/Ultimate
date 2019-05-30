@@ -21,6 +21,7 @@ type IWorldMgr interface {
 type IWorld interface {
 	ID() uint32
 	Name() string
+	SetLastConTime(t int)
 	Con() net.Conn
 	ResetTestConnect()
 	Run()

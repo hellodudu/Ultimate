@@ -11,7 +11,7 @@ import (
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	world_message "github.com/hellodudu/Ultimate/proto"
+	pb "github.com/hellodudu/Ultimate/proto"
 	"github.com/hellodudu/Ultimate/utils"
 )
 
@@ -20,15 +20,15 @@ type world struct {
 	name        string   `gorm:"type:varchar(32);column:name;default:;not null"`
 	lastConTime int      `gorm:"type:int(10);column:last_connect_time;default:0;not null"`
 	con         net.Conn // connection
-	datastore   iface.IDatastore
+	ds          iface.IDatastore
 	tHeartBeat  *time.Timer // connection heart beat
 	tTimeOut    *time.Timer // connection time out
 	ctx         context.Context
 	cancel      context.CancelFunc
 	chw         chan uint32
 
-	mapPlayer map[int64]*world_message.CrossPlayerInfo
-	mapGuild  map[int64]*world_message.CrossGuildInfo
+	mapPlayer map[int64]*pb.CrossPlayerInfo
+	mapGuild  map[int64]*pb.CrossGuildInfo
 
 	chDBInit chan struct{}
 }
@@ -39,18 +39,22 @@ func NewWorld(id uint32, name string, con net.Conn, chw chan uint32, datastore i
 		name:        name,
 		lastConTime: 0,
 		con:         con,
-		datastore:   datastore,
+		ds:          datastore,
 		tHeartBeat:  time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
 		tTimeOut:    time.NewTimer(time.Duration(global.WorldConTimeOutSec) * time.Second),
 		chw:         chw,
-		mapPlayer:   make(map[int64]*world_message.CrossPlayerInfo),
-		mapGuild:    make(map[int64]*world_message.CrossGuildInfo),
+		mapPlayer:   make(map[int64]*pb.CrossPlayerInfo),
+		mapGuild:    make(map[int64]*pb.CrossGuildInfo),
 		chDBInit:    make(chan struct{}, 1),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
 	w.loadFromDB()
 	return w
+}
+
+func (world) TableName() string {
+	return "world"
 }
 
 func (w *world) ID() uint32 {
@@ -65,22 +69,12 @@ func (w *world) Con() net.Conn {
 	return w.con
 }
 
-func (w *world) loadFromDB() {
-	query := fmt.Sprintf("select * from world where id = %d", w.id)
-	rows, err := w.datastore.Query(query)
-	if err != nil {
-		logger.Warning(fmt.Sprintf("world load rom db query<%s> failed:", query), err)
-		return
-	}
+func (w *world) SetLastConTime(t int) {
+	w.lastConTime = t
+}
 
-	for rows.Next() {
-		var id, time int32
-		var name string
-		if err := rows.Scan(&id, &name, &time); err != nil {
-			logger.Warning("world load query err:", err)
-		}
-		logger.Info("world load query success:", id, time)
-	}
+func (w *world) loadFromDB() {
+	w.ds.DB().First(w)
 
 	w.chDBInit <- struct{}{}
 }
@@ -108,7 +102,7 @@ func (w *world) Run() {
 
 		// Heart Beat
 		case <-w.tHeartBeat.C:
-			msg := &world_message.MUW_TestConnect{}
+			msg := &pb.MUW_TestConnect{}
 			w.SendProtoMessage(msg)
 			w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
 		}

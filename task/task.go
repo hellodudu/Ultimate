@@ -1,14 +1,24 @@
 package task
 
-import "net"
-
-type TaskCallback func(net.Conn, []byte)
+import "github.com/hellodudu/Ultimate/iface"
 
 type TaskReqInfo struct {
 	ID   int
-	Con  net.Conn
+	Con  iface.ITCPConn
 	Data []byte
-	CB   TaskCallback
+	CB   iface.TaskCallback
+}
+
+func (t *TaskReqInfo) SetID(id int) {
+	t.ID = id
+}
+
+func (t *TaskReqInfo) GetID() int {
+	return t.ID
+}
+
+func (t *TaskReqInfo) Call() {
+	t.CB(t.Con, t.Data)
 }
 
 type Tasker interface {
@@ -17,17 +27,17 @@ type Tasker interface {
 }
 
 type task struct {
-	req *TaskReqInfo
+	req iface.ITaskReqInfo
 }
 
 func (t *task) GetReq() int {
-	return t.req.ID
+	return t.req.GetID()
 }
 
 func (t *task) Callback() {
-	t.req.CB(t.req.Con, t.req.Data)
+	t.req.Call()
 }
 
-func NewTask(req *TaskReqInfo) Tasker {
+func NewTask(req iface.ITaskReqInfo) Tasker {
 	return &task{req: req}
 }

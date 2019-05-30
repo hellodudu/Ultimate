@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"net"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -16,10 +15,10 @@ import (
 )
 
 type world struct {
-	ID          uint32   `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
-	Name        string   `gorm:"type:varchar(32);column:name;default:'';not null"`
-	LastConTime int      `gorm:"type:int(10);column:last_connect_time;default:0;not null"`
-	con         net.Conn // connection
+	ID          uint32         `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
+	Name        string         `gorm:"type:varchar(32);column:name;default:'';not null"`
+	LastConTime int            `gorm:"type:int(10);column:last_connect_time;default:0;not null"`
+	con         iface.ITCPConn // connection
 	ds          iface.IDatastore
 	tHeartBeat  *time.Timer // connection heart beat
 	tTimeOut    *time.Timer // connection time out
@@ -33,7 +32,7 @@ type world struct {
 	chDBInit chan struct{}
 }
 
-func NewWorld(id uint32, name string, con net.Conn, chw chan uint32, datastore iface.IDatastore) iface.IWorld {
+func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datastore iface.IDatastore) iface.IWorld {
 	w := &world{
 		ID:          id,
 		Name:        name,
@@ -65,7 +64,7 @@ func (w *world) GetName() string {
 	return w.Name
 }
 
-func (w *world) GetCon() net.Conn {
+func (w *world) GetCon() iface.ITCPConn {
 	return w.con
 }
 
@@ -137,7 +136,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	copy(resp[14+len(typeName):], out)
 
 	if _, err := w.con.Write(resp); err != nil {
-		logger.Warning("reply message error:", err)
+		logger.Warning("send proto msg error:", err)
 	}
 }
 
@@ -146,6 +145,6 @@ func (w *world) SendTransferMessage(data []byte) {
 	binary.LittleEndian.PutUint32(resp[:4], uint32(len(data)))
 	copy(resp[4:], data)
 	if _, err := w.con.Write(resp); err != nil {
-		logger.Warning("transfer message error:", err)
+		logger.Warning("send transfer msg error:", err)
 	}
 }

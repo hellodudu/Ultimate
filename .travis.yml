@@ -21,3 +21,4 @@ install:
   - go get github.com/gorilla/websocket
   - go get github.com/go-ini/ini
   - go get google.golang.org/grpc
+  - go get github.com/jinzhu/gorm

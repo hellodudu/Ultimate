@@ -1,7 +1,13 @@
 package iface
 
-import "github.com/hellodudu/Ultimate/task"
+type TaskCallback func(ITCPConn, []byte)
 
 type IDispatcher interface {
-	AddTask(*task.TaskReqInfo)
+	AddTask(ITaskReqInfo)
+}
+
+type ITaskReqInfo interface {
+	SetID(id int)
+	GetID() int
+	Call()
 }

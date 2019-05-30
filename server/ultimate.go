@@ -23,7 +23,7 @@ type ultimate struct {
 	mp iface.IMsgParser  // msg parser
 
 	rds      *redis.Client // redis
-	tcpServ  *TcpServer    // tcp server
+	tcpServ  *TCPServer    // tcp server
 	rpcServ  *RpcServer    // rpc server
 	httpServ *HttpServer   // http server
 	wg       sync.WaitGroup

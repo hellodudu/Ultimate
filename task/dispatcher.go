@@ -2,6 +2,8 @@ package task
 
 import (
 	"sync"
+
+	"github.com/hellodudu/Ultimate/iface"
 )
 
 // Dispatcher define
@@ -36,7 +38,7 @@ func (td *Dispatcher) genReqID() int {
 }
 
 // AddTask add new task to taskchan
-func (td *Dispatcher) AddTask(req *TaskReqInfo) {
-	req.ID = td.genReqID()
+func (td *Dispatcher) AddTask(req iface.ITaskReqInfo) {
+	req.SetID(td.genReqID())
 	td.taskerChan <- NewTask(req)
 }

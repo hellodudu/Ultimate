@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
 	"sync"
 	"time"
 
@@ -51,7 +50,7 @@ func (wm *WorldMgr) Stop() chan struct{} {
 	return wm.chStop
 }
 
-func (wm *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (iface.IWorld, error) {
+func (wm *WorldMgr) AddWorld(id uint32, name string, con iface.ITCPConn) (iface.IWorld, error) {
 	var invalidID int32 = -1
 	if id == uint32(invalidID) {
 		return nil, errors.New("add world id invalid!")
@@ -119,7 +118,7 @@ func (wm *WorldMgr) GetWorldByID(id uint32) iface.IWorld {
 	return world
 }
 
-func (wm *WorldMgr) GetWorldByCon(con net.Conn) iface.IWorld {
+func (wm *WorldMgr) GetWorldByCon(con iface.ITCPConn) iface.IWorld {
 	v, ok := wm.mapConn.Load(con)
 	if !ok {
 		return nil
@@ -133,7 +132,7 @@ func (wm *WorldMgr) GetWorldByCon(con net.Conn) iface.IWorld {
 	return world
 }
 
-func (wm *WorldMgr) DisconnectWorld(con net.Conn) {
+func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 	v, ok := wm.mapConn.Load(con)
 	if !ok {
 		return

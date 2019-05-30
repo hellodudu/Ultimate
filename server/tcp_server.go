@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"net"
 	"sync"
@@ -16,8 +17,42 @@ import (
 
 var tcpReadBufMax = 1024 * 1024 * 2
 
-type TcpServer struct {
-	conns      map[net.Conn]struct{}
+// TcpCon with closed status
+type TCPCon struct {
+	sync.Mutex
+	con    net.Conn
+	closed bool
+}
+
+func NewTCPCon(con net.Conn) *TCPCon {
+	return &TCPCon{con: con, closed: false}
+}
+
+func (c *TCPCon) Close() {
+	if c.closed {
+		return
+	}
+
+	c.Lock()
+	defer c.Unlock()
+	c.closed = true
+	c.con.Close()
+}
+
+func (c *TCPCon) Write(b []byte) (n int, err error) {
+	if c.closed {
+		return 0, fmt.Errorf("connection closed, nothing will be write in")
+	}
+
+	return c.con.Write(b)
+}
+
+func (c *TCPCon) Closed() bool {
+	return c.closed
+}
+
+type TCPServer struct {
+	conns      map[*TCPCon]struct{}
 	ln         net.Listener
 	parser     iface.IMsgParser
 	dispatcher iface.IDispatcher
@@ -27,9 +62,9 @@ type TcpServer struct {
 	cancel     context.CancelFunc
 }
 
-func NewTcpServer(parser iface.IMsgParser, dispatcher iface.IDispatcher) (*TcpServer, error) {
-	s := &TcpServer{
-		conns:      make(map[net.Conn]struct{}),
+func NewTcpServer(parser iface.IMsgParser, dispatcher iface.IDispatcher) (*TCPServer, error) {
+	s := &TCPServer{
+		conns:      make(map[*TCPCon]struct{}),
 		parser:     parser,
 		dispatcher: dispatcher,
 	}
@@ -51,7 +86,7 @@ func NewTcpServer(parser iface.IMsgParser, dispatcher iface.IDispatcher) (*TcpSe
 	return s, nil
 }
 
-func (server *TcpServer) Run() {
+func (server *TCPServer) Run() {
 	var tempDelay time.Duration
 	for {
 		conn, err := server.ln.Accept()
@@ -73,19 +108,20 @@ func (server *TcpServer) Run() {
 		}
 		tempDelay = 0
 
+		connection := NewTCPCon(conn)
+
 		server.mutexConns.Lock()
 		if len(server.conns) >= 5000 {
 			server.mutexConns.Unlock()
-			conn.Close()
+			connection.Close()
 			logger.Warning("too many connections")
 			continue
 		}
-		server.conns[conn] = struct{}{}
+		server.conns[connection] = struct{}{}
 		server.mutexConns.Unlock()
 
 		server.wgConns.Add(1)
-
-		go func(c net.Conn) {
+		go func(c *TCPCon) {
 			server.handleTCPConnection(c)
 
 			server.mutexConns.Lock()
@@ -93,11 +129,11 @@ func (server *TcpServer) Run() {
 			server.mutexConns.Unlock()
 
 			server.wgConns.Done()
-		}(conn)
+		}(connection)
 	}
 }
 
-func (server *TcpServer) Stop() {
+func (server *TCPServer) Stop() {
 	server.ln.Close()
 	server.cancel()
 	server.wgConns.Wait()
@@ -110,23 +146,29 @@ func (server *TcpServer) Stop() {
 	server.mutexConns.Unlock()
 }
 
-func (server *TcpServer) handleTCPConnection(conn net.Conn) {
-	defer conn.Close()
+func (server *TCPServer) handleTCPConnection(connection *TCPCon) {
+	defer connection.Close()
 
-	logger.Info("a new tcp connection with remote addr:", conn.RemoteAddr().String())
-	conn.(*net.TCPConn).SetKeepAlive(true)
-	conn.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
+	logger.Info("a new tcp connection with remote addr:", connection.con.RemoteAddr().String())
+	connection.con.(*net.TCPConn).SetKeepAlive(true)
+	connection.con.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
 
 	for {
 		select {
 		case <-server.ctx.Done():
 			logger.Print("tcp connection context done!")
 			return
+		default:
+		}
+
+		if connection.Closed() {
+			logger.Print("tcp connection closed:", connection)
+			return
 		}
 
 		// read len
 		b := make([]byte, 4)
-		if _, err := io.ReadFull(conn, b); err != nil {
+		if _, err := io.ReadFull(connection.con, b); err != nil {
 			logger.Info("one client connection was shut down:", err)
 			return
 		}
@@ -145,13 +187,13 @@ func (server *TcpServer) handleTCPConnection(conn net.Conn) {
 
 		// data
 		msgData := make([]byte, msgLen)
-		if _, err := io.ReadFull(conn, msgData); err != nil {
+		if _, err := io.ReadFull(connection.con, msgData); err != nil {
 			logger.Warning("tcp recv error:", err)
 			continue
 		}
 
 		server.dispatcher.AddTask(&task.TaskReqInfo{
-			Con:  conn,
+			Con:  connection,
 			Data: msgData,
 			CB:   server.parser.ParserMessage,
 		})

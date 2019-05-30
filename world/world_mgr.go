@@ -18,7 +18,7 @@ type WorldMgr struct {
 	mapWorld      sync.Map
 	mapConn       sync.Map
 	mapRefWorldID sync.Map
-	datastore     iface.IDatastore
+	ds            iface.IDatastore
 	wg            sync.WaitGroup
 	ctx           context.Context
 	cancel        context.CancelFunc
@@ -30,10 +30,11 @@ func NewWorldMgr(datastore iface.IDatastore) (*WorldMgr, error) {
 	wm := &WorldMgr{
 		chTimeOutW: make(chan uint32, global.WorldConnectMax),
 		chStop:     make(chan struct{}, 1),
-		datastore:  datastore,
+		ds:         datastore,
 	}
 
 	wm.ctx, wm.cancel = context.WithCancel(context.Background())
+	wm.ds.DB().AutoMigrate(world{})
 
 	return wm, nil
 }
@@ -75,16 +76,16 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con net.Conn) (iface.IWorld
 	}
 
 	// new world
-	w := NewWorld(id, name, con, wm.chTimeOutW, wm.datastore)
-	wm.mapWorld.Store(w.ID(), w)
-	wm.mapConn.Store(w.Con(), w)
-	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.ID(), w.Name(), w.Con()))
+	w := NewWorld(id, name, con, wm.chTimeOutW, wm.ds)
+	wm.mapWorld.Store(w.GetID(), w)
+	wm.mapConn.Store(w.GetCon(), w)
+	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.GetID(), w.GetName(), w.GetCon()))
 
 	// world run
 	go w.Run()
 
 	w.SetLastConTime(int(time.Now().Unix()))
-	wm.datastore.DB().Save(w)
+	wm.ds.DB().Save(w)
 
 	return w, nil
 }
@@ -143,10 +144,10 @@ func (wm *WorldMgr) DisconnectWorld(con net.Conn) {
 		return
 	}
 
-	logger.Warning(fmt.Sprintf("World<id:%d> disconnected!", world.ID()))
+	logger.Warning(fmt.Sprintf("World<id:%d> disconnected!", world.GetID()))
 	world.Stop()
 
-	wm.mapWorld.Delete(world.ID())
+	wm.mapWorld.Delete(world.GetID())
 	wm.mapConn.Delete(con)
 }
 
@@ -161,15 +162,15 @@ func (wm *WorldMgr) KickWorld(id uint32) {
 		return
 	}
 
-	if _, ok := wm.mapConn.Load(world.Con()); !ok {
+	if _, ok := wm.mapConn.Load(world.GetCon()); !ok {
 		return
 	}
 
-	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.ID()))
+	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.GetID()))
 	world.Stop()
 
-	wm.mapConn.Delete(world.Con())
-	wm.mapWorld.Delete(world.ID())
+	wm.mapConn.Delete(world.GetCon())
+	wm.mapWorld.Delete(world.GetID())
 }
 
 func (wm *WorldMgr) BroadCast(msg proto.Message) {

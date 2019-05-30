@@ -19,10 +19,10 @@ type IWorldMgr interface {
 }
 
 type IWorld interface {
-	ID() uint32
-	Name() string
+	GetID() uint32
+	GetName() string
 	SetLastConTime(t int)
-	Con() net.Conn
+	GetCon() net.Conn
 	ResetTestConnect()
 	Run()
 	SendProtoMessage(p proto.Message)

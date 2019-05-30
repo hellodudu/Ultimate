@@ -231,7 +231,7 @@ func (m *MsgParser) handleWorldConnected(con net.Conn, p proto.Message) {
 		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
 		// add reference world id
-		m.wm.AddWorldRef(world.ID(), arrWorldID)
+		m.wm.AddWorldRef(world.GetID(), arrWorldID)
 
 		// request player info
 		msgP := &pb.MUW_RequestPlayerInfo{MinLevel: 20}
@@ -265,8 +265,8 @@ func (m *MsgParser) handleWorldConnected(con net.Conn, p proto.Message) {
 			}
 
 			w.SendProtoMessage(msg)
-			logger.Info("sync arena champion to world<id:", w.ID(), ", name:", w.Name(), ">")
-		}(world.ID())
+			logger.Info("sync arena champion to world<id:", w.GetID(), ", name:", w.GetName(), ">")
+		}(world.GetID())
 	}
 }
 
@@ -343,7 +343,7 @@ func (m *MsgParser) handleRequestUltimatePlayer(con net.Conn, p proto.Message) {
 			SrcPlayerId: msg.SrcPlayerId,
 			SrcServerId: msg.SrcServerId,
 			DstPlayerId: msg.DstPlayerId,
-			DstServerId: dstWorld.ID(),
+			DstServerId: dstWorld.GetID(),
 		}
 		dstWorld.SendProtoMessage(msgSend)
 	}
@@ -375,7 +375,7 @@ func (m *MsgParser) handleViewFormation(con net.Conn, p proto.Message) {
 			SrcPlayerId: msg.SrcPlayerId,
 			SrcServerId: msg.SrcServerId,
 			DstPlayerId: msg.DstPlayerId,
-			DstServerId: dstWorld.ID(),
+			DstServerId: dstWorld.GetID(),
 		}
 		dstWorld.SendProtoMessage(msgSend)
 	}

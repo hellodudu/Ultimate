@@ -770,7 +770,9 @@ func (arena *Arena) SaveChampion() {
 
 	// save to db
 	arena.ds.DB().Delete(championData{})
-	arena.ds.DB().Save(arena.championList)
+	for _, v := range arena.championList {
+		arena.ds.DB().Save(v)
+	}
 
 	// broadcast to all world
 	msg := &world_message.MUW_ArenaChampion{

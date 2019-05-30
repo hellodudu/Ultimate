@@ -16,9 +16,9 @@ import (
 )
 
 type world struct {
-	id          uint32   `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
-	name        string   `gorm:"type:varchar(32);column:name;default:;not null"`
-	lastConTime int      `gorm:"type:int(10);column:last_connect_time;default:0;not null"`
+	ID          uint32   `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
+	Name        string   `gorm:"type:varchar(32);column:name;default:'';not null"`
+	LastConTime int      `gorm:"type:int(10);column:last_connect_time;default:0;not null"`
 	con         net.Conn // connection
 	ds          iface.IDatastore
 	tHeartBeat  *time.Timer // connection heart beat
@@ -35,9 +35,9 @@ type world struct {
 
 func NewWorld(id uint32, name string, con net.Conn, chw chan uint32, datastore iface.IDatastore) iface.IWorld {
 	w := &world{
-		id:          id,
-		name:        name,
-		lastConTime: 0,
+		ID:          id,
+		Name:        name,
+		LastConTime: 0,
 		con:         con,
 		ds:          datastore,
 		tHeartBeat:  time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
@@ -57,20 +57,20 @@ func (world) TableName() string {
 	return "world"
 }
 
-func (w *world) ID() uint32 {
-	return w.id
+func (w *world) GetID() uint32 {
+	return w.ID
 }
 
-func (w *world) Name() string {
-	return w.name
+func (w *world) GetName() string {
+	return w.Name
 }
 
-func (w *world) Con() net.Conn {
+func (w *world) GetCon() net.Conn {
 	return w.con
 }
 
 func (w *world) SetLastConTime(t int) {
-	w.lastConTime = t
+	w.LastConTime = t
 }
 
 func (w *world) loadFromDB() {
@@ -93,12 +93,12 @@ func (w *world) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			logger.Info(fmt.Sprintf("world<%d> context done!", w.id))
+			logger.Info(fmt.Sprintf("world<%d> context done!", w.ID))
 			return
 
 		// connecting timeout
 		case <-w.tTimeOut.C:
-			w.chw <- w.id
+			w.chw <- w.ID
 
 		// Heart Beat
 		case <-w.tHeartBeat.C:

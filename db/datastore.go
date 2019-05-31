@@ -2,7 +2,6 @@ package datastore
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -88,23 +87,4 @@ func (m *Datastore) loadGlobal() {
 	}
 
 	logger.Info("datastore loadGlobal success:", m.global)
-}
-
-func (m *Datastore) Query(q string) (*sql.Rows, error) {
-	return nil, fmt.Errorf("test error")
-	// return func() (*sql.Rows, error) {
-	// 	stmt, err := m.db.PrepareContext(m.ctx, q)
-	// 	if err != nil {
-	// 		logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
-	// 		return nil, err
-	// 	}
-
-	// 	rows, err := stmt.QueryContext(m.ctx)
-	// 	if err != nil {
-	// 		logger.Warning(fmt.Sprintf("db query<%s> failed:", q), err)
-	// 		return nil, err
-	// 	}
-
-	// 	return rows, nil
-	// }()
 }

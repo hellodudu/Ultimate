@@ -9,7 +9,7 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	world_message "github.com/hellodudu/Ultimate/proto"
+	pb "github.com/hellodudu/Ultimate/proto"
 )
 
 var arenaMatchSectionNum = 8 // arena section num
@@ -266,13 +266,13 @@ func (arena *Arena) GetRecordNum() int {
 	return n
 }
 
-func (arena *Arena) GetRecordByID(id int64) (*world_message.ArenaRecord, error) {
+func (arena *Arena) GetRecordByID(id int64) (*pb.ArenaRecord, error) {
 	v, ok := arena.mapRecord.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena record with id %d", id)
 	}
 
-	return v.(*world_message.ArenaRecord), nil
+	return v.(*pb.ArenaRecord), nil
 }
 
 func (arena *Arena) GetMatchingList() []int64 {
@@ -311,13 +311,13 @@ func (arena *Arena) WeekEndTime() int {
 	return arena.ds.TableGlobal().ArenaWeekEndTime
 }
 
-func (arena *Arena) GetChampion() []*world_message.ArenaChampion {
+func (arena *Arena) GetChampion() []*pb.ArenaChampion {
 	arena.cpLock.RLock()
 	defer arena.cpLock.RUnlock()
 
-	championRet := make([]*world_message.ArenaChampion, 0)
+	championRet := make([]*pb.ArenaChampion, 0)
 	for _, v := range arena.championList {
-		champion := &world_message.ArenaChampion{
+		champion := &pb.ArenaChampion{
 			Rank:     int32(v.Rank) + 1,
 			PlayerId: v.PlayerID,
 			Score:    int32(v.Score),
@@ -453,8 +453,8 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	data := d.(*arenaData)
 
 	// function of find target
-	f := func(sec int32) *world_message.ArenaRecord {
-		var r *world_message.ArenaRecord
+	f := func(sec int32) *pb.ArenaRecord {
+		var r *pb.ArenaRecord
 		arena.arrMatchPool[sec].Range(func(k, _ interface{}) bool {
 			key := k.(int64)
 
@@ -473,7 +473,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 				return true
 			}
 
-			r = dv.(*world_message.ArenaRecord)
+			r = dv.(*pb.ArenaRecord)
 			return false
 		})
 		return r
@@ -500,7 +500,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	}
 
 	if world := arena.wm.GetWorldByID(info.ServerId); world != nil {
-		msg := &world_message.MUW_ArenaStartBattle{
+		msg := &pb.MUW_ArenaStartBattle{
 			AttackId: id,
 		}
 
@@ -539,7 +539,7 @@ func (arena *Arena) updateRequestRecord() {
 		}
 
 		// send request and try again 1 minutes later
-		msg := &world_message.MUW_ArenaAddRecord{
+		msg := &pb.MUW_ArenaAddRecord{
 			PlayerId: id,
 		}
 		world.SendProtoMessage(msg)
@@ -667,7 +667,7 @@ func (arena *Arena) weekEnd() {
 						continue
 					}
 
-					msg := &world_message.MUW_ArenaWeeklyReward{
+					msg := &pb.MUW_ArenaWeeklyReward{
 						PlayerId: k,
 						Score:    v.s,
 					}
@@ -711,7 +711,7 @@ func (arena *Arena) nextSeason() {
 	})
 
 	// broadcast to all world
-	msg := &world_message.MUW_SyncArenaSeason{
+	msg := &pb.MUW_SyncArenaSeason{
 		Season:  int32(arena.Season()),
 		EndTime: uint32(arena.SeasonEndTime()),
 	}
@@ -775,7 +775,7 @@ func (arena *Arena) SaveChampion() {
 	}
 
 	// broadcast to all world
-	msg := &world_message.MUW_ArenaChampion{
+	msg := &pb.MUW_ArenaChampion{
 		Data: arena.GetChampion(),
 	}
 
@@ -799,7 +799,7 @@ func (arena *Arena) seasonReward() {
 			continue
 		}
 
-		msg := &world_message.MUW_ArenaSeasonReward{
+		msg := &pb.MUW_ArenaSeasonReward{
 			PlayerId: data.Playerid,
 			Rank:     int32(n + 1),
 		}
@@ -836,7 +836,7 @@ func (arena *Arena) Matching(playerID int64) {
 }
 
 // AddRecord if existing then replace record
-func (arena *Arena) AddRecord(rec *world_message.ArenaRecord) {
+func (arena *Arena) AddRecord(rec *pb.ArenaRecord) {
 
 	if _, ok := arena.mapRecord.Load(rec.PlayerId); ok {
 		// update record
@@ -932,13 +932,13 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		return
 	}
 
-	msg := &world_message.MUW_RequestArenaRank{
+	msg := &pb.MUW_RequestArenaRank{
 		PlayerId:      id,
 		Page:          page,
 		Score:         int32(arenaDefaultScore),
 		Rank:          -1,
 		SeasonEndTime: uint32(arena.SeasonEndTime()),
-		Infos:         make([]*world_message.ArenaTargetInfo, 0),
+		Infos:         make([]*pb.ArenaTargetInfo, 0),
 	}
 
 	// get player rank
@@ -956,9 +956,9 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 			continue
 		}
 
-		value := v.(*world_message.ArenaRecord)
+		value := v.(*pb.ArenaRecord)
 
-		info := &world_message.ArenaTargetInfo{
+		info := &pb.ArenaTargetInfo{
 			PlayerId:     value.PlayerId,
 			PlayerName:   value.FirstGroup.Name,
 			ServerName:   value.FirstGroup.WorldName,

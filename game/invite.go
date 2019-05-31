@@ -6,7 +6,7 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	world_message "github.com/hellodudu/Ultimate/proto"
+	pb "github.com/hellodudu/Ultimate/proto"
 )
 
 type Invite struct {
@@ -72,7 +72,7 @@ func (invite *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 	}
 
 	if world := invite.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
-		msg := &world_message.MUW_CheckInvite{
+		msg := &pb.MUW_CheckInvite{
 			NewbieId:  newbieId,
 			InviterId: inviterId,
 		}
@@ -96,7 +96,7 @@ func (invite *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCo
 	}
 
 	if world := invite.wm.GetWorldByID(newbieInfo.ServerId); world != nil {
-		msg := &world_message.MUW_AddInviteResult{
+		msg := &pb.MUW_AddInviteResult{
 			NewbieId:  newbieId,
 			InviterId: inviterId,
 			ErrorCode: errorCode,
@@ -126,7 +126,7 @@ func (invite *Invite) InviteRecharge(newbieId int64, newbieName string, inviterI
 	}
 
 	if world := invite.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
-		msg := &world_message.MUW_InviteRecharge{
+		msg := &pb.MUW_InviteRecharge{
 			NewbieId:    newbieId,
 			NewbieName:  newbieName,
 			InviterId:   inviterId,

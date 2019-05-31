@@ -8,7 +8,7 @@ import (
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	world_message "github.com/hellodudu/Ultimate/proto"
+	pb "github.com/hellodudu/Ultimate/proto"
 	"google.golang.org/grpc"
 )
 
@@ -48,12 +48,12 @@ func NewRpcServer(gm iface.IGameMgr) (*RpcServer, error) {
 }
 
 // SayHello implements helloworld.GreeterServer
-func (s *rpcResponser) SayHello(ctx context.Context, in *world_message.HelloRequest) (*world_message.HelloReply, error) {
+func (s *rpcResponser) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	logger.Info("Received: ", in.Name)
-	return &world_message.HelloReply{Message: "Reply " + in.Name}, nil
+	return &pb.HelloReply{Message: "Reply " + in.Name}, nil
 }
 
-func (s *rpcResponser) GetScore(ctx context.Context, in *world_message.GetScoreRequest) (*world_message.GetScoreReply, error) {
+func (s *rpcResponser) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetScoreReply, error) {
 	logger.Info("Received: ", in.Id)
 	_, err := s.gm.Arena().GetDataByID(in.Id)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *rpcResponser) GetScore(ctx context.Context, in *world_message.GetScoreR
 		return nil, err
 	}
 
-	return &world_message.GetScoreReply{Score: 0}, nil
+	return &pb.GetScoreReply{Score: 0}, nil
 }
 
 func (server *RpcServer) Run() {
@@ -71,8 +71,8 @@ func (server *RpcServer) Run() {
 	server.s[s] = struct{}{}
 	server.mu.Unlock()
 
-	world_message.RegisterGreeterServer(s, &rpcResponser{gm: server.gm})
-	world_message.RegisterInviterServer(s, &rpcResponser{gm: server.gm})
+	pb.RegisterGreeterServer(s, &rpcResponser{gm: server.gm})
+	pb.RegisterInviterServer(s, &rpcResponser{gm: server.gm})
 	if err := s.Serve(server.ln); err != nil {
 		logger.Error("failed to service rpc Greeter: ", err)
 		return

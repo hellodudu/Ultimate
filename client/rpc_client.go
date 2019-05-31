@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	world_message "github.com/hellodudu/Ultimate/proto"
+	pb "github.com/hellodudu/Ultimate/proto"
 	"google.golang.org/grpc"
 )
 
@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := world_message.NewGreeterClient(conn)
+	c := pb.NewGreeterClient(conn)
 
 	// Contact the server and print out its response.
 	name := defaultName
@@ -33,16 +33,16 @@ func main() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.SayHello(ctx, &world_message.HelloRequest{Name: name})
+	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting: %s", r.Message)
 
-	i := world_message.NewInviterClient(conn)
+	i := pb.NewInviterClient(conn)
 	nctx, ncancel := context.WithTimeout(context.Background(), time.Second)
 	defer ncancel()
-	ir, err := i.GetScore(nctx, &world_message.GetScoreRequest{Id: 1201616684167725058})
+	ir, err := i.GetScore(nctx, &pb.GetScoreRequest{Id: 1201616684167725058})
 	if err != nil {
 		log.Fatalf("could not invite: %v", err)
 	}

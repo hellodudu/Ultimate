@@ -141,10 +141,14 @@ func (arenaData) TableName() string {
 
 // champion data
 type championData struct {
-	Rank     int   `gorm:"type:smallint(5);primary_key;column:champion_rank;default:0;not null"`
-	PlayerID int64 `gorm:"type:bigint(20);column:player_id;default:-1;not null"`
-	Score    int   `gorm:"type:int(10);column:score;default:0;not null"`
-	Season   int   `gorm:"type:int(10);column:arena_season;default:0;not null"`
+	Rank       int    `gorm:"type:smallint(5);primary_key;column:champion_rank;default:0;not null"`
+	PlayerID   int64  `gorm:"type:bigint(20);column:player_id;default:-1;not null"`
+	Score      int    `gorm:"type:int(10);column:score;default:0;not null"`
+	Season     int    `gorm:"type:int(10);column:arena_season;default:0;not null"`
+	PlayerName string `gorm:"type:varchar(32);column:player_name;default:'';not null"`
+	ServerName string `gorm:"type:varchar(32);column:server_name;default:'';not null"`
+	MasterID   int    `gorm:"type:int(10);column:master_id;default:1;not null"`
+	FashionID  int    `gorm:"type:int(10);column:fashion_id;default:-1;not null"`
 }
 
 func (championData) TableName() string {
@@ -318,25 +322,13 @@ func (arena *Arena) GetChampion() []*pb.ArenaChampion {
 	championRet := make([]*pb.ArenaChampion, 0)
 	for _, v := range arena.championList {
 		champion := &pb.ArenaChampion{
-			Rank:     int32(v.Rank) + 1,
-			PlayerId: v.PlayerID,
-			Score:    int32(v.Score),
-		}
-
-		rec, err := arena.GetRecordByID(v.PlayerID)
-		if err != nil {
-			logger.Warning("GetChampion cannot get player's ArenaRecord:", v.PlayerID)
-			continue
-		}
-
-		champion.PlayerName = rec.FirstGroup.Name
-		champion.ServerName = rec.FirstGroup.WorldName
-		for _, val := range rec.FirstGroup.HeroRecord {
-			if val.EntityId > 0 && val.EntityId < 1000 {
-				champion.MasterId = val.EntityId
-				champion.FashionId = val.FashionId
-				break
-			}
+			Rank:       int32(v.Rank) + 1,
+			PlayerId:   v.PlayerID,
+			Score:      int32(v.Score),
+			PlayerName: v.PlayerName,
+			ServerName: v.ServerName,
+			MasterId:   uint32(v.MasterID),
+			FashionId:  int32(v.FashionID),
 		}
 
 		championRet = append(championRet, champion)
@@ -739,7 +731,11 @@ func (arena *Arena) newSeasonRank() {
 
 		newScore := getDefaultScoreBySection(newSec)
 		value.Score = newScore
-		arena.ds.DB().Save(value)
+
+		// save to db
+		go func(data *arenaData) {
+			arena.ds.DB().Save(data)
+		}(value)
 
 		if oldSec != newSec {
 			arena.arrMatchPool[oldSec].Delete(value.Playerid)
@@ -760,11 +756,29 @@ func (arena *Arena) SaveChampion() {
 
 	for k, v := range list {
 		data := &championData{
-			Rank:     k,
-			PlayerID: v.Playerid,
-			Score:    int(v.Score),
-			Season:   arena.Season(),
+			Rank:       k,
+			PlayerID:   v.Playerid,
+			Score:      int(v.Score),
+			Season:     arena.Season(),
+			PlayerName: "",
+			ServerName: "",
+			MasterID:   1,
+			FashionID:  -1,
 		}
+
+		rec, _ := arena.GetRecordByID(v.Playerid)
+		if rec != nil {
+			data.PlayerName = rec.FirstGroup.Name
+			data.ServerName = rec.FirstGroup.WorldName
+			for _, val := range rec.FirstGroup.HeroRecord {
+				if val.EntityId > 0 && val.EntityId < 1000 {
+					data.MasterID = int(val.EntityId)
+					data.FashionID = int(val.FashionId)
+					break
+				}
+			}
+		}
+
 		arena.championList = append(arena.championList, data)
 	}
 	arena.cpLock.Unlock()

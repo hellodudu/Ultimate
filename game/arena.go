@@ -739,6 +739,7 @@ func (arena *Arena) newSeasonRank() {
 
 		newScore := getDefaultScoreBySection(newSec)
 		value.Score = newScore
+		arena.ds.DB().Save(value)
 
 		if oldSec != newSec {
 			arena.arrMatchPool[oldSec].Delete(value.Playerid)

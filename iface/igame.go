@@ -27,6 +27,7 @@ type IArena interface {
 	GetRecordReqList() map[int64]uint32
 	Season() int
 	SeasonEndTime() int
+	WeekEnd()
 	WeekEndTime() int
 	Matching(playerID int64)
 	RequestRank(id int64, page int32)

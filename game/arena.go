@@ -405,14 +405,14 @@ func (arena *Arena) loadFromDB() {
 
 	// if arena weekEndTime was expired, set a new time one week later
 	if arena.WeekEndTime() == 0 {
-		arena.weekEnd()
+		arena.WeekEnd()
 
 		// if weekEndTime has gone past, call weekEnd() 9 minutes later(wait for all world connected)
 	} else if now > arena.WeekEndTime() {
 		t := time.NewTimer(9 * time.Minute)
 		go func(ct *time.Timer) {
 			<-ct.C
-			arena.weekEnd()
+			arena.WeekEnd()
 		}(t)
 	}
 
@@ -561,7 +561,7 @@ func (arena *Arena) updateTime() {
 
 	// week end
 	if t >= arena.WeekEndTime() {
-		arena.weekEnd()
+		arena.WeekEnd()
 	}
 
 	// season end
@@ -571,7 +571,7 @@ func (arena *Arena) updateTime() {
 }
 
 // every monday request new player record and send weekly reward
-func (arena *Arena) weekEnd() {
+func (arena *Arena) WeekEnd() {
 	// current time
 	ct := time.Now()
 

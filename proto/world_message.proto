@@ -255,9 +255,13 @@ message MUW_SyncArenaSeason {
     uint32 end_time = 2;
 }
 
-message MUW_ArenaWeeklyReward {
+message ArenaWeeklyReward {
     int64 player_id = 1;
     int32 score = 2;
+}
+
+message MUW_ArenaWeeklyReward {
+    repeated ArenaWeeklyReward data = 1;
 }
 
 message MUW_ArenaSeasonReward {

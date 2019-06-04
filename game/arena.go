@@ -386,12 +386,12 @@ func (arena *Arena) Run() {
 func (arena *Arena) loadFromDB() {
 
 	// load from arena_champion
-	arena.ds.DB().AutoMigrate(championData{})
+	arena.ds.DB().Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(championData{})
 	arena.ds.DB().Find(&arena.championList)
 
 	// load from arena_player
 	var arenaDataList []*arenaData
-	arena.ds.DB().AutoMigrate(arenaData{})
+	arena.ds.DB().Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(arenaData{})
 	arena.ds.DB().Find(&arenaDataList)
 
 	for _, v := range arenaDataList {
@@ -595,6 +595,7 @@ func (arena *Arena) weekEnd() {
 		TimeStamp:        int(time.Now().Unix()),
 	})
 
+	// every monday will request players new record
 	// send request with time delay, 50 request per second
 	var arrReq []int64
 	arena.mapRecord.Range(func(k, _ interface{}) bool {
@@ -619,60 +620,52 @@ func (arena *Arena) weekEnd() {
 
 	// send weekly reward
 	type rewardWeek struct {
-		s int32
-		t time.Time
+		id int64 // player_id
+		s  int32 // score
 	}
 
-	mapReward := make(map[int64]*rewardWeek)
-	var index int
+	// map[world_id]arrayRewardWeek
+	mapWeekReward := make(map[uint32]([]*rewardWeek))
 	arena.mapArenaData.Range(func(_, v interface{}) bool {
 		data := v.(*arenaData)
 
-		r := &rewardWeek{}
-		r.s = data.Score
-		r.t = time.Now().Add(time.Second * time.Duration(2+index/50))
+		r := &rewardWeek{
+			id: data.Playerid,
+			s:  data.Score,
+		}
 
-		mapReward[data.Playerid] = r
-		index++
+		info := arena.gm.GetPlayerInfoByID(r.id)
+		if info == nil {
+			return true
+		}
+
+		if _, ok := mapWeekReward[info.ServerId]; !ok {
+			mapWeekReward[info.ServerId] = make([]*rewardWeek, 0)
+		}
+
+		mapWeekReward[info.ServerId] = append(mapWeekReward[info.ServerId], r)
 		return true
 	})
 
-	go func(m map[int64]*rewardWeek) {
-		for {
-			if len(m) == 0 {
-				return
+	// send to world
+	for worldID, rewardList := range mapWeekReward {
+		if world := arena.wm.GetWorldByID(worldID); world != nil {
+			msg := &pb.MUW_ArenaWeeklyReward{
+				Data: make([]*pb.ArenaWeeklyReward, 0),
 			}
 
-			t := time.Now()
-
-			for k, v := range m {
-				if t.Unix() >= v.t.Unix() {
-					info := arena.gm.GetPlayerInfoByID(k)
-					if info == nil {
-						delete(m, k)
-						continue
-					}
-
-					world := arena.wm.GetWorldByID(info.ServerId)
-					if world == nil {
-						delete(m, k)
-						continue
-					}
-
-					msg := &pb.MUW_ArenaWeeklyReward{
-						PlayerId: k,
-						Score:    v.s,
-					}
-
-					world.SendProtoMessage(msg)
-					delete(m, k)
+			for _, v := range rewardList {
+				d := &pb.ArenaWeeklyReward{
+					PlayerId: v.id,
+					Score:    v.s,
 				}
+
+				msg.Data = append(msg.Data, d)
 			}
 
-			d := time.Since(t)
-			time.Sleep(time.Millisecond - d)
+			world.SendProtoMessage(msg)
 		}
-	}(mapReward)
+	}
 }
 
 func (arena *Arena) nextSeason() {

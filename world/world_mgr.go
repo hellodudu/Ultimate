@@ -33,7 +33,7 @@ func NewWorldMgr(datastore iface.IDatastore) (*WorldMgr, error) {
 	}
 
 	wm.ctx, wm.cancel = context.WithCancel(context.Background())
-	wm.ds.DB().AutoMigrate(world{})
+	wm.ds.DB().Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(world{})
 
 	return wm, nil
 }

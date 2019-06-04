@@ -81,7 +81,7 @@ func (m *Datastore) loadGlobal() {
 		ArenaSeasonEndTime: 0,
 	}
 
-	m.db.AutoMigrate(m.global)
+	m.db.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(m.global)
 	if m.db.FirstOrCreate(m.global, global.UltimateID).RecordNotFound() {
 		m.db.Create(m.global)
 	}

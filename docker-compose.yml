@@ -2,14 +2,14 @@ version: "3"
 services:
   ultimate-service:
     build: ./
-    command: env GOOS=linux GOARCH=amd64 go build -o ultimate-service
     image: ultimate-service
     ports:
-      - 7030:7030
-      - 8088:8080
+      - "7030:7030"
+      - "8080:8080"
+    volumes:
+      - "./log/:/app/log"
+      - "./config/:/app/config"
     environment:
       MICRO_ADRESS: ":50051"
       MICRO_REGISTRY: "mdns"
-      DB_HOST: "root:@(localhost:3306)/db_ultimate"
-
-
+      DB_HOST: "root:@(host.docker.internal:3306)/db_ultimate"

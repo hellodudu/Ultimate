@@ -4,9 +4,8 @@ RUN apk add tzdata
 RUN mkdir /app
 WORKDIR /app
 
-COPY main /app/main
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
-RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo 'Asia/Shanghai' >/etc/timezone 
+COPY ultimate-service /app/ultimate-service
 
-ENTRYPOINT ["/app/main"]
+ENTRYPOINT ["/app/ultimate-service"]

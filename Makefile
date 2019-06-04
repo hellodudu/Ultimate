@@ -4,8 +4,8 @@ v ?= latest
 
 .PHONY: build
 build:
-	env GOOS=linux GOARCH=amd64 go build main.go
-	docker build -t ultimate .
+	env GOOS=linux GOARCH=amd64 go build -o ultimate-service
+	docker-compose build
 
 .PHONY: proto
 proto:
@@ -17,7 +17,7 @@ test:
 
 .PHONY: run
 run:
-	docker run -itd -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate:$(v)
+	docker run -itd -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate-service:$(v)
 
 .PHONY: docker_push
 docker_push:

@@ -919,6 +919,8 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 		// rank change
 		arena.arrRankArena.Sort()
 	}
+
+	logger.Info("arena battle result<attack_id:", attack, ", target_id:", target, ", win:", win, ", attack_score:", data.Score, ">")
 }
 
 // RequestRank request rank by world, max page is 10

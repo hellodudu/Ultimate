@@ -9,10 +9,9 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/invite-service/handler"
 	"github.com/hellodudu/Ultimate/invite-service/subscriber"
+	pbInvite "github.com/hellodudu/Ultimate/proto/invite"
 	"github.com/micro/go-micro"
 	log "github.com/sirupsen/logrus"
-
-	example "github.com/hellodudu/Ultimate/invite-service/proto/example"
 )
 
 func main() {
@@ -30,7 +29,7 @@ func main() {
 
 	// New Service
 	service := micro.NewService(
-		micro.Name("go.micro.srv.invite-service"),
+		micro.Name("ultimate.service.invite"),
 		micro.Version("latest"),
 	)
 
@@ -38,7 +37,7 @@ func main() {
 	service.Init()
 
 	// Register Handler
-	example.RegisterExampleHandler(service.Server(), new(handler.Example))
+	pbInvite.RegisterExampleHandler(service.Server(), new(handler.Example))
 
 	// Register Struct as Subscriber
 	micro.RegisterSubscriber("go.micro.srv.invite-service", service.Server(), new(subscriber.Example))

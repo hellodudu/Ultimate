@@ -1,7 +1,7 @@
 syntax = "proto3";
 package ultimate.service.invite;
 
-service Example {
+service InviteService {
 	rpc Call(Request) returns (Response) {}
 	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
 	rpc PingPong(stream Ping) returns (stream Pong) {}

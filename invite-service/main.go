@@ -1,13 +1,56 @@
-package game
+package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
-	pb "github.com/hellodudu/Ultimate/proto"
+	"github.com/hellodudu/Ultimate/invite-service/handler"
+	"github.com/hellodudu/Ultimate/invite-service/subscriber"
+	"github.com/micro/go-micro"
+	log "github.com/sirupsen/logrus"
+
+	example "github.com/hellodudu/Ultimate/invite-service/proto/example"
 )
+
+func main() {
+	// log file
+	t := time.Now()
+	fileTime := fmt.Sprintf("%d-%d-%d %d-%d-%d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+	logFn := fmt.Sprintf("log/%s_ultimate_service_invite.log", fileTime)
+
+	file, err := os.OpenFile(logFn, os.O_CREATE|os.O_WRONLY, 0666)
+	if err == nil {
+		log.SetOutput(file)
+	} else {
+		log.Info("Failed to log to file, using default stderr")
+	}
+
+	// New Service
+	service := micro.NewService(
+		micro.Name("go.micro.srv.invite-service"),
+		micro.Version("latest"),
+	)
+
+	// Initialise service
+	service.Init()
+
+	// Register Handler
+	example.RegisterExampleHandler(service.Server(), new(handler.Example))
+
+	// Register Struct as Subscriber
+	micro.RegisterSubscriber("go.micro.srv.invite-service", service.Server(), new(subscriber.Example))
+
+	// Register Function as Subscriber
+	micro.RegisterSubscriber("go.micro.srv.invite-service", service.Server(), subscriber.Handler)
+
+	// Run service
+	if err := service.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
 
 type Invite struct {
 	gm     iface.IGameMgr
@@ -40,7 +83,7 @@ func (invite *Invite) Run() {
 		select {
 		// context canceled
 		case <-invite.ctx.Done():
-			logger.Info("invite context done!")
+			invite.log.Info("invite context done!")
 			return
 
 		default:
@@ -67,7 +110,7 @@ func (invite *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 
 	inviterInfo := invite.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
-		logger.Warning("AddInvite cannot find inviter info:", inviterId)
+		log.Warn("AddInvite cannot find inviter info:", inviterId)
 		return 3
 	}
 
@@ -91,7 +134,7 @@ func (invite *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCo
 
 	newbieInfo := invite.gm.GetPlayerInfoByID(newbieId)
 	if newbieInfo == nil {
-		logger.Warning("CheckInviteResult cannot find newbie info:", newbieId)
+		log.Warn("CheckInviteResult cannot find newbie info:", newbieId)
 		return
 	}
 
@@ -121,7 +164,7 @@ func (invite *Invite) InviteRecharge(newbieId int64, newbieName string, inviterI
 
 	inviterInfo := invite.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
-		logger.Warning("InviteRecharge cannot find inviter info:", inviterId)
+		log.Warn("InviteRecharge cannot find inviter info:", inviterId)
 		return
 	}
 

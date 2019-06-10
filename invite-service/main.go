@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	invite "github.com/hellodudu/Ultimate/invite-service/handler"
+	"github.com/hellodudu/Ultimate/invite-service/handler"
 	pbInvite "github.com/hellodudu/Ultimate/proto/invite"
 	"github.com/micro/go-micro"
 	log "github.com/sirupsen/logrus"
@@ -34,13 +34,13 @@ func main() {
 	service.Init()
 
 	// invite
-	i := invite.NewInvite()
+	h := handler.NewInviteHandler()
 
 	// Register Handler
-	pbInvite.RegisterInviteServiceHandler(service.Server(), i)
+	pbInvite.RegisterInviteServiceHandler(service.Server(), h)
 
 	// Register Struct as Subscriber
-	micro.RegisterSubscriber("ultimate.service.invite", service.Server(), i.SubHandler)
+	micro.RegisterSubscriber("ultimate.service.invite", service.Server(), h.SubHandler)
 
 	// Run service
 	if err := service.Run(); err != nil {

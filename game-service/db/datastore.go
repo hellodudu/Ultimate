@@ -7,8 +7,8 @@ import (
 
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
 )
 
 type Datastore struct {
@@ -21,7 +21,7 @@ type Datastore struct {
 	global *iface.TableGlobal
 }
 
-func NewDatastore() (iface.IDatastore, error) {
+func NewDatastore() (*Datastore, error) {
 	datastore := &Datastore{
 		chStop: make(chan struct{}, 1),
 	}
@@ -32,7 +32,7 @@ func NewDatastore() (iface.IDatastore, error) {
 	var err error
 	datastore.db, err = gorm.Open("mysql", mysqlDSN)
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal(err)
 		return nil, err
 	}
 
@@ -46,21 +46,21 @@ func (m *Datastore) DB() *gorm.DB {
 	return m.db
 }
 
-func (m *Datastore) TableGlobal() *iface.TableGlobal {
-	return m.global
-}
+// func (m *Datastore) TableGlobal() *iface.TableGlobal {
+// 	return m.global
+// }
 
-func (m *Datastore) Run() {
-	for {
-		select {
-		case <-m.ctx.Done():
-			logger.Print("db mgr context done!")
-			m.chStop <- struct{}{}
-			return
-		}
-	}
+// func (m *Datastore) Run() {
+// 	for {
+// 		select {
+// 		case <-m.ctx.Done():
+// 			logger.Print("db mgr context done!")
+// 			m.chStop <- struct{}{}
+// 			return
+// 		}
+// 	}
 
-}
+// }
 
 func (m *Datastore) Stop() chan struct{} {
 	m.db.Close()
@@ -86,5 +86,5 @@ func (m *Datastore) loadGlobal() {
 		m.db.Create(m.global)
 	}
 
-	logger.Info("datastore loadGlobal success:", m.global)
+	log.Info("datastore loadGlobal success:", m.global)
 }

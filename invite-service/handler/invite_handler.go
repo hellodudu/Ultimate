@@ -1,32 +1,34 @@
-package invite
+package handler
 
 import (
 	"context"
 
+	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbInvite "github.com/hellodudu/Ultimate/proto/invite"
 	log "github.com/sirupsen/logrus"
 )
 
-type Invite struct {
+type InviteHandler struct {
 	// gm iface.IGameMgr
 	// wm iface.IWorldMgr
+	gameCli pbGame.GameServiceClient
 }
 
 // NewInvite create new Invite
-func NewInvite() *Invite {
-	i := &Invite{
-		// gm: gm,
+func NewInviteHandler() *InviteHandler {
+	h := &InviteHandler{
+		gameCli: pbGame.NewGameServiceClient("ultimate.service.game", nil),
 		// wm: wm,
 	}
 
-	return i
+	return h
 }
 
 // Stop stop
-func (i *Invite) Stop() {
+func (h *InviteHandler) Stop() {
 }
 
-func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
+func (h *InviteHandler) AddInvite(newbieId int64, inviterId int64) int32 {
 	if newbieId == -1 {
 		return 3
 	}
@@ -35,8 +37,8 @@ func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 		return 3
 	}
 
-	inviterInfo := i.gm.GetPlayerInfoByID(inviterId)
-	if inviterInfo == nil {
+	req := &pbGame.GetPlayerInfoByIDRequest{Id: inviterId}
+	if inviterInfo, err := h.gameCli.GetPlayerInfoByID(context.Background(), req); err != nil {
 		log.Warn("AddInvite cannot find inviter info:", inviterId)
 		return 3
 	}
@@ -54,18 +56,18 @@ func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 	return 3
 }
 
-func (i *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode int32) {
+func (h *InviteHandler) CheckInviteResult(newbieId int64, inviterId int64, errorCode int32) {
 	if newbieId == -1 {
 		return
 	}
 
-	newbieInfo := i.gm.GetPlayerInfoByID(newbieId)
+	newbieInfo := h.gm.GetPlayerInfoByID(newbieId)
 	if newbieInfo == nil {
 		log.Warn("CheckInviteResult cannot find newbie info:", newbieId)
 		return
 	}
 
-	if world := i.wm.GetWorldByID(newbieInfo.ServerId); world != nil {
+	if world := h.wm.GetWorldByID(newbieInfo.ServerId); world != nil {
 		msg := &pb.MUW_AddInviteResult{
 			NewbieId:  newbieId,
 			InviterId: inviterId,
@@ -76,7 +78,7 @@ func (i *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode in
 	}
 }
 
-func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int64, diamondGift int32) {
+func (h *InviteHandler) InviteRecharge(newbieId int64, newbieName string, inviterId int64, diamondGift int32) {
 	if newbieId == -1 {
 		return
 	}
@@ -89,13 +91,13 @@ func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int
 		return
 	}
 
-	inviterInfo := i.gm.GetPlayerInfoByID(inviterId)
+	inviterInfo := h.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
 		log.Warn("InviteRecharge cannot find inviter info:", inviterId)
 		return
 	}
 
-	if world := i.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
+	if world := h.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
 		msg := &pb.MUW_InviteRecharge{
 			NewbieId:    newbieId,
 			NewbieName:  newbieName,
@@ -112,14 +114,14 @@ func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int
 /////////////////////////////////////
 
 // Call is a single request handler called via client.Call or the generated client code
-func (i *Invite) Call(ctx context.Context, req *pbInvite.Request, rsp *pbInvite.Response) error {
+func (h *InviteHandler) Call(ctx context.Context, req *pbInvite.Request, rsp *pbInvite.Response) error {
 	log.Info("Received InviteService.Call request")
 	rsp.Msg = "Hello " + req.Name
 	return nil
 }
 
 // Stream is a server side stream handler called via client.Stream or the generated client code
-func (i *Invite) Stream(ctx context.Context, req *pbInvite.StreamingRequest, stream pbInvite.InviteService_StreamStream) error {
+func (h *InviteHandler) Stream(ctx context.Context, req *pbInvite.StreamingRequest, stream pbInvite.InviteService_StreamStream) error {
 	log.Info("Received InviteService.Stream request with count: %d", req.Count)
 
 	for i := 0; i < int(req.Count); i++ {
@@ -135,7 +137,7 @@ func (i *Invite) Stream(ctx context.Context, req *pbInvite.StreamingRequest, str
 }
 
 // PingPong is a bidirectional stream handler called via client.Stream or the generated client code
-func (i *Invite) PingPong(ctx context.Context, stream pbInvite.InviteService_PingPongStream) error {
+func (h *InviteHandler) PingPong(ctx context.Context, stream pbInvite.InviteService_PingPongStream) error {
 	for {
 		req, err := stream.Recv()
 		if err != nil {
@@ -151,7 +153,7 @@ func (i *Invite) PingPong(ctx context.Context, stream pbInvite.InviteService_Pin
 /////////////////////////////////////
 // subscribe
 /////////////////////////////////////
-func (i *Invite) SubHandler(ctx context.Context, msg *pbInvite.Message) error {
+func (h *InviteHandler) SubHandler(ctx context.Context, msg *pbInvite.Message) error {
 	log.Info("Function Received message: ", msg.Say)
 	return nil
 }

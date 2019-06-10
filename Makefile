@@ -11,6 +11,7 @@ build:
 proto:
 	protoc -I=proto --go_out=plugins=grpc:proto proto/world_message.proto
 	make -C invite-service proto
+	make -C game-service proto
 
 .PHONY: test
 test:

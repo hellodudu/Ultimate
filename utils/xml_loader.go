@@ -1,4 +1,4 @@
-package res
+package utils
 
 import (
 	"encoding/xml"

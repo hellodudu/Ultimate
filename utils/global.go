@@ -1,9 +1,8 @@
-package global
+package utils
 
 import (
 	"strconv"
 
-	"github.com/gorilla/websocket"
 	"github.com/hellodudu/Ultimate/res"
 )
 
@@ -11,12 +10,6 @@ import (
 var RedisAddr string = "127.0.0.1:6379"
 var RedisPwd string = ""
 var RedisDB int = 0
-
-// websocket
-var Upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
 
 // inimgr
 var IniMgr = res.NewIniMgr()

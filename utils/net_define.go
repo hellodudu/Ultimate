@@ -1,4 +1,4 @@
-package global
+package utils
 
 // base net message type define
 type BaseNetMsg struct {

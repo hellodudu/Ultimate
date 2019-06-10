@@ -789,7 +789,7 @@ func (arena *Arena) saveChampion() {
 	Instance().GetDBMgr().Exec(query)
 
 	for _, v := range arena.championList {
-		query = fmt.Sprintf("replace into arena_champion set rank = %d, player_id = %d, score = %d, arena_season = %d", v.rank, v.playerID, v.score, arena.season)
+		query = fmt.Sprintf("replace into arena_champion set champion_rank = %d, player_id = %d, score = %d, arena_season = %d", v.rank, v.playerID, v.score, arena.season)
 		Instance().GetDBMgr().Exec(query)
 	}
 

@@ -126,7 +126,7 @@ func HandleRequestUltimatePlayer(con net.Conn, ws *WorldSession, p proto.Message
 			return
 		}
 
-		if int(msg.DstServerId) == -1 {
+		if int32(msg.DstServerId) == -1 {
 			dstWorld = ws.GetWorldByID(dstInfo.ServerId)
 		}
 
@@ -152,7 +152,7 @@ func HandleViewFormation(con net.Conn, ws *WorldSession, p proto.Message) {
 			return
 		}
 
-		if int(msg.DstServerId) == -1 {
+		if int32(msg.DstServerId) == -1 {
 			dstWorld = ws.GetWorldByID(dstInfo.ServerId)
 		}
 

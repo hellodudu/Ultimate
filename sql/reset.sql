@@ -31,7 +31,7 @@ create table arena_player (
 
 drop table if exists `arena_champion`;
 create table arena_champion (
-    `rank` smallint(5) not null default '0' comment 'arena rank from 1 to 3',
+    `champion_rank` smallint(5) not null default '0' comment 'arena rank from 0 to 2',
     `player_id` bigint(20) not null default '-1' comment 'playerid',
     `score` int(10) not null default '0' comment 'arena score',
     `arena_season` int(10) not null default '0' comment 'arena seasons', 

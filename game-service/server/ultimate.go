@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-redis/redis"
 	datastore "github.com/hellodudu/Ultimate/game-service/db"
+	"github.com/hellodudu/Ultimate/game-service/game"
 	"github.com/hellodudu/Ultimate/game-service/handler"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
@@ -24,6 +25,7 @@ type ultimate struct {
 	td iface.IDispatcher // task dispatcher
 	ds iface.IDatastore  // datastore
 	wm iface.IWorldMgr   // world manager
+	gm iface.IGameMgr    // game manager
 	mp iface.IMsgParser  // msg parser
 
 	gameSrv     micro.Service
@@ -47,9 +49,15 @@ func NewUltimate() (iface.IUltimate, error) {
 		return nil, err
 	}
 
-	umt.InitWorldMgr()
+	if err := umt.InitWorldMgr(); err != nil {
+		return nil, err
+	}
 
-	if err := umt.InitGame(); err != nil {
+	if err := umt.InitGameMgr(); err != nil {
+		return nil, err
+	}
+
+	if err := umt.InitGameService(); err != nil {
 		return nil, err
 	}
 
@@ -150,19 +158,29 @@ func (umt *ultimate) InitHttpServer() {
 }
 
 // init world session
-func (umt *ultimate) InitWorldMgr() {
+func (umt *ultimate) InitWorldMgr() error {
 	var err error
 	if umt.wm, err = world.NewWorldMgr(umt.ds); err != nil {
-		logger.Fatal(err)
+		return err
 	}
 
-	logger.Print("world_session init ok!")
+	log.Info("world_mgr init ok!")
+	return nil
 }
 
-func (umt *ultimate) InitGame() error {
+func (umt *ultimate) InitGameMgr() error {
+	var err error
+	if umt.gm, err = game.NewGameMgr(); err != nil {
+		return err
+	}
+
+	log.Info("game_mgr init ok!")
+}
+
+func (umt *ultimate) InitGameService() error {
 
 	var err error
-	if umt.gameHandler, err = handler.NewGameHandler(); err != nil {
+	if umt.gameHandler, err = handler.NewGameHandler(umt.gm); err != nil {
 		return err
 	}
 

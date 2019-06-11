@@ -1,11 +1,11 @@
-# Invite-Service Service
+# Arena-Service Service
 
-This is the Invite-Service service
+This is the Arena-Service service
 
 Generated with
 
 ```
-micro new github.com/hellodudu/Ultimate/invite-service --namespace=go.micro --type=srv
+micro new github.com/hellodudu/Ultimate/arena-service --namespace=go.micro --type=srv
 ```
 
 ## Getting Started
@@ -16,9 +16,9 @@ micro new github.com/hellodudu/Ultimate/invite-service --namespace=go.micro --ty
 
 ## Configuration
 
-- FQDN: go.micro.srv.invite-service
+- FQDN: go.micro.srv.arena-service
 - Type: srv
-- Alias: invite-service
+- Alias: arena-service
 
 ## Dependencies
 
@@ -46,7 +46,7 @@ make build
 
 Run the service
 ```
-./invite-service-srv
+./arena-service-srv
 ```
 
 Build a docker image

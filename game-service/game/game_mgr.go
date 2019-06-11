@@ -11,7 +11,7 @@ import (
 
 type GameMgr struct {
 	// arena         iface.IArena
-	// invite        iface.IInvite
+	invite        iface.IInvite
 	mapPlayerInfo map[int64]*pbGame.CrossPlayerInfo
 	mapGuildInfo  map[int64]*pbGame.CrossGuildInfo
 	mu            sync.Lock
@@ -37,10 +37,10 @@ func NewGameMgr() (iface.IGameMgr, error) {
 	// 	logger.Fatal(err)
 	// }
 
-	// gm.invite, err = NewInvite(gm.ctx, gm, wm)
-	// if err != nil {
-	// 	logger.Fatal(err)
-	// }
+	gm.invite, err = NewInvite(gm.ctx, gm, wm)
+	if err != nil {
+		logger.Fatal(err)
+	}
 
 	return gm, nil
 }
@@ -49,13 +49,12 @@ func NewGameMgr() (iface.IGameMgr, error) {
 // 	return g.arena
 // }
 
-// func (g *GameMgr) Invite() iface.IInvite {
-// 	return g.invite
-// }
+func (g *GameMgr) Invite() iface.IInvite {
+	return g.invite
+}
 
 func (g *GameMgr) Run() {
 	// go g.arena.Run()
-	// go g.invite.Run()
 
 	for {
 		select {
@@ -70,9 +69,9 @@ func (g *GameMgr) Run() {
 // 	return g.arena
 // }
 
-// func (g *GameMgr) GetInvite() iface.IInvite {
-// 	return g.invite
-// }
+func (g *GameMgr) GetInvite() iface.IInvite {
+	return g.invite
+}
 
 func (g *GameMgr) AddPlayerInfoList(p []*pbGame.CrossPlayerInfo) {
 	if len(p) == 0 {

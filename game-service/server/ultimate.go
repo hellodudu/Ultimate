@@ -13,11 +13,10 @@ import (
 	"github.com/hellodudu/Ultimate/game-service/handler"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/task"
 	"github.com/hellodudu/Ultimate/world"
-	"github.com/liangdas/mqant/log"
 	"github.com/micro/go-micro"
+	log "github.com/sirupsen/logrus"
 )
 
 // ultimate define
@@ -33,7 +32,6 @@ type ultimate struct {
 
 	rds      *redis.Client // redis
 	tcpServ  *TCPServer    // tcp server
-	rpcServ  *RpcServer    // rpc server
 	httpServ *HttpServer   // http server
 	wg       sync.WaitGroup
 }
@@ -61,11 +59,19 @@ func NewUltimate() (iface.IUltimate, error) {
 		return nil, err
 	}
 
-	umt.InitMsgParser()
-	umt.InitTCPServer()
-	umt.InitHttpServer()
+	if err := umt.InitMsgParser(); err != nil {
+		return nil, err
+	}
 
-	logger.Print("all init ok!")
+	if err := umt.InitTCPServer(); err != nil {
+		return nil, err
+	}
+
+	if err := umt.InitHttpServer(); err != nil {
+		return nil, err
+	}
+
+	log.Info("all init ok!")
 
 	return umt, nil
 }
@@ -113,48 +119,35 @@ func (umt *ultimate) InitRedis() {
 	})
 
 	if _, err := umt.rds.Ping().Result(); err != nil {
-		logger.Fatal(err)
+		log.Fatal(err)
 		return
 	}
 
-	logger.Print("redis init ok")
+	log.Info("redis init ok")
 }
 
-func (umt *ultimate) InitMsgParser() {
-	if umt.mp = NewMsgParser(umt.gm, umt.wm); umt.mp == nil {
-		logger.Fatal("cannot new msg_parser")
-	}
-
-	logger.Print("msg parser init ok!")
+func (umt *ultimate) InitMsgParser() error {
+	umt.mp = NewMsgParser(umt.gm, umt.wm)
+	log.Info("msg parser init ok!")
+	return nil
 }
 
 // InitTCPServer init
-func (umt *ultimate) InitTCPServer() {
+func (umt *ultimate) InitTCPServer() error {
 	var err error
 	if umt.tcpServ, err = NewTcpServer(umt.mp, umt.td); err != nil {
-		logger.Fatal(err)
+		return err
 	}
 
-	logger.Print("tcp_server init ok!")
-}
-
-// InitRPCServer init
-func (umt *ultimate) InitRPCServer() {
-	var err error
-	if umt.rpcServ, err = NewRpcServer(umt.gm); err != nil {
-		logger.Fatal(err)
-	}
-
-	logger.Print("rpc_server init ok!")
+	log.Info("tcp_server init ok!")
+	return nil
 }
 
 // init http server
-func (umt *ultimate) InitHttpServer() {
-	if umt.httpServ = NewHttpServer(umt.gm); umt.httpServ == nil {
-		logger.Fatal("cannot new http_server")
-	}
-
-	logger.Print("http_server init ok!")
+func (umt *ultimate) InitHttpServer() error {
+	umt.httpServ = NewHttpServer(umt.gm)
+	log.Info("http_server init ok!")
+	return nil
 }
 
 // init world session
@@ -203,7 +196,6 @@ func (umt *ultimate) InitGameService() error {
 // run
 func (umt *ultimate) Run() {
 	go umt.tcpServ.Run()
-	go umt.rpcServ.Run()
 	go umt.httpServ.Run()
 	go umt.wm.Run()
 	go umt.gm.Run()
@@ -236,7 +228,6 @@ func (umt *ultimate) Run() {
 }
 
 func (umt *ultimate) Stop() {
-	umt.rpcServ.Stop()
 	umt.tcpServ.Stop()
 	<-umt.ds.Stop()
 	<-umt.wm.Stop()

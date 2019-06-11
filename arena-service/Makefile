@@ -4,11 +4,11 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: proto
 proto:
-	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/invite/invite.proto
+	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/arena/arena.proto
 
 .PHONY: build
 build: proto
-	env GOOS=linux GOARCH=amd64 go build -o ultimate-service-invite main.go plugin.go
+	env GOOS=linux GOARCH=amd64 go build -o ultimate-service-arena main.go plugin.go
 
 .PHONY: test
 test:
@@ -16,11 +16,11 @@ test:
 
 .PHONY: docker
 docker:
-	docker build . -t ultimate-service-invite:latest
+	docker build . -t ultimate-service-arena:latest
 
 .PHONY: run
 run:
 	docker run -it -p 50051:50051 \
 	 -e MICRO_SERVER_ADDRESS=:50051 \
 	 -e MICRO_REGISTRY=mdns \
-	 ultimate-service-invite
+	 ultimate-service-arena

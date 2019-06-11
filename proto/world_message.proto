@@ -3,18 +3,6 @@ package world_message;
 
 
 
-message MUW_RequestPlayerInfo {
-    int32 min_level = 1;
-}
-
-
-
-message MUW_RequestGuildInfo {
-
-}
-
-
-
 message MWU_PlayUltimateRecord {
 	int64 src_player_id = 1;
 	uint32 src_server_id = 2;
@@ -214,8 +202,6 @@ message MUW_ArenaChampionOnline {
     string server_name = 3;
 }
 
-//////////////////////////////////////
-// invite
 message MUW_CheckInvite {
     int64 newbie_id = 1;
     int64 inviter_id = 2;
@@ -266,19 +252,6 @@ message HelloRequest {
 message HelloReply {
     string message = 1;
 }
-
-service Inviter {
-    rpc GetScore (GetScoreRequest) returns (GetScoreReply) {}
-}
-
-message GetScoreRequest {
-    int64 id = 1;
-}
-
-message GetScoreReply {
-    int32 score = 1;
-}
-
 
 // world manager
 service WorldMgr {

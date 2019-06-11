@@ -9,9 +9,10 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
-	pb "github.com/hellodudu/Ultimate/proto"
+	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 type world struct {
@@ -26,8 +27,8 @@ type world struct {
 	cancel      context.CancelFunc
 	chw         chan uint32
 
-	mapPlayer map[int64]*pb.CrossPlayerInfo
-	mapGuild  map[int64]*pb.CrossGuildInfo
+	mapPlayer map[int64]*pbGame.CrossPlayerInfo
+	mapGuild  map[int64]*pbGame.CrossGuildInfo
 
 	chDBInit chan struct{}
 }
@@ -42,8 +43,8 @@ func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datas
 		tHeartBeat:  time.NewTimer(time.Duration(global.WorldHeartBeatSec) * time.Second),
 		tTimeOut:    time.NewTimer(time.Duration(global.WorldConTimeOutSec) * time.Second),
 		chw:         chw,
-		mapPlayer:   make(map[int64]*pb.CrossPlayerInfo),
-		mapGuild:    make(map[int64]*pb.CrossGuildInfo),
+		mapPlayer:   make(map[int64]*pbGame.CrossPlayerInfo),
+		mapGuild:    make(map[int64]*pbGame.CrossGuildInfo),
 		chDBInit:    make(chan struct{}, 1),
 	}
 
@@ -92,7 +93,7 @@ func (w *world) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			logger.Info(fmt.Sprintf("world<%d> context done!", w.ID))
+			log.Info(fmt.Sprintf("world<%d> context done!", w.ID))
 			return
 
 		// connecting timeout
@@ -101,7 +102,7 @@ func (w *world) Run() {
 
 		// Heart Beat
 		case <-w.tHeartBeat.C:
-			msg := &pb.MUW_TestConnect{}
+			msg := &pbWorld.MUW_TestConnect{}
 			w.SendProtoMessage(msg)
 			w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
 		}
@@ -117,7 +118,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	// reply message length = 4bytes size + 8bytes size BaseNetMsg + 2bytes message_name size + message_name + proto_data
 	out, err := proto.Marshal(p)
 	if err != nil {
-		logger.Warning(err)
+		log.Warn(err)
 		return
 	}
 
@@ -136,7 +137,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	copy(resp[14+len(typeName):], out)
 
 	if _, err := w.con.Write(resp); err != nil {
-		logger.Warning("send proto msg error:", err)
+		log.Warn("send proto msg error:", err)
 	}
 }
 
@@ -145,6 +146,6 @@ func (w *world) SendTransferMessage(data []byte) {
 	binary.LittleEndian.PutUint32(resp[:4], uint32(len(data)))
 	copy(resp[4:], data)
 	if _, err := w.con.Write(resp); err != nil {
-		logger.Warning("send transfer msg error:", err)
+		log.Warn("send transfer msg error:", err)
 	}
 }

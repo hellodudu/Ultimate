@@ -1,17 +1,22 @@
 package server
 
 import (
-	"errors"
+	"fmt"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/go-redis/redis"
-	datastore "github.com/hellodudu/Ultimate/db"
-	"github.com/hellodudu/Ultimate/game"
+	datastore "github.com/hellodudu/Ultimate/game-service/db"
+	"github.com/hellodudu/Ultimate/game-service/handler"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/task"
 	"github.com/hellodudu/Ultimate/world"
+	"github.com/liangdas/mqant/log"
+	"github.com/micro/go-micro"
 )
 
 // ultimate define
@@ -19,8 +24,10 @@ type ultimate struct {
 	td iface.IDispatcher // task dispatcher
 	ds iface.IDatastore  // datastore
 	wm iface.IWorldMgr   // world manager
-	gm iface.IGameMgr    // game manager
 	mp iface.IMsgParser  // msg parser
+
+	gameSrv     micro.Service
+	gameHandler *handler.GameHandler
 
 	rds      *redis.Client // redis
 	tcpServ  *TCPServer    // tcp server
@@ -32,20 +39,26 @@ type ultimate struct {
 func NewUltimate() (iface.IUltimate, error) {
 	umt := &ultimate{}
 
-	if ok := logger.Init(global.Debugging); !ok {
-		return nil, errors.New("init log file failed")
+	if err := umt.InitDatastore(); err != nil {
+		return nil, err
 	}
 
-	umt.InitDatastore()
-	umt.InitTask()
+	if err := umt.InitTask(); err != nil {
+		return nil, err
+	}
+
 	umt.InitWorldMgr()
-	umt.InitGame()
+
+	if err := umt.InitGame(); err != nil {
+		return nil, err
+	}
+
 	umt.InitMsgParser()
 	umt.InitTCPServer()
-	umt.InitRPCServer()
 	umt.InitHttpServer()
 
 	logger.Print("all init ok!")
+
 	return umt, nil
 }
 
@@ -62,24 +75,26 @@ func (umt *ultimate) Datastore() iface.IDatastore {
 }
 
 // init task and taskdispatcher
-func (umt *ultimate) InitTask() {
+func (umt *ultimate) InitTask() error {
 	var err error
 	if umt.td, err = task.NewDispatcher(); err != nil {
-		logger.Fatal(err)
-		return
+		return err
 	}
 
-	logger.Print("task init ok!")
+	log.Info("task init ok!")
+
+	return nil
 }
 
 // init db
-func (umt *ultimate) InitDatastore() {
+func (umt *ultimate) InitDatastore() error {
 	var err error
 	if umt.ds, err = datastore.NewDatastore(); err != nil {
-		logger.Fatal(err)
-		return
+		return err
 	}
-	logger.Print("datastore init ok!")
+
+	log.Info("datastore init ok!")
+	return nil
 }
 
 func (umt *ultimate) InitRedis() {
@@ -144,13 +159,27 @@ func (umt *ultimate) InitWorldMgr() {
 	logger.Print("world_session init ok!")
 }
 
-func (umt *ultimate) InitGame() {
+func (umt *ultimate) InitGame() error {
+
 	var err error
-	if umt.gm, err = game.NewGameMgr(umt.wm, umt.ds); err != nil {
-		logger.Fatal(err)
+	if umt.gameHandler, err = handler.NewGameHandler(); err != nil {
+		return err
 	}
 
-	logger.Print("gm init ok!")
+	// New Service
+	umt.gameSrv = micro.NewService(
+		micro.Name("ultimate.service.game"),
+		micro.Version("latest"),
+	)
+
+	// Initialise service
+	umt.gameSrv.Init()
+
+	// Register Handler
+	pbGame.RegisterGameServiceHandler(umt.gameSrv.Server(), umt.gameHandler)
+
+	log.Info("game init ok!")
+	return nil
 }
 
 // run
@@ -162,6 +191,30 @@ func (umt *ultimate) Run() {
 	go umt.gm.Run()
 	go umt.ds.Run()
 
+	// rpc service
+	go func() {
+		if err := umt.gameSrv.Run(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// server exit
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		sig := <-c
+		log.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
+
+		switch sig {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
+			umt.Stop()
+			log.Info("server exit safely")
+			return
+		case syscall.SIGHUP:
+		default:
+			return
+		}
+	}
 }
 
 func (umt *ultimate) Stop() {

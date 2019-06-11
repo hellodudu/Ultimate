@@ -2,33 +2,6 @@ syntax = "proto3";
 package world_message;
 
 
-message MWU_WorldLogon {
-  uint32 world_id = 1;
-  string world_name = 2;
-}
-
-message MUW_WorldLogon {
-}
-
-message MWU_TestConnect {
-
-}
-
-message MUW_TestConnect {
-
-}
-
-message MWU_HeartBeat {
-
-}
-
-message MUW_HeartBeat {
-    uint32  battle_time = 1;
-}
-
-message MWU_WorldConnected {
-    repeated uint32 world_id = 1;
-}
 
 message MUW_RequestPlayerInfo {
     int32 min_level = 1;

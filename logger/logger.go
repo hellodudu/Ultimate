@@ -65,3 +65,18 @@ func Print(v ...interface{}) {
 	logConsole.Println(v...)
 	logrus.Println(v...)
 }
+
+func WithFieldsInfo(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Info(s)
+	logrus.WithFields(fields).Info(s)
+}
+
+func WithFieldsWarn(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Warn(s)
+	logrus.WithFields(fields).Warn(s)
+}
+
+func WithFieldsError(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Error(s)
+	logrus.WithFields(fields).Error(s)
+}

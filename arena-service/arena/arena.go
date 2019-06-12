@@ -12,6 +12,7 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/protobuf/proto"
+	"github.com/sirupsen/logrus"
 )
 
 var arenaMatchSectionNum = 8 // arena section num
@@ -596,7 +597,9 @@ func (arena *Arena) sendWorldMessage(id uint32, m proto.Message) error {
 func (arena *Arean) broadCast(m proto.Message) error {
 	out, err := proto.Marshal(m)
 	if err != nil {
-		logger.Warn("proto marshal failed:", err)
+		logger.WithFieldsWarn("proto marshal failed", logrus.Fields{
+			"error": err,
+		})
 		return err
 	}
 
@@ -837,7 +840,11 @@ func (arena *Arena) seasonReward() {
 		req := &pbGame.GetPlayerInfoByIDRequest{Id: data.Playerid}
 		resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
 		if err != nil {
-			logger.Warning("arena season end, but cannot find top", n+1, " player ", data.Playerid, " : ", err)
+			logger.WithFieldsWarn("season reward cannot find player", logrus.Fields{
+				"top":       n + 1,
+				"player_id": data.Playerid,
+				"error":     err,
+			})
 			continue
 		}
 

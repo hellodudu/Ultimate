@@ -30,17 +30,17 @@ func NewXmlLoader() *XmlLoader {
 	xmlLoader := &XmlLoader{}
 	xmlFile, err := os.Open("config/entity_client.xml")
 	if err != nil {
-		logger.Warning(err.Error())
+		logger.Warn(err)
 	}
 	defer xmlFile.Close()
 
 	byXml, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
-		logger.Warning(err.Error())
+		logger.Warn(err)
 	}
 
 	if err := xml.Unmarshal(byXml, xmlLoader); err != nil {
-		logger.Warning(err.Error())
+		logger.Warn(err)
 	}
 
 	return xmlLoader

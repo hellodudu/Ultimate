@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/jinzhu/gorm"
 )
 

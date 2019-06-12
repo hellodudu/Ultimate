@@ -273,13 +273,13 @@ func (arena *Arena) GetRecordNum() int {
 	return n
 }
 
-func (arena *Arena) GetRecordByID(id int64) (*pb.ArenaRecord, error) {
+func (arena *Arena) GetRecordByID(id int64) (*pbArena.ArenaRecord, error) {
 	v, ok := arena.mapRecord.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena record with id %d", id)
 	}
 
-	return v.(*pb.ArenaRecord), nil
+	return v.(*pbArena.ArenaRecord), nil
 }
 
 func (arena *Arena) GetMatchingList() []int64 {
@@ -318,13 +318,13 @@ func (arena *Arena) WeekEndTime() int {
 	return arena.ds.TableGlobal().ArenaWeekEndTime
 }
 
-func (arena *Arena) GetChampion() []*pb.ArenaChampion {
+func (arena *Arena) GetChampion() []*pbArena.ArenaChampion {
 	arena.cpLock.RLock()
 	defer arena.cpLock.RUnlock()
 
-	championRet := make([]*pb.ArenaChampion, 0)
+	championRet := make([]*pbArena.ArenaChampion, 0)
 	for _, v := range arena.championList {
-		champion := &pb.ArenaChampion{
+		champion := &pbArena.ArenaChampion{
 			Rank:       int32(v.Rank) + 1,
 			PlayerId:   v.PlayerID,
 			Score:      int32(v.Score),
@@ -440,15 +440,17 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	// get player arena data
 	d, ok := arena.mapArenaData.Load(id)
 	if !ok {
-		logger.Warning("cannot find player:", id, " 's arena data!")
+		logger.WithFieldsWarn("cannot find player's arena data", logrus.Fields{
+			"player_id": id,
+		})
 		return false, fmt.Errorf("cannot find player %d 's arena data", id)
 	}
 
 	data := d.(*arenaData)
 
 	// function of find target
-	f := func(sec int32) *pb.ArenaRecord {
-		var r *pb.ArenaRecord
+	f := func(sec int32) *pbArena.ArenaRecord {
+		var r *pbArena.ArenaRecord
 		arena.arrMatchPool[sec].Range(func(k, _ interface{}) bool {
 			key := k.(int64)
 
@@ -467,7 +469,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 				return true
 			}
 
-			r = dv.(*pb.ArenaRecord)
+			r = dv.(*pbArena.ArenaRecord)
 			return false
 		})
 		return r
@@ -528,7 +530,7 @@ func (arena *Arena) updateRequestRecord() {
 		}
 
 		// send request and try again 1 minutes later
-		msg := &pb.MUW_ArenaAddRecord{
+		msg := &pbArena.MUW_ArenaAddRecord{
 			PlayerId: id,
 		}
 
@@ -825,7 +827,7 @@ func (arena *Arena) SaveChampion() {
 	}
 
 	// broadcast to all world
-	msg := &pb.MUW_ArenaChampion{
+	msg := &pbArena.MUW_ArenaChampion{
 		Data: arena.GetChampion(),
 	}
 
@@ -848,7 +850,7 @@ func (arena *Arena) seasonReward() {
 			continue
 		}
 
-		msg := &pb.MUW_ArenaSeasonReward{
+		msg := &pbArena.MUW_ArenaSeasonReward{
 			PlayerId: data.Playerid,
 			Rank:     int32(n + 1),
 		}
@@ -885,7 +887,7 @@ func (arena *Arena) Matching(playerID int64) {
 }
 
 // AddRecord if existing then replace record
-func (arena *Arena) AddRecord(rec *pb.ArenaRecord) {
+func (arena *Arena) AddRecord(rec *pbArena.ArenaRecord) {
 
 	if _, ok := arena.mapRecord.Load(rec.PlayerId); ok {
 		// update record
@@ -933,7 +935,9 @@ func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {
 func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 	d, ok := arena.mapArenaData.Load(attack)
 	if !ok {
-		logger.Warning("cannot find attack ", attack, " 's arena data!")
+		logger.WithFieldsWarn("cannot find attacker's arena data", logrus.Fields{
+			"player_id": attack,
+		})
 		return
 	}
 
@@ -976,13 +980,13 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		return
 	}
 
-	msg := &pb.MUW_RequestArenaRank{
+	msg := &pbArena.MUW_RequestArenaRank{
 		PlayerId:      id,
 		Page:          page,
 		Score:         int32(arenaDefaultScore),
 		Rank:          -1,
 		SeasonEndTime: uint32(arena.SeasonEndTime()),
-		Infos:         make([]*pb.ArenaTargetInfo, 0),
+		Infos:         make([]*pbArena.ArenaTargetInfo, 0),
 	}
 
 	// get player rank
@@ -1000,9 +1004,9 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 			continue
 		}
 
-		value := v.(*pb.ArenaRecord)
+		value := v.(*pbArena.ArenaRecord)
 
-		info := &pb.ArenaTargetInfo{
+		info := &pbArena.ArenaTargetInfo{
 			PlayerId:     value.PlayerId,
 			PlayerName:   value.FirstGroup.Name,
 			ServerName:   value.FirstGroup.WorldName,
@@ -1016,7 +1020,9 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 	}
 
 	if msg.Page >= 10 {
-		logger.Warning("reply arena request rank pages error:", msg.Page)
+		logger.WithFieldsWarn("reply arena request rank pages error", logrus.Fields{
+			"page": msg.Page,
+		}
 	}
 
 	arena.sendWorldMessage(resp.Info.ServerId, msg)

@@ -1,9 +1,8 @@
 package iface
 
-import pb "github.com/hellodudu/Ultimate/proto"
+import pb "github.com/hellodudu/Ultimate/proto/game"
 
 type IGameMgr interface {
-	Arena() IArena
 	Invite() IInvite
 	AddGuildInfo(i *pb.CrossGuildInfo)
 	AddGuildInfoList(s []*pb.CrossGuildInfo)

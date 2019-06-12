@@ -1,4 +1,4 @@
-package ini
+package utils
 
 import (
 	"github.com/go-ini/ini"

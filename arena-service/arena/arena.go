@@ -1022,7 +1022,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 	if msg.Page >= 10 {
 		logger.WithFieldsWarn("reply arena request rank pages error", logrus.Fields{
 			"page": msg.Page,
-		}
+		})
 	}
 
 	arena.sendWorldMessage(resp.Info.ServerId, msg)

@@ -2,8 +2,8 @@ package game
 
 import (
 	"github.com/hellodudu/Ultimate/iface"
+	"github.com/hellodudu/Ultimate/logger"
 	pb "github.com/hellodudu/Ultimate/proto/invite"
-	log "github.com/sirupsen/logrus"
 )
 
 type Invite struct {
@@ -36,7 +36,7 @@ func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 
 	inviterInfo := i.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
-		log.Warn("AddInvite cannot find inviter info:", inviterId)
+		logger.Warn("AddInvite cannot find inviter info:", inviterId)
 		return 3
 	}
 
@@ -60,7 +60,7 @@ func (i *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode in
 
 	newbieInfo := i.gm.GetPlayerInfoByID(newbieId)
 	if newbieInfo == nil {
-		log.Warn("CheckInviteResult cannot find newbie info:", newbieId)
+		logger.Warn("CheckInviteResult cannot find newbie info:", newbieId)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int
 
 	inviterInfo := i.gm.GetPlayerInfoByID(inviterId)
 	if inviterInfo == nil {
-		log.Warn("InviteRecharge cannot find inviter info:", inviterId)
+		logger.Warn("InviteRecharge cannot find inviter info:", inviterId)
 		return
 	}
 

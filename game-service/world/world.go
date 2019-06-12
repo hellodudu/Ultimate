@@ -9,10 +9,10 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
+	"github.com/hellodudu/Ultimate/logger"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 type world struct {
@@ -93,7 +93,7 @@ func (w *world) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			log.Info(fmt.Sprintf("world<%d> context done!", w.ID))
+			logger.Info(fmt.Sprintf("world<%d> context done!", w.ID))
 			return
 
 		// connecting timeout
@@ -118,7 +118,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	// reply message length = 4bytes size + 8bytes size BaseNetMsg + 2bytes message_name size + message_name + proto_data
 	out, err := proto.Marshal(p)
 	if err != nil {
-		log.Warn(err)
+		logger.Warn(err)
 		return
 	}
 
@@ -137,7 +137,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	copy(resp[14+len(typeName):], out)
 
 	if _, err := w.con.Write(resp); err != nil {
-		log.Warn("send proto msg error:", err)
+		logger.Warn("send proto msg error:", err)
 	}
 }
 
@@ -146,6 +146,6 @@ func (w *world) SendTransferMessage(data []byte) {
 	binary.LittleEndian.PutUint32(resp[:4], uint32(len(data)))
 	copy(resp[4:], data)
 	if _, err := w.con.Write(resp); err != nil {
-		log.Warn("send transfer msg error:", err)
+		logger.Warn("send transfer msg error:", err)
 	}
 }

@@ -11,11 +11,10 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/log"
+	"github.com/hellodudu/Ultimate/logger"
 	pb "github.com/hellodudu/Ultimate/proto"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 // ProtoHandler handle function
@@ -73,7 +72,7 @@ func (m *MsgParser) getRegProtoHandle(id uint32) (ProtoHandler, error) {
 func (m *MsgParser) regProtoHandle(name string, fn ProtoHandler) {
 	id := utils.Crc32(name)
 	if v, ok := m.protoHandler[id]; ok {
-		log.Warn(fmt.Sprintf("register proto msg_id<%d> existed! protobuf type:%v\n", id, v))
+		logger.Warn(fmt.Sprintf("register proto msg_id<%d> existed! protobuf type:%v\n", id, v))
 		return
 	}
 
@@ -111,7 +110,7 @@ func (m *MsgParser) decodeToProto(data []byte) (proto.Message, error) {
 
 	// unmarshal
 	if err := proto.Unmarshal(protoData, newProto); err != nil {
-		log.Warn("Failed to parse proto msg:", newProto, err)
+		logger.Warn("Failed to parse proto msg:", newProto, err)
 		return nil, fmt.Errorf("invalid message<%s>, won't deal with it", protoTypeName)
 	}
 
@@ -123,7 +122,7 @@ func (m *MsgParser) decodeToProto(data []byte) (proto.Message, error) {
 // if it is transfer msg(transfer binarys to other world), then next are binarys to be transferd
 func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 	if len(data) <= 8 {
-		log.Warn("tcp recv data length <= 8:", string(data))
+		logger.Warn("tcp recv data length <= 8:", string(data))
 		return
 	}
 
@@ -133,13 +132,13 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 	copy(byBaseMsg, data[:binary.Size(baseMsg)])
 	buf := &bytes.Buffer{}
 	if _, err := buf.Write(byBaseMsg); err != nil {
-		log.Warn("cannot read message:", byBaseMsg, " from connection:", con, " err:", err)
+		logger.Warn("cannot read message:", byBaseMsg, " from connection:", con, " err:", err)
 		return
 	}
 
 	// get top 4 bytes messageid
 	if err := binary.Read(buf, binary.LittleEndian, baseMsg); err != nil {
-		log.Warn("cannot read message:", byBaseMsg, " from connection:", con, " err:", err)
+		logger.Warn("cannot read message:", byBaseMsg, " from connection:", con, " err:", err)
 		return
 	}
 
@@ -147,14 +146,14 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 	if baseMsg.ID == utils.Crc32(string("MWU_DirectProtoMsg")) {
 		newProto, err := m.decodeToProto(data)
 		if err != nil {
-			log.Warn(err)
+			logger.Warn(err)
 			return
 		}
 
 		protoMsgID := utils.Crc32(proto.MessageName(newProto))
 		fn, err := m.getRegProtoHandle(protoMsgID)
 		if err != nil {
-			log.Warn(fmt.Sprintf("unregisted protoMsgID<%d> received!", protoMsgID))
+			logger.Warn(fmt.Sprintf("unregisted protoMsgID<%d> received!", protoMsgID))
 		}
 
 		// callback
@@ -168,20 +167,20 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 		copy(byTransferMsg, data[:binary.Size(transferMsg)])
 		buf := &bytes.Buffer{}
 		if _, err := buf.Write(byTransferMsg); err != nil {
-			log.Warn("cannot read message:", byTransferMsg, " from connection:", con, " err:", err)
+			logger.Warn("cannot read message:", byTransferMsg, " from connection:", con, " err:", err)
 			return
 		}
 
 		// get top 4 bytes messageid
 		if err := binary.Read(buf, binary.LittleEndian, transferMsg); err != nil {
-			log.Warn("cannot read message:", byTransferMsg, " from connection:", con, " err:", err)
+			logger.Warn("cannot read message:", byTransferMsg, " from connection:", con, " err:", err)
 			return
 		}
 
 		// send message to world
 		sendWorld := m.wm.GetWorldByID(transferMsg.WorldID)
 		if sendWorld == nil {
-			log.Warn(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.WorldID))
+			logger.Warn(fmt.Sprintf("send transfer message to unconnected world<%d>", transferMsg.WorldID))
 			return
 		}
 
@@ -193,13 +192,13 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 func (m *MsgParser) handleWorldLogon(con iface.ITCPConn, p proto.Message) {
 	msg, ok := p.(*pbWorld.MWU_WorldLogon)
 	if !ok {
-		log.Warn("Cannot assert value to message")
+		logger.Warn("Cannot assert value to message")
 		return
 	}
 
 	world, err := m.wm.AddWorld(msg.WorldId, msg.WorldName, con)
 	if err != nil {
-		log.Warn(err, fmt.Sprintf("<id:%d, name:%s, con:%v>", msg.WorldId, msg.WorldName, con))
+		logger.Warn(err, fmt.Sprintf("<id:%d, name:%s, con:%v>", msg.WorldId, msg.WorldName, con))
 		return
 	}
 
@@ -217,7 +216,7 @@ func (m *MsgParser) handleTestConnect(con iface.ITCPConn, p proto.Message) {
 func (m *MsgParser) handleHeartBeat(con iface.ITCPConn, p proto.Message) {
 	if world := m.wm.GetWorldByCon(con); world != nil {
 		if t := int32(time.Now().Unix()); t == -1 {
-			log.Warn("Heart beat get time err")
+			logger.Warn("Heart beat get time err")
 			return
 		}
 
@@ -229,7 +228,7 @@ func (m *MsgParser) handleHeartBeat(con iface.ITCPConn, p proto.Message) {
 func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 	if world := m.wm.GetWorldByCon(con); world != nil {
 		arrWorldID := p.(*pbWorld.MWU_WorldConnected).WorldId
-		log.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
+		logger.Info(fmt.Sprintf("world ref<%v> connected!", arrWorldID))
 
 		// add reference world id
 		m.wm.AddWorldRef(world.GetID(), arrWorldID)
@@ -257,7 +256,7 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 			<-t.C
 			w := m.wm.GetWorldByID(id)
 			if w == nil {
-				log.Warn("world<", id, "> disconnected, cannot sync arena champion")
+				logger.Warn("world<", id, "> disconnected, cannot sync arena champion")
 				return
 			}
 
@@ -266,7 +265,7 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 			}
 
 			w.SendProtoMessage(msg)
-			log.Info("sync arena champion to world<id:", w.GetID(), ", name:", w.GetName(), ">")
+			logger.Info("sync arena champion to world<id:", w.GetID(), ", name:", w.GetName(), ">")
 		}(world.GetID())
 	}
 }
@@ -275,7 +274,7 @@ func (m *MsgParser) handleRequestPlayerInfo(con iface.ITCPConn, p proto.Message)
 	if world := m.wm.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*pbWorld.MWU_RequestPlayerInfo)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_RequestPlayerInfo")
+			logger.Warn("Cannot assert value to message pb.MWU_RequestPlayerInfo")
 			return
 		}
 
@@ -287,7 +286,7 @@ func (m *MsgParser) handleRequestGuildInfo(con iface.ITCPConn, p proto.Message) 
 	if world := m.wm.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*pbWorld.MWU_RequestGuildInfo)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_RequestGuildInfo")
+			logger.Warn("Cannot assert value to message pb.MWU_RequestGuildInfo")
 			return
 		}
 
@@ -299,7 +298,7 @@ func (m *MsgParser) handlePlayUltimateRecord(con iface.ITCPConn, p proto.Message
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_PlayUltimateRecord)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_PlayUltimateRecord")
+			logger.Warn("Cannot assert value to message pb.MWU_PlayUltimateRecord")
 			return
 		}
 
@@ -322,7 +321,7 @@ func (m *MsgParser) handleRequestUltimatePlayer(con iface.ITCPConn, p proto.Mess
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_RequestUltimatePlayer)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_RequestUltimatePlayer")
+			logger.Warn("Cannot assert value to message pb.MWU_RequestUltimatePlayer")
 			return
 		}
 
@@ -354,7 +353,7 @@ func (m *MsgParser) handleViewFormation(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ViewFormation)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_ViewFormation")
+			logger.Warn("Cannot assert value to message pb.MWU_ViewFormation")
 			return
 		}
 
@@ -389,7 +388,7 @@ func (m *MsgParser) handleArenaMatching(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ArenaMatching)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_ArenaMatching")
+			logger.Warn("Cannot assert value to message pb.MWU_ArenaMatching")
 			return
 		}
 
@@ -401,7 +400,7 @@ func (m *MsgParser) handleArenaAddRecord(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ArenaAddRecord)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_ArenaAddRecord")
+			logger.Warn("Cannot assert value to message pb.MWU_ArenaAddRecord")
 			return
 		}
 
@@ -413,7 +412,7 @@ func (m *MsgParser) handleArenaBattleResult(con iface.ITCPConn, p proto.Message)
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ArenaBattleResult)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_ArenaBattleResult")
+			logger.Warn("Cannot assert value to message pb.MWU_ArenaBattleResult")
 			return
 		}
 
@@ -425,7 +424,7 @@ func (m *MsgParser) handleReplacePlayerInfo(con iface.ITCPConn, p proto.Message)
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbWorld.MWU_ReplacePlayerInfo)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_ReplacePlayerInfo")
+			logger.Warn("Cannot assert value to message pb.MWU_ReplacePlayerInfo")
 			return
 		}
 
@@ -437,7 +436,7 @@ func (m *MsgParser) handleReplaceGuildInfo(con iface.ITCPConn, p proto.Message) 
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbWorld.MWU_ReplaceGuildInfo)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_ReplaceGuildInfo")
+			logger.Warn("Cannot assert value to message pb.MWU_ReplaceGuildInfo")
 			return
 		}
 
@@ -449,7 +448,7 @@ func (m *MsgParser) handleRequestArenaRank(con iface.ITCPConn, p proto.Message) 
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_RequestArenaRank)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_RequestArenaRank")
+			logger.Warn("Cannot assert value to message pb.MWU_RequestArenaRank")
 			return
 		}
 
@@ -461,7 +460,7 @@ func (m *MsgParser) handleAddInvite(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_AddInvite)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_AddInvite")
+			logger.Warn("Cannot assert value to message pb.MWU_AddInvite")
 			return
 		}
 
@@ -482,7 +481,7 @@ func (m *MsgParser) handleCheckInviteResult(con iface.ITCPConn, p proto.Message)
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_CheckInviteResult)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_CheckInviteResult")
+			logger.Warn("Cannot assert value to message pb.MWU_CheckInviteResult")
 			return
 		}
 
@@ -494,7 +493,7 @@ func (m *MsgParser) handleInviteRecharge(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_InviteRecharge)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_InviteRecharge")
+			logger.Warn("Cannot assert value to message pb.MWU_InviteRecharge")
 			return
 		}
 
@@ -506,7 +505,7 @@ func (m *MsgParser) handleArenaChampionOnline(con iface.ITCPConn, p proto.Messag
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pb.MWU_ArenaChampionOnline)
 		if !ok {
-			log.Warn("Cannot assert value to message pb.MWU_ArenaChampionOnline")
+			logger.Warn("Cannot assert value to message pb.MWU_ArenaChampionOnline")
 			return
 		}
 

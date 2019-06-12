@@ -1,27 +1,32 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 
-	"github.com/hellodudu/Ultimate/arena-service/handler"
+	"github.com/hellodudu/Ultimate/arena-service/arena"
+	datastore "github.com/hellodudu/Ultimate/arena-service/db"
+	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	"github.com/micro/go-micro"
-	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	// log file
-	t := time.Now()
-	fileTime := fmt.Sprintf("%d-%d-%d %d-%d-%d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
-	logFn := fmt.Sprintf("log/%s_ultimate_service_arena.log", fileTime)
 
-	file, err := os.OpenFile(logFn, os.O_CREATE|os.O_WRONLY, 0666)
-	if err == nil {
-		log.SetOutput(file)
-	} else {
-		log.Info("Failed to log to file, using default stderr")
+	logger.Init(global.debug, "ultimate_service_arena")
+
+	ds, err := datastore.NewDatastore()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	// new arena
+	arena, err := arena.NewArena(context.Background(), ds)
+	if err != nil {
+		logger.Fatal(err)
 	}
 
 	// New Service
@@ -33,17 +38,38 @@ func main() {
 	// Initialise service
 	service.Init()
 
-	// arena
-	h := handler.NewArenaHandler()
-
 	// Register Handler
-	pbArena.RegisterArenaServiceHandler(service.Server(), h)
+	pbArena.RegisterArenaServiceHandler(service.Server(), arena)
 
 	// Register Struct as Subscriber
-	micro.RegisterSubscriber("ultimate.service.arena", service.Server(), h.SubHandler)
+	micro.RegisterSubscriber("ultimate.service.arena", service.Server(), arena.SubHandler)
 
 	// Run service
-	if err := service.Run(); err != nil {
-		log.Fatal(err)
+	go func() {
+		if err := service.Run(); err != nil {
+			logger.Fatal(err)
+		}
+	}()
+
+	// Run datastore
+	go ds.Run()
+
+	// server exit
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		sig := <-c
+		logger.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
+
+		switch sig {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
+			arena.Stop()
+			<-ds.Stop()
+			logger.Info("server exit safely")
+			return
+		case syscall.SIGHUP:
+		default:
+			return
+		}
 	}
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
-	log "github.com/sirupsen/logrus"
+	"github.com/hellodudu/Ultimate/logger"
 )
 
 type WorldMgr struct {
@@ -80,7 +80,7 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con iface.ITCPConn) (iface.
 	wm.mapConn[w.GetCon()] = w
 	wm.mu.Unlock()
 
-	log.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.GetID(), w.GetName(), w.GetCon()))
+	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.GetID(), w.GetName(), w.GetCon()))
 
 	// world run
 	go w.Run()
@@ -129,7 +129,7 @@ func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 		return
 	}
 
-	log.Warn(fmt.Sprintf("World<id:%d> disconnected!", world.GetID()))
+	logger.Warn(fmt.Sprintf("World<id:%d> disconnected!", world.GetID()))
 	w.Stop()
 
 	wm.mu.Lock()
@@ -148,7 +148,7 @@ func (wm *WorldMgr) KickWorld(id uint32) {
 		return
 	}
 
-	log.Warn(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.GetID()))
+	logger.Warn(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.GetID()))
 	w.Stop()
 
 	wm.mu.Lock()
@@ -167,7 +167,7 @@ func (wm *WorldMgr) Run() {
 	for {
 		select {
 		case <-wm.ctx.Done():
-			log.Info("world session context done!")
+			logger.Info("world session context done!")
 			wm.chStop <- struct{}{}
 			return
 		case wid := <-wm.chTimeOutW:

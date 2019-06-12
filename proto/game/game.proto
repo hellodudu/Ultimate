@@ -143,6 +143,8 @@ message MUW_InviteRecharge {
 service GameService {
     rpc GetPlayerInfoByID (GetPlayerInfoByIDRequest) returns (GetPlayerInfoByIDReply) {}
     rpc GetGuildInfoByID (GetGuildInfoByIDRequest) returns (GetGuildInfoByIDReply) {}
+    rpc SendWorldMessage (SendWorldMessageRequest) returns (SendWorldMessageReply) {}
+    rpc BroadCast (BroadCastRequest) returns (BroadCastReply) {}
 }
 
 message GetPlayerInfoByIDRequest {
@@ -159,4 +161,21 @@ message GetGuildInfoByIDRequest {
 
 message GetGuildInfoByIDReply {
     CrossGuildInfo info = 1;
+}
+
+message SendWorldMessageRequest {
+    uint32 id = 1;
+    bytes msg = 2;
+}
+
+message SendWorldMessageReply {
+
+}
+
+message BroadCastRequest {
+    bytes msg = 1;
+}
+
+message BroadCastReply {
+
 }

@@ -14,27 +14,27 @@ type IGameMgr interface {
 	Run()
 }
 
-type IArena interface {
-	AddRecord(rec *pb.ArenaRecord)
-	BattleResult(attack int64, target int64, win bool)
-	GetArenaDataNum() int
-	GetChampion() []*pb.ArenaChampion
-	GetDataByID(id int64) (interface{}, error) // ret: (*arenaData, error)
-	GetMatchingList() []int64
-	GetRankListByPage(page int) interface{} //ret: []*arenaData
-	GetRecordByID(id int64) (*pb.ArenaRecord, error)
-	GetRecordNum() int
-	GetRecordReqList() map[int64]uint32
-	Season() int
-	SeasonEndTime() int
-	WeekEnd()
-	WeekEndTime() int
-	Matching(playerID int64)
-	RequestRank(id int64, page int32)
-	Run()
-	Stop()
-	SaveChampion()
-}
+// type IArena interface {
+// 	AddRecord(rec *pb.ArenaRecord)
+// 	BattleResult(attack int64, target int64, win bool)
+// 	GetArenaDataNum() int
+// 	GetChampion() []*pb.ArenaChampion
+// 	GetDataByID(id int64) (interface{}, error) // ret: (*arenaData, error)
+// 	GetMatchingList() []int64
+// 	GetRankListByPage(page int) interface{} //ret: []*arenaData
+// 	GetRecordByID(id int64) (*pb.ArenaRecord, error)
+// 	GetRecordNum() int
+// 	GetRecordReqList() map[int64]uint32
+// 	Season() int
+// 	SeasonEndTime() int
+// 	WeekEnd()
+// 	WeekEndTime() int
+// 	Matching(playerID int64)
+// 	RequestRank(id int64, page int32)
+// 	Run()
+// 	Stop()
+// 	SaveChampion()
+// }
 
 type IInvite interface {
 	AddInvite(newbieId int64, inviterId int64) int32

@@ -13,10 +13,10 @@ import (
 	"github.com/hellodudu/Ultimate/game-service/handler"
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
+	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/task"
 	"github.com/hellodudu/Ultimate/world"
 	"github.com/micro/go-micro"
-	log "github.com/sirupsen/logrus"
 )
 
 // ultimate define
@@ -71,7 +71,7 @@ func NewUltimate() (iface.IUltimate, error) {
 		return nil, err
 	}
 
-	log.Info("all init ok!")
+	logger.Info("all init ok!")
 
 	return umt, nil
 }
@@ -95,7 +95,7 @@ func (umt *ultimate) InitTask() error {
 		return err
 	}
 
-	log.Info("task init ok!")
+	logger.Info("task init ok!")
 
 	return nil
 }
@@ -107,7 +107,7 @@ func (umt *ultimate) InitDatastore() error {
 		return err
 	}
 
-	log.Info("datastore init ok!")
+	logger.Info("datastore init ok!")
 	return nil
 }
 
@@ -119,16 +119,16 @@ func (umt *ultimate) InitRedis() {
 	})
 
 	if _, err := umt.rds.Ping().Result(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
-	log.Info("redis init ok")
+	logger.Info("redis init ok")
 }
 
 func (umt *ultimate) InitMsgParser() error {
 	umt.mp = NewMsgParser(umt.gm, umt.wm)
-	log.Info("msg parser init ok!")
+	logger.Info("msg parser init ok!")
 	return nil
 }
 
@@ -139,14 +139,14 @@ func (umt *ultimate) InitTCPServer() error {
 		return err
 	}
 
-	log.Info("tcp_server init ok!")
+	logger.Info("tcp_server init ok!")
 	return nil
 }
 
 // init http server
 func (umt *ultimate) InitHttpServer() error {
 	umt.httpServ = NewHttpServer(umt.gm)
-	log.Info("http_server init ok!")
+	logger.Info("http_server init ok!")
 	return nil
 }
 
@@ -157,7 +157,7 @@ func (umt *ultimate) InitWorldMgr() error {
 		return err
 	}
 
-	log.Info("world_mgr init ok!")
+	logger.Info("world_mgr init ok!")
 	return nil
 }
 
@@ -167,7 +167,7 @@ func (umt *ultimate) InitGameMgr() error {
 		return err
 	}
 
-	log.Info("game_mgr init ok!")
+	logger.Info("game_mgr init ok!")
 }
 
 func (umt *ultimate) InitGameService() error {
@@ -189,7 +189,7 @@ func (umt *ultimate) InitGameService() error {
 	// Register Handler
 	pbGame.RegisterGameServiceHandler(umt.gameSrv.Server(), umt.gameHandler)
 
-	log.Info("game init ok!")
+	logger.Info("game init ok!")
 	return nil
 }
 
@@ -204,7 +204,7 @@ func (umt *ultimate) Run() {
 	// rpc service
 	go func() {
 		if err := umt.gameSrv.Run(); err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}()
 
@@ -213,12 +213,12 @@ func (umt *ultimate) Run() {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
 		sig := <-c
-		log.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
+		logger.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
 
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
 			umt.Stop()
-			log.Info("server exit safely")
+			logger.Info("server exit safely")
 			return
 		case syscall.SIGHUP:
 		default:

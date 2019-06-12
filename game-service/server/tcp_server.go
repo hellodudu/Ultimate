@@ -12,7 +12,7 @@ import (
 	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	"github.com/hellodudu/Ultimate/task"
+	"github.com/hellodudu/Ultimate/utils/task"
 )
 
 var tcpReadBufMax = 1024 * 1024 * 2

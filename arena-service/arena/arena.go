@@ -578,7 +578,12 @@ func (arena *Arena) sendWorldMessage(id uint32, m proto.Message) error {
 		return err
 	}
 
-	req := &pbGame.SendWorldMessageRequest{Id: id, Msg: out}
+	req := &pbGame.SendWorldMessageRequest{
+		Id:      id,
+		MsgName: proto.MessageName(m),
+		Msg:     out,
+	}
+
 	_, err := arena.gameCli.SendWorldMessage(arena.ctx, req)
 	if err != nil {
 		logger.Warn("sendWorldMessage reply err:", err)
@@ -595,7 +600,11 @@ func (arena *Arean) broadCast(m proto.Message) error {
 		return err
 	}
 
-	req := &pbGame.BroadCastRequest{Msg: out}
+	req := &pbGame.BroadCastRequest{
+		MsgName: proto.MessageName(m),
+		MsgData: out,
+	}
+
 	_, err := arena.gameCli.BroadCast(arena.ctx, req)
 	if err != nil {
 		logger.Warn("broadcast reply err:", err)
@@ -681,12 +690,12 @@ func (arena *Arena) WeekEnd() {
 
 	// send to world
 	for worldID, rewardList := range mapWeekReward {
-		msg := &pb.MUW_ArenaWeeklyReward{
-			Data: make([]*pb.ArenaWeeklyReward, 0),
+		msg := &pbArena.MUW_ArenaWeeklyReward{
+			Data: make([]*pbArena.ArenaWeeklyReward, 0),
 		}
 
 		for _, v := range rewardList {
-			d := &pb.ArenaWeeklyReward{
+			d := &pbArena.ArenaWeeklyReward{
 				PlayerId: v.id,
 				Score:    v.s,
 			}

@@ -165,7 +165,8 @@ message GetGuildInfoByIDReply {
 
 message SendWorldMessageRequest {
     uint32 id = 1;
-    bytes msg = 2;
+    string msg_name = 2;
+    bytes msg_data = 3;
 }
 
 message SendWorldMessageReply {
@@ -173,7 +174,8 @@ message SendWorldMessageReply {
 }
 
 message BroadCastRequest {
-    bytes msg = 1;
+    string msg_name = 1;
+    bytes msg_data = 2;
 }
 
 message BroadCastReply {

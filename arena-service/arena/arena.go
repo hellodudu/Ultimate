@@ -492,7 +492,10 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	req := &pbGame.GetPlayerInfoByIDRequest{Id: id}
 	resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
 	if err != nil {
-		logger.Warn("cannot find player ", id, " s info! ", err)
+		logger.WithFieldsWarn("cannot find player's info", logrus.Fields{
+			"player_id": id,
+			"error":     err,
+		})
 		return false, nil
 	}
 
@@ -584,11 +587,10 @@ func (arena *Arena) sendWorldMessage(id uint32, m proto.Message) error {
 	req := &pbGame.SendWorldMessageRequest{
 		Id:      id,
 		MsgName: proto.MessageName(m),
-		Msg:     out,
+		MsgData: out,
 	}
 
-	_, err := arena.gameCli.SendWorldMessage(arena.ctx, req)
-	if err != nil {
+	if _, err := arena.gameCli.SendWorldMessage(arena.ctx, req); err != nil {
 		logger.Warn("sendWorldMessage reply err:", err)
 		return err
 	}
@@ -596,7 +598,7 @@ func (arena *Arena) sendWorldMessage(id uint32, m proto.Message) error {
 	return nil
 }
 
-func (arena *Arean) broadCast(m proto.Message) error {
+func (arena *Arena) broadCast(m proto.Message) error {
 	out, err := proto.Marshal(m)
 	if err != nil {
 		logger.WithFieldsWarn("proto marshal failed", logrus.Fields{
@@ -610,8 +612,7 @@ func (arena *Arean) broadCast(m proto.Message) error {
 		MsgData: out,
 	}
 
-	_, err := arena.gameCli.BroadCast(arena.ctx, req)
-	if err != nil {
+	if _, err := arena.gameCli.BroadCast(arena.ctx, req); err != nil {
 		logger.Warn("broadcast reply err:", err)
 		return err
 	}
@@ -655,7 +656,7 @@ func (arena *Arena) WeekEnd() {
 
 	for k, v := range arrReq {
 		req := &pbGame.GetPlayerInfoByIDRequest{Id: v}
-		resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
+		_, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
 		if err != nil {
 			continue
 		}
@@ -744,7 +745,7 @@ func (arena *Arena) nextSeason() {
 		Season:  int32(arena.Season()),
 		EndTime: uint32(arena.SeasonEndTime()),
 	}
-	arena.BroadCast(msg)
+	arena.broadCast(msg)
 }
 
 func (arena *Arena) newSeasonRank() {
@@ -1021,8 +1022,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 
 	if msg.Page >= 10 {
 		logger.WithFieldsWarn("reply arena request rank pages error", logrus.Fields{
-			"page": msg.Page,
-		})
+			"page": msg.Page})
 	}
 
 	arena.sendWorldMessage(resp.Info.ServerId, msg)
@@ -1031,16 +1031,17 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 /////////////////////////////////////////////
 // rpc service
 /////////////////////////////////////////////
-func (arena *Arena) Call(ctx context.Context, req *pbArena.Request, rsp *pbArena.Response) error {
-	logger.Info("Received ArenaService.Call request")
-	rsp.Msg = "Hello " + req.Name
+func (arena *Arena) GetSeasonData(ctx context.Context, req *pbArena.GetSeasonDataRequest, rsp *pbArena.GetSeasonDataReply) error {
+	logger.Info("Received ArenaSevice.GetSeasonData request")
+	rsp.Season = int32(arena.Season())
+	rsp.SeasonEndTime = int32(arena.SeasonEndTime())
 	return nil
 }
 
 /////////////////////////////////////
 // subscribe
 /////////////////////////////////////
-func (arena *Arena) SubHandler(ctx context.Context, msg *pbArena.Message) error {
-	logger.Info("Function Received message: ", msg.Say)
-	return nil
-}
+// func (arena *Arena) SubHandler(ctx context.Context, msg *pbArena.Message) error {
+// 	logger.Info("Function Received message: ", msg.Say)
+// 	return nil
+// }

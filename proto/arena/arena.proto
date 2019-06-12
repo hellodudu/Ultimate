@@ -1,8 +1,6 @@
 syntax = "proto3";
 package ultimate.service.arena;
 
-service ArenaService {
-}
 
 // 镜像
 message HeroRecord {
@@ -159,4 +157,20 @@ message MUW_ArenaChampionOnline {
     int64 player_id = 1;
     string player_name = 2;
     string server_name = 3;
+}
+
+/////////////////////////////////////////////////
+// rpc service
+/////////////////////////////////////////////////
+service ArenaService {
+    rpc GetSeasonData (GetSeasonDataRequest) returns (GetSeasonDataReply) {}
+}
+
+message GetSeasonDataRequest {
+
+}
+
+message GetSeasonDataReply {
+    int32 season = 1;
+    int32 season_end_time = 2;
 }

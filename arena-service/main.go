@@ -11,12 +11,13 @@ import (
 	datastore "github.com/hellodudu/Ultimate/arena-service/db"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
+	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/micro/go-micro"
 )
 
 func main() {
 
-	logger.Init(global.debug, "ultimate_service_arena")
+	logger.Init(global.Debugging, "ultimate_service_arena")
 
 	ds, err := datastore.NewDatastore()
 	if err != nil {
@@ -42,7 +43,7 @@ func main() {
 	pbArena.RegisterArenaServiceHandler(service.Server(), arena)
 
 	// Register Struct as Subscriber
-	micro.RegisterSubscriber("ultimate.service.arena", service.Server(), arena.SubHandler)
+	// micro.RegisterSubscriber("ultimate.service.arena", service.Server(), arena.SubHandler)
 
 	// Run service
 	go func() {

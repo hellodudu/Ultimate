@@ -16,7 +16,6 @@ var (
 func Init(d bool, fn string) {
 	debug = d
 	logConsole = logrus.New()
-	logConsole.SetReportCaller(true)
 
 	// log file name
 	t := time.Now()
@@ -30,7 +29,11 @@ func Init(d bool, fn string) {
 		Warn("Failed to log to file, using default stderr")
 	}
 
-	logrus.SetReportCaller(true)
+	customFormatter := new(logrus.TextFormatter)
+	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	customFormatter.FullTimestamp = true
+	logrus.SetFormatter(customFormatter)
+	logConsole.SetFormatter(customFormatter)
 }
 
 func Trace(v ...interface{}) {
@@ -58,6 +61,7 @@ func Error(v ...interface{}) {
 }
 
 func Fatal(v ...interface{}) {
+	logConsole.Fatal(v...)
 	logrus.Fatal(v...)
 }
 

@@ -59,6 +59,84 @@ message MWU_ReplaceGuildInfo {
     CrossGuildInfo info = 1;
 }
 
+message MWU_PlayUltimateRecord {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 record_id = 3;
+	uint32 dst_server_id = 4;
+}
+
+message MUW_PlayUltimateRecord {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 record_id = 3;
+	uint32 dst_server_id = 4;
+}
+
+message MWU_RequestUltimatePlayer {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 dst_player_id = 3;
+	uint32 dst_server_id = 4;
+}
+
+message MUW_RequestUltimatePlayer {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 dst_player_id = 3;
+	uint32 dst_server_id = 4;
+}
+
+message MWU_ViewFormation {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 dst_player_id = 3;
+	uint32 dst_server_id = 4;
+}
+
+message MUW_ViewFormation {
+	int64 src_player_id = 1;
+	uint32 src_server_id = 2;
+	int64 dst_player_id = 3;
+	uint32 dst_server_id = 4;
+}
+
+message MUW_CheckInvite {
+    int64 newbie_id = 1;
+    int64 inviter_id = 2;
+}
+
+message MWU_CheckInviteResult {
+    int64 newbie_id = 1;
+    int64 inviter_id = 2;
+    int32 error_code = 3;
+}
+
+message MWU_AddInvite {
+    int64 newbie_id = 1;
+    int64 inviter_id = 2;
+}
+
+message MUW_AddInviteResult {
+    int64 newbie_id = 1;
+    int64 inviter_id = 2;
+    int32 error_code = 3;
+}
+
+message MWU_InviteRecharge {
+    int64 newbie_id = 1;
+    string newbie_name = 2;
+    int64 inviter_id = 3;
+    int32 diamond_gift = 4;
+}
+
+message MUW_InviteRecharge {
+    int64 newbie_id = 1;
+    string newbie_name = 2;
+    int64 inviter_id = 3;
+    int32 diamond_gift = 4;
+}
+
 ///////////////////////////////////////////////////
 // service
 ///////////////////////////////////////////////////

@@ -9,12 +9,13 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	pb "github.com/hellodudu/Ultimate/proto"
+	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
+	"github.com/hellodudu/Ultimate/utils/global"
+	"github.com/sirupsen/logrus"
 )
 
 // ProtoHandler handle function
@@ -242,13 +243,13 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 		world.SendProtoMessage(msgG)
 
 		// sync arena data
-		endTime := m.gm.Arena().SeasonEndTime()
-		season := m.gm.Arena().Season()
-		msgArena := &pb.MUW_SyncArenaSeason{
-			Season:  int32(season),
-			EndTime: uint32(endTime),
+		if season, seasonEndTime, err := m.gm.GetArenaSeasonData(); err != nil {
+			msgArena := &pbArena.MUW_SyncArenaSeason{
+				Season:  season,
+				EndTime: uint32(seasonEndTime),
+			}
+			world.SendProtoMessage(msgArena)
 		}
-		world.SendProtoMessage(msgArena)
 
 		// 20s later sync arena champion
 		t := time.NewTimer(20 * time.Second)
@@ -256,16 +257,23 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 			<-t.C
 			w := m.wm.GetWorldByID(id)
 			if w == nil {
-				logger.Warn("world<", id, "> disconnected, cannot sync arena champion")
+				logger.WithFieldsWarn("world disconnected, cannot sync arena champion", logrus.Fields{
+					"world_id": id,
+				})
 				return
 			}
 
-			msg := &pb.MUW_ArenaChampion{
-				Data: m.gm.Arena().GetChampion(),
-			}
+			if championList, err := m.gm.GetArenaChampion(); err != nil {
+				msg := &pb.MUW_ArenaChampion{
+					Data: championList,
+				}
 
-			w.SendProtoMessage(msg)
-			logger.Info("sync arena champion to world<id:", w.GetID(), ", name:", w.GetName(), ">")
+				w.SendProtoMessage(msg)
+				logger.WithFieldsInfo("sync arena champion to world", logrus.Fields{
+					"world_id":   w.GetID(),
+					"world_name": w.GetName(),
+				})
+			}
 		}(world.GetID())
 	}
 }
@@ -392,13 +400,13 @@ func (m *MsgParser) handleArenaMatching(con iface.ITCPConn, p proto.Message) {
 			return
 		}
 
-		m.gm.Arena().Matching(msg.PlayerId)
+		m.gm.Matching(msg.PlayerId)
 	}
 }
 
 func (m *MsgParser) handleArenaAddRecord(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
-		msg, ok := p.(*pb.MWU_ArenaAddRecord)
+		msg, ok := p.(*pbArena.MWU_ArenaAddRecord)
 		if !ok {
 			logger.Warn("Cannot assert value to message pb.MWU_ArenaAddRecord")
 			return

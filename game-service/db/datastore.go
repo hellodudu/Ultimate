@@ -3,11 +3,10 @@ package datastore
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/jinzhu/gorm"
 )
 
@@ -66,25 +65,4 @@ func (m *Datastore) Stop() chan struct{} {
 	m.db.Close()
 	m.cancel()
 	return m.chStop
-}
-
-func (m *Datastore) initDatastore() {
-	m.loadGlobal()
-}
-
-func (m *Datastore) loadGlobal() {
-	m.global = &iface.TableGlobal{
-		Id:                 global.UltimateID,
-		TimeStamp:          int(int32(time.Now().Unix())),
-		ArenaSeason:        0,
-		ArenaWeekEndTime:   0,
-		ArenaSeasonEndTime: 0,
-	}
-
-	m.db.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(m.global)
-	if m.db.FirstOrCreate(m.global, global.UltimateID).RecordNotFound() {
-		m.db.Create(m.global)
-	}
-
-	logger.Info("datastore loadGlobal success:", m.global)
 }

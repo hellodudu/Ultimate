@@ -11,10 +11,10 @@ import (
 	datastore "github.com/hellodudu/Ultimate/game-service/db"
 	"github.com/hellodudu/Ultimate/game-service/game"
 	"github.com/hellodudu/Ultimate/game-service/handler"
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/task"
+	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/world"
 	"github.com/micro/go-micro"
 )

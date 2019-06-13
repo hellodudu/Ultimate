@@ -1038,6 +1038,12 @@ func (arena *Arena) GetSeasonData(ctx context.Context, req *pbArena.GetSeasonDat
 	return nil
 }
 
+func (arena *Arena) GetChampion(ctx context.Context, req *pbArena.GetChampionRequest, rsp *pbArena.GetChampionReply) error {
+	logger.Info("Received ArenaSevice.GetChampion request")
+	rsp.Data = arena.GetChampion()
+	return nil
+}
+
 /////////////////////////////////////
 // subscribe
 /////////////////////////////////////

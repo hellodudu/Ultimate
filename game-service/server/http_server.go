@@ -10,9 +10,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	"github.com/hellodudu/Ultimate/utils/global"
 )
 
 var testChan = make(chan interface{}, 1)

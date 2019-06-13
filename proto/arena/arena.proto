@@ -164,6 +164,8 @@ message MUW_ArenaChampionOnline {
 /////////////////////////////////////////////////
 service ArenaService {
     rpc GetSeasonData (GetSeasonDataRequest) returns (GetSeasonDataReply) {}
+    rpc GetChampion (GetChampionRequest) returns (GetChampionReply) {}
+    rpc Matching (MatchingRequest) returns (MatchingReply) {}
 }
 
 message GetSeasonDataRequest {
@@ -173,4 +175,20 @@ message GetSeasonDataRequest {
 message GetSeasonDataReply {
     int32 season = 1;
     int32 season_end_time = 2;
+}
+
+message GetChampionRequest {
+
+}
+
+message GetChampionReply {
+    repeated ArenaChampion data = 1;   
+}
+
+message MatchingRequest {
+    int64 id = 1;
+}
+
+message MatchingReply {
+
 }

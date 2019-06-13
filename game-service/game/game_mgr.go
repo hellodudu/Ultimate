@@ -5,7 +5,9 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	"github.com/sirupsen/logrus"
 )
 
 type GameMgr struct {
@@ -15,6 +17,8 @@ type GameMgr struct {
 	mu            sync.Lock
 	ctx           context.Context
 	cancel        context.CancelFunc
+
+	arenaCli pbArena.ArenaServiceClient
 }
 
 func NewGameMgr() (iface.IGameMgr, error) {
@@ -27,6 +31,8 @@ func NewGameMgr() (iface.IGameMgr, error) {
 	if err != nil {
 		logger.Fatal(err)
 	}
+
+	gm.arenaCli = pbArena.NewArenaServiceClient("", nil)
 
 	gm.ctx, gm.cancel = context.WithCancel(context.Background())
 	return gm, nil
@@ -105,4 +111,41 @@ func (g *GameMgr) GetGuildInfoByID(id int64) *pbGame.CrossGuildInfo {
 	}
 
 	return nil
+}
+
+func (g *GameMgr) GetArenaSeasonData() (int32, int32, error) {
+	req := &pbArena.GetSeasonDataRequest{}
+	rsp, err := g.arenaCli.GetSeasonData(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetArenaSeasonData Response", logrus.Fields{
+			"error": err,
+		})
+		return 0, 0, err
+	}
+
+	return rsp.Season, rsp.SeasonEndTime, nil
+}
+
+func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
+	req := &pbArena.GetChampionRequest{}
+	rsp, err := g.arenaCli.GetChampion(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetArenaChampion Response", logrus.Fields{
+			"error": err,
+		})
+
+		return nil, err
+	}
+
+	return rsp.Data, nil
+}
+
+func (g *GameMgr) Matching(id int64) {
+	req := &pbArena.MatchingRequest{}
+	rsp, err := g.arenaCli.Matching(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("Matching Response", logrus.Fields{
+			"error": err,
+		})
+	}
 }

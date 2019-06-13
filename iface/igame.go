@@ -1,27 +1,31 @@
 package iface
 
-import pb "github.com/hellodudu/Ultimate/proto/game"
+import pbGame "github.com/hellodudu/Ultimate/proto/game"
+import pbArena "github.com/hellodudu/Ultimate/proto/arena"
 
 type IGameMgr interface {
 	Invite() IInvite
-	AddGuildInfo(i *pb.CrossGuildInfo)
-	AddGuildInfoList(s []*pb.CrossGuildInfo)
-	AddPlayerInfo(p *pb.CrossPlayerInfo)
-	AddPlayerInfoList(s []*pb.CrossPlayerInfo)
-	GetGuildInfoByID(id int64) *pb.CrossGuildInfo
-	GetPlayerInfoByID(id int64) *pb.CrossPlayerInfo
+	AddGuildInfo(i *pbGame.CrossGuildInfo)
+	AddGuildInfoList(s []*pbGame.CrossGuildInfo)
+	AddPlayerInfo(p *pbGame.CrossPlayerInfo)
+	AddPlayerInfoList(s []*pbGame.CrossPlayerInfo)
+	GetGuildInfoByID(id int64) *pbGame.CrossGuildInfo
+	GetPlayerInfoByID(id int64) *pbGame.CrossPlayerInfo
+	GetArenaSeasonData() (int32, int32)
+	GetArenaChampion() ([]*pbArena.ArenaChampion, error)
+	Matching(id int64)
 	Run()
 }
 
 // type IArena interface {
-// 	AddRecord(rec *pb.ArenaRecord)
+// 	AddRecord(rec *pbGame.ArenaRecord)
 // 	BattleResult(attack int64, target int64, win bool)
 // 	GetArenaDataNum() int
-// 	GetChampion() []*pb.ArenaChampion
+// 	GetChampion() []*pbGame.ArenaChampion
 // 	GetDataByID(id int64) (interface{}, error) // ret: (*arenaData, error)
 // 	GetMatchingList() []int64
 // 	GetRankListByPage(page int) interface{} //ret: []*arenaData
-// 	GetRecordByID(id int64) (*pb.ArenaRecord, error)
+// 	GetRecordByID(id int64) (*pbGame.ArenaRecord, error)
 // 	GetRecordNum() int
 // 	GetRecordReqList() map[int64]uint32
 // 	Season() int

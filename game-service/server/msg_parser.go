@@ -400,7 +400,7 @@ func (m *MsgParser) handleArenaMatching(con iface.ITCPConn, p proto.Message) {
 			return
 		}
 
-		m.gm.Matching(msg.PlayerId)
+		m.gm.ArenaMatching(msg.PlayerId)
 	}
 }
 
@@ -412,7 +412,7 @@ func (m *MsgParser) handleArenaAddRecord(con iface.ITCPConn, p proto.Message) {
 			return
 		}
 
-		m.gm.Arena().AddRecord(msg.Record)
+		m.gm.ArenaAddRecord(msg.Record)
 	}
 }
 
@@ -424,7 +424,7 @@ func (m *MsgParser) handleArenaBattleResult(con iface.ITCPConn, p proto.Message)
 			return
 		}
 
-		m.gm.Arena().BattleResult(msg.AttackId, msg.TargetId, msg.AttackWin)
+		m.gm.ArenaBattleResult(msg.AttackId, msg.TargetId, msg.AttackWin)
 	}
 }
 
@@ -454,13 +454,13 @@ func (m *MsgParser) handleReplaceGuildInfo(con iface.ITCPConn, p proto.Message) 
 
 func (m *MsgParser) handleRequestArenaRank(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
-		msg, ok := p.(*pb.MWU_RequestArenaRank)
+		msg, ok := p.(*pbArena.MWU_RequestArenaRank)
 		if !ok {
 			logger.Warn("Cannot assert value to message pb.MWU_RequestArenaRank")
 			return
 		}
 
-		m.gm.Arena().RequestRank(msg.PlayerId, msg.Page)
+		m.gm.ArenaGetRank(msg.PlayerId, msg.Page)
 	}
 }
 

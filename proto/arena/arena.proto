@@ -166,6 +166,9 @@ service ArenaService {
     rpc GetSeasonData (GetSeasonDataRequest) returns (GetSeasonDataReply) {}
     rpc GetChampion (GetChampionRequest) returns (GetChampionReply) {}
     rpc Matching (MatchingRequest) returns (MatchingReply) {}
+    rpc AddRecord (AddRecordRequest) returns (AddRecordReply) {}
+    rpc BattleResult (BattleResultRequest) returns (BattleResultReply) {}
+    rpc GetRank (GetRankRequest) returns (GetRankReply) {}
 }
 
 message GetSeasonDataRequest {
@@ -190,5 +193,32 @@ message MatchingRequest {
 }
 
 message MatchingReply {
+
+}
+
+message AddRecordRequest {
+    ArenaRecord data = 1;
+}
+
+message AddRecordReply {
+    
+}
+
+message BattleResultRequest {
+    int64 attack_id = 1;
+    int64 target_id = 2;
+    bool attack_win = 3;
+}
+
+message BattleResultReply {
+
+}
+
+message GetRankRequest {
+    int64 player_id = 1;
+    int32 page = 2;
+}
+
+message GetRankReply {
 
 }

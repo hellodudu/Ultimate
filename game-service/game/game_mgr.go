@@ -140,11 +140,41 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 	return rsp.Data, nil
 }
 
-func (g *GameMgr) Matching(id int64) {
+func (g *GameMgr) ArenaMatching(id int64) {
 	req := &pbArena.MatchingRequest{}
 	rsp, err := g.arenaCli.Matching(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("Matching Response", logrus.Fields{
+		logger.WithFieldsWarn("ArenaMatching Response", logrus.Fields{
+			"error": err,
+		})
+	}
+}
+
+func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {
+	req := &pbArena.AddRecordRequest{Data: data}
+	rsp, err := g.arenaCli.AddRecord(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("ArenaAddRecord Response", logrus.Fields{
+			"error": err,
+		})
+	}
+}
+
+func (g *GameMgr) ArenaBattleResult(attackID int64, targetID int64, attackWin bool) {
+	req := &pbArena.BattleResultRequest{AttackId: attackID, TargetId: targetID, AttackWin: attackWin}
+	rsp, err := g.arenaCli.BattleResult(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("ArenaBattleResult Response", logrus.Fields{
+			"error": err,
+		})
+	}
+}
+
+func (g *GameMgr) ArenaGetRank(id int64, page int32) {
+	req := &pbArena.GetRankRequest{PlayerId: id, Page: page}
+	rsp, err := g.arenaCli.GetRank(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("ArenaGetRank Response", logrus.Fields{
 			"error": err,
 		})
 	}

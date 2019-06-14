@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"expvar"
 	"fmt"
@@ -12,7 +13,9 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	"github.com/hellodudu/Ultimate/utils/global"
+	"github.com/sirupsen/logrus"
 )
 
 var testChan = make(chan interface{}, 1)
@@ -57,19 +60,28 @@ func getLastGCPauseTime() interface{} {
 }
 
 func (s *HttpServer) getArenaPlayerDataNum() interface{} {
-	return s.gm.Arena().GetArenaDataNum()
+	return s.gm.GetArenaDataNum()
 }
 
 func (s *HttpServer) getArenaRecordNum() interface{} {
-	return s.gm.Arena().GetRecordNum()
+	return s.gm.GetArenaRecordNum()
 }
 
 type HttpServer struct {
-	gm iface.IGameMgr
+	ctx      context.Context
+	cancel   context.CancelFunc
+	gm       iface.IGameMgr
+	arenaCli pbArena.ArenaServiceClient
 }
 
 func NewHttpServer(gm iface.IGameMgr) *HttpServer {
-	return &HttpServer{gm: gm}
+	s := &HttpServer{
+		gm:       gm,
+		arenaCli: pbArena.NewArenaServiceClient("", nil),
+	}
+
+	s.ctx, s.cancel = context.WithCancel(context.Background())
+	return s
 }
 
 func (s *HttpServer) Run() {
@@ -83,7 +95,6 @@ func (s *HttpServer) Run() {
 	expvar.Publish("arena_player_data_num", expvar.Func(s.getArenaPlayerDataNum))
 	expvar.Publish("arena_record_num", expvar.Func(s.getArenaRecordNum))
 
-	http.HandleFunc("/arena_get_player_data", s.arenaGetPlayerDataHandler)
 	http.HandleFunc("/arena_matching_list", s.arenaMatchingListHandler)
 	http.HandleFunc("/arena_record_req_list", s.arenaRecordReqListHandler)
 	http.HandleFunc("/arena_get_record", s.arenaGetRecordHandler)
@@ -103,41 +114,21 @@ func (s *HttpServer) Run() {
 
 }
 
-func (s *HttpServer) arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	var req struct {
-		ID int64 `json:"id"`
-	}
-
-	if err := json.Unmarshal(body, &req); err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	d, err := s.gm.Arena().GetDataByID(req.ID)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(d)
-}
-
 func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Request) {
-	list := s.gm.Arena().GetMatchingList()
+	req := &pbArena.GetMatchingListRequest{}
+	rsp, err := s.arenaCli.GetMatchingList(s.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetMatchingList Response", logrus.Fields{
+			"error": err,
+		})
+		return
+	}
 
 	var resp struct {
 		ID []int64 `json:"id"`
 	}
 
-	resp.ID = list[:]
+	resp.ID = rsp.Ids
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -145,11 +136,18 @@ func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (s *HttpServer) arenaRecordReqListHandler(w http.ResponseWriter, r *http.Request) {
-	m := s.gm.Arena().GetRecordReqList()
+	req := &pbArena.GetRecordReqListRequest{}
+	rsp, err := s.arenaCli.GetRecordReqList(s.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetRecordReqList Response", logrus.Fields{
+			"error": err,
+		})
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(m)
+	json.NewEncoder(w).Encode(rsp.ReqList)
 }
 
 func (s *HttpServer) arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
@@ -168,13 +166,17 @@ func (s *HttpServer) arenaGetRecordHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	d, err := s.gm.Arena().GetRecordByID(req.ID)
+	rpcReq := &pbArena.GetRecordByIDRequest{Id: req.ID}
+	rsp, err := s.arenaCli.GetRecordByID(s.ctx, rpcReq)
 	if err != nil {
+		logger.WithFieldsWarn("GetRecordByID Response", logrus.Fields{
+			"error": err,
+		})
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	json.NewEncoder(w).Encode(d)
+	json.NewEncoder(w).Encode(rsp.Record)
 }
 
 func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Request) {

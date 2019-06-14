@@ -14,6 +14,7 @@ import (
 	"github.com/hellodudu/Ultimate/game-service/world"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
@@ -168,12 +169,13 @@ func (umt *ultimate) InitGameMgr() error {
 	}
 
 	logger.Info("game_mgr init ok!")
+	return nil
 }
 
 func (umt *ultimate) InitGameService() error {
 
 	var err error
-	if umt.gameHandler, err = handler.NewGameHandler(umt.gm); err != nil {
+	if umt.gameHandler, err = handler.NewGameHandler(umt.gm, umt.wm); err != nil {
 		return err
 	}
 

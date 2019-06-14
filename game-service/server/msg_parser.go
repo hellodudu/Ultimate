@@ -280,7 +280,7 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 
 func (m *MsgParser) handleRequestPlayerInfo(con iface.ITCPConn, p proto.Message) {
 	if world := m.wm.GetWorldByCon(con); world != nil {
-		msg, ok := p.(*pbWorld.MWU_RequestPlayerInfo)
+		msg, ok := p.(*pbGame.MWU_RequestPlayerInfo)
 		if !ok {
 			logger.Warn("Cannot assert value to message pb.MWU_RequestPlayerInfo")
 			return
@@ -292,7 +292,7 @@ func (m *MsgParser) handleRequestPlayerInfo(con iface.ITCPConn, p proto.Message)
 
 func (m *MsgParser) handleRequestGuildInfo(con iface.ITCPConn, p proto.Message) {
 	if world := m.wm.GetWorldByCon(con); world != nil {
-		msg, ok := p.(*pbWorld.MWU_RequestGuildInfo)
+		msg, ok := p.(*pbGame.MWU_RequestGuildInfo)
 		if !ok {
 			logger.Warn("Cannot assert value to message pb.MWU_RequestGuildInfo")
 			return
@@ -430,7 +430,7 @@ func (m *MsgParser) handleArenaBattleResult(con iface.ITCPConn, p proto.Message)
 
 func (m *MsgParser) handleReplacePlayerInfo(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
-		msg, ok := p.(*pbWorld.MWU_ReplacePlayerInfo)
+		msg, ok := p.(*pbGame.MWU_ReplacePlayerInfo)
 		if !ok {
 			logger.Warn("Cannot assert value to message pb.MWU_ReplacePlayerInfo")
 			return
@@ -442,7 +442,7 @@ func (m *MsgParser) handleReplacePlayerInfo(con iface.ITCPConn, p proto.Message)
 
 func (m *MsgParser) handleReplaceGuildInfo(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
-		msg, ok := p.(*pbWorld.MWU_ReplaceGuildInfo)
+		msg, ok := p.(*pbGame.MWU_ReplaceGuildInfo)
 		if !ok {
 			logger.Warn("Cannot assert value to message pb.MWU_ReplaceGuildInfo")
 			return

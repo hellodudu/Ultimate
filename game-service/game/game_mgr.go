@@ -178,3 +178,27 @@ func (g *GameMgr) ArenaGetRank(id int64, page int32) {
 		})
 	}
 }
+
+func (g *GameMgr) GetArenaDataNum() int32 {
+	req := &pbArena.GetArenaDataNumRequest{}
+	rsp, err := g.arenaCli.GetArenaDataNum(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetArenaDataNum Response", logrus.Fields{
+			"error": err,
+		})
+	}
+
+	return rsp.Num
+}
+
+func (g *GameMgr) GetArenaRecordNum() int32 {
+	req := &pbArena.GetRecordNumRequest{}
+	rsp, err := g.arenaCli.GetRecordNum(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetArenaRecordNum Response", logrus.Fields{
+			"error": err,
+		})
+	}
+
+	return rsp.Num
+}

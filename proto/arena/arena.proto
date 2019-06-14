@@ -169,6 +169,11 @@ service ArenaService {
     rpc AddRecord (AddRecordRequest) returns (AddRecordReply) {}
     rpc BattleResult (BattleResultRequest) returns (BattleResultReply) {}
     rpc GetRank (GetRankRequest) returns (GetRankReply) {}
+    rpc GetArenaDataNum (GetArenaDataNumRequest) returns (GetArenaDataNumReply) {}
+    rpc GetRecordNum (GetRecordNumRequest) returns (GetRecordNumReply) {}
+    rpc GetMatchingList (GetMatchingListRequest) returns (GetMatchingListReply) {}
+    rpc GetRecordReqList (GetRecordReqListRequest) returns (GetRecordReqListReply) {}
+    rpc GetRecordByID (GetRecordByIDRequest) returns (GetRecordByIDReply) {}
 }
 
 message GetSeasonDataRequest {
@@ -221,4 +226,49 @@ message GetRankRequest {
 
 message GetRankReply {
 
+}
+
+message GetArenaDataNumRequest {
+
+}
+
+message GetArenaDataNumReply {
+    int32 num = 1;
+}
+
+message GetRecordNumRequest {
+
+}
+
+message GetRecordNumReply {
+    int32 num = 1;
+}
+
+message GetMatchingListRequest {
+
+}
+
+message GetMatchingListReply {
+    repeated int64 ids = 1;
+}
+
+message GetRecordReqListRequest {
+
+}
+
+message RecordReqList {
+    int64 player_id = 1;
+    int32 time = 2;
+}
+
+message GetRecordReqListReply {
+    repeated RecordReqList req_list = 1;
+}
+
+message GetRecordByIDRequest {
+    int64 id = 1;
+}
+
+message GetRecordByIDReply {
+    ArenaRecord record = 1;
 }

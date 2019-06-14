@@ -73,7 +73,6 @@ func NewHttpServer(gm iface.IGameMgr) *HttpServer {
 }
 
 func (s *HttpServer) Run() {
-	http.HandleFunc("/ws", wsHandler)
 
 	expvar.Publish("ticktime", expvar.Func(calculateUptime))
 	expvar.Publish("version", expvar.Func(currentGoVersion))
@@ -102,27 +101,6 @@ func (s *HttpServer) Run() {
 
 	logger.Error(http.ListenAndServe(addr, nil))
 
-}
-
-func wsHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := global.Upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		logger.Error(err)
-	}
-
-	for {
-		msgtype, p, err := conn.ReadMessage()
-		if err != nil {
-			logger.Warning(err)
-			return
-		}
-
-		res := []byte("server recv:")
-		if err := conn.WriteMessage(msgtype, append(res, p...)); err != nil {
-			logger.Warning(err)
-			return
-		}
-	}
 }
 
 func (s *HttpServer) arenaGetPlayerDataHandler(w http.ResponseWriter, r *http.Request) {

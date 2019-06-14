@@ -23,7 +23,7 @@ func turnToInt(v string, e error) int {
 var (
 	WorldHeartBeatSec  = turnToInt(IniMgr.GetIniValue("../config/ultimate.ini", "world config", "WorldHeartBeatSec"))
 	WorldConTimeOutSec = turnToInt(IniMgr.GetIniValue("../config/ultimate.ini", "world config", "WorldConTimeOutSec"))
-	WorldConnectMax    = uint32(turnToInt(IniMgr.GetIniValue("../config/ultimate.ini", "world config", "WorldConnectMax")))
+	WorldConnectMax    = int(turnToInt(IniMgr.GetIniValue("../config/ultimate.ini", "world config", "WorldConnectMax")))
 )
 
 // mysql

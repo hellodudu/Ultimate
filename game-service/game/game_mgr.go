@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"sync"
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
@@ -11,27 +12,25 @@ import (
 )
 
 type GameMgr struct {
+	wm            iface.IWorldMgr
 	invite        iface.IInvite
 	mapPlayerInfo map[int64]*pbGame.CrossPlayerInfo
 	mapGuildInfo  map[int64]*pbGame.CrossGuildInfo
-	mu            sync.Lock
+	mu            sync.Mutex
 	ctx           context.Context
 	cancel        context.CancelFunc
 
 	arenaCli pbArena.ArenaServiceClient
 }
 
-func NewGameMgr() (iface.IGameMgr, error) {
+func NewGameMgr(wm iface.IWorldMgr) (iface.IGameMgr, error) {
 	gm := &GameMgr{
+		wm:            wm,
 		mapPlayerInfo: make(map[int64]*pbGame.CrossPlayerInfo),
 		mapGuildInfo:  make(map[int64]*pbGame.CrossGuildInfo),
 	}
 
-	gm.invite, err = NewInvite(gm.ctx, gm, wm)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
+	gm.invite = NewInvite(gm, wm)
 	gm.arenaCli = pbArena.NewArenaServiceClient("", nil)
 
 	gm.ctx, gm.cancel = context.WithCancel(context.Background())
@@ -142,7 +141,7 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 
 func (g *GameMgr) ArenaMatching(id int64) {
 	req := &pbArena.MatchingRequest{}
-	rsp, err := g.arenaCli.Matching(g.ctx, req)
+	_, err := g.arenaCli.Matching(g.ctx, req)
 	if err != nil {
 		logger.WithFieldsWarn("ArenaMatching Response", logrus.Fields{
 			"error": err,
@@ -152,7 +151,7 @@ func (g *GameMgr) ArenaMatching(id int64) {
 
 func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {
 	req := &pbArena.AddRecordRequest{Data: data}
-	rsp, err := g.arenaCli.AddRecord(g.ctx, req)
+	_, err := g.arenaCli.AddRecord(g.ctx, req)
 	if err != nil {
 		logger.WithFieldsWarn("ArenaAddRecord Response", logrus.Fields{
 			"error": err,
@@ -162,7 +161,7 @@ func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {
 
 func (g *GameMgr) ArenaBattleResult(attackID int64, targetID int64, attackWin bool) {
 	req := &pbArena.BattleResultRequest{AttackId: attackID, TargetId: targetID, AttackWin: attackWin}
-	rsp, err := g.arenaCli.BattleResult(g.ctx, req)
+	_, err := g.arenaCli.BattleResult(g.ctx, req)
 	if err != nil {
 		logger.WithFieldsWarn("ArenaBattleResult Response", logrus.Fields{
 			"error": err,
@@ -172,7 +171,7 @@ func (g *GameMgr) ArenaBattleResult(attackID int64, targetID int64, attackWin bo
 
 func (g *GameMgr) ArenaGetRank(id int64, page int32) {
 	req := &pbArena.GetRankRequest{PlayerId: id, Page: page}
-	rsp, err := g.arenaCli.GetRank(g.ctx, req)
+	_, err := g.arenaCli.GetRank(g.ctx, req)
 	if err != nil {
 		logger.WithFieldsWarn("ArenaGetRank Response", logrus.Fields{
 			"error": err,

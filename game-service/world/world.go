@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
+	"github.com/hellodudu/Ultimate/utils/global"
 )
 
 type world struct {
@@ -123,7 +123,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	}
 
 	typeName := proto.MessageName(p)
-	baseMsg := &global.BaseNetMsg{}
+	baseMsg := &utils.BaseNetMsg{}
 	msgSize := binary.Size(baseMsg) + 2 + len(typeName) + len(out)
 	baseMsg.ID = utils.Crc32("MUW_DirectProtoMsg")
 	baseMsg.Size = uint32(msgSize)

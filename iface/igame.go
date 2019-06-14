@@ -11,12 +11,12 @@ type IGameMgr interface {
 	AddPlayerInfoList(s []*pbGame.CrossPlayerInfo)
 	GetGuildInfoByID(id int64) *pbGame.CrossGuildInfo
 	GetPlayerInfoByID(id int64) *pbGame.CrossPlayerInfo
-	GetArenaSeasonData() (int32, int32)
+	GetArenaSeasonData() (int32, int32, error)
 	GetArenaChampion() ([]*pbArena.ArenaChampion, error)
 	ArenaMatching(id int64)
 	ArenaAddRecord(*pbArena.ArenaRecord)
 	ArenaBattleResult(attackID int64, targetID int64, attackWin bool)
-	ArenaGetRank(id int64, page int)
+	ArenaGetRank(id int64, page int32)
 	Run()
 }
 

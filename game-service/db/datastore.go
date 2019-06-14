@@ -35,9 +35,6 @@ func NewDatastore() (*Datastore, error) {
 		return nil, err
 	}
 
-	// datastore.db.LogMode(true)
-
-	datastore.initDatastore()
 	return datastore, nil
 }
 

@@ -3,7 +3,7 @@ package game
 import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	pb "github.com/hellodudu/Ultimate/proto/invite"
+	pb "github.com/hellodudu/Ultimate/proto/game"
 )
 
 type Invite struct {
@@ -40,7 +40,7 @@ func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 		return 3
 	}
 
-	if world := invite.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
+	if world := i.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
 		msg := &pb.MUW_CheckInvite{
 			NewbieId:  newbieId,
 			InviterId: inviterId,

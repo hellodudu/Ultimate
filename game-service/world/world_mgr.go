@@ -8,9 +8,10 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/global"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	"github.com/hellodudu/Ultimate/utils/global"
+	"github.com/sirupsen/logrus"
 )
 
 type WorldMgr struct {
@@ -129,7 +130,7 @@ func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 		return
 	}
 
-	logger.Warn(fmt.Sprintf("World<id:%d> disconnected!", world.GetID()))
+	logger.WithFieldsWarn("world disconnected", logrus.Fields{"world_id": w.GetID()})
 	w.Stop()
 
 	wm.mu.Lock()
@@ -148,7 +149,7 @@ func (wm *WorldMgr) KickWorld(id uint32) {
 		return
 	}
 
-	logger.Warn(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.GetID()))
+	logger.WithFieldsWarn("world was kicked by timeout", logrus.Fields{"world_id": w.GetID()})
 	w.Stop()
 
 	wm.mu.Lock()

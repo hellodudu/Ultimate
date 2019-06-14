@@ -11,11 +11,11 @@ import (
 	datastore "github.com/hellodudu/Ultimate/game-service/db"
 	"github.com/hellodudu/Ultimate/game-service/game"
 	"github.com/hellodudu/Ultimate/game-service/handler"
+	"github.com/hellodudu/Ultimate/game-service/world"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	"github.com/hellodudu/Ultimate/task"
 	"github.com/hellodudu/Ultimate/utils/global"
-	"github.com/hellodudu/Ultimate/world"
+	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
 )
 
@@ -163,7 +163,7 @@ func (umt *ultimate) InitWorldMgr() error {
 
 func (umt *ultimate) InitGameMgr() error {
 	var err error
-	if umt.gm, err = game.NewGameMgr(); err != nil {
+	if umt.gm, err = game.NewGameMgr(umt.wm); err != nil {
 		return err
 	}
 

@@ -70,6 +70,16 @@ func Print(v ...interface{}) {
 	logrus.Println(v...)
 }
 
+func WithFieldsTrace(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Trace(s)
+	logrus.WithFields(fields).Trace(s)
+}
+
+func WithFieldsDebug(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Debug(s)
+	logrus.WithFields(fields).Debug(s)
+}
+
 func WithFieldsInfo(s string, fields logrus.Fields) {
 	logConsole.WithFields(fields).Info(s)
 	logrus.WithFields(fields).Info(s)

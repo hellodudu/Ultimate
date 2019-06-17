@@ -20,20 +20,34 @@ func NewGameHandler(gm iface.IGameMgr, wm iface.IWorldMgr) (*GameHandler, error)
 	return &GameHandler{gm: gm, wm: wm}, nil
 }
 
+/////////////////////////////////////////////////
+// rpc received
+/////////////////////////////////////////////////
 func (h *GameHandler) GetPlayerInfoByID(ctx context.Context, req *pbGame.GetPlayerInfoByIDRequest, resp *pbGame.GetPlayerInfoByIDReply) error {
-	logger.Info("GetPlayerInfoByID:", req.Id)
+	logger.Info("Received rpc call GetPlayerInfoByID:", req.Id)
 
-	resp.Info = h.gm.GetPlayerInfoByID(req.Id)
+	var err error
+	if resp.Info, err = h.gm.GetPlayerInfoByID(req.Id); resp.Info == nil {
+		return err
+	}
+
 	return nil
 }
 
 func (h *GameHandler) GetGuildInfoByID(ctx context.Context, req *pbGame.GetGuildInfoByIDRequest, resp *pbGame.GetGuildInfoByIDReply) error {
-	logger.Info("GetGuildInfoByID:", req.Id)
-	resp.Info = h.gm.GetGuildInfoByID(req.Id)
+	logger.Info("Received rpc call GetGuildInfoByID:", req.Id)
+
+	var err error
+	if resp.Info, err = h.gm.GetGuildInfoByID(req.Id); err != nil {
+		return err
+	}
 
 	return nil
 }
 
+/////////////////////////////////////////////////
+// rpc call
+/////////////////////////////////////////////////
 func (h *GameHandler) SendWorldMessage(ctx context.Context, req *pbGame.SendWorldMessageRequest, resp *pbGame.SendWorldMessageReply) error {
 
 	world := h.wm.GetWorldByID(req.Id)

@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/hellodudu/Ultimate/iface"
@@ -96,20 +97,20 @@ func (g *GameMgr) AddGuildInfo(p *pbGame.CrossGuildInfo) {
 	g.mapGuildInfo[p.GuildId] = p
 }
 
-func (g *GameMgr) GetPlayerInfoByID(id int64) *pbGame.CrossPlayerInfo {
+func (g *GameMgr) GetPlayerInfoByID(id int64) (*pbGame.CrossPlayerInfo, error) {
 	if v, ok := g.mapPlayerInfo[id]; ok {
-		return v
+		return v, nil
 	}
 
-	return nil
+	return nil, fmt.Errorf("cannot find player by id:%d", id)
 }
 
-func (g *GameMgr) GetGuildInfoByID(id int64) *pbGame.CrossGuildInfo {
+func (g *GameMgr) GetGuildInfoByID(id int64) (*pbGame.CrossGuildInfo, error) {
 	if v, ok := g.mapGuildInfo[id]; ok {
-		return v
+		return v, nil
 	}
 
-	return nil
+	return nil, fmt.Errorf("cannot find guild by id:%d", id)
 }
 
 func (g *GameMgr) GetArenaSeasonData() (int32, int32, error) {

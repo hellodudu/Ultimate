@@ -28,7 +28,6 @@ func NewArenaHandler(ctx context.Context, arena *Arena) *ArenaHandler {
 /////////////////////////////////////////////
 // rpc call
 /////////////////////////////////////////////
-
 func (h *ArenaHandler) GetPlayerInfoByID(id int64) (*pbGame.GetPlayerInfoByIDReply, error) {
 	req := &pbGame.GetPlayerInfoByIDRequest{Id: id}
 	return h.gameCli.GetPlayerInfoByID(h.ctx, req)

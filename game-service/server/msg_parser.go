@@ -333,9 +333,9 @@ func (m *MsgParser) handleRequestUltimatePlayer(con iface.ITCPConn, p proto.Mess
 			return
 		}
 
-		dstInfo := m.gm.GetPlayerInfoByID(msg.DstPlayerId)
+		dstInfo, err := m.gm.GetPlayerInfoByID(msg.DstPlayerId)
 		dstWorld := m.wm.GetWorldByID(msg.DstServerId)
-		if dstInfo == nil {
+		if err != nil {
 			return
 		}
 
@@ -365,9 +365,9 @@ func (m *MsgParser) handleViewFormation(con iface.ITCPConn, p proto.Message) {
 			return
 		}
 
-		dstInfo := m.gm.GetPlayerInfoByID(msg.DstPlayerId)
+		dstInfo, err := m.gm.GetPlayerInfoByID(msg.DstPlayerId)
 		dstWorld := m.wm.GetWorldByID(msg.DstServerId)
-		if dstInfo == nil {
+		if err != nil {
 			return
 		}
 

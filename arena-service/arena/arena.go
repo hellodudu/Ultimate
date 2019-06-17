@@ -246,6 +246,10 @@ func NewArena(ctx context.Context, ds iface.IDatastore) (*Arena, error) {
 	return arena, nil
 }
 
+func (arena *Arena) Handler() *ArenaHandler {
+	return arena.handler
+}
+
 func (arena *Arena) getArenaDataNum() int {
 	n := 0
 	arena.mapArenaData.Range(func(_, _ interface{}) bool {
@@ -526,7 +530,14 @@ func (arena *Arena) updateRequestRecord() {
 		}
 
 		resp, err := arena.handler.GetPlayerInfoByID(id)
+		logger.WithFieldsInfo("GetPlayerInfoByID Result", logrus.Fields{
+			"response": resp,
+			"error":    err,
+		})
+
+		// add 3 seconds interval
 		if err != nil {
+			t = t.Add(time.Second * 3)
 			return true
 		}
 

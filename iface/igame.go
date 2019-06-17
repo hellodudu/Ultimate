@@ -9,8 +9,8 @@ type IGameMgr interface {
 	AddGuildInfoList(s []*pbGame.CrossGuildInfo)
 	AddPlayerInfo(p *pbGame.CrossPlayerInfo)
 	AddPlayerInfoList(s []*pbGame.CrossPlayerInfo)
-	GetGuildInfoByID(id int64) *pbGame.CrossGuildInfo
-	GetPlayerInfoByID(id int64) *pbGame.CrossPlayerInfo
+	GetGuildInfoByID(id int64) (*pbGame.CrossGuildInfo, error)
+	GetPlayerInfoByID(id int64) (*pbGame.CrossPlayerInfo, error)
 	GetArenaSeasonData() (int32, int32, error)
 	GetArenaChampion() ([]*pbArena.ArenaChampion, error)
 	GetArenaDataNum() int32

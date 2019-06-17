@@ -176,7 +176,7 @@ service ArenaService {
     rpc GetRecordByID (GetRecordByIDRequest) returns (GetRecordByIDReply) {}
     rpc GetRankListByPage (GetRankListByPageRequest) returns (GetRankListByPageReply) {}
     rpc SaveChampion (SaveChampionRequest) returns (SaveChampionReply) {}
-    rpc WeekEnd (WeekEndRequest) returns (WeekEndRequest) {}
+    rpc WeekEnd (WeekEndRequest) returns (WeekEndReply) {}
 }
 
 message GetSeasonDataRequest {

@@ -40,7 +40,7 @@ func main() {
 	service.Init()
 
 	// Register Handler
-	pbArena.RegisterArenaServiceHandler(service.Server(), arena)
+	pbArena.RegisterArenaServiceHandler(service.Server(), arena.Handler())
 
 	// Register Struct as Subscriber
 	// micro.RegisterSubscriber("ultimate.service.arena", service.Server(), arena.SubHandler)

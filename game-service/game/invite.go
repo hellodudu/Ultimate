@@ -4,6 +4,7 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pb "github.com/hellodudu/Ultimate/proto/game"
+	"github.com/sirupsen/logrus"
 )
 
 type Invite struct {
@@ -34,9 +35,11 @@ func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 		return 3
 	}
 
-	inviterInfo := i.gm.GetPlayerInfoByID(inviterId)
-	if inviterInfo == nil {
-		logger.Warn("AddInvite cannot find inviter info:", inviterId)
+	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterId)
+	if err != nil {
+		logger.WithFieldsWarn("AddInvite cannot find inviter info", logrus.Fields{
+			"error": err,
+		})
 		return 3
 	}
 
@@ -58,9 +61,11 @@ func (i *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode in
 		return
 	}
 
-	newbieInfo := i.gm.GetPlayerInfoByID(newbieId)
-	if newbieInfo == nil {
-		logger.Warn("CheckInviteResult cannot find newbie info:", newbieId)
+	newbieInfo, err := i.gm.GetPlayerInfoByID(newbieId)
+	if err != nil {
+		logger.WithFieldsWarn("CheckInviteResult cannot find newbie info", logrus.Fields{
+			"error": err,
+		})
 		return
 	}
 
@@ -88,9 +93,11 @@ func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int
 		return
 	}
 
-	inviterInfo := i.gm.GetPlayerInfoByID(inviterId)
-	if inviterInfo == nil {
-		logger.Warn("InviteRecharge cannot find inviter info:", inviterId)
+	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterId)
+	if err != nil {
+		logger.WithFieldsWarn("InviteRecharge cannot find inviter info", logrus.Fields{
+			"error": err,
+		})
 		return
 	}
 

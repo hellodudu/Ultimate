@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"expvar"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
@@ -14,6 +13,7 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
+	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/sirupsen/logrus"
 )
@@ -72,12 +72,14 @@ type HttpServer struct {
 	cancel   context.CancelFunc
 	gm       iface.IGameMgr
 	arenaCli pbArena.ArenaServiceClient
+	gameCli  pbGame.GameServiceClient
 }
 
 func NewHttpServer(gm iface.IGameMgr) *HttpServer {
 	s := &HttpServer{
 		gm:       gm,
 		arenaCli: pbArena.NewArenaServiceClient("", nil),
+		gameCli:  pbGame.NewGameServiceClient("", nil),
 	}
 
 	s.ctx, s.cancel = context.WithCancel(context.Background())
@@ -104,7 +106,7 @@ func (s *HttpServer) Run() {
 	http.HandleFunc("/player_info", s.getPlayerInfoHandler)
 	http.HandleFunc("/guild_info", s.getGuildInfoHandler)
 
-	addr, err := global.IniMgr.GetIniValue("config/ultimate.ini", "listen", "HttpListenAddr")
+	addr, err := global.IniMgr.GetIniValue("../config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {
 		logger.Error("cannot read ini HttpListenAddr!")
 		return
@@ -195,16 +197,45 @@ func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	d := s.gm.Arena().GetRankListByPage(req.Page)
-	json.NewEncoder(w).Encode(d)
+	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(req.Page)}
+	rsp, err := s.arenaCli.GetRankListByPage(s.ctx, rpcReq)
+	if err != nil {
+		logger.WithFieldsWarn("GetRankListByPage Response", logrus.Fields{
+			"error": err,
+		})
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	json.NewEncoder(w).Encode(rsp.Data)
 }
 
 func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {
-	s.gm.Arena().SaveChampion()
+	req := &pbArena.SaveChampionRequest{}
+	_, err := s.arenaCli.SaveChampion(s.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("SaveChampion Response", logrus.Fields{
+			"error": err,
+		})
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Write([]byte("success"))
 }
 
 func (s *HttpServer) arenaWeekEnd(w http.ResponseWriter, r *http.Request) {
-	s.gm.Arena().WeekEnd()
+	req := &pbArena.WeekEndRequest{}
+	_, err := s.arenaCli.WeekEnd(s.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("WeekEnd Response", logrus.Fields{
+			"error": err,
+		})
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Write([]byte("success"))
 }
 
 func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -223,13 +254,19 @@ func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	d := s.gm.GetPlayerInfoByID(req.ID)
-	if d == nil {
-		w.Write([]byte(fmt.Sprintf("cannot find player info by id: %d", req.ID)))
+	rpcReq := &pbGame.GetPlayerInfoByIDRequest{Id: req.ID}
+	rsp, err := s.gameCli.GetPlayerInfoByID(s.ctx, rpcReq)
+	if err != nil {
+		logger.WithFieldsWarn("cannot find player info by id", logrus.Fields{
+			"error": err,
+			"id":    req.ID,
+		})
+
+		w.Write([]byte(err.Error()))
 		return
 	}
 
-	json.NewEncoder(w).Encode(d)
+	json.NewEncoder(w).Encode(rsp.Info)
 }
 
 func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -248,11 +285,16 @@ func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	d := s.gm.GetGuildInfoByID(req.ID)
-	if d == nil {
-		w.Write([]byte(fmt.Sprintf("cannot find guild info by id: %d", req.ID)))
+	rpcReq := &pbGame.GetGuildInfoByIDRequest{Id: req.ID}
+	rsp, err := s.gameCli.GetGuildInfoByID(s.ctx, rpcReq)
+	if err != nil {
+		logger.WithFieldsWarn("cannot find guild info by id", logrus.Fields{
+			"error": err,
+			"id":    req.ID,
+		})
+		w.Write([]byte(err.Error()))
 		return
 	}
 
-	json.NewEncoder(w).Encode(d)
+	json.NewEncoder(w).Encode(rsp.Info)
 }

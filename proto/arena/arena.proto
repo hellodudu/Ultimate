@@ -174,6 +174,9 @@ service ArenaService {
     rpc GetMatchingList (GetMatchingListRequest) returns (GetMatchingListReply) {}
     rpc GetRecordReqList (GetRecordReqListRequest) returns (GetRecordReqListReply) {}
     rpc GetRecordByID (GetRecordByIDRequest) returns (GetRecordByIDReply) {}
+    rpc GetRankListByPage (GetRankListByPageRequest) returns (GetRankListByPageReply) {}
+    rpc SaveChampion (SaveChampionRequest) returns (SaveChampionReply) {}
+    rpc WeekEnd (WeekEndRequest) returns (WeekEndRequest) {}
 }
 
 message GetSeasonDataRequest {
@@ -271,4 +274,28 @@ message GetRecordByIDRequest {
 
 message GetRecordByIDReply {
     ArenaRecord record = 1;
+}
+
+message GetRankListByPageRequest {
+    int32 page = 1;
+}
+
+message GetRankListByPageReply {
+    bytes data = 1;
+}
+
+message SaveChampionRequest {
+
+}
+
+message SaveChampionReply {
+
+}
+
+message WeekEndRequest {
+
+}
+
+message WeekEndReply {
+
 }

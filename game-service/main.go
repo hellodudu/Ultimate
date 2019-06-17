@@ -6,11 +6,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/Ultimate/game-service/server"
 	"github.com/hellodudu/Ultimate/logger"
+	"github.com/hellodudu/Ultimate/utils/global"
 )
 
 func main() {
 
-	logger.Init(global.debug, "ultimate_service_game")
+	logger.Init(global.Debugging, "ultimate_service_game")
 
 	umt, err := server.NewUltimate()
 	if err != nil {

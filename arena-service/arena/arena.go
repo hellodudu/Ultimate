@@ -10,7 +10,6 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
-	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/protobuf/proto"
 	"github.com/sirupsen/logrus"
 )
@@ -132,10 +131,10 @@ func (s *rankArenaData) Add(v *arenaData) {
 
 // arena player data
 type arenaData struct {
-	Playerid   int64  `gorm:"type:bigint(20);primary_key;column:player_id;default:-1;not null"`
-	Score      int32  `gorm:"type:int(10);column:score;default:0;not null"`
-	ReachTime  uint32 `gorm:"type:int(10);column:reach_time;default:0;not null"`
-	LastTarget int64  `gorm:"type:bigint(20);column:last_target;default:-1;not null"` // target cannot be last one
+	Playerid   int64  `gorm:"type:bigint(20);primary_key;column:player_id;default:-1;not null" json:"player_id,omitempty"`
+	Score      int32  `gorm:"type:int(10);column:score;default:0;not null" json:"score,omitempty"`
+	ReachTime  uint32 `gorm:"type:int(10);column:reach_time;default:0;not null" json:"reach_time,omitempty"`
+	LastTarget int64  `gorm:"type:bigint(20);column:last_target;default:-1;not null" json:"last_target,omitempty"` // target cannot be last one
 }
 
 func (arenaData) TableName() string {
@@ -224,7 +223,7 @@ type Arena struct {
 	cancel   context.CancelFunc
 	chDBInit chan struct{}
 
-	gameCli pbGame.GameServiceClient
+	handler *ArenaHandler
 }
 
 // NewArena create new arena
@@ -236,17 +235,18 @@ func NewArena(ctx context.Context, ds iface.IDatastore) (*Arena, error) {
 		chMatchWaitOK: make(chan int64, 1000),
 		chDBInit:      make(chan struct{}, 1),
 		championList:  make([]*championData, 0),
-		gameCli:       pbGame.NewGameServiceClient("ultimate.service.game", nil),
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
+	arena.handler = NewArenaHandler(arena.ctx, arena)
+
 	go arena.loadFromDB()
 	go arena.run()
 
 	return arena, nil
 }
 
-func (arena *Arena) GetArenaDataNum() int {
+func (arena *Arena) getArenaDataNum() int {
 	n := 0
 	arena.mapArenaData.Range(func(_, _ interface{}) bool {
 		n++
@@ -264,7 +264,7 @@ func (arena *Arena) GetDataByID(id int64) (interface{}, error) {
 	return v.(*arenaData), nil
 }
 
-func (arena *Arena) GetRecordNum() int {
+func (arena *Arena) getRecordNum() int {
 	n := 0
 	arena.mapRecord.Range(func(_, _ interface{}) bool {
 		n++
@@ -273,7 +273,7 @@ func (arena *Arena) GetRecordNum() int {
 	return n
 }
 
-func (arena *Arena) GetRecordByID(id int64) (*pbArena.ArenaRecord, error) {
+func (arena *Arena) getRecordByID(id int64) (*pbArena.ArenaRecord, error) {
 	v, ok := arena.mapRecord.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena record with id %d", id)
@@ -282,7 +282,7 @@ func (arena *Arena) GetRecordByID(id int64) (*pbArena.ArenaRecord, error) {
 	return v.(*pbArena.ArenaRecord), nil
 }
 
-func (arena *Arena) GetMatchingList() []int64 {
+func (arena *Arena) getMatchingList() []int64 {
 	l := make([]int64, 0)
 	arena.matchingList.Range(func(k, _ interface{}) bool {
 		l = append(l, k.(int64))
@@ -300,17 +300,17 @@ func (arena *Arena) GetRecordReqList() map[int64]uint32 {
 	return m
 }
 
-func (arena *Arena) GetRankListByPage(page int) interface{} {
+func (arena *Arena) getRankListByPage(page int) []*arenaData {
 	return arena.arrRankArena.GetListByPage(page)
 }
 
-// SeasonEndTime get season end time
-func (arena *Arena) SeasonEndTime() int {
+// seasonEndTime get season end time
+func (arena *Arena) seasonEndTime() int {
 	return arena.ds.TableGlobal().ArenaSeasonEndTime
 }
 
-// Season get season
-func (arena *Arena) Season() int {
+// season get season
+func (arena *Arena) season() int {
 	return arena.ds.TableGlobal().ArenaSeason
 }
 
@@ -318,7 +318,7 @@ func (arena *Arena) WeekEndTime() int {
 	return arena.ds.TableGlobal().ArenaWeekEndTime
 }
 
-func (arena *Arena) GetChampion() []*pbArena.ArenaChampion {
+func (arena *Arena) getChampion() []*pbArena.ArenaChampion {
 	arena.cpLock.RLock()
 	defer arena.cpLock.RUnlock()
 
@@ -407,23 +407,23 @@ func (arena *Arena) loadFromDB() {
 
 	// if arena weekEndTime was expired, set a new time one week later
 	if arena.WeekEndTime() == 0 {
-		arena.WeekEnd()
+		arena.weekEnd()
 
 		// if weekEndTime has gone past, call weekEnd() 9 minutes later(wait for all world connected)
 	} else if now > arena.WeekEndTime() {
 		t := time.NewTimer(9 * time.Minute)
 		go func(ct *time.Timer) {
 			<-ct.C
-			arena.WeekEnd()
+			arena.weekEnd()
 		}(t)
 	}
 
 	// if arena seasonEndTime was expired, set a new seasonEndTime one season later
-	if arena.SeasonEndTime() == 0 {
+	if arena.seasonEndTime() == 0 {
 		arena.nextSeason()
 
 		// if season end time has gone past, call seasonEnd() 10 minutes later(wait for all world connected)
-	} else if now > arena.SeasonEndTime() {
+	} else if now > arena.seasonEndTime() {
 		t := time.NewTimer(10 * time.Minute)
 		go func(ct *time.Timer) {
 			<-ct.C
@@ -489,8 +489,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 		}
 	}
 
-	req := &pbGame.GetPlayerInfoByIDRequest{Id: id}
-	resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
+	resp, err := arena.handler.GetPlayerInfoByID(id)
 	if err != nil {
 		logger.WithFieldsWarn("cannot find player's info", logrus.Fields{
 			"player_id": id,
@@ -526,8 +525,7 @@ func (arena *Arena) updateRequestRecord() {
 			return true
 		}
 
-		req := &pbGame.GetPlayerInfoByIDRequest{Id: id}
-		resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
+		resp, err := arena.handler.GetPlayerInfoByID(id)
 		if err != nil {
 			return true
 		}
@@ -568,11 +566,11 @@ func (arena *Arena) updateTime() {
 
 	// week end
 	if t >= arena.WeekEndTime() {
-		arena.WeekEnd()
+		arena.weekEnd()
 	}
 
 	// season end
-	if t >= arena.SeasonEndTime() {
+	if t >= arena.seasonEndTime() {
 		arena.seasonEnd()
 	}
 }
@@ -584,13 +582,7 @@ func (arena *Arena) sendWorldMessage(id uint32, m proto.Message) error {
 		return err
 	}
 
-	req := &pbGame.SendWorldMessageRequest{
-		Id:      id,
-		MsgName: proto.MessageName(m),
-		MsgData: out,
-	}
-
-	if _, err := arena.gameCli.SendWorldMessage(arena.ctx, req); err != nil {
+	if _, err := arena.handler.SendWorldMessage(id, proto.MessageName(m), out); err != nil {
 		logger.Warn("sendWorldMessage reply err:", err)
 		return err
 	}
@@ -607,12 +599,7 @@ func (arena *Arena) broadCast(m proto.Message) error {
 		return err
 	}
 
-	req := &pbGame.BroadCastRequest{
-		MsgName: proto.MessageName(m),
-		MsgData: out,
-	}
-
-	if _, err := arena.gameCli.BroadCast(arena.ctx, req); err != nil {
+	if _, err := arena.handler.BroadCast(proto.MessageName(m), out); err != nil {
 		logger.Warn("broadcast reply err:", err)
 		return err
 	}
@@ -621,7 +608,7 @@ func (arena *Arena) broadCast(m proto.Message) error {
 }
 
 // every monday request new player record and send weekly reward
-func (arena *Arena) WeekEnd() {
+func (arena *Arena) weekEnd() {
 	// current time
 	ct := time.Now()
 
@@ -655,8 +642,7 @@ func (arena *Arena) WeekEnd() {
 	})
 
 	for k, v := range arrReq {
-		req := &pbGame.GetPlayerInfoByIDRequest{Id: v}
-		_, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
+		_, err := arena.handler.GetPlayerInfoByID(v)
 		if err != nil {
 			continue
 		}
@@ -680,8 +666,7 @@ func (arena *Arena) WeekEnd() {
 			s:  data.Score,
 		}
 
-		req := &pbGame.GetPlayerInfoByIDRequest{Id: r.id}
-		resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
+		resp, err := arena.handler.GetPlayerInfoByID(r.id)
 		if err != nil {
 			return true
 		}
@@ -735,15 +720,15 @@ func (arena *Arena) nextSeason() {
 
 	// save to db
 	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
-		ArenaSeasonEndTime: arena.SeasonEndTime(),
-		ArenaSeason:        arena.Season(),
+		ArenaSeasonEndTime: arena.seasonEndTime(),
+		ArenaSeason:        arena.season(),
 		TimeStamp:          int(time.Now().Unix()),
 	})
 
 	// broadcast to all world
 	msg := &pbArena.MUW_SyncArenaSeason{
-		Season:  int32(arena.Season()),
-		EndTime: uint32(arena.SeasonEndTime()),
+		Season:  int32(arena.season()),
+		EndTime: uint32(arena.seasonEndTime()),
 	}
 	arena.broadCast(msg)
 }
@@ -786,7 +771,7 @@ func (arena *Arena) newSeasonRank() {
 }
 
 // save top 3 champion id
-func (arena *Arena) SaveChampion() {
+func (arena *Arena) saveChampion() {
 	list := arena.arrRankArena.GetTop(3)
 
 	arena.cpLock.Lock()
@@ -797,14 +782,14 @@ func (arena *Arena) SaveChampion() {
 			Rank:       k,
 			PlayerID:   v.Playerid,
 			Score:      int(v.Score),
-			Season:     arena.Season(),
+			Season:     arena.season(),
 			PlayerName: "",
 			ServerName: "",
 			MasterID:   1,
 			FashionID:  -1,
 		}
 
-		rec, _ := arena.GetRecordByID(v.Playerid)
+		rec, _ := arena.getRecordByID(v.Playerid)
 		if rec != nil {
 			data.PlayerName = rec.FirstGroup.Name
 			data.ServerName = rec.FirstGroup.WorldName
@@ -829,7 +814,7 @@ func (arena *Arena) SaveChampion() {
 
 	// broadcast to all world
 	msg := &pbArena.MUW_ArenaChampion{
-		Data: arena.GetChampion(),
+		Data: arena.getChampion(),
 	}
 
 	arena.broadCast(msg)
@@ -840,8 +825,7 @@ func (arena *Arena) seasonReward() {
 	list := arena.arrRankArena.GetTop(100)
 
 	for n, data := range list {
-		req := &pbGame.GetPlayerInfoByIDRequest{Id: data.Playerid}
-		resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
+		resp, err := arena.handler.GetPlayerInfoByID(data.Playerid)
 		if err != nil {
 			logger.WithFieldsWarn("season reward cannot find player", logrus.Fields{
 				"top":       n + 1,
@@ -861,14 +845,13 @@ func (arena *Arena) seasonReward() {
 }
 
 func (arena *Arena) seasonEnd() {
-	arena.SaveChampion()
+	arena.saveChampion()
 	arena.seasonReward()
 	arena.nextSeason()
 	arena.newSeasonRank()
 }
 
-// Matching begin matching
-func (arena *Arena) Matching(playerID int64) {
+func (arena *Arena) matching(playerID int64) {
 	_, ok := arena.mapRecord.Load(playerID)
 
 	if ok {
@@ -887,8 +870,8 @@ func (arena *Arena) Matching(playerID int64) {
 	}
 }
 
-// AddRecord if existing then replace record
-func (arena *Arena) AddRecord(rec *pbArena.ArenaRecord) {
+// addRecord if existing then replace record
+func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 
 	if _, ok := arena.mapRecord.Load(rec.PlayerId); ok {
 		// update record
@@ -932,8 +915,8 @@ func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {
 
 }
 
-// BattleResult battle end
-func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
+// battleResult battle end
+func (arena *Arena) battleResult(attack int64, target int64, win bool) {
 	d, ok := arena.mapArenaData.Load(attack)
 	if !ok {
 		logger.WithFieldsWarn("cannot find attacker's arena data", logrus.Fields{
@@ -967,15 +950,14 @@ func (arena *Arena) BattleResult(attack int64, target int64, win bool) {
 	}
 }
 
-// RequestRank request rank by world, max page is 10
-func (arena *Arena) RequestRank(id int64, page int32) {
+// requestRank request rank by world, max page is 10
+func (arena *Arena) requestRank(id int64, page int32) {
 	if page >= 10 || page < 0 {
 		logger.Warn("player ", id, " request rank error: page ", page)
 		return
 	}
 
-	req := &pbGame.GetPlayerInfoByIDRequest{Id: id}
-	resp, err := arena.gameCli.GetPlayerInfoByID(arena.ctx, req)
+	resp, err := arena.handler.GetPlayerInfoByID(id)
 	if err != nil {
 		logger.Warn("player ", id, " request rank error: cannot find player info ", err)
 		return
@@ -986,7 +968,7 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		Page:          page,
 		Score:         int32(arenaDefaultScore),
 		Rank:          -1,
-		SeasonEndTime: uint32(arena.SeasonEndTime()),
+		SeasonEndTime: uint32(arena.seasonEndTime()),
 		Infos:         make([]*pbArena.ArenaTargetInfo, 0),
 	}
 
@@ -1027,27 +1009,3 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 
 	arena.sendWorldMessage(resp.Info.ServerId, msg)
 }
-
-/////////////////////////////////////////////
-// rpc service
-/////////////////////////////////////////////
-func (arena *Arena) GetSeasonData(ctx context.Context, req *pbArena.GetSeasonDataRequest, rsp *pbArena.GetSeasonDataReply) error {
-	logger.Info("Received ArenaSevice.GetSeasonData request")
-	rsp.Season = int32(arena.Season())
-	rsp.SeasonEndTime = int32(arena.SeasonEndTime())
-	return nil
-}
-
-func (arena *Arena) GetChampion(ctx context.Context, req *pbArena.GetChampionRequest, rsp *pbArena.GetChampionReply) error {
-	logger.Info("Received ArenaSevice.GetChampion request")
-	rsp.Data = arena.GetChampion()
-	return nil
-}
-
-/////////////////////////////////////
-// subscribe
-/////////////////////////////////////
-// func (arena *Arena) SubHandler(ctx context.Context, msg *pbArena.Message) error {
-// 	logger.Info("Function Received message: ", msg.Say)
-// 	return nil
-// }

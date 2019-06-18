@@ -29,10 +29,4 @@ message MWU_WorldConnected {
     repeated uint32 world_id = 1;
 }
 
-message MUW_RequestPlayerInfo {
-    int32 min_level = 1;
-}
 
-message MUW_RequestGuildInfo {
-
-}

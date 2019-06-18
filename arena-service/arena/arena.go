@@ -212,7 +212,8 @@ type Arena struct {
 	arrMatchPool []sync.Map // 8 level match pool map[playerid]struct{}
 	matchingList sync.Map   // list of matching waiting player map[playerid]struct{}
 
-	mapRecordReq sync.Map // map of init player request map[playerid]time.Now() : next request time
+	mapRecordReq map[int64]int64 // map of init player request map[playerid]time.Now() : next request time
+	muRecordReq  sync.Mutex
 
 	chMatchWaitOK chan int64 // match wait player channel
 
@@ -233,6 +234,7 @@ func NewArena(ctx context.Context, ds iface.IDatastore) (*Arena, error) {
 		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
 		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
 		chMatchWaitOK: make(chan int64, 1000),
+		mapRecordReq:  make(map[int64]int64),
 		chDBInit:      make(chan struct{}, 1),
 		championList:  make([]*championData, 0),
 	}
@@ -295,13 +297,8 @@ func (arena *Arena) getMatchingList() []int64 {
 	return l
 }
 
-func (arena *Arena) GetRecordReqList() map[int64]uint32 {
-	m := make(map[int64]uint32)
-	arena.mapRecordReq.Range(func(k, v interface{}) bool {
-		m[k.(int64)] = uint32(v.(time.Time).Unix())
-		return true
-	})
-	return m
+func (arena *Arena) GetRecordReqList() map[int64]int64 {
+	return arena.mapRecordReq
 }
 
 func (arena *Arena) getRankListByPage(page int) []*arenaData {
@@ -400,12 +397,14 @@ func (arena *Arena) loadFromDB() {
 	arena.ds.DB().Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(arenaData{})
 	arena.ds.DB().Find(&arenaDataList)
 
+	arena.muRecordReq.Lock()
 	for _, v := range arenaDataList {
 		arena.mapArenaData.Store(v.Playerid, v)
 
 		// add to record request list, delay 20s to start request
-		arena.mapRecordReq.Store(v.Playerid, time.Now().Add(time.Second*20))
+		arena.mapRecordReq[v.Playerid] = time.Now().Add(time.Second * 20).Unix()
 	}
+	arena.muRecordReq.Unlock()
 
 	now := int(time.Now().Unix())
 
@@ -518,15 +517,13 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 }
 
 func (arena *Arena) updateRequestRecord() {
-	var arrDel []int64
+	arena.muRecordReq.Lock()
+	defer arena.muRecordReq.Unlock()
 
-	arena.mapRecordReq.Range(func(k, v interface{}) bool {
-		id := k.(int64)
-		t := v.(time.Time)
-
+	for id, t := range arena.mapRecordReq {
 		// it's not right time to send request
-		if time.Now().Unix() < t.Unix() {
-			return true
+		if time.Now().Unix() < t {
+			continue
 		}
 
 		resp, err := arena.handler.GetPlayerInfoByID(id)
@@ -537,8 +534,8 @@ func (arena *Arena) updateRequestRecord() {
 
 		// add 3 seconds interval
 		if err != nil {
-			t = t.Add(time.Second * 3)
-			return true
+			arena.mapRecordReq[id] = time.Now().Add(time.Second * 3).Unix()
+			continue
 		}
 
 		// send request and try again 1 minutes later
@@ -548,15 +545,10 @@ func (arena *Arena) updateRequestRecord() {
 
 		err = arena.sendWorldMessage(resp.Info.ServerId, msg)
 		if err != nil {
-			return true
+			continue
 		}
 
-		arrDel = append(arrDel, id)
-		return true
-	})
-
-	for _, v := range arrDel {
-		arena.mapRecordReq.Delete(v)
+		delete(arena.mapRecordReq, id)
 	}
 }
 
@@ -652,14 +644,16 @@ func (arena *Arena) weekEnd() {
 		return true
 	})
 
+	arena.muRecordReq.Lock()
 	for k, v := range arrReq {
 		_, err := arena.handler.GetPlayerInfoByID(v)
 		if err != nil {
 			continue
 		}
 
-		arena.mapRecordReq.Store(v, ct.Add(time.Second*time.Duration(k/50)))
+		arena.mapRecordReq[v] = ct.Add(time.Second * time.Duration(k/50)).Unix()
 	}
+	arena.muRecordReq.Unlock()
 
 	// send weekly reward
 	type rewardWeek struct {
@@ -863,6 +857,9 @@ func (arena *Arena) seasonEnd() {
 }
 
 func (arena *Arena) matching(playerID int64) {
+	arena.muRecordReq.Lock()
+	defer arena.muRecordReq.Unlock()
+
 	_, ok := arena.mapRecord.Load(playerID)
 
 	if ok {
@@ -870,11 +867,11 @@ func (arena *Arena) matching(playerID int64) {
 		arena.chMatchWaitOK <- playerID
 
 		// request newlest record after 5 seconds
-		arena.mapRecordReq.Store(playerID, time.Now().Add(time.Second*5))
+		arena.mapRecordReq[playerID] = time.Now().Add(time.Second * 5).Unix()
 
 	} else {
 		// request record
-		arena.mapRecordReq.Store(playerID, time.Now())
+		arena.mapRecordReq[playerID] = time.Now().Unix()
 
 		// add to matching wait list
 		arena.matchingList.Store(playerID, struct{}{})

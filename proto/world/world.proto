@@ -1,5 +1,5 @@
 syntax = "proto3";
-package world;
+package ultimate.service.world;
 
 message MWU_WorldLogon {
   uint32 world_id = 1;

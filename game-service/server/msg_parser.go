@@ -39,25 +39,25 @@ func NewMsgParser(gm iface.IGameMgr, wm iface.IWorldMgr) *MsgParser {
 }
 
 func (m *MsgParser) registerAllMessage() {
-	m.regProtoHandle("world_message.MWU_WorldLogon", m.handleWorldLogon)
-	m.regProtoHandle("world_message.MWU_TestConnect", m.handleTestConnect)
-	m.regProtoHandle("world_message.MWU_HeartBeat", m.handleHeartBeat)
-	m.regProtoHandle("world_message.MWU_WorldConnected", m.handleWorldConnected)
-	m.regProtoHandle("world_message.MWU_RequestPlayerInfo", m.handleRequestPlayerInfo)
-	m.regProtoHandle("world_message.MWU_RequestGuildInfo", m.handleRequestGuildInfo)
-	m.regProtoHandle("world_message.MWU_PlayUltimateRecord", m.handlePlayUltimateRecord)
-	m.regProtoHandle("world_message.MWU_RequestUltimatePlayer", m.handleRequestUltimatePlayer)
-	m.regProtoHandle("world_message.MWU_ViewFormation", m.handleViewFormation)
-	m.regProtoHandle("world_message.MWU_ArenaMatching", m.handleArenaMatching)
-	m.regProtoHandle("world_message.MWU_ArenaAddRecord", m.handleArenaAddRecord)
-	m.regProtoHandle("world_message.MWU_ArenaBattleResult", m.handleArenaBattleResult)
-	m.regProtoHandle("world_message.MWU_ReplacePlayerInfo", m.handleReplacePlayerInfo)
-	m.regProtoHandle("world_message.MWU_ReplaceGuildInfo", m.handleReplaceGuildInfo)
-	m.regProtoHandle("world_message.MWU_RequestArenaRank", m.handleRequestArenaRank)
-	m.regProtoHandle("world_message.MWU_AddInvite", m.handleAddInvite)
-	m.regProtoHandle("world_message.MWU_CheckInviteResult", m.handleCheckInviteResult)
-	m.regProtoHandle("world_message.MWU_InviteRecharge", m.handleInviteRecharge)
-	m.regProtoHandle("world_message.MWU_ArenaChampionOnline", m.handleArenaChampionOnline)
+	m.regProtoHandle("ultimate.service.world.MWU_WorldLogon", m.handleWorldLogon)
+	m.regProtoHandle("ultimate.service.world.MWU_TestConnect", m.handleTestConnect)
+	m.regProtoHandle("ultimate.service.world.MWU_HeartBeat", m.handleHeartBeat)
+	m.regProtoHandle("ultimate.service.world.MWU_WorldConnected", m.handleWorldConnected)
+	m.regProtoHandle("ultimate.service.game.MWU_RequestPlayerInfo", m.handleRequestPlayerInfo)
+	m.regProtoHandle("ultimate.service.game.MWU_RequestGuildInfo", m.handleRequestGuildInfo)
+	m.regProtoHandle("ultimate.service.game.MWU_PlayUltimateRecord", m.handlePlayUltimateRecord)
+	m.regProtoHandle("ultimate.service.game.MWU_RequestUltimatePlayer", m.handleRequestUltimatePlayer)
+	m.regProtoHandle("ultimate.service.game.MWU_ViewFormation", m.handleViewFormation)
+	m.regProtoHandle("ultimate.service.game.MWU_AddInvite", m.handleAddInvite)
+	m.regProtoHandle("ultimate.service.game.MWU_CheckInviteResult", m.handleCheckInviteResult)
+	m.regProtoHandle("ultimate.service.game.MWU_InviteRecharge", m.handleInviteRecharge)
+	m.regProtoHandle("ultimate.service.arena.MWU_ArenaMatching", m.handleArenaMatching)
+	m.regProtoHandle("ultimate.service.arena.MWU_ArenaAddRecord", m.handleArenaAddRecord)
+	m.regProtoHandle("ultimate.service.arena.MWU_ArenaBattleResult", m.handleArenaBattleResult)
+	m.regProtoHandle("ultimate.service.arena.MWU_ReplacePlayerInfo", m.handleReplacePlayerInfo)
+	m.regProtoHandle("ultimate.service.arena.MWU_ReplaceGuildInfo", m.handleReplaceGuildInfo)
+	m.regProtoHandle("ultimate.service.arena.MWU_RequestArenaRank", m.handleRequestArenaRank)
+	m.regProtoHandle("ultimate.service.arena.MWU_ArenaChampionOnline", m.handleArenaChampionOnline)
 
 }
 
@@ -151,10 +151,16 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 			return
 		}
 
-		protoMsgID := utils.Crc32(proto.MessageName(newProto))
+		protoMsgName := proto.MessageName(newProto)
+		protoMsgID := utils.Crc32(protoMsgName)
 		fn, err := m.getRegProtoHandle(protoMsgID)
 		if err != nil {
-			logger.Warn(fmt.Sprintf("unregisted protoMsgID<%d> received!", protoMsgID))
+			logger.WithFieldsWarn("unregisted proto message received", logrus.Fields{
+				"message_id":   protoMsgID,
+				"message_name": protoMsgName,
+				"error":        err,
+			})
+			return
 		}
 
 		// callback
@@ -235,11 +241,11 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 		m.wm.AddWorldRef(world.GetID(), arrWorldID)
 
 		// request player info
-		msgP := &pbWorld.MUW_RequestPlayerInfo{MinLevel: 20}
+		msgP := &pbGame.MUW_RequestPlayerInfo{MinLevel: 20}
 		world.SendProtoMessage(msgP)
 
 		// request guild info
-		msgG := &pbWorld.MUW_RequestGuildInfo{}
+		msgG := &pbGame.MUW_RequestGuildInfo{}
 		world.SendProtoMessage(msgG)
 
 		// sync arena data

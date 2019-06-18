@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
-	"github.com/micro/protobuf/proto"
 	"github.com/sirupsen/logrus"
 )
 

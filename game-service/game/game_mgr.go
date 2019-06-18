@@ -141,7 +141,7 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 }
 
 func (g *GameMgr) ArenaMatching(id int64) {
-	req := &pbArena.MatchingRequest{}
+	req := &pbArena.MatchingRequest{Id: id}
 	_, err := g.arenaCli.Matching(g.ctx, req)
 	if err != nil {
 		logger.WithFieldsWarn("ArenaMatching Response", logrus.Fields{

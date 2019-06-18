@@ -51,11 +51,11 @@ func (m *MsgParser) registerAllMessage() {
 	m.regProtoHandle("ultimate.service.game.MWU_AddInvite", m.handleAddInvite)
 	m.regProtoHandle("ultimate.service.game.MWU_CheckInviteResult", m.handleCheckInviteResult)
 	m.regProtoHandle("ultimate.service.game.MWU_InviteRecharge", m.handleInviteRecharge)
+	m.regProtoHandle("ultimate.service.game.MWU_ReplacePlayerInfo", m.handleReplacePlayerInfo)
+	m.regProtoHandle("ultimate.service.game.MWU_ReplaceGuildInfo", m.handleReplaceGuildInfo)
 	m.regProtoHandle("ultimate.service.arena.MWU_ArenaMatching", m.handleArenaMatching)
 	m.regProtoHandle("ultimate.service.arena.MWU_ArenaAddRecord", m.handleArenaAddRecord)
 	m.regProtoHandle("ultimate.service.arena.MWU_ArenaBattleResult", m.handleArenaBattleResult)
-	m.regProtoHandle("ultimate.service.arena.MWU_ReplacePlayerInfo", m.handleReplacePlayerInfo)
-	m.regProtoHandle("ultimate.service.arena.MWU_ReplaceGuildInfo", m.handleReplaceGuildInfo)
 	m.regProtoHandle("ultimate.service.arena.MWU_RequestArenaRank", m.handleRequestArenaRank)
 	m.regProtoHandle("ultimate.service.arena.MWU_ArenaChampionOnline", m.handleArenaChampionOnline)
 

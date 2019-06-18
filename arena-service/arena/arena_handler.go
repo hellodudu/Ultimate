@@ -7,6 +7,7 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	"github.com/sirupsen/logrus"
 )
 
 type ArenaHandler struct {
@@ -69,7 +70,9 @@ func (h *ArenaHandler) GetChampion(ctx context.Context, req *pbArena.GetChampion
 }
 
 func (h *ArenaHandler) Matching(ctx context.Context, req *pbArena.MatchingRequest, rsp *pbArena.MatchingReply) error {
-	logger.Info("Received ArenaService.Matching request")
+	logger.WithFieldsInfo("Received ArenaService.Matching request", logrus.Fields{
+		"id": req.Id,
+	})
 	h.arena.matching(req.Id)
 	return nil
 }

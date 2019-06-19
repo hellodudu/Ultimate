@@ -527,13 +527,13 @@ func (arena *Arena) updateRequestRecord() {
 		}
 
 		resp, err := arena.handler.GetPlayerInfoByID(id)
-		logger.WithFieldsInfo("GetPlayerInfoByID Result", logrus.Fields{
-			"response": resp,
-			"error":    err,
-		})
 
 		// add 3 seconds interval
 		if err != nil {
+			logger.WithFieldsInfo("GetPlayerInfoByID Result", logrus.Fields{
+				"response": resp,
+				"error":    err,
+			})
 			arena.mapRecordReq[id] = time.Now().Add(time.Second * 3).Unix()
 			continue
 		}

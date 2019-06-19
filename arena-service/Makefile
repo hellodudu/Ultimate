@@ -20,7 +20,11 @@ docker:
 
 .PHONY: run
 run:
-	docker run -it -p 50051:50051 \
+	docker run -it \
+	 -p 50051:50051 \
+	 -p 3306:3306 \
 	 -e MICRO_SERVER_ADDRESS=:50051 \
 	 -e MICRO_REGISTRY=mdns \
+	 -v $(shell pwd)/../config:/config/ \
+	 -v $(shell pwd)/../log:/log/ \
 	 ultimate-service-arena

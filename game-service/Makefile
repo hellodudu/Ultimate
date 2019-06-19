@@ -1,3 +1,6 @@
+GOPATH:=$(shell go env GOPATH)
+v ?= latest
+
 .PHONY: proto
 proto:
 	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/game/game.proto
@@ -12,8 +15,13 @@ test:
 	go test -v ./... -cover
 
 .PHONY: docker
-docker:
+docker: build
 	docker build . -t ultimate-service-game:latest
+
+.PHONY: push
+push: build
+	docker tag ultimate-service-game hellodudu86/ultimate-service-game:$(v)
+	docker push hellodudu86/ultimate-service-game:$(v)
 
 .PHONY: run
 run:

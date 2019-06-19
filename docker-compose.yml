@@ -2,7 +2,7 @@ version: "3"
 services:
   
   ultimate-service-arena:
-    build: ./
+    build: game-service/
     image: ultimate-service-arena
     ports:
       - "3306"
@@ -18,7 +18,7 @@ services:
       - "ultimate-service-game"
 
   ultimate-service-game:
-    build: ./
+    build: arena-service/
     image: ultimate-service-game
     ports:
       - "7030:7030"

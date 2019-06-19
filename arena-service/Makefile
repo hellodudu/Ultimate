@@ -1,5 +1,5 @@
-
 GOPATH:=$(shell go env GOPATH)
+v ?= latest
 
 
 .PHONY: proto
@@ -15,8 +15,13 @@ test:
 	go test -v ./... -cover
 
 .PHONY: docker
-docker:
+docker: build
 	docker build . -t ultimate-service-arena:latest
+
+.PHONY: push
+push: build
+	docker tag ultimate-service-arena hellodudu86/ultimate-service-arena:$(v)
+	docker push hellodudu86/ultimate-service-arena:$(v)
 
 .PHONY: run
 run:

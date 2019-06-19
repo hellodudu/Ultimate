@@ -1,15 +1,34 @@
 version: "3"
 services:
-  game-service:
+  
+  ultimate-service-arena:
     build: ./
-    image: ultimate-service
+    image: ultimate-service-arena
+    ports:
+      - "3306"
+      - "8080"
+      - "50051"
+    volumes:
+      - "./log/:/log"
+      - "./config/:/config"
+    environment:
+      MICRO_SERVER_ADDRESS: ":50051"
+      MICRO_REGISTRY: "mdns"
+    depends_on:
+      - "ultimate-service-game"
+
+  ultimate-service-game:
+    build: ./
+    image: ultimate-service-game
     ports:
       - "7030:7030"
+      - "3306"
       - "8080"
+      - "50052"
     volumes:
-      - "./log/:/app/log"
-      - "./config/:/app/config"
+      - "./log/:/log"
+      - "./config/:/config"
     environment:
-      MICRO_ADRESS: ":50051"
+      micro_server_address: ":50052"
       MICRO_REGISTRY: "mdns"
-      DB_HOST: "root:@(host.docker.internal:3306)/db_ultimate"
+

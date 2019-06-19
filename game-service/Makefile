@@ -17,7 +17,12 @@ docker:
 
 .PHONY: run
 run:
-	docker run -it -p 50052:50052 \
+	docker run -it \
+	 -p 50052 \
+	 -p 3306 \
+	 -p 7030:7030 \
 	 -e MICRO_SERVER_ADDRESS=:50052 \
 	 -e MICRO_REGISTRY=mdns \
+	 -v $(shell pwd)/../config:/config/ \
+	 -v $(shell pwd)/../log:/log/ \
 	 ultimate-service-game

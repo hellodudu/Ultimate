@@ -1,11 +1,11 @@
 version: "3"
 services:
-  ultimate-service:
+  game-service:
     build: ./
     image: ultimate-service
     ports:
       - "7030:7030"
-      - "8080:8080"
+      - "8080"
     volumes:
       - "./log/:/app/log"
       - "./config/:/app/config"

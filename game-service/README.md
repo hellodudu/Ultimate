@@ -5,7 +5,7 @@ This is the Game-Service service
 Generated with
 
 ```
-micro new github.com/hellodudu/Ultimate/game-service --namespace=ultimate.service --type=srv
+micro new github.com/hellodudu/Ultimate/game-service --namespace=ultimate.service --type=game
 ```
 
 ## Getting Started
@@ -16,7 +16,7 @@ micro new github.com/hellodudu/Ultimate/game-service --namespace=ultimate.servic
 
 ## Configuration
 
-- FQDN: ultimate.service.srv.game-service
+- FQDN: ultimate.service.game
 - Type: srv
 - Alias: game-service
 
@@ -46,7 +46,7 @@ make build
 
 Run the service
 ```
-./game-service-srv
+./ultimate-service-game
 ```
 
 Build a docker image

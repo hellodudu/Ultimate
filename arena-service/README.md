@@ -5,7 +5,7 @@ This is the Arena-Service service
 Generated with
 
 ```
-micro new github.com/hellodudu/Ultimate/arena-service --namespace=go.micro --type=srv
+micro new github.com/hellodudu/Ultimate/arena-service --namespace=ultimate.service --type=arena
 ```
 
 ## Getting Started
@@ -16,7 +16,7 @@ micro new github.com/hellodudu/Ultimate/arena-service --namespace=go.micro --typ
 
 ## Configuration
 
-- FQDN: go.micro.srv.arena-service
+- FQDN: ultimate.service.arena
 - Type: srv
 - Alias: arena-service
 
@@ -46,7 +46,7 @@ make build
 
 Run the service
 ```
-./arena-service-srv
+./ultimate-service-arena
 ```
 
 Build a docker image

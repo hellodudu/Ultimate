@@ -2,14 +2,20 @@
 # GOPATH:=$(shell go env GOPATH)
 v ?= latest
 
-.PHONY: build
-build:
-	env GOOS=linux GOARCH=amd64 go build main.go
-	docker build -t ultimate .
-
 .PHONY: proto
 proto:
-	protoc -I=proto --go_out=plugins=grpc:proto proto/world_message.proto
+	make -C arena-service proto
+	make -C game-service proto
+
+.PHONY: build
+build:
+	make -C arena-service build
+	make -C game-service build
+
+.PHONY: docker
+docker:
+	make -C arena-service docker
+	make -C game-service docker
 
 .PHONY: test
 test:
@@ -17,12 +23,12 @@ test:
 
 .PHONY: run
 run:
-	docker run -itd -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate:$(v)
+	docker-compose up
 
-.PHONY: docker_push
-docker_push:
-	docker tag ultimate hellodudu86/ultimate:$(v)
-	docker push hellodudu86/ultimate:$(v)
+.PHONY: push
+push:
+	make -C arena-service push
+	make -C game-service push
 
 .PHONY: docker_rm
 docker_rm:

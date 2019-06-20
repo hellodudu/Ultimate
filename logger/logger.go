@@ -2,85 +2,95 @@ package logger
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
-	"github.com/fatih/color"
+	"github.com/sirupsen/logrus"
 )
 
 var (
-	trace   *log.Logger
-	info    *log.Logger
-	warning *log.Logger
-	error   *log.Logger
-	debug   bool
+	logConsole *logrus.Logger
+	debug      bool
 )
 
-func Init(d bool) bool {
+func Init(d bool, fn string) {
 	debug = d
+	logConsole = logrus.New()
+
+	// log file name
 	t := time.Now()
 	fileTime := fmt.Sprintf("%d-%d-%d %d-%d-%d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+	logFn := fmt.Sprintf("../log/%s_%s.log", fileTime, fn)
 
-	traceName := fmt.Sprintf("log/%s_ultimate_trace.log", fileTime)
-	traceFile, err := os.OpenFile(traceName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalln("Failed to open log file ", traceName, ":", err)
-		return false
+	file, err := os.OpenFile(logFn, os.O_CREATE|os.O_WRONLY, 0666)
+	if err == nil {
+		logrus.SetOutput(file)
+	} else {
+		Warn("Failed to log to file, using default stderr")
 	}
 
-	trace = log.New(traceFile, "TRACE: ", log.Ldate|log.Ltime|log.Lshortfile)
-
-	infoName := fmt.Sprintf("log/%s_ultimate_info.log", fileTime)
-	infoFile, err := os.OpenFile(infoName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalln("Failed to open log file ", infoName, ":", err)
-		return false
-	}
-	info = log.New(infoFile, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-
-	errorName := fmt.Sprintf("log/%s_ultimate_error.log", fileTime)
-	errorFile, err := os.OpenFile(errorName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalln("Failed to open log file ", errorName, ":", err)
-		return false
-	}
-	error = log.New(errorFile, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
-	warning = error
-
-	return true
+	customFormatter := new(logrus.TextFormatter)
+	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	customFormatter.FullTimestamp = true
+	logrus.SetFormatter(customFormatter)
+	logConsole.SetFormatter(customFormatter)
 }
 
 func Trace(v ...interface{}) {
-	trace.Println(fmt.Sprint(v...))
+	logConsole.Println(v...)
 	if debug {
-		log.Println(color.BlueString(fmt.Sprint(v...)))
+		logrus.Println(v...)
 	}
 }
 
 func Info(v ...interface{}) {
-	info.Println(fmt.Sprint(v...))
+	logConsole.Info(v...)
 	if debug {
-		log.Println(color.CyanString(fmt.Sprint(v...)))
+		logrus.Info(v...)
 	}
 }
 
-func Warning(v ...interface{}) {
-	warning.Println(fmt.Sprint(v...))
-	log.Println(color.YellowString(fmt.Sprint(v...)))
+func Warn(v ...interface{}) {
+	logConsole.Warn(v...)
+	logrus.Warn(v...)
 }
 
 func Error(v ...interface{}) {
-	error.Println(fmt.Sprint(v...))
-	log.Println(color.RedString(fmt.Sprint(v...)))
+	logConsole.Error(v...)
+	logrus.Error(v...)
 }
 
 func Fatal(v ...interface{}) {
-	Error(v...)
-	os.Exit(1)
+	logConsole.Fatal(v...)
+	logrus.Fatal(v...)
 }
 
 func Print(v ...interface{}) {
-	info.Println(fmt.Sprint(v...))
-	log.Println(color.CyanString(fmt.Sprint(v...)))
+	logConsole.Println(v...)
+	logrus.Println(v...)
+}
+
+func WithFieldsTrace(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Trace(s)
+	logrus.WithFields(fields).Trace(s)
+}
+
+func WithFieldsDebug(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Debug(s)
+	logrus.WithFields(fields).Debug(s)
+}
+
+func WithFieldsInfo(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Info(s)
+	logrus.WithFields(fields).Info(s)
+}
+
+func WithFieldsWarn(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Warn(s)
+	logrus.WithFields(fields).Warn(s)
+}
+
+func WithFieldsError(s string, fields logrus.Fields) {
+	logConsole.WithFields(fields).Error(s)
+	logrus.WithFields(fields).Error(s)
 }

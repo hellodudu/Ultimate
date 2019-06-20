@@ -1,15 +1,34 @@
 version: "3"
 services:
-  ultimate-service:
-    build: ./
-    command: env GOOS=linux GOARCH=amd64 go build -o ultimate-service
-    image: ultimate-service
+  
+  ultimate-service-arena:
+    build: game-service/
+    image: ultimate-service-arena
     ports:
-      - 7030:7030
-      - 8088:8080
+      - "3306"
+      - "8080"
+      - "50051"
+    volumes:
+      - "./log/:/log"
+      - "./config/:/config"
     environment:
-      MICRO_ADRESS: ":50051"
+      MICRO_SERVER_ADDRESS: ":50051"
       MICRO_REGISTRY: "mdns"
-      DB_HOST: "root:@(localhost:3306)/db_ultimate"
+    depends_on:
+      - "ultimate-service-game"
 
+  ultimate-service-game:
+    build: arena-service/
+    image: ultimate-service-game
+    ports:
+      - "7030:7030"
+      - "3306"
+      - "8080"
+      - "50052"
+    volumes:
+      - "./log/:/log"
+      - "./config/:/config"
+    environment:
+      micro_server_address: ":50052"
+      MICRO_REGISTRY: "mdns"
 

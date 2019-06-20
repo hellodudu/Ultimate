@@ -1,0 +1,301 @@
+syntax = "proto3";
+package ultimate.service.arena;
+
+
+// 镜像
+message HeroRecord {
+	uint32 entity_id = 1;
+	int32 state_flag = 2;
+	int32 fashion_id = 3;
+	uint32 mount_type_id = 4;
+	int32 rage_level = 5;
+	int32 level = 6;
+	repeated int32 att = 7;
+	repeated int32 base_att = 8;
+	repeated int32 base_att_mod_pct = 9;
+	repeated int32 att_mod = 10;
+	repeated int32 att_mod_pct = 11;
+	repeated uint32 passive_spell = 12;
+	int32 fly_up = 13;
+	int32 star_level = 14;
+	int32 quality = 15;
+}
+
+message BabyRecord {
+	int32 id = 1;
+	int32 type = 2;
+	uint32 mood = 3;
+	uint32 fashion_id = 4;
+	int32 health = 5;
+	uint32 teacher_id = 6;
+	uint32 hire_time = 7;
+	repeated uint32 skill_id = 8;
+	string name = 9;
+    int32 train_level = 10;
+}
+
+message GroupRecord {
+	int64 player_id = 1;
+	int32 level = 2;
+	int32 player_score = 3;
+	string name = 4;
+	repeated HeroRecord hero_record = 5;
+	repeated int32 dmg_mod_att = 6;
+	repeated uint32 rune_id = 7;
+	repeated int32 rune_level = 8;
+	int64 guild_id = 9;
+	string world_name = 10;
+	string guild_name = 11;
+	uint32 protrait = 12;
+	int32 head_quality = 13;
+	int32 vip_level = 14;
+	int32 flag = 15;
+	repeated int32 hero_dmg_mod_att = 16;
+	int32 head_protrait = 17;
+	repeated BabyRecord baby_record = 18;
+}
+
+message ArenaRecord {
+	int64 player_id = 1;
+	GroupRecord first_group = 3;
+	GroupRecord follow_group = 4;
+}
+
+// 加入镜像
+message MUW_ArenaAddRecord {
+	int64 player_id = 1;
+}
+
+message MWU_ArenaAddRecord {
+	ArenaRecord record = 1;
+}
+
+// 开始匹配
+message MWU_ArenaMatching {
+	int64 player_id = 1;
+}
+
+// 战斗
+message MUW_ArenaStartBattle {
+	int64 attack_id = 1;
+	ArenaRecord target_record = 2;
+    bool bot = 3;
+}
+
+message MWU_ArenaBattleResult {
+	int64 attack_id = 1;
+	int64 target_id = 2;
+	bool attack_win = 3;
+}
+
+// 请求排行
+message ArenaTargetInfo {
+    int64 player_id = 1;
+    string player_name = 2;
+    string server_name = 3;
+    int32 level = 4;
+    int32 player_score = 5;
+    int32 head_protrait = 6;
+    int32 head_quality = 7;
+    int32 arena_score = 8;
+}
+
+message MWU_RequestArenaRank {
+    int64 player_id = 1;
+    int32 page = 2;
+}
+
+message MUW_RequestArenaRank {
+    int64 player_id = 1;
+    int32 page = 2;
+    int32 rank = 3;
+    int32 score = 4;
+    uint32 season_end_time = 5;
+    repeated ArenaTargetInfo infos = 6;
+}
+
+message MUW_SyncArenaSeason {
+    int32 season = 1;
+    uint32 end_time = 2;
+}
+
+message ArenaWeeklyReward {
+    int64 player_id = 1;
+    int32 score = 2;
+}
+
+message MUW_ArenaWeeklyReward {
+    repeated ArenaWeeklyReward data = 1;
+}
+
+message MUW_ArenaSeasonReward {
+    int64 player_id = 1;
+    int32 rank = 2;
+}
+
+message ArenaChampion {
+    int32 rank = 1;
+    int64 player_id = 2;
+    int32 score = 3;
+    string player_name = 4;
+    string server_name = 5;
+    uint32 master_id = 6;
+    int32 fashion_id = 7;
+}
+
+message MUW_ArenaChampion {
+    repeated ArenaChampion data = 1;
+}
+
+message MWU_ArenaChampionOnline {
+    int64 player_id = 1;
+    string player_name = 2;
+    string server_name = 3;
+}
+
+message MUW_ArenaChampionOnline {
+    int64 player_id = 1;
+    string player_name = 2;
+    string server_name = 3;
+}
+
+/////////////////////////////////////////////////
+// rpc service
+/////////////////////////////////////////////////
+service ArenaService {
+    rpc GetSeasonData (GetSeasonDataRequest) returns (GetSeasonDataReply) {}
+    rpc GetChampion (GetChampionRequest) returns (GetChampionReply) {}
+    rpc Matching (MatchingRequest) returns (MatchingReply) {}
+    rpc AddRecord (AddRecordRequest) returns (AddRecordReply) {}
+    rpc BattleResult (BattleResultRequest) returns (BattleResultReply) {}
+    rpc GetRank (GetRankRequest) returns (GetRankReply) {}
+    rpc GetArenaDataNum (GetArenaDataNumRequest) returns (GetArenaDataNumReply) {}
+    rpc GetRecordNum (GetRecordNumRequest) returns (GetRecordNumReply) {}
+    rpc GetMatchingList (GetMatchingListRequest) returns (GetMatchingListReply) {}
+    rpc GetRecordReqList (GetRecordReqListRequest) returns (GetRecordReqListReply) {}
+    rpc GetRecordByID (GetRecordByIDRequest) returns (GetRecordByIDReply) {}
+    rpc GetRankListByPage (GetRankListByPageRequest) returns (GetRankListByPageReply) {}
+    rpc SaveChampion (SaveChampionRequest) returns (SaveChampionReply) {}
+    rpc WeekEnd (WeekEndRequest) returns (WeekEndReply) {}
+}
+
+message GetSeasonDataRequest {
+
+}
+
+message GetSeasonDataReply {
+    int32 season = 1;
+    int32 season_end_time = 2;
+}
+
+message GetChampionRequest {
+
+}
+
+message GetChampionReply {
+    repeated ArenaChampion data = 1;   
+}
+
+message MatchingRequest {
+    int64 id = 1;
+}
+
+message MatchingReply {
+
+}
+
+message AddRecordRequest {
+    ArenaRecord data = 1;
+}
+
+message AddRecordReply {
+    
+}
+
+message BattleResultRequest {
+    int64 attack_id = 1;
+    int64 target_id = 2;
+    bool attack_win = 3;
+}
+
+message BattleResultReply {
+
+}
+
+message GetRankRequest {
+    int64 player_id = 1;
+    int32 page = 2;
+}
+
+message GetRankReply {
+
+}
+
+message GetArenaDataNumRequest {
+
+}
+
+message GetArenaDataNumReply {
+    int32 num = 1;
+}
+
+message GetRecordNumRequest {
+
+}
+
+message GetRecordNumReply {
+    int32 num = 1;
+}
+
+message GetMatchingListRequest {
+
+}
+
+message GetMatchingListReply {
+    repeated int64 ids = 1;
+}
+
+message GetRecordReqListRequest {
+
+}
+
+message RecordReqList {
+    int64 player_id = 1;
+    int32 time = 2;
+}
+
+message GetRecordReqListReply {
+    repeated RecordReqList req_list = 1;
+}
+
+message GetRecordByIDRequest {
+    int64 id = 1;
+}
+
+message GetRecordByIDReply {
+    ArenaRecord record = 1;
+}
+
+message GetRankListByPageRequest {
+    int32 page = 1;
+}
+
+message GetRankListByPageReply {
+    bytes data = 1;
+}
+
+message SaveChampionRequest {
+
+}
+
+message SaveChampionReply {
+
+}
+
+message WeekEndRequest {
+
+}
+
+message WeekEndReply {
+
+}

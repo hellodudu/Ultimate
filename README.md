@@ -8,7 +8,7 @@
 
 # Install:
 
-	go get github.com/hellodudu/Ultimate
+	git clone https://github.com/hellodudu/Ultimate.git
 
 
 # Makefile:
@@ -19,7 +19,7 @@
 
 * Docker Build:
     
-	    make build
+	    make docker
 
 * Run
     
@@ -29,4 +29,4 @@
 # Run From Docker Hub:
 
    
-	docker run -it -p 7030:7030 -p 8080:8080 hellodudu86/ultimate
+	docker-compose up

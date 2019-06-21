@@ -14,6 +14,7 @@ services:
     environment:
       MICRO_SERVER_ADDRESS: ":50051"
       MICRO_REGISTRY: "mdns"
+      MYSQL_ADDR: "host.docker.internal"
     depends_on:
       - "ultimate-service-game"
 
@@ -31,4 +32,5 @@ services:
     environment:
       micro_server_address: ":50052"
       MICRO_REGISTRY: "mdns"
+      MYSQL_ADDR: "host.docker.internal"
 

@@ -5,13 +5,27 @@
 [![GoDoc](https://godoc.org/github.com/hellodudu/Ultimate?status.svg)](https://godoc.org/github.com/hellodudu/Ultimate)
 [![LICENSE](https://img.shields.io/badge/license-NPL%20(The%20996%20Prohibited%20License)-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
+# Requirement:
+
+    go version >= 1.11(module)
 
 # Install:
 
 	git clone https://github.com/hellodudu/Ultimate.git
 
+# Run From Path:
 
-# Makefile:
+* game-service:
+
+        cd game-service
+        go run main.go
+
+* arena-service:
+
+        cd arena-service
+        go run main.go
+
+# Run From Docker:
 
 * Proto: 
 
@@ -28,5 +42,4 @@
 
 # Run From Docker Hub:
 
-   
 	docker-compose up

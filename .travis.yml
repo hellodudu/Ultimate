@@ -1,19 +1,30 @@
 sudo: false
 language: go
-before_install:
-  - cd subdirectory
 
 services:
   - mysql
 
 go:
-  - 1.11.x
   - 1.12.x
   - tip
+
+env:
+  - GO111MODULE=on
 
 matrix:
   allow_failures:
     - go: tip
+
+jobs:
+  include:
+    - stage: game
+      script: 
+        - cd game-service
+        - make build
+    - stage: arena
+      script: 
+        - cd arena-service
+        - make build
 
 install:
   - go get github.com/go-sql-driver/mysql

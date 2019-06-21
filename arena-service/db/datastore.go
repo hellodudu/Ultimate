@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -29,7 +30,13 @@ func NewDatastore() (iface.IDatastore, error) {
 
 	datastore.ctx, datastore.cancel = context.WithCancel(context.Background())
 
-	mysqlDSN := fmt.Sprintf("%s:%s@(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, global.MysqlAddr, global.MysqlPort, global.MysqlDB)
+	// default use docker env value
+	var mysqlAddr string
+	if mysqlAddr = os.Getenv("MYSQL_ADDR"); len(mysqlAddr) == 0 {
+		mysqlAddr = global.MysqlAddr
+	}
+
+	mysqlDSN := fmt.Sprintf("%s:%s@(%s:%s)/%s", global.MysqlUser, global.MysqlPwd, mysqlAddr, global.MysqlPort, global.MysqlDB)
 	var err error
 	datastore.db, err = gorm.Open("mysql", mysqlDSN)
 	if err != nil {

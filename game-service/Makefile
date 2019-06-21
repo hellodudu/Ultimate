@@ -31,6 +31,7 @@ run:
 	 -p 7030:7030 \
 	 -e MICRO_SERVER_ADDRESS=:50052 \
 	 -e MICRO_REGISTRY=mdns \
+	 -e MYSQL_ADDR=host.docker.internal \
 	 -v $(shell pwd)/../config:/config/ \
 	 -v $(shell pwd)/../log:/log/ \
 	 ultimate-service-game

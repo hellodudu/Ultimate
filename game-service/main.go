@@ -3,8 +3,9 @@ package main
 import (
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/Ultimate/game-service/server"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils/global"
 )

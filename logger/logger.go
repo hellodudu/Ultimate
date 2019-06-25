@@ -11,10 +11,12 @@ import (
 var (
 	logConsole *logrus.Logger
 	debug      bool
+	console    bool
 )
 
-func Init(d bool, fn string) {
+func Init(d bool, c bool, fn string) {
 	debug = d
+	console = c
 	logConsole = logrus.New()
 
 	// log file name
@@ -37,60 +39,93 @@ func Init(d bool, fn string) {
 }
 
 func Trace(v ...interface{}) {
-	logConsole.Println(v...)
+	if console {
+		logConsole.Println(v...)
+	}
+
 	if debug {
 		logrus.Println(v...)
 	}
 }
 
 func Info(v ...interface{}) {
-	logConsole.Info(v...)
+	if console {
+		logConsole.Info(v...)
+	}
+
 	if debug {
 		logrus.Info(v...)
 	}
 }
 
 func Warn(v ...interface{}) {
-	logConsole.Warn(v...)
+	if console {
+		logConsole.Warn(v...)
+	}
+
 	logrus.Warn(v...)
 }
 
 func Error(v ...interface{}) {
-	logConsole.Error(v...)
+	if console {
+		logConsole.Error(v...)
+	}
+
 	logrus.Error(v...)
 }
 
 func Fatal(v ...interface{}) {
-	logConsole.Fatal(v...)
+	if console {
+		logConsole.Fatal(v...)
+	}
+
 	logrus.Fatal(v...)
 }
 
 func Print(v ...interface{}) {
-	logConsole.Println(v...)
+	if console {
+		logConsole.Println(v...)
+	}
+
 	logrus.Println(v...)
 }
 
 func WithFieldsTrace(s string, fields logrus.Fields) {
-	logConsole.WithFields(fields).Trace(s)
+	if console {
+		logConsole.WithFields(fields).Trace(s)
+	}
+
 	logrus.WithFields(fields).Trace(s)
 }
 
 func WithFieldsDebug(s string, fields logrus.Fields) {
-	logConsole.WithFields(fields).Debug(s)
+	if console {
+		logConsole.WithFields(fields).Debug(s)
+	}
+
 	logrus.WithFields(fields).Debug(s)
 }
 
 func WithFieldsInfo(s string, fields logrus.Fields) {
-	logConsole.WithFields(fields).Info(s)
+	if console {
+		logConsole.WithFields(fields).Info(s)
+	}
+
 	logrus.WithFields(fields).Info(s)
 }
 
 func WithFieldsWarn(s string, fields logrus.Fields) {
-	logConsole.WithFields(fields).Warn(s)
+	if console {
+		logConsole.WithFields(fields).Warn(s)
+	}
+
 	logrus.WithFields(fields).Warn(s)
 }
 
 func WithFieldsError(s string, fields logrus.Fields) {
-	logConsole.WithFields(fields).Error(s)
+	if console {
+		logConsole.WithFields(fields).Error(s)
+	}
+
 	logrus.WithFields(fields).Error(s)
 }

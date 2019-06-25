@@ -19,6 +19,8 @@ docker:
 
 .PHONY: test
 test:
+	make -C arena-service test
+	make -C game-service test
 	go test -v ./... -cover
 
 .PHONY: run

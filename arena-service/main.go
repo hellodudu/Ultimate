@@ -17,7 +17,7 @@ import (
 
 func main() {
 
-	logger.Init(global.Debugging, "ultimate_service_arena")
+	logger.Init(global.Debugging, true, "ultimate_service_arena")
 
 	ds, err := datastore.NewDatastore()
 	if err != nil {

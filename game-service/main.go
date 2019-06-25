@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	logger.Init(global.Debugging, "ultimate_service_game")
+	logger.Init(global.Debugging, true, "ultimate_service_game")
 
 	umt, err := server.NewUltimate()
 	if err != nil {

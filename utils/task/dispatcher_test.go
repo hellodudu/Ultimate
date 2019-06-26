@@ -3,11 +3,26 @@ package task
 import (
 	"testing"
 
+	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 )
 
+var chCallback chan int
+
 func init() {
 	logger.Init(false, false, "dispatcher_test")
+	chCallback = make(chan int, 1)
+}
+
+func taskCallback(_ iface.ITCPConn, data []byte) {
+	str := string(data[:])
+
+	if str != "hello world" {
+		chCallback <- 0
+		return
+	}
+
+	chCallback <- 1
 }
 
 func TestNewDispatcher(t *testing.T) {
@@ -17,8 +32,13 @@ func TestNewDispatcher(t *testing.T) {
 		t.Error("NewDispatcher failed")
 	}
 
-	id := td.genReqID()
-	if id != 1 {
-		t.Error("genReqID failed")
+	td.AddTask(&TaskReqInfo{
+		Data: []byte("hello world"),
+		CB:   taskCallback,
+	})
+
+	success := <-chCallback
+	if success != 1 {
+		t.Error("AddTask failed")
 	}
 }

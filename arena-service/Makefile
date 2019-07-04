@@ -7,7 +7,7 @@ proto:
 	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/arena/arena.proto
 
 .PHONY: build
-build: proto
+build: 
 	env GOOS=linux GOARCH=amd64 go build -o ultimate-service-arena main.go plugin.go
 
 .PHONY: test

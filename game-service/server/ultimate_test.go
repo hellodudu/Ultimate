@@ -26,4 +26,6 @@ func TestUltimate(t *testing.T) {
 	if err != nil {
 		t.Error("NewUltimate error:", err)
 	}
+
+	umt.Stop()
 }

@@ -2,15 +2,15 @@
 # GOPATH:=$(shell go env GOPATH)
 v ?= latest
 
-.PHONY: proto
-proto:
-	make -C arena-service proto
-	make -C game-service proto
-
 .PHONY: build
 build:
 	make -C arena-service build
 	make -C game-service build
+
+.PHONY: proto
+proto:
+	make -C arena-service proto
+	make -C game-service proto
 
 .PHONY: docker
 docker:

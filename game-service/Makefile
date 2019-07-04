@@ -1,14 +1,14 @@
 GOPATH:=$(shell go env GOPATH)
 v ?= latest
 
+.PHONY: build
+build: 
+	env GOOS=linux GOARCH=amd64 go build -o ultimate-service-game main.go plugin.go
+
 .PHONY: proto
 proto:
 	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/game/game.proto
 	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/world/world.proto
-
-.PHONY: build
-build: 
-	env GOOS=linux GOARCH=amd64 go build -o ultimate-service-game main.go plugin.go
 
 .PHONY: test
 test:

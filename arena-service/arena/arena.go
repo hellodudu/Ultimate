@@ -719,8 +719,8 @@ func (arena *Arena) nextSeason() {
 	// now elapse duration
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
-	// add 30 seconds inaccuracy
-	arena.ds.TableGlobal().ArenaSeasonEndTime = int(ct.Add(d - e + time.Duration(time.Second)*30).Unix())
+	// cut 5 minutes inaccuracy
+	arena.ds.TableGlobal().ArenaSeasonEndTime = int(ct.Add(d - e - time.Duration(time.Minute)*5).Unix())
 	arena.ds.TableGlobal().ArenaSeason++
 
 	// save to db

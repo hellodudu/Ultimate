@@ -281,7 +281,11 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 		world.SendProtoMessage(msgG)
 
 		// sync arena data
-		if season, seasonEndTime, err := m.gm.GetArenaSeasonData(); err != nil {
+		if season, seasonEndTime, err := m.gm.GetArenaSeasonData(); err == nil {
+			logger.WithFieldsInfo("GetArenaSeasonData success", logrus.Fields{
+				"season": season,
+				"time":   seasonEndTime,
+			})
 			msgArena := &pbArena.MUW_SyncArenaSeason{
 				Season:  season,
 				EndTime: uint32(seasonEndTime),

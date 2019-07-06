@@ -57,14 +57,12 @@ func (h *ArenaHandler) BroadCast(name string, data []byte) (*pbGame.BroadCastRep
 // rpc receive
 /////////////////////////////////////////////
 func (h *ArenaHandler) GetSeasonData(ctx context.Context, req *pbArena.GetSeasonDataRequest, rsp *pbArena.GetSeasonDataReply) error {
-	logger.Info("Received ArenaSevice.GetSeasonData request")
 	rsp.Season = int32(h.arena.season())
 	rsp.SeasonEndTime = int32(h.arena.seasonEndTime())
 	return nil
 }
 
 func (h *ArenaHandler) GetChampion(ctx context.Context, req *pbArena.GetChampionRequest, rsp *pbArena.GetChampionReply) error {
-	logger.Info("Received ArenaSevice.GetChampion request")
 	rsp.Data = h.arena.getChampion()
 	return nil
 }
@@ -78,7 +76,6 @@ func (h *ArenaHandler) Matching(ctx context.Context, req *pbArena.MatchingReques
 }
 
 func (h *ArenaHandler) AddRecord(ctx context.Context, req *pbArena.AddRecordRequest, rsp *pbArena.AddRecordReply) error {
-	logger.Info("Received ArenaService.AddRecord request")
 	h.arena.addRecord(req.Data)
 	return nil
 }

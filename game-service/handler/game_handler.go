@@ -24,7 +24,6 @@ func NewGameHandler(gm iface.IGameMgr, wm iface.IWorldMgr) (*GameHandler, error)
 // rpc received
 /////////////////////////////////////////////////
 func (h *GameHandler) GetPlayerInfoByID(ctx context.Context, req *pbGame.GetPlayerInfoByIDRequest, resp *pbGame.GetPlayerInfoByIDReply) error {
-	logger.Info("Received rpc call GetPlayerInfoByID:", req.Id)
 
 	var err error
 	if resp.Info, err = h.gm.GetPlayerInfoByID(req.Id); resp.Info == nil {
@@ -35,7 +34,6 @@ func (h *GameHandler) GetPlayerInfoByID(ctx context.Context, req *pbGame.GetPlay
 }
 
 func (h *GameHandler) GetGuildInfoByID(ctx context.Context, req *pbGame.GetGuildInfoByIDRequest, resp *pbGame.GetGuildInfoByIDReply) error {
-	logger.Info("Received rpc call GetGuildInfoByID:", req.Id)
 
 	var err error
 	if resp.Info, err = h.gm.GetGuildInfoByID(req.Id); err != nil {

@@ -311,6 +311,10 @@ func (arena *Arena) Season() int {
 	return arena.ds.TableGlobal().ArenaSeason
 }
 
+func (arena *Arena) fixEndTime() int {
+	return arena.ds.TableGlobal().ArenaFixEndTime
+}
+
 func (arena *Arena) WeekEndTime() int {
 	return arena.ds.TableGlobal().ArenaWeekEndTime
 }
@@ -437,6 +441,21 @@ func (arena *Arena) loadFromDB() {
 			<-ct.C
 			arena.seasonEnd()
 		}(t)
+	}
+
+	// fix arena end time
+	if arena.ds.TableGlobal().ArenaFixEndTime == 0 {
+		arena.newSeasonRank()
+		arena.ds.TableGlobal().ArenaFixEndTime = 1
+		arena.ds.TableGlobal().ArenaWeekEndTime = arena.WeekEndTime() - 490
+
+		// save to db
+		arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
+			ArenaWeekEndTime: arena.WeekEndTime(),
+			ArenaFixEndTime:  arena.fixEndTime(),
+			TimeStamp:        int(time.Now().Unix()),
+		})
+		logger.Trace("set new season rank")
 	}
 
 	// all init ok
@@ -592,13 +611,13 @@ func (arena *Arena) WeekEnd() {
 	}
 
 	// one full week duration
-	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(arenaRequestNewRecordDays)
+	o := time.Duration(time.Hour) * time.Duration(24)
 
 	// now elapse duration
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
 	// add 10 seconds inaccuracy
-	arena.ds.TableGlobal().ArenaWeekEndTime = int(ct.Add(d - e + time.Duration(time.Second)*10).Unix())
+	arena.ds.TableGlobal().ArenaWeekEndTime = int(ct.Add(o*7 - e - time.Duration(time.Minute)*8).Unix())
 
 	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
 		ArenaWeekEndTime: arena.ds.TableGlobal().ArenaWeekEndTime,
@@ -717,6 +736,7 @@ func (arena *Arena) nextSeason() {
 func (arena *Arena) newSeasonRank() {
 	// people who's section > 4, set score to 4 section default score
 	// people who's section <= 4, set score to section - 1 default score
+	saveList := make([]*arenaData, 0)
 	arena.mapArenaData.Range(func(k, v interface{}) bool {
 		value := v.(*arenaData)
 		oldSec := getSectionIndexByScore(value.Score)
@@ -735,11 +755,7 @@ func (arena *Arena) newSeasonRank() {
 
 		newScore := getDefaultScoreBySection(newSec)
 		value.Score = newScore
-
-		// save to db
-		go func(data *arenaData) {
-			arena.ds.DB().Save(data)
-		}(value)
+		saveList = append(saveList, value)
 
 		if oldSec != newSec {
 			arena.arrMatchPool[oldSec].Delete(value.Playerid)
@@ -748,6 +764,12 @@ func (arena *Arena) newSeasonRank() {
 		return true
 	})
 
+	// save to db
+	for _, v := range saveList {
+		arena.ds.DB().Save(v)
+	}
+
+	// resort
 	arena.arrRankArena.Sort()
 }
 

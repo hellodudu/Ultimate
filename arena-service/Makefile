@@ -27,6 +27,7 @@ run:
 	docker run -it \
 	 -p 50051 \
 	 -p 3306 \
+	 -e MICRO_BROKER=nsq \
 	 -e MICRO_SERVER_ADDRESS=:50051 \
 	 -e MICRO_REGISTRY=mdns \
 	 -e MYSQL_ADDR=host.docker.internal \

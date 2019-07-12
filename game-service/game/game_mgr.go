@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// GameMgr game manager
 type GameMgr struct {
 	wm            iface.IWorldMgr
 	invite        iface.IInvite
@@ -31,7 +32,7 @@ func NewGameMgr(wm iface.IWorldMgr) (iface.IGameMgr, error) {
 		mapGuildInfo:  make(map[int64]*pbGame.CrossGuildInfo),
 	}
 
-	gm.invite = NewInvite(gm, wm)
+	gm.invite = &invite{gm: gm, wm: wm}
 	gm.arenaCli = pbArena.NewArenaServiceClient("", nil)
 
 	gm.ctx, gm.cancel = context.WithCancel(context.Background())

@@ -7,35 +7,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Invite struct {
+type invite struct {
 	gm iface.IGameMgr
 	wm iface.IWorldMgr
 }
 
-// NewInvite create new Invite
-func NewInvite(gm iface.IGameMgr, wm iface.IWorldMgr) *Invite {
-	i := &Invite{
-		gm: gm,
-		wm: wm,
-	}
-
-	return i
-}
-
 // Stop stop
-func (i *Invite) Stop() {
+func (i *invite) Stop() {
 }
 
-func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
-	if newbieId == -1 {
+func (i *invite) AddInvite(newbieID int64, inviterID int64) int32 {
+	if newbieID == -1 {
 		return 3
 	}
 
-	if inviterId == -1 {
+	if inviterID == -1 {
 		return 3
 	}
 
-	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterId)
+	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterID)
 	if err != nil {
 		logger.WithFieldsWarn("AddInvite cannot find inviter info", logrus.Fields{
 			"error": err,
@@ -45,8 +35,8 @@ func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 
 	if world := i.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
 		msg := &pb.MUW_CheckInvite{
-			NewbieId:  newbieId,
-			InviterId: inviterId,
+			NewbieId:  newbieID,
+			InviterId: inviterID,
 		}
 
 		world.SendProtoMessage(msg)
@@ -56,12 +46,12 @@ func (i *Invite) AddInvite(newbieId int64, inviterId int64) int32 {
 	return 3
 }
 
-func (i *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode int32) {
-	if newbieId == -1 {
+func (i *invite) CheckInviteResult(newbieID int64, inviterID int64, errorCode int32) {
+	if newbieID == -1 {
 		return
 	}
 
-	newbieInfo, err := i.gm.GetPlayerInfoByID(newbieId)
+	newbieInfo, err := i.gm.GetPlayerInfoByID(newbieID)
 	if err != nil {
 		logger.WithFieldsWarn("CheckInviteResult cannot find newbie info", logrus.Fields{
 			"error": err,
@@ -71,8 +61,8 @@ func (i *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode in
 
 	if world := i.wm.GetWorldByID(newbieInfo.ServerId); world != nil {
 		msg := &pb.MUW_AddInviteResult{
-			NewbieId:  newbieId,
-			InviterId: inviterId,
+			NewbieId:  newbieID,
+			InviterId: inviterID,
 			ErrorCode: errorCode,
 		}
 
@@ -80,12 +70,12 @@ func (i *Invite) CheckInviteResult(newbieId int64, inviterId int64, errorCode in
 	}
 }
 
-func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int64, diamondGift int32) {
-	if newbieId == -1 {
+func (i *invite) InviteRecharge(newbieID int64, newbieName string, inviterID int64, diamondGift int32) {
+	if newbieID == -1 {
 		return
 	}
 
-	if inviterId == -1 {
+	if inviterID == -1 {
 		return
 	}
 
@@ -93,7 +83,7 @@ func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int
 		return
 	}
 
-	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterId)
+	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterID)
 	if err != nil {
 		logger.WithFieldsWarn("InviteRecharge cannot find inviter info", logrus.Fields{
 			"error": err,
@@ -103,9 +93,9 @@ func (i *Invite) InviteRecharge(newbieId int64, newbieName string, inviterId int
 
 	if world := i.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
 		msg := &pb.MUW_InviteRecharge{
-			NewbieId:    newbieId,
+			NewbieId:    newbieID,
 			NewbieName:  newbieName,
-			InviterId:   inviterId,
+			InviterId:   inviterID,
 			DiamondGift: diamondGift,
 		}
 

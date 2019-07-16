@@ -14,6 +14,7 @@ var (
 	console    bool
 )
 
+// Init init log system
 func Init(d bool, c bool, fn string) {
 	debug = d
 	console = c

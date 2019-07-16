@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -18,6 +19,7 @@ import (
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
+	"github.com/nsqio/go-nsq"
 )
 
 // ultimate define
@@ -37,38 +39,43 @@ type ultimate struct {
 	wg       sync.WaitGroup
 }
 
+// NewUltimate return IUltimate
 func NewUltimate() (iface.IUltimate, error) {
 	umt := &ultimate{}
 
-	if err := umt.InitDatastore(); err != nil {
+	if err := umt.initDatastore(); err != nil {
 		return nil, err
 	}
 
-	if err := umt.InitTask(); err != nil {
+	if err := umt.initTask(); err != nil {
 		return nil, err
 	}
 
-	if err := umt.InitWorldMgr(); err != nil {
+	if err := umt.initWorldMgr(); err != nil {
 		return nil, err
 	}
 
-	if err := umt.InitGameMgr(); err != nil {
+	if err := umt.initGameMgr(); err != nil {
 		return nil, err
 	}
 
-	if err := umt.InitGameService(); err != nil {
+	if err := umt.initGameService(); err != nil {
 		return nil, err
 	}
 
-	if err := umt.InitMsgParser(); err != nil {
+	if err := umt.initMsgParser(); err != nil {
 		return nil, err
 	}
 
-	if err := umt.InitTCPServer(); err != nil {
+	if err := umt.initTCPServer(); err != nil {
 		return nil, err
 	}
 
-	if err := umt.InitHttpServer(); err != nil {
+	if err := umt.initHTTPServer(); err != nil {
+		return nil, err
+	}
+
+	if err := umt.initNsq(); err != nil {
 		return nil, err
 	}
 
@@ -90,7 +97,7 @@ func (umt *ultimate) Datastore() iface.IDatastore {
 }
 
 // init task and taskdispatcher
-func (umt *ultimate) InitTask() error {
+func (umt *ultimate) initTask() error {
 	var err error
 	if umt.td, err = task.NewDispatcher(); err != nil {
 		return err
@@ -101,8 +108,8 @@ func (umt *ultimate) InitTask() error {
 	return nil
 }
 
-// init db
-func (umt *ultimate) InitDatastore() error {
+// init datastore
+func (umt *ultimate) initDatastore() error {
 	var err error
 	if umt.ds, err = datastore.NewDatastore(); err != nil {
 		return err
@@ -127,14 +134,14 @@ func (umt *ultimate) InitRedis() {
 	logger.Info("redis init ok")
 }
 
-func (umt *ultimate) InitMsgParser() error {
+func (umt *ultimate) initMsgParser() error {
 	umt.mp = NewMsgParser(umt.gm, umt.wm)
 	logger.Info("msg parser init ok!")
 	return nil
 }
 
 // InitTCPServer init
-func (umt *ultimate) InitTCPServer() error {
+func (umt *ultimate) initTCPServer() error {
 	var err error
 	if umt.tcpServ, err = NewTcpServer(umt.mp, umt.td); err != nil {
 		return err
@@ -145,14 +152,14 @@ func (umt *ultimate) InitTCPServer() error {
 }
 
 // init http server
-func (umt *ultimate) InitHttpServer() error {
+func (umt *ultimate) initHTTPServer() error {
 	umt.httpServ = NewHttpServer(umt.gm)
 	logger.Info("http_server init ok!")
 	return nil
 }
 
 // init world session
-func (umt *ultimate) InitWorldMgr() error {
+func (umt *ultimate) initWorldMgr() error {
 	var err error
 	if umt.wm, err = world.NewWorldMgr(umt.ds); err != nil {
 		return err
@@ -162,7 +169,7 @@ func (umt *ultimate) InitWorldMgr() error {
 	return nil
 }
 
-func (umt *ultimate) InitGameMgr() error {
+func (umt *ultimate) initGameMgr() error {
 	var err error
 	if umt.gm, err = game.NewGameMgr(umt.wm); err != nil {
 		return err
@@ -172,7 +179,7 @@ func (umt *ultimate) InitGameMgr() error {
 	return nil
 }
 
-func (umt *ultimate) InitGameService() error {
+func (umt *ultimate) initGameService() error {
 
 	var err error
 	if umt.gameHandler, err = handler.NewGameHandler(umt.gm, umt.wm); err != nil {
@@ -192,6 +199,30 @@ func (umt *ultimate) InitGameService() error {
 	pbGame.RegisterGameServiceHandler(umt.gameSrv.Server(), umt.gameHandler)
 
 	logger.Info("game init ok!")
+	return nil
+}
+
+func (umt *ultimate) initNsq() error {
+	config := nsq.NewConfig()
+	w, err := nsq.NewProducer("127.0.0.1:4150", config)
+	if err != nil {
+		return err
+	}
+
+	w.SetLogger(log.New(os.Stderr, "", log.LstdFlags), LogLevelInfo)
+
+	err := w.Publish("write_test", []byte("test"))
+	if err != nil {
+		t.Fatalf("should lazily connect - %s", err)
+	}
+
+	w.Stop()
+
+	err = w.Publish("write_test", []byte("fail test"))
+	if err != ErrStopped {
+		t.Fatalf("should not be able to write after Stop()")
+	}
+
 	return nil
 }
 

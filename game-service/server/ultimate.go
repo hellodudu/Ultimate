@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -19,7 +18,6 @@ import (
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
-	"github.com/nsqio/go-nsq"
 )
 
 // ultimate define
@@ -195,21 +193,6 @@ func (umt *ultimate) initGameService() error {
 	pbGame.RegisterGameServiceHandler(umt.gameSrv.Server(), umt.gameHandler)
 
 	logger.Info("game init ok!")
-	return nil
-}
-
-func (umt *ultimate) initNsqServer() error {
-	config := nsq.NewConfig()
-	w, err := nsq.NewProducer("127.0.0.1:4150", config)
-	if err != nil {
-		return err
-	}
-
-	if err := w.Publish("write_test", []byte("test")); err != nil {
-		log.Fatalf("should lazily connect - %s", err)
-	}
-
-	w.Stop()
 	return nil
 }
 

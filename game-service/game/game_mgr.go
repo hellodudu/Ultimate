@@ -2,6 +2,8 @@ package game
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -9,8 +11,34 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	"github.com/hellodudu/Ultimate/utils/global"
+	"github.com/nsqio/go-nsq"
 	"github.com/sirupsen/logrus"
 )
+
+type ConsumerHandler struct {
+}
+
+func (c *ConsumerHandler) HandleMessage(m *nsq.Message) error {
+	if string(m.Body) == "TOBEFAILED" {
+		return errors.New("fail this message")
+	}
+
+	data := struct {
+		Msg string `json:"msg"`
+	}{}
+
+	err := json.Unmarshal(m.Body, &data)
+	if err != nil {
+		return err
+	}
+
+	msg := data.Msg
+	logger.WithFieldsInfo("ConsumerHandler recved message", logrus.Fields{
+		"msg": msg,
+	})
+	return nil
+}
 
 // GameMgr game manager
 type GameMgr struct {
@@ -23,6 +51,8 @@ type GameMgr struct {
 	cancel        context.CancelFunc
 
 	arenaCli pbArena.ArenaServiceClient
+	producer *nsq.Producer
+	consumer *nsq.Consumer
 }
 
 func NewGameMgr(wm iface.IWorldMgr) (iface.IGameMgr, error) {
@@ -32,10 +62,32 @@ func NewGameMgr(wm iface.IWorldMgr) (iface.IGameMgr, error) {
 		mapGuildInfo:  make(map[int64]*pbGame.CrossGuildInfo),
 	}
 
+	// init invite
 	gm.invite = &invite{gm: gm, wm: wm}
+
+	// init arena service client
 	gm.arenaCli = pbArena.NewArenaServiceClient("", nil)
 
+	// init context
 	gm.ctx, gm.cancel = context.WithCancel(context.Background())
+
+	// init nsq producer
+	config := nsq.NewConfig()
+	var err error
+	if gm.producer, err = nsq.NewProducer(global.NsqdAddr, config); err != nil {
+		return nil, err
+	}
+
+	// init nsq consumer
+	if gm.consumer, err = nsq.NewConsumer("arena", "arena_channel", nsq.NewConfig()); err != nil {
+		return nil, err
+	}
+
+	gm.consumer.AddHandler(&ConsumerHandler{})
+	if err := gm.consumer.ConnectToNSQLookupd(global.NsqlookupdAddr); err != nil {
+		logger.Fatal(err)
+	}
+
 	return gm, nil
 }
 

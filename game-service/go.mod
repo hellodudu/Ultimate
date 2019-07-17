@@ -3,6 +3,8 @@ module github.com/hellodudu/Ultimate/game-service
 go 1.12
 
 require (
+	github.com/blang/semver v3.6.1+incompatible // indirect
+	github.com/bmizerany/perks v0.0.0-20141205001514-d9a9656a3a4b // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.1
@@ -10,9 +12,13 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20190328170749-bb2674552d8f // indirect
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
 	github.com/jinzhu/gorm v1.9.8
+	github.com/judwhite/go-svc v1.1.2 // indirect
 	github.com/micro/go-micro v1.5.0
+	github.com/mreiferson/go-options v0.0.0-20190302064952-20ba7d382d05 // indirect
 	github.com/nats-io/nats-server/v2 v2.0.0 // indirect
+	github.com/nsqio/go-diskqueue v0.0.0-20180306152900-74cfbc9de839 // indirect
 	github.com/nsqio/go-nsq v1.0.7
+	github.com/nsqio/nsq v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect

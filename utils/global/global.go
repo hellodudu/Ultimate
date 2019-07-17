@@ -35,6 +35,12 @@ var (
 	MysqlDB, _   = IniMgr.GetIniValue("../config/ultimate.ini", "mysql", "db")
 )
 
+// nsq
+var (
+	NsqdAddr, _       = IniMgr.GetIniValue("../config/ultimate.ini", "nsq", "NsqdAddr")
+	NsqlookupdAddr, _ = IniMgr.GetIniValue("../config/ultimate.ini", "nsq", "NsqlookupdAddr")
+)
+
 // ultimate
 var UltimateID = turnToInt(IniMgr.GetIniValue("../config/ultimate.ini", "ultimate", "id"))
 var Debugging = func() bool {

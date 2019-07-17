@@ -75,10 +75,6 @@ func NewUltimate() (iface.IUltimate, error) {
 		return nil, err
 	}
 
-	if err := umt.initNsq(); err != nil {
-		return nil, err
-	}
-
 	logger.Info("all init ok!")
 
 	return umt, nil
@@ -202,27 +198,18 @@ func (umt *ultimate) initGameService() error {
 	return nil
 }
 
-func (umt *ultimate) initNsq() error {
+func (umt *ultimate) initNsqServer() error {
 	config := nsq.NewConfig()
 	w, err := nsq.NewProducer("127.0.0.1:4150", config)
 	if err != nil {
 		return err
 	}
 
-	w.SetLogger(log.New(os.Stderr, "", log.LstdFlags), LogLevelInfo)
-
-	err := w.Publish("write_test", []byte("test"))
-	if err != nil {
-		t.Fatalf("should lazily connect - %s", err)
+	if err := w.Publish("write_test", []byte("test")); err != nil {
+		log.Fatalf("should lazily connect - %s", err)
 	}
 
 	w.Stop()
-
-	err = w.Publish("write_test", []byte("fail test"))
-	if err != ErrStopped {
-		t.Fatalf("should not be able to write after Stop()")
-	}
-
 	return nil
 }
 

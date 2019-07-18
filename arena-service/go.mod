@@ -7,6 +7,7 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705 // indirect
 	github.com/coredns/coredns v1.4.0 // indirect
 	github.com/envoyproxy/go-control-plane v0.6.9 // indirect
+	github.com/go-log/log v0.1.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.1
@@ -36,6 +37,7 @@ require (
 	github.com/shirou/gopsutil v2.18.12+incompatible // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/ugorji/go/codec v0.0.0-20190320090025-2dc34c0b8780 // indirect
+	grpc.go4.org v0.0.0-20170609214715-11d0a25b4919
 	layeh.com/radius v0.0.0-20190322222518-890bc1058917 // indirect
 )
 

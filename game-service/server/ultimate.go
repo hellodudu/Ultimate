@@ -10,11 +10,9 @@ import (
 	"github.com/go-redis/redis"
 	datastore "github.com/hellodudu/Ultimate/game-service/db"
 	"github.com/hellodudu/Ultimate/game-service/game"
-	"github.com/hellodudu/Ultimate/game-service/handler"
 	"github.com/hellodudu/Ultimate/game-service/world"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
@@ -28,8 +26,7 @@ type ultimate struct {
 	gm iface.IGameMgr    // game manager
 	mp iface.IMsgParser  // msg parser
 
-	gameSrv     micro.Service
-	gameHandler *handler.GameHandler
+	gameSrv micro.Service
 
 	rds      *redis.Client // redis
 	tcpServ  *TCPServer    // tcp server
@@ -54,10 +51,6 @@ func NewUltimate() (iface.IUltimate, error) {
 	}
 
 	if err := umt.initGameMgr(); err != nil {
-		return nil, err
-	}
-
-	if err := umt.initGameService(); err != nil {
 		return nil, err
 	}
 
@@ -164,21 +157,6 @@ func (umt *ultimate) initWorldMgr() error {
 }
 
 func (umt *ultimate) initGameMgr() error {
-	var err error
-	if umt.gm, err = game.NewGameMgr(umt.wm); err != nil {
-		return err
-	}
-
-	logger.Info("game_mgr init ok!")
-	return nil
-}
-
-func (umt *ultimate) initGameService() error {
-
-	var err error
-	if umt.gameHandler, err = handler.NewGameHandler(umt.gm, umt.wm); err != nil {
-		return err
-	}
 
 	// New Service
 	umt.gameSrv = micro.NewService(
@@ -186,13 +164,16 @@ func (umt *ultimate) initGameService() error {
 		micro.Version("latest"),
 	)
 
-	// Initialise service
+	// init service
 	umt.gameSrv.Init()
 
-	// Register Handler
-	pbGame.RegisterGameServiceHandler(umt.gameSrv.Server(), umt.gameHandler)
+	// init game mgr
+	var err error
+	if umt.gm, err = game.NewGameMgr(umt.wm, umt.gameSrv); err != nil {
+		return err
+	}
 
-	logger.Info("game init ok!")
+	logger.Info("game_mgr init ok!")
 	return nil
 }
 

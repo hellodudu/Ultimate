@@ -11,6 +11,8 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
+	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	"github.com/micro/go-micro"
 	"github.com/sirupsen/logrus"
 )
 
@@ -224,11 +226,12 @@ type Arena struct {
 	cancel   context.CancelFunc
 	chDBInit chan struct{}
 
-	handler *ArenaHandler
+	handler *RPCHandler
+	pub     micro.Publisher
 }
 
 // NewArena create new arena
-func NewArena(ctx context.Context, ds iface.IDatastore) (*Arena, error) {
+func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (*Arena, error) {
 	arena := &Arena{
 		ds:            ds,
 		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
@@ -240,16 +243,25 @@ func NewArena(ctx context.Context, ds iface.IDatastore) (*Arena, error) {
 	}
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
-	arena.handler = NewArenaHandler(arena.ctx, arena)
+	arena.handler = &RPCHandler{
+		ctx:     arena.ctx,
+		arena:   arena,
+		gameCli: pbGame.NewGameServiceClient("", nil),
+	}
+
+	// create publisher
+	arena.pub = micro.NewPublisher("arena", service.Client())
+
+	// register subscriber
+	micro.RegisterSubscriber("arena.Matching", service.Server(), new(MatchingSubHandler))
+
+	// register Handler
+	pbArena.RegisterArenaServiceHandler(service.Server(), arena.handler)
 
 	go arena.loadFromDB()
 	go arena.run()
 
 	return arena, nil
-}
-
-func (arena *Arena) Handler() *ArenaHandler {
-	return arena.handler
 }
 
 func (arena *Arena) getArenaDataNum() int {
@@ -530,10 +542,6 @@ func (arena *Arena) updateRequestRecord() {
 
 		// add 3 seconds interval
 		if err != nil {
-			logger.WithFieldsInfo("GetPlayerInfoByID Result", logrus.Fields{
-				"response": resp,
-				"error":    err,
-			})
 			arena.mapRecordReq[id] = time.Now().Add(time.Second * 3).Unix()
 			continue
 		}

@@ -9,15 +9,20 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	"github.com/micro/go-micro"
 )
 
 type GameHandler struct {
-	gm iface.IGameMgr
-	wm iface.IWorldMgr
+	gm      iface.IGameMgr
+	wm      iface.IWorldMgr
+	service micro.Service
+	pub     micro.Publisher
 }
 
-func NewGameHandler(gm iface.IGameMgr, wm iface.IWorldMgr) (*GameHandler, error) {
-	return &GameHandler{gm: gm, wm: wm}, nil
+func NewGameHandler(gm iface.IGameMgr, wm iface.IWorldMgr, service micro.Service) (*GameHandler, error) {
+	h := &GameHandler{gm: gm, wm: wm, service: service}
+	h.pub = micro.NewPublisher("arena", service.Client())
+	return h, nil
 }
 
 /////////////////////////////////////////////////

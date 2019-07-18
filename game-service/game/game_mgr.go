@@ -2,43 +2,17 @@ package game
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"sync"
 
+	"github.com/hellodudu/Ultimate/game-service/handler"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
-	"github.com/hellodudu/Ultimate/utils/global"
-	"github.com/nsqio/go-nsq"
+	"github.com/micro/go-micro"
 	"github.com/sirupsen/logrus"
 )
-
-type ConsumerHandler struct {
-}
-
-func (c *ConsumerHandler) HandleMessage(m *nsq.Message) error {
-	if string(m.Body) == "TOBEFAILED" {
-		return errors.New("fail this message")
-	}
-
-	data := struct {
-		Msg string `json:"msg"`
-	}{}
-
-	err := json.Unmarshal(m.Body, &data)
-	if err != nil {
-		return err
-	}
-
-	msg := data.Msg
-	logger.WithFieldsInfo("ConsumerHandler recved message", logrus.Fields{
-		"msg": msg,
-	})
-	return nil
-}
 
 // GameMgr game manager
 type GameMgr struct {
@@ -51,11 +25,11 @@ type GameMgr struct {
 	cancel        context.CancelFunc
 
 	arenaCli pbArena.ArenaServiceClient
-	producer *nsq.Producer
-	consumer *nsq.Consumer
+	handler  *handler.GameHandler
+	pub      micro.Publisher
 }
 
-func NewGameMgr(wm iface.IWorldMgr) (iface.IGameMgr, error) {
+func NewGameMgr(wm iface.IWorldMgr, service micro.Service) (iface.IGameMgr, error) {
 	gm := &GameMgr{
 		wm:            wm,
 		mapPlayerInfo: make(map[int64]*pbGame.CrossPlayerInfo),
@@ -71,22 +45,17 @@ func NewGameMgr(wm iface.IWorldMgr) (iface.IGameMgr, error) {
 	// init context
 	gm.ctx, gm.cancel = context.WithCancel(context.Background())
 
-	// init nsq producer
-	config := nsq.NewConfig()
+	// GameHandler
 	var err error
-	if gm.producer, err = nsq.NewProducer(global.NsqdAddr, config); err != nil {
+	if gm.handler, err = handler.NewGameHandler(gm, wm, service); err != nil {
 		return nil, err
 	}
 
-	// init nsq consumer
-	if gm.consumer, err = nsq.NewConsumer("arena", "arena_channel", nsq.NewConfig()); err != nil {
-		return nil, err
-	}
+	// Register Handler
+	pbGame.RegisterGameServiceHandler(service.Server(), gm.handler)
 
-	gm.consumer.AddHandler(&ConsumerHandler{})
-	if err := gm.consumer.ConnectToNSQLookupd(global.NsqlookupdAddr); err != nil {
-		logger.Fatal(err)
-	}
+	// init publisher
+	gm.pub = micro.NewPublisher("arena.Matching", service.Client())
 
 	return gm, nil
 }
@@ -194,13 +163,27 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 }
 
 func (g *GameMgr) ArenaMatching(id int64) {
+	// req := &pbArena.MatchingRequest{Id: id}
+	// _, err := g.arenaCli.Matching(g.ctx, req)
+	// if err != nil {
+	// 	logger.WithFieldsWarn("ArenaMatching Response", logrus.Fields{
+	// 		"error": err,
+	// 	})
+	// 	return
+	// }
+
+	// create new event
 	req := &pbArena.MatchingRequest{Id: id}
-	_, err := g.arenaCli.Matching(g.ctx, req)
-	if err != nil {
-		logger.WithFieldsWarn("ArenaMatching Response", logrus.Fields{
+
+	// publish an event
+	if err := g.pub.Publish(g.ctx, req); err != nil {
+		logger.WithFieldsWarn("publish Matching failed", logrus.Fields{
 			"error": err,
 		})
+		return
 	}
+
+	logger.Info("ArenaMatching publish success")
 }
 
 func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {

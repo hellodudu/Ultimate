@@ -253,7 +253,8 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 	arena.pub = micro.NewPublisher("arena", service.Client())
 
 	// register subscriber
-	micro.RegisterSubscriber("arena.Matching", service.Server(), new(MatchingSubHandler))
+	subHandler := &MatchingSubHandler{arena: arena}
+	micro.RegisterSubscriber("arena.Matching", service.Server(), subHandler)
 
 	// register Handler
 	pbArena.RegisterArenaServiceHandler(service.Server(), arena.handler)

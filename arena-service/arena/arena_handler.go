@@ -8,7 +8,6 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/sirupsen/logrus"
-	"grpc.go4.org/metadata"
 )
 
 // RPCHandler rpc handler
@@ -143,16 +142,15 @@ func (h *RPCHandler) WeekEnd(ctx context.Context, req *pbArena.WeekEndRequest, r
 // subscribe
 /////////////////////////////////////
 // SubHandler sub handler
-type MatchingSubHandler struct{}
+type MatchingSubHandler struct {
+	arena *Arena
+}
 
 // Process sub handler process
 func (s *MatchingSubHandler) Process(ctx context.Context, event *pbArena.MatchingRequest) error {
-	md, _ := metadata.FromContext(ctx)
-	// log.Logf("[pubsub.1] Received event %+v with metadata %+v\n", event, md)
-	logger.WithFieldsInfo("MatchingSubHandler Received event with metadata", logrus.Fields{
-		"event":    event,
-		"metadata": md,
+	logger.WithFieldsInfo("MatchingSubHandler Received event", logrus.Fields{
+		"event": event,
 	})
-	// do something with event
+	s.arena.matching(event.Id)
 	return nil
 }

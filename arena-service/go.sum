@@ -744,6 +744,7 @@ github.com/micro/go-config v0.14.0/go.mod h1:ijvLjvxxfDdlH5vO36ZBrzMVGpiGysuwFot
 github.com/micro/go-config v1.1.0/go.mod h1:CXPn1mOHB6dBgqWzmsww9cb267dWThPzppMl93jLQ0I=
 github.com/micro/go-grpc v0.9.0/go.mod h1:0oVU9jFs55Pcu4J5+ZI9c4MKgQBm0UWWSiPZyUdQPJo=
 github.com/micro/go-grpc v1.0.0/go.mod h1:G5jb/FchX5B0fSZc417Y+dXFsDjtGStsQOgIG7eQcj8=
+github.com/micro/go-log v0.1.0 h1:szYSR+yyTsomZM2jyinJC5562DlqffSjHmTZFaeZ2vY=
 github.com/micro/go-log v0.1.0/go.mod h1:qaFBF6d6Jk01Gz4cbMkCA2vVuLk3FSaLLjmEGrMCreA=
 github.com/micro/go-micro v0.23.0/go.mod h1:3z3lfMkNU9Sr1L/CxL++8pVJmQapRo0N6kNjwYDtOVs=
 github.com/micro/go-micro v0.24.0/go.mod h1:G/2AWGXaoz2RoiT8xNNzE9Jn46MAI3GiRvSw6QsCDwI=
@@ -780,7 +781,10 @@ github.com/micro/micro v0.22.0/go.mod h1:P9n/z0/T/F0h3ywgKACNaRlXQitOQtGrYVfhEzm
 github.com/micro/micro v0.22.1/go.mod h1:P9n/z0/T/F0h3ywgKACNaRlXQitOQtGrYVfhEzmIvw0=
 github.com/micro/micro v0.23.2/go.mod h1:Fxh8P04RkEdpsiSzlwqVJR7+OHR1/7vo2obwCCQnwAc=
 github.com/micro/micro v1.1.1/go.mod h1:r9wLAx67Dn/ClxSiF4nUt/d1SaZDwPm06hegO6spy0I=
+github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb h1:7X2fjfHGQUGIqA6PwBpPChDIRrnB0Y0zD0ox3Cqg/Bs=
+github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb/go.mod h1:3YhiKlo1uYsab8vkYbrfJ6w9DnpYWGIYWwd0txqveNM=
 github.com/micro/util v0.1.0/go.mod h1:MZgOs0nwxzv9k4xQo4fpF9IwZGF2O96F5/phP9X4/Sw=
+github.com/micro/util v0.2.0 h1:6u0cPj1TeixEk5cAR9jbcVRUWDQsmCaZvDBiM3zFZuA=
 github.com/micro/util v0.2.0/go.mod h1:SgRDkxJJluC2ZNiPfINY42ObEaCAFjL3jP5a+u+qRLU=
 github.com/microcosm-cc/bluemonday v1.0.1/go.mod h1:hsXNsILzKxV+sX77C5b8FSuKF00vh2OMYv+xgHpAMF4=
 github.com/microcosm-cc/bluemonday v1.0.2/go.mod h1:iVP4YcDBq+n/5fb23BhYFvIMq/leAFZyRl6bYmGDlGc=

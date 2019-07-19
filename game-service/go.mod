@@ -12,7 +12,6 @@ require (
 	github.com/marten-seemann/qtls v0.3.1 // indirect
 	github.com/micro/go-micro v1.7.1-0.20190711204633-5157241c88e0
 	github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c
-	github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb // indirect
 	github.com/nats-io/jwt v0.2.10 // indirect
 	github.com/nats-io/nats-server/v2 v2.0.2 // indirect
 	github.com/sirupsen/logrus v1.4.2

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hellodudu/Ultimate/game-service/handler"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
@@ -25,8 +24,7 @@ type GameMgr struct {
 	cancel        context.CancelFunc
 
 	arenaCli pbArena.ArenaServiceClient
-	handler  *handler.GameHandler
-	pub      micro.Publisher
+	pubsub   *pubSub
 }
 
 func NewGameMgr(wm iface.IWorldMgr, service micro.Service) (iface.IGameMgr, error) {
@@ -45,17 +43,11 @@ func NewGameMgr(wm iface.IWorldMgr, service micro.Service) (iface.IGameMgr, erro
 	// init context
 	gm.ctx, gm.cancel = context.WithCancel(context.Background())
 
-	// GameHandler
-	var err error
-	if gm.handler, err = handler.NewGameHandler(gm, wm, service); err != nil {
-		return nil, err
-	}
-
 	// Register Handler
-	pbGame.RegisterGameServiceHandler(service.Server(), gm.handler)
+	pbGame.RegisterGameServiceHandler(service.Server(), newGameHandler(gm, wm, service))
 
-	// init publisher
-	gm.pub = micro.NewPublisher("arena.Matching", service.Client())
+	// init pub/sub
+	gm.pubsub = newPubSub(service, gm, wm)
 
 	return gm, nil
 }
@@ -163,27 +155,8 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 }
 
 func (g *GameMgr) ArenaMatching(id int64) {
-	// req := &pbArena.MatchingRequest{Id: id}
-	// _, err := g.arenaCli.Matching(g.ctx, req)
-	// if err != nil {
-	// 	logger.WithFieldsWarn("ArenaMatching Response", logrus.Fields{
-	// 		"error": err,
-	// 	})
-	// 	return
-	// }
-
-	// create new event
-	req := &pbArena.MatchingRequest{Id: id}
-
 	// publish an event
-	if err := g.pub.Publish(g.ctx, req); err != nil {
-		logger.WithFieldsWarn("publish Matching failed", logrus.Fields{
-			"error": err,
-		})
-		return
-	}
-
-	logger.Info("ArenaMatching publish success")
+	g.pubsub.publishArenaMatching(g.ctx, &pbArena.PublishMatching{Id: id})
 }
 
 func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {

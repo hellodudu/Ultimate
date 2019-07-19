@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
@@ -227,7 +226,7 @@ type Arena struct {
 	chDBInit chan struct{}
 
 	handler *RPCHandler
-	pub     micro.Publisher
+	pubsub  *pubSub
 }
 
 // NewArena create new arena
@@ -249,15 +248,11 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 		gameCli: pbGame.NewGameServiceClient("", nil),
 	}
 
-	// create publisher
-	arena.pub = micro.NewPublisher("arena", service.Client())
-
-	// register subscriber
-	subHandler := &MatchingSubHandler{arena: arena}
-	micro.RegisterSubscriber("arena.Matching", service.Server(), subHandler)
-
 	// register Handler
 	pbArena.RegisterArenaServiceHandler(service.Server(), arena.handler)
+
+	// create pub/sub manager
+	arena.pubsub = newPubSub(service, arena)
 
 	go arena.loadFromDB()
 	go arena.run()
@@ -525,7 +520,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 		msg.TargetRecord = dstRec
 	}
 
-	arena.sendWorldMessage(resp.Info.ServerId, msg)
+	arena.pubsub.publishSendWorldMessage(arena.ctx, resp.Info.ServerId, msg)
 	return true, nil
 }
 
@@ -552,7 +547,7 @@ func (arena *Arena) updateRequestRecord() {
 			PlayerId: id,
 		}
 
-		err = arena.sendWorldMessage(resp.Info.ServerId, msg)
+		err = arena.pubsub.publishSendWorldMessage(arena.ctx, resp.Info.ServerId, msg)
 		if err != nil {
 			continue
 		}
@@ -585,38 +580,6 @@ func (arena *Arena) updateTime() {
 	if t >= arena.seasonEndTime() {
 		arena.seasonEnd()
 	}
-}
-
-func (arena *Arena) sendWorldMessage(id uint32, m proto.Message) error {
-	out, err := proto.Marshal(m)
-	if err != nil {
-		logger.Warn("proto marshal failed:", err)
-		return err
-	}
-
-	if _, err := arena.handler.SendWorldMessage(id, proto.MessageName(m), out); err != nil {
-		logger.Warn("sendWorldMessage reply err:", err)
-		return err
-	}
-
-	return nil
-}
-
-func (arena *Arena) broadCast(m proto.Message) error {
-	out, err := proto.Marshal(m)
-	if err != nil {
-		logger.WithFieldsWarn("proto marshal failed", logrus.Fields{
-			"error": err,
-		})
-		return err
-	}
-
-	if _, err := arena.handler.BroadCast(proto.MessageName(m), out); err != nil {
-		logger.Warn("broadcast reply err:", err)
-		return err
-	}
-
-	return nil
 }
 
 // every monday request new player record and send weekly reward
@@ -708,7 +671,7 @@ func (arena *Arena) weekEnd() {
 			msg.Data = append(msg.Data, d)
 		}
 
-		arena.sendWorldMessage(worldID, msg)
+		arena.pubsub.publishSendWorldMessage(arena.ctx, worldID, msg)
 	}
 }
 
@@ -744,7 +707,7 @@ func (arena *Arena) nextSeason() {
 		Season:  int32(arena.season()),
 		EndTime: uint32(arena.seasonEndTime()),
 	}
-	arena.broadCast(msg)
+	arena.pubsub.publishBroadCast(arena.ctx, msg)
 }
 
 func (arena *Arena) newSeasonRank() {
@@ -831,7 +794,7 @@ func (arena *Arena) saveChampion() {
 		Data: arena.getChampion(),
 	}
 
-	arena.broadCast(msg)
+	arena.pubsub.publishBroadCast(arena.ctx, msg)
 }
 
 // send top 100 reward mail
@@ -854,7 +817,7 @@ func (arena *Arena) seasonReward() {
 			Rank:     int32(n + 1),
 		}
 
-		arena.sendWorldMessage(resp.Info.ServerId, msg)
+		arena.pubsub.publishSendWorldMessage(arena.ctx, resp.Info.ServerId, msg)
 	}
 }
 
@@ -1026,5 +989,5 @@ func (arena *Arena) requestRank(id int64, page int32) {
 			"page": msg.Page})
 	}
 
-	arena.sendWorldMessage(resp.Info.ServerId, msg)
+	arena.pubsub.publishSendWorldMessage(arena.ctx, resp.Info.ServerId, msg)
 }

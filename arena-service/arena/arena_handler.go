@@ -7,7 +7,6 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
-	"github.com/sirupsen/logrus"
 )
 
 // RPCHandler rpc handler
@@ -25,25 +24,6 @@ func (h *RPCHandler) GetPlayerInfoByID(id int64) (*pbGame.GetPlayerInfoByIDReply
 	return h.gameCli.GetPlayerInfoByID(h.ctx, req)
 }
 
-func (h *RPCHandler) SendWorldMessage(id uint32, name string, data []byte) (*pbGame.SendWorldMessageReply, error) {
-	req := &pbGame.SendWorldMessageRequest{
-		Id:      id,
-		MsgName: name,
-		MsgData: data,
-	}
-
-	return h.gameCli.SendWorldMessage(h.ctx, req)
-}
-
-func (h *RPCHandler) BroadCast(name string, data []byte) (*pbGame.BroadCastReply, error) {
-	req := &pbGame.BroadCastRequest{
-		MsgName: name,
-		MsgData: data,
-	}
-
-	return h.gameCli.BroadCast(h.ctx, req)
-}
-
 /////////////////////////////////////////////
 // rpc receive
 /////////////////////////////////////////////
@@ -55,14 +35,6 @@ func (h *RPCHandler) GetSeasonData(ctx context.Context, req *pbArena.GetSeasonDa
 
 func (h *RPCHandler) GetChampion(ctx context.Context, req *pbArena.GetChampionRequest, rsp *pbArena.GetChampionReply) error {
 	rsp.Data = h.arena.getChampion()
-	return nil
-}
-
-func (h *RPCHandler) Matching(ctx context.Context, req *pbArena.MatchingRequest, rsp *pbArena.MatchingReply) error {
-	logger.WithFieldsInfo("Received ArenaService.Matching request", logrus.Fields{
-		"id": req.Id,
-	})
-	h.arena.matching(req.Id)
 	return nil
 }
 
@@ -135,22 +107,5 @@ func (h *RPCHandler) SaveChampion(ctx context.Context, req *pbArena.SaveChampion
 func (h *RPCHandler) WeekEnd(ctx context.Context, req *pbArena.WeekEndRequest, rsp *pbArena.WeekEndReply) error {
 	logger.Info("Received ArenaService.WeekEnd request")
 	h.arena.weekEnd()
-	return nil
-}
-
-/////////////////////////////////////
-// subscribe
-/////////////////////////////////////
-// SubHandler sub handler
-type MatchingSubHandler struct {
-	arena *Arena
-}
-
-// Process sub handler process
-func (s *MatchingSubHandler) Process(ctx context.Context, event *pbArena.MatchingRequest) error {
-	logger.WithFieldsInfo("MatchingSubHandler Received event", logrus.Fields{
-		"event": event,
-	})
-	s.arena.matching(event.Id)
 	return nil
 }

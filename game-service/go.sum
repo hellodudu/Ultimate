@@ -351,8 +351,6 @@ github.com/micro/mdns v0.1.0/go.mod h1:KJ0dW7KmicXU2BV++qkLlmHYcVv7/hHnbtguSWt9A
 github.com/micro/mdns v0.1.1-0.20190624125042-790ba6222fe3 h1:hBlRvF0l2kK/mPuL1QZ1/Po6oat0AAhlB0q6AxbctUQ=
 github.com/micro/mdns v0.1.1-0.20190624125042-790ba6222fe3/go.mod h1:KJ0dW7KmicXU2BV++qkLlmHYcVv7/hHnbtguSWt9Aoc=
 github.com/micro/micro v1.7.1-0.20190709174227-b038441fa11b/go.mod h1:st2ucTgYBuDFCqQnGo6Iu//5vChPVjRR7bJIL5N8Ig0=
-github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb h1:7X2fjfHGQUGIqA6PwBpPChDIRrnB0Y0zD0ox3Cqg/Bs=
-github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb/go.mod h1:3YhiKlo1uYsab8vkYbrfJ6w9DnpYWGIYWwd0txqveNM=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/miekg/dns v1.1.3/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/miekg/dns v1.1.13 h1:x7DQtkU0cedzeS8TD36tT/w1Hm4rDtfCaYYAHE7TTBI=

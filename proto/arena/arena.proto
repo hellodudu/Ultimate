@@ -165,7 +165,6 @@ message MUW_ArenaChampionOnline {
 service ArenaService {
     rpc GetSeasonData (GetSeasonDataRequest) returns (GetSeasonDataReply) {}
     rpc GetChampion (GetChampionRequest) returns (GetChampionReply) {}
-    rpc Matching (MatchingRequest) returns (MatchingReply) {}
     rpc AddRecord (AddRecordRequest) returns (AddRecordReply) {}
     rpc BattleResult (BattleResultRequest) returns (BattleResultReply) {}
     rpc GetRank (GetRankRequest) returns (GetRankReply) {}
@@ -196,13 +195,6 @@ message GetChampionReply {
     repeated ArenaChampion data = 1;   
 }
 
-message MatchingRequest {
-    int64 id = 1;
-}
-
-message MatchingReply {
-
-}
 
 message AddRecordRequest {
     ArenaRecord data = 1;
@@ -298,4 +290,11 @@ message WeekEndRequest {
 
 message WeekEndReply {
 
+}
+
+/////////////////////////////////////////////////
+// pub/sub
+/////////////////////////////////////////////////
+message PublishMatching {
+    int64 id = 1;
 }

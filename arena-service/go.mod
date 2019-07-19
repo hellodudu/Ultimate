@@ -7,7 +7,6 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705 // indirect
 	github.com/coredns/coredns v1.4.0 // indirect
 	github.com/envoyproxy/go-control-plane v0.6.9 // indirect
-	github.com/go-log/log v0.1.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.1
@@ -33,12 +32,13 @@ require (
 	github.com/lyft/protoc-gen-validate v0.0.14 // indirect
 	github.com/micro/go-micro v1.5.0
 	github.com/micro/go-plugins v1.1.0
-	github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb // indirect
 	github.com/nats-io/nats-server/v2 v2.0.0 // indirect
 	github.com/shirou/gopsutil v2.18.12+incompatible // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/ugorji/go/codec v0.0.0-20190320090025-2dc34c0b8780 // indirect
-	grpc.go4.org v0.0.0-20170609214715-11d0a25b4919
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
 	layeh.com/radius v0.0.0-20190322222518-890bc1058917 // indirect
 )
 

@@ -3,17 +3,20 @@ module github.com/hellodudu/Ultimate
 go 1.12
 
 require (
-	github.com/OneOfOne/xxhash v1.2.5 // indirect
-	github.com/dgryski/go-sip13 v0.0.0-20190329191031-25c5027a8c7b // indirect
+	cloud.google.com/go v0.41.0 // indirect
 	github.com/go-ini/ini v1.42.0
 	github.com/golang/protobuf v1.3.2
-	github.com/hellodudu/Ultimate/game-service v0.0.0-20190717151922-7f185e0bb90c // indirect
+	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
 	github.com/jinzhu/gorm v1.9.8
+	github.com/lib/pq v1.2.0 // indirect
 	github.com/micro/go-micro v1.7.1-0.20190627135301-d8e998ad85fe
-	github.com/pborman/uuid v1.2.0 // indirect
-	github.com/prometheus/tsdb v0.8.0 // indirect
+	github.com/micro/mdns v0.1.1-0.20190624125042-790ba6222fe3 // indirect
+	github.com/miekg/dns v1.1.15 // indirect
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/smartystreets/assertions v1.0.0 // indirect
+	github.com/smartystreets/goconvey v0.0.0-20190710185942-9d28bd7c0945 // indirect
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
+	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 )

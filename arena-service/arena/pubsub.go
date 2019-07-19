@@ -5,8 +5,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/logger"
-	pbArena "github.com/hellodudu/Ultimate/proto/arena"
-	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
 	"github.com/micro/go-micro"
 )
 
@@ -27,6 +26,7 @@ func newPubSub(service micro.Service, arena *Arena) *pubSub {
 
 	// register subscriber
 	micro.RegisterSubscriber("arena.Matching", service.Server(), &matchingSubHandler{pubsub: ps})
+	micro.RegisterSubscriber("arena.AddRecord", service.Server(), &addRecordSubHandler{pubsub: ps})
 
 	return ps
 }
@@ -44,7 +44,7 @@ func (ps *pubSub) publishSendWorldMessage(ctx context.Context, serverID uint32, 
 		return err
 	}
 
-	send := &pbGame.PublishSendWorldMessage{
+	send := &pbPubSub.PublishSendWorldMessage{
 		Id:      serverID,
 		MsgName: proto.MessageName(m),
 		MsgData: out,
@@ -71,7 +71,7 @@ func (ps *pubSub) publishBroadCast(ctx context.Context, m proto.Message) error {
 		return err
 	}
 
-	send := &pbGame.PublishBroadCast{
+	send := &pbPubSub.PublishBroadCast{
 		MsgName: proto.MessageName(m),
 		MsgData: out,
 	}
@@ -96,8 +96,17 @@ type matchingSubHandler struct {
 	pubsub *pubSub
 }
 
-// process matching sub
-func (s *matchingSubHandler) Process(ctx context.Context, event *pbArena.PublishMatching) error {
+func (s *matchingSubHandler) Process(ctx context.Context, event *pbPubSub.PublishMatching) error {
 	s.pubsub.arena.matching(event.Id)
+	return nil
+}
+
+// addRecord handler
+type addRecordSubHandler struct {
+	pubsub *pubSub
+}
+
+func (s *addRecordSubHandler) Process(ctx context.Context, event *pbPubSub.PublishAddRecord) error {
+	s.pubsub.arena.addRecord(event.Data)
 	return nil
 }

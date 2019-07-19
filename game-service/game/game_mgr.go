@@ -9,6 +9,7 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
 	"github.com/micro/go-micro"
 )
 
@@ -155,17 +156,12 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 
 func (g *GameMgr) ArenaMatching(id int64) {
 	// publish an event
-	g.pubsub.publishArenaMatching(g.ctx, &pbArena.PublishMatching{Id: id})
+	g.pubsub.publishArenaMatching(g.ctx, &pbPubSub.PublishMatching{Id: id})
 }
 
 func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {
-	req := &pbArena.AddRecordRequest{Data: data}
-	_, err := g.arenaCli.AddRecord(g.ctx, req)
-	if err != nil {
-		logger.WithFieldsWarn("ArenaAddRecord Response", logger.Fields{
-			"error": err,
-		})
-	}
+	// publish an event
+	g.pubsub.publishArenaAddRecord(g.ctx, &pbPubSub.PublishAddRecord{Data: data})
 }
 
 func (g *GameMgr) ArenaBattleResult(attackID int64, targetID int64, attackWin bool) {

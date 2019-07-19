@@ -38,11 +38,6 @@ func (h *RPCHandler) GetChampion(ctx context.Context, req *pbArena.GetChampionRe
 	return nil
 }
 
-func (h *RPCHandler) AddRecord(ctx context.Context, req *pbArena.AddRecordRequest, rsp *pbArena.AddRecordReply) error {
-	h.arena.addRecord(req.Data)
-	return nil
-}
-
 func (h *RPCHandler) BattleResult(ctx context.Context, req *pbArena.BattleResultRequest, rsp *pbArena.BattleResultReply) error {
 	h.arena.battleResult(req.AttackId, req.TargetId, req.AttackWin)
 	return nil

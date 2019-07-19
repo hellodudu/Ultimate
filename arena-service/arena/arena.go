@@ -12,7 +12,6 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/go-micro"
-	"github.com/sirupsen/logrus"
 )
 
 var arenaMatchSectionNum = 8 // arena section num
@@ -451,7 +450,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	// get player arena data
 	d, ok := arena.mapArenaData.Load(id)
 	if !ok {
-		logger.WithFieldsWarn("cannot find player's arena data", logrus.Fields{
+		logger.WithFieldsWarn("cannot find player's arena data", logger.Fields{
 			"player_id": id,
 		})
 		return false, fmt.Errorf("cannot find player %d 's arena data", id)
@@ -502,7 +501,7 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 
 	resp, err := arena.handler.GetPlayerInfoByID(id)
 	if err != nil {
-		logger.WithFieldsWarn("cannot find player's info", logrus.Fields{
+		logger.WithFieldsWarn("cannot find player's info", logger.Fields{
 			"player_id": id,
 			"error":     err,
 		})
@@ -804,7 +803,7 @@ func (arena *Arena) seasonReward() {
 	for n, data := range list {
 		resp, err := arena.handler.GetPlayerInfoByID(data.Playerid)
 		if err != nil {
-			logger.WithFieldsWarn("season reward cannot find player", logrus.Fields{
+			logger.WithFieldsWarn("season reward cannot find player", logger.Fields{
 				"top":       n + 1,
 				"player_id": data.Playerid,
 				"error":     err,
@@ -899,7 +898,7 @@ func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {
 func (arena *Arena) battleResult(attack int64, target int64, win bool) {
 	d, ok := arena.mapArenaData.Load(attack)
 	if !ok {
-		logger.WithFieldsWarn("cannot find attacker's arena data", logrus.Fields{
+		logger.WithFieldsWarn("cannot find attacker's arena data", logger.Fields{
 			"player_id": attack,
 		})
 		return
@@ -929,7 +928,12 @@ func (arena *Arena) battleResult(attack int64, target int64, win bool) {
 		arena.arrRankArena.Sort()
 	}
 
-	logger.Info("arena battle result<attack_id:", attack, ", target_id:", target, ", win:", win, ", attack_score:", data.Score, ">")
+	logger.WithFieldsInfo("arena battle result", logger.Fields{
+		"attack_id":    attack,
+		"target_id":    target,
+		"win":          win,
+		"attack_score": data.Score,
+	})
 }
 
 // requestRank request rank by world, max page is 10
@@ -985,7 +989,7 @@ func (arena *Arena) requestRank(id int64, page int32) {
 	}
 
 	if msg.Page >= 10 {
-		logger.WithFieldsWarn("reply arena request rank pages error", logrus.Fields{
+		logger.WithFieldsWarn("reply arena request rank pages error", logger.Fields{
 			"page": msg.Page})
 	}
 

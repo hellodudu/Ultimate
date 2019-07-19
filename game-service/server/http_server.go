@@ -15,7 +15,6 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
-	"github.com/sirupsen/logrus"
 )
 
 var testChan = make(chan interface{}, 1)
@@ -120,7 +119,7 @@ func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Req
 	req := &pbArena.GetMatchingListRequest{}
 	rsp, err := s.arenaCli.GetMatchingList(s.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("GetMatchingList Response", logrus.Fields{
+		logger.WithFieldsWarn("GetMatchingList Response", logger.Fields{
 			"error": err,
 		})
 		return
@@ -141,7 +140,7 @@ func (s *HttpServer) arenaRecordReqListHandler(w http.ResponseWriter, r *http.Re
 	req := &pbArena.GetRecordReqListRequest{}
 	rsp, err := s.arenaCli.GetRecordReqList(s.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("GetRecordReqList Response", logrus.Fields{
+		logger.WithFieldsWarn("GetRecordReqList Response", logger.Fields{
 			"error": err,
 		})
 		return
@@ -171,7 +170,7 @@ func (s *HttpServer) arenaGetRecordHandler(w http.ResponseWriter, r *http.Reques
 	rpcReq := &pbArena.GetRecordByIDRequest{Id: req.ID}
 	rsp, err := s.arenaCli.GetRecordByID(s.ctx, rpcReq)
 	if err != nil {
-		logger.WithFieldsWarn("GetRecordByID Response", logrus.Fields{
+		logger.WithFieldsWarn("GetRecordByID Response", logger.Fields{
 			"error": err,
 		})
 		w.Write([]byte(err.Error()))
@@ -200,7 +199,7 @@ func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Requ
 	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(req.Page)}
 	rsp, err := s.arenaCli.GetRankListByPage(s.ctx, rpcReq)
 	if err != nil {
-		logger.WithFieldsWarn("GetRankListByPage Response", logrus.Fields{
+		logger.WithFieldsWarn("GetRankListByPage Response", logger.Fields{
 			"error": err,
 		})
 		w.Write([]byte(err.Error()))
@@ -214,7 +213,7 @@ func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {
 	req := &pbArena.SaveChampionRequest{}
 	_, err := s.arenaCli.SaveChampion(s.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("SaveChampion Response", logrus.Fields{
+		logger.WithFieldsWarn("SaveChampion Response", logger.Fields{
 			"error": err,
 		})
 		w.Write([]byte(err.Error()))
@@ -228,7 +227,7 @@ func (s *HttpServer) arenaWeekEnd(w http.ResponseWriter, r *http.Request) {
 	req := &pbArena.WeekEndRequest{}
 	_, err := s.arenaCli.WeekEnd(s.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("WeekEnd Response", logrus.Fields{
+		logger.WithFieldsWarn("WeekEnd Response", logger.Fields{
 			"error": err,
 		})
 		w.Write([]byte(err.Error()))
@@ -257,7 +256,7 @@ func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request
 	rpcReq := &pbGame.GetPlayerInfoByIDRequest{Id: req.ID}
 	rsp, err := s.gameCli.GetPlayerInfoByID(s.ctx, rpcReq)
 	if err != nil {
-		logger.WithFieldsWarn("cannot find player info by id", logrus.Fields{
+		logger.WithFieldsWarn("cannot find player info by id", logger.Fields{
 			"error": err,
 			"id":    req.ID,
 		})
@@ -288,7 +287,7 @@ func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request)
 	rpcReq := &pbGame.GetGuildInfoByIDRequest{Id: req.ID}
 	rsp, err := s.gameCli.GetGuildInfoByID(s.ctx, rpcReq)
 	if err != nil {
-		logger.WithFieldsWarn("cannot find guild info by id", logrus.Fields{
+		logger.WithFieldsWarn("cannot find guild info by id", logger.Fields{
 			"error": err,
 			"id":    req.ID,
 		})

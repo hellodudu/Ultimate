@@ -11,7 +11,6 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils/global"
-	"github.com/sirupsen/logrus"
 )
 
 type WorldMgr struct {
@@ -130,7 +129,7 @@ func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 		return
 	}
 
-	logger.WithFieldsWarn("world disconnected", logrus.Fields{"world_id": w.GetID()})
+	logger.WithFieldsWarn("world disconnected", logger.Fields{"world_id": w.GetID()})
 	w.Stop()
 
 	wm.mu.Lock()
@@ -149,7 +148,7 @@ func (wm *WorldMgr) KickWorld(id uint32) {
 		return
 	}
 
-	logger.WithFieldsWarn("world was kicked by timeout", logrus.Fields{"world_id": w.GetID()})
+	logger.WithFieldsWarn("world was kicked by timeout", logger.Fields{"world_id": w.GetID()})
 	w.Stop()
 
 	wm.mu.Lock()

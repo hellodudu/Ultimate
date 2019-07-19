@@ -4,7 +4,6 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pb "github.com/hellodudu/Ultimate/proto/game"
-	"github.com/sirupsen/logrus"
 )
 
 type invite struct {
@@ -27,7 +26,7 @@ func (i *invite) AddInvite(newbieID int64, inviterID int64) int32 {
 
 	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterID)
 	if err != nil {
-		logger.WithFieldsWarn("AddInvite cannot find inviter info", logrus.Fields{
+		logger.WithFieldsWarn("AddInvite cannot find inviter info", logger.Fields{
 			"error": err,
 		})
 		return 3
@@ -53,7 +52,7 @@ func (i *invite) CheckInviteResult(newbieID int64, inviterID int64, errorCode in
 
 	newbieInfo, err := i.gm.GetPlayerInfoByID(newbieID)
 	if err != nil {
-		logger.WithFieldsWarn("CheckInviteResult cannot find newbie info", logrus.Fields{
+		logger.WithFieldsWarn("CheckInviteResult cannot find newbie info", logger.Fields{
 			"error": err,
 		})
 		return
@@ -85,7 +84,7 @@ func (i *invite) InviteRecharge(newbieID int64, newbieName string, inviterID int
 
 	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterID)
 	if err != nil {
-		logger.WithFieldsWarn("InviteRecharge cannot find inviter info", logrus.Fields{
+		logger.WithFieldsWarn("InviteRecharge cannot find inviter info", logger.Fields{
 			"error": err,
 		})
 		return

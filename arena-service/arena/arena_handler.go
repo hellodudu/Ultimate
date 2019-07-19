@@ -44,7 +44,6 @@ func (h *RPCHandler) AddRecord(ctx context.Context, req *pbArena.AddRecordReques
 }
 
 func (h *RPCHandler) BattleResult(ctx context.Context, req *pbArena.BattleResultRequest, rsp *pbArena.BattleResultReply) error {
-	logger.Info("Received ArenaService.BattleResult request")
 	h.arena.battleResult(req.AttackId, req.TargetId, req.AttackWin)
 	return nil
 }

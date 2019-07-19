@@ -8,6 +8,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Fields logrus.Fields wrapper
+type Fields map[string]interface{}
+
 var (
 	logConsole *logrus.Logger
 	debug      bool
@@ -91,42 +94,67 @@ func Print(v ...interface{}) {
 	logrus.Println(v...)
 }
 
-func WithFieldsTrace(s string, fields logrus.Fields) {
-	if console {
-		logConsole.WithFields(fields).Trace(s)
+func WithFieldsTrace(s string, fields Fields) {
+	f := make(logrus.Fields)
+	for k, v := range fields {
+		f[k] = v
 	}
 
-	logrus.WithFields(fields).Trace(s)
+	if console {
+		logConsole.WithFields(f).Trace(s)
+	}
+
+	logrus.WithFields(f).Trace(s)
 }
 
-func WithFieldsDebug(s string, fields logrus.Fields) {
-	if console {
-		logConsole.WithFields(fields).Debug(s)
+func WithFieldsDebug(s string, fields Fields) {
+	f := make(logrus.Fields)
+	for k, v := range fields {
+		f[k] = v
 	}
 
-	logrus.WithFields(fields).Debug(s)
+	if console {
+		logConsole.WithFields(f).Debug(s)
+	}
+
+	logrus.WithFields(f).Debug(s)
 }
 
-func WithFieldsInfo(s string, fields logrus.Fields) {
-	if console {
-		logConsole.WithFields(fields).Info(s)
+func WithFieldsInfo(s string, fields Fields) {
+	f := make(logrus.Fields)
+	for k, v := range fields {
+		f[k] = v
 	}
 
-	logrus.WithFields(fields).Info(s)
+	if console {
+		logConsole.WithFields(f).Info(s)
+	}
+
+	logrus.WithFields(f).Info(s)
 }
 
-func WithFieldsWarn(s string, fields logrus.Fields) {
-	if console {
-		logConsole.WithFields(fields).Warn(s)
+func WithFieldsWarn(s string, fields Fields) {
+	f := make(logrus.Fields)
+	for k, v := range fields {
+		f[k] = v
 	}
 
-	logrus.WithFields(fields).Warn(s)
+	if console {
+		logConsole.WithFields(f).Warn(s)
+	}
+
+	logrus.WithFields(f).Warn(s)
 }
 
-func WithFieldsError(s string, fields logrus.Fields) {
-	if console {
-		logConsole.WithFields(fields).Error(s)
+func WithFieldsError(s string, fields Fields) {
+	f := make(logrus.Fields)
+	for k, v := range fields {
+		f[k] = v
 	}
 
-	logrus.WithFields(fields).Error(s)
+	if console {
+		logConsole.WithFields(f).Error(s)
+	}
+
+	logrus.WithFields(f).Error(s)
 }

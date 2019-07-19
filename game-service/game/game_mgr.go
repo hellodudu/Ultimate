@@ -10,7 +10,6 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/go-micro"
-	"github.com/sirupsen/logrus"
 )
 
 // GameMgr game manager
@@ -131,7 +130,7 @@ func (g *GameMgr) GetArenaSeasonData() (int32, int32, error) {
 	req := &pbArena.GetSeasonDataRequest{}
 	rsp, err := g.arenaCli.GetSeasonData(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("GetArenaSeasonData Response", logrus.Fields{
+		logger.WithFieldsWarn("GetArenaSeasonData Response", logger.Fields{
 			"error": err,
 		})
 		return 0, 0, err
@@ -144,7 +143,7 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 	req := &pbArena.GetChampionRequest{}
 	rsp, err := g.arenaCli.GetChampion(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("GetArenaChampion Response", logrus.Fields{
+		logger.WithFieldsWarn("GetArenaChampion Response", logger.Fields{
 			"error": err,
 		})
 
@@ -163,7 +162,7 @@ func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {
 	req := &pbArena.AddRecordRequest{Data: data}
 	_, err := g.arenaCli.AddRecord(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("ArenaAddRecord Response", logrus.Fields{
+		logger.WithFieldsWarn("ArenaAddRecord Response", logger.Fields{
 			"error": err,
 		})
 	}
@@ -173,7 +172,7 @@ func (g *GameMgr) ArenaBattleResult(attackID int64, targetID int64, attackWin bo
 	req := &pbArena.BattleResultRequest{AttackId: attackID, TargetId: targetID, AttackWin: attackWin}
 	_, err := g.arenaCli.BattleResult(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("ArenaBattleResult Response", logrus.Fields{
+		logger.WithFieldsWarn("ArenaBattleResult Response", logger.Fields{
 			"error": err,
 		})
 	}
@@ -183,7 +182,7 @@ func (g *GameMgr) ArenaGetRank(id int64, page int32) {
 	req := &pbArena.GetRankRequest{PlayerId: id, Page: page}
 	_, err := g.arenaCli.GetRank(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("ArenaGetRank Response", logrus.Fields{
+		logger.WithFieldsWarn("ArenaGetRank Response", logger.Fields{
 			"error": err,
 		})
 	}
@@ -193,7 +192,7 @@ func (g *GameMgr) GetArenaDataNum() int32 {
 	req := &pbArena.GetArenaDataNumRequest{}
 	rsp, err := g.arenaCli.GetArenaDataNum(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("GetArenaDataNum Response", logrus.Fields{
+		logger.WithFieldsWarn("GetArenaDataNum Response", logger.Fields{
 			"error": err,
 		})
 	}
@@ -205,7 +204,7 @@ func (g *GameMgr) GetArenaRecordNum() int32 {
 	req := &pbArena.GetRecordNumRequest{}
 	rsp, err := g.arenaCli.GetRecordNum(g.ctx, req)
 	if err != nil {
-		logger.WithFieldsWarn("GetArenaRecordNum Response", logrus.Fields{
+		logger.WithFieldsWarn("GetArenaRecordNum Response", logger.Fields{
 			"error": err,
 		})
 	}

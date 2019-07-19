@@ -13,7 +13,6 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
-	"github.com/sirupsen/logrus"
 )
 
 var tcpReadBufMax = 1024 * 1024 * 2
@@ -103,7 +102,7 @@ func (server *TCPServer) Run() {
 					tempDelay = max
 				}
 
-				logger.WithFieldsWarn("accept error", logrus.Fields{
+				logger.WithFieldsWarn("accept error", logger.Fields{
 					"error":         err,
 					"retry_seconds": tempDelay,
 				})
@@ -121,7 +120,7 @@ func (server *TCPServer) Run() {
 		if len(server.conns) >= 5000 {
 			server.mutexConns.Unlock()
 			connection.Close()
-			logger.WithFieldsWarn("too many connections", logrus.Fields{
+			logger.WithFieldsWarn("too many connections", logger.Fields{
 				"connections": len(server.conns),
 			})
 			continue
@@ -187,13 +186,13 @@ func (server *TCPServer) handleTCPConnection(connection *TCPCon) {
 
 		// check len
 		if msgLen > uint32(tcpReadBufMax) {
-			logger.WithFieldsWarn("tcp recv failed", logrus.Fields{
+			logger.WithFieldsWarn("tcp recv failed", logger.Fields{
 				"error":  "message too long",
 				"length": msgLen,
 			})
 			continue
 		} else if msgLen < 4 {
-			logger.WithFieldsWarn("tcp recv failed", logrus.Fields{
+			logger.WithFieldsWarn("tcp recv failed", logger.Fields{
 				"error":  "message too short",
 				"length": msgLen,
 			})
@@ -203,7 +202,7 @@ func (server *TCPServer) handleTCPConnection(connection *TCPCon) {
 		// data
 		msgData := make([]byte, msgLen)
 		if _, err := io.ReadFull(connection.con, msgData); err != nil {
-			logger.WithFieldsWarn("tcp recv failed", logrus.Fields{
+			logger.WithFieldsWarn("tcp recv failed", logger.Fields{
 				"error": err,
 			})
 			continue

@@ -10,7 +10,6 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/go-micro"
-	"github.com/sirupsen/logrus"
 )
 
 type pubSub struct {
@@ -40,7 +39,7 @@ func newPubSub(service micro.Service, gm iface.IGameMgr, wm iface.IWorldMgr) *pu
 /////////////////////////////////////
 func (ps *pubSub) publishArenaMatching(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaMatching.Publish(ctx, m); err != nil {
-		logger.WithFieldsWarn("publish Matching failed", logrus.Fields{
+		logger.WithFieldsWarn("publish Matching failed", logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(m),
 		})
@@ -74,7 +73,7 @@ func (s *broadCastSubHandler) Process(ctx context.Context, event *pbGame.Publish
 
 	// unmarshal
 	if err := proto.Unmarshal(event.MsgData, msg); err != nil {
-		logger.WithFieldsWarn("Failed to parse proto msg", logrus.Fields{
+		logger.WithFieldsWarn("Failed to parse proto msg", logger.Fields{
 			"msg":   msg,
 			"error": err,
 		})
@@ -113,7 +112,7 @@ func (s *sendWorldMessageSubHandler) Process(ctx context.Context, event *pbGame.
 
 	// unmarshal
 	if err := proto.Unmarshal(event.MsgData, msg); err != nil {
-		logger.WithFieldsWarn("Failed to parse proto msg", logrus.Fields{
+		logger.WithFieldsWarn("Failed to parse proto msg", logger.Fields{
 			"msg":   msg,
 			"error": err,
 		})

@@ -8,7 +8,6 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/go-micro"
-	"github.com/sirupsen/logrus"
 )
 
 type pubSub struct {
@@ -38,7 +37,7 @@ func newPubSub(service micro.Service, arena *Arena) *pubSub {
 func (ps *pubSub) publishSendWorldMessage(ctx context.Context, serverID uint32, m proto.Message) error {
 	out, err := proto.Marshal(m)
 	if err != nil {
-		logger.WithFieldsWarn("before publish proto marshal failed", logrus.Fields{
+		logger.WithFieldsWarn("before publish proto marshal failed", logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(m),
 		})
@@ -52,7 +51,7 @@ func (ps *pubSub) publishSendWorldMessage(ctx context.Context, serverID uint32, 
 	}
 
 	if err := ps.pubSendWorldMessage.Publish(ctx, send); err != nil {
-		logger.WithFieldsWarn("publish failed", logrus.Fields{
+		logger.WithFieldsWarn("publish failed", logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(send),
 		})
@@ -65,7 +64,7 @@ func (ps *pubSub) publishSendWorldMessage(ctx context.Context, serverID uint32, 
 func (ps *pubSub) publishBroadCast(ctx context.Context, m proto.Message) error {
 	out, err := proto.Marshal(m)
 	if err != nil {
-		logger.WithFieldsWarn("before publish proto marshal failed", logrus.Fields{
+		logger.WithFieldsWarn("before publish proto marshal failed", logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(m),
 		})
@@ -78,7 +77,7 @@ func (ps *pubSub) publishBroadCast(ctx context.Context, m proto.Message) error {
 	}
 
 	if err := ps.pubBroadCast.Publish(ctx, send); err != nil {
-		logger.WithFieldsWarn("publish failed", logrus.Fields{
+		logger.WithFieldsWarn("publish failed", logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(send),
 		})

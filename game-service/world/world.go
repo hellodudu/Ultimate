@@ -3,7 +3,6 @@ package world
 import (
 	"context"
 	"encoding/binary"
-	"fmt"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -93,7 +92,9 @@ func (w *world) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			logger.Info(fmt.Sprintf("world<%d> context done!", w.ID))
+			logger.WithFieldsInfo("world context done!", logger.Fields{
+				"id": w.GetID(),
+			})
 			return
 
 		// connecting timeout

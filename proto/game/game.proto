@@ -1,6 +1,8 @@
 syntax = "proto3";
 package ultimate.service.game;
 
+option go_package = "github.com/hellodudu/Ultimate/proto/game";
+
 message CrossPlayerInfo {
     int64 player_id = 1;
     string user_id = 2;
@@ -171,16 +173,4 @@ message GetGuildInfoByIDReply {
 
 
 
-/////////////////////////////////////////////////
-// pub/sub
-/////////////////////////////////////////////////
-message PublishBroadCast {
-    string msg_name = 1;
-    bytes msg_data = 2;
-}
 
-message PublishSendWorldMessage {
-    uint32 id = 1;
-    string msg_name = 2;
-    bytes msg_data = 3;
-}

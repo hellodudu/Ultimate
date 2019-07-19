@@ -1,6 +1,7 @@
 syntax = "proto3";
 package ultimate.service.arena;
 
+option go_package = "github.com/hellodudu/Ultimate/proto/arena";
 
 // 镜像
 message HeroRecord {
@@ -165,7 +166,6 @@ message MUW_ArenaChampionOnline {
 service ArenaService {
     rpc GetSeasonData (GetSeasonDataRequest) returns (GetSeasonDataReply) {}
     rpc GetChampion (GetChampionRequest) returns (GetChampionReply) {}
-    rpc AddRecord (AddRecordRequest) returns (AddRecordReply) {}
     rpc BattleResult (BattleResultRequest) returns (BattleResultReply) {}
     rpc GetRank (GetRankRequest) returns (GetRankReply) {}
     rpc GetArenaDataNum (GetArenaDataNumRequest) returns (GetArenaDataNumReply) {}
@@ -196,13 +196,7 @@ message GetChampionReply {
 }
 
 
-message AddRecordRequest {
-    ArenaRecord data = 1;
-}
 
-message AddRecordReply {
-    
-}
 
 message BattleResultRequest {
     int64 attack_id = 1;
@@ -292,9 +286,4 @@ message WeekEndReply {
 
 }
 
-/////////////////////////////////////////////////
-// pub/sub
-/////////////////////////////////////////////////
-message PublishMatching {
-    int64 id = 1;
-}
+

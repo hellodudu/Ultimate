@@ -1,6 +1,8 @@
 syntax = "proto3";
 package ultimate.service.world;
 
+option go_package = "github.com/hellodudu/Ultimate/proto/world";
+
 message MWU_WorldLogon {
   uint32 world_id = 1;
   string world_name = 2;

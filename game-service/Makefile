@@ -7,8 +7,8 @@ build:
 
 .PHONY: proto
 proto:
-	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/game/game.proto
-	protoc -I=../proto --go_out=plugins=micro:../proto/ ../proto/world/world.proto
+	protoc -I=../proto --go_out=plugins=micro:${GOPATH}/src ../proto/game/game.proto
+	protoc -I=../proto --go_out=plugins=micro:${GOPATH}/src ../proto/world/world.proto
 
 .PHONY: test
 test:

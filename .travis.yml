@@ -13,6 +13,7 @@ env:
 
 matrix:
   allow_failures:
+    - go: 1.12.x
     - go: tip
 
 jobs:

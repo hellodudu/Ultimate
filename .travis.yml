@@ -26,3 +26,6 @@ jobs:
         - cd arena-service
         - make build
 
+install:
+  - go mod download
+

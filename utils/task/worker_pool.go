@@ -48,3 +48,8 @@ func (wp *workerPool) Run() {
 		}
 	}
 }
+
+func (wp *workerPool) stop() {
+	close(wp.taskerChan)
+	close(wp.workerChan)
+}

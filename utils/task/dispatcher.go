@@ -42,3 +42,9 @@ func (td *Dispatcher) AddTask(req iface.ITaskReqInfo) {
 	req.SetID(td.genReqID())
 	td.taskerChan <- NewTask(req)
 }
+
+// Stop graceful close channel
+func (td *Dispatcher) Stop() {
+	close(td.taskerChan)
+	td.workerPool.stop()
+}

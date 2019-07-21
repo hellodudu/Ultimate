@@ -212,6 +212,7 @@ func (umt *ultimate) Run() {
 }
 
 func (umt *ultimate) Stop() {
+	umt.td.Stop()
 	umt.tcpServ.Stop()
 	<-umt.ds.Stop()
 	<-umt.wm.Stop()

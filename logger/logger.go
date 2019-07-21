@@ -9,7 +9,7 @@ import (
 )
 
 // Fields logrus.Fields wrapper
-type Fields map[string]interface{}
+type Fields = logrus.Fields
 
 var (
 	logConsole *logrus.Logger

@@ -7,6 +7,7 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190715232110-2b613d287457 // indirect
 	github.com/go-ini/ini v1.44.0
 	github.com/go-kit/kit v0.9.0 // indirect
+	github.com/golang/go v0.0.0-20190717225703-4814e7d59191 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
 	github.com/gorilla/handlers v1.4.1 // indirect

@@ -8,7 +8,7 @@ type IDatastore interface {
 	DB() *gorm.DB
 	TableGlobal() *TableGlobal
 	Run()
-	Stop() chan struct{}
+	Stop()
 }
 
 // Global mysql table global

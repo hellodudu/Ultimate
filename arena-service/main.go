@@ -61,7 +61,7 @@ func main() {
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
 			arena.Stop()
-			<-ds.Stop()
+			ds.Stop()
 			logger.Info("server exit safely")
 			return
 		case syscall.SIGHUP:

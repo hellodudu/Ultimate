@@ -66,8 +66,9 @@ func (m *Datastore) Run() {
 
 }
 
-func (m *Datastore) Stop() chan struct{} {
+func (m *Datastore) Stop() {
 	m.db.Close()
 	m.cancel()
-	return m.chStop
+	<-m.chStop
+	close(m.chStop)
 }

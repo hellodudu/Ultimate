@@ -41,4 +41,6 @@ func TestNewDispatcher(t *testing.T) {
 	if success != 1 {
 		t.Error("AddTask failed")
 	}
+
+	close(chCallback)
 }

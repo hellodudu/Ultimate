@@ -30,6 +30,7 @@ type world struct {
 	mapGuild  map[int64]*pbGame.CrossGuildInfo
 
 	chDBInit chan struct{}
+	chStop   chan struct{}
 }
 
 func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datastore iface.IDatastore) iface.IWorld {
@@ -45,6 +46,7 @@ func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datas
 		mapPlayer:   make(map[int64]*pbGame.CrossPlayerInfo),
 		mapGuild:    make(map[int64]*pbGame.CrossGuildInfo),
 		chDBInit:    make(chan struct{}, 1),
+		chStop:      make(chan struct{}, 1),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -82,6 +84,10 @@ func (w *world) Stop() {
 	w.tHeartBeat.Stop()
 	w.tTimeOut.Stop()
 	w.cancel()
+	<-w.chStop
+	close(w.chw)
+	close(w.chStop)
+	close(w.chDBInit)
 	w.con.Close()
 }
 
@@ -95,6 +101,7 @@ func (w *world) Run() {
 			logger.WithFieldsInfo("world context done!", logger.Fields{
 				"id": w.GetID(),
 			})
+			w.chStop <- struct{}{}
 			return
 
 		// connecting timeout

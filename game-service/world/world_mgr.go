@@ -43,7 +43,7 @@ func NewWorldMgr(datastore iface.IDatastore) (*WorldMgr, error) {
 	return wm, nil
 }
 
-func (wm *WorldMgr) Stop() chan struct{} {
+func (wm *WorldMgr) Stop() {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
 	for _, v := range wm.mapWorld {
@@ -51,7 +51,9 @@ func (wm *WorldMgr) Stop() chan struct{} {
 	}
 
 	wm.cancel()
-	return wm.chStop
+	<-wm.chStop
+	close(wm.chStop)
+	close(wm.chTimeOutW)
 }
 
 func (wm *WorldMgr) AddWorld(id uint32, name string, con iface.ITCPConn) (iface.IWorld, error) {

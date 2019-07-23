@@ -223,6 +223,7 @@ type Arena struct {
 	ctx      context.Context
 	cancel   context.CancelFunc
 	chDBInit chan struct{}
+	chStop   chan struct{}
 
 	handler *RPCHandler
 	pubsub  *pubSub
@@ -237,6 +238,7 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 		chMatchWaitOK: make(chan int64, 1000),
 		mapRecordReq:  make(map[int64]int64),
 		chDBInit:      make(chan struct{}, 1),
+		chStop:        make(chan struct{}, 1),
 		championList:  make([]*championData, 0),
 	}
 
@@ -351,6 +353,10 @@ func (arena *Arena) getChampion() []*pbArena.ArenaChampion {
 // Stop stop
 func (arena *Arena) Stop() {
 	arena.cancel()
+	<-arena.chStop
+	close(arena.chMatchWaitOK)
+	close(arena.chDBInit)
+	close(arena.chStop)
 }
 
 func (arena *Arena) run() {
@@ -361,6 +367,7 @@ func (arena *Arena) run() {
 		// context canceled
 		case <-arena.ctx.Done():
 			logger.Info("arena context done!")
+			arena.chStop <- struct{}{}
 			return
 
 		// matching request

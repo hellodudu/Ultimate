@@ -197,6 +197,7 @@ func (umt *ultimate) Run() {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
 		sig := <-c
+		close(c)
 		logger.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
 
 		switch sig {
@@ -214,6 +215,6 @@ func (umt *ultimate) Run() {
 func (umt *ultimate) Stop() {
 	umt.td.Stop()
 	umt.tcpServ.Stop()
-	<-umt.ds.Stop()
-	<-umt.wm.Stop()
+	umt.ds.Stop()
+	umt.wm.Stop()
 }

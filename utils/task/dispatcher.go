@@ -45,6 +45,6 @@ func (td *Dispatcher) AddTask(req iface.ITaskReqInfo) {
 
 // Stop graceful close channel
 func (td *Dispatcher) Stop() {
-	close(td.taskerChan)
 	td.workerPool.stop()
+	close(td.taskerChan)
 }

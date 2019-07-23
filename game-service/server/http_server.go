@@ -17,7 +17,6 @@ import (
 	"github.com/hellodudu/Ultimate/utils/global"
 )
 
-var testChan = make(chan interface{}, 1)
 var startTime = time.Now()
 var lastGCPause uint32
 

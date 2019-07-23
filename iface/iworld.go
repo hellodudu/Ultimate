@@ -13,7 +13,7 @@ type IWorldMgr interface {
 	GetWorldByID(id uint32) IWorld
 	KickWorld(id uint32)
 	Run()
-	Stop() chan struct{}
+	Stop()
 }
 
 type IWorld interface {

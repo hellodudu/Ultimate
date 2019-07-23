@@ -16,8 +16,9 @@ type pubSub struct {
 	gm iface.IGameMgr
 	wm iface.IWorldMgr
 
-	pubArenaMatching  micro.Publisher
-	pubArenaAddRecord micro.Publisher
+	pubArenaMatching     micro.Publisher
+	pubArenaAddRecord    micro.Publisher
+	pubArenaBattleResult micro.Publisher
 }
 
 func newPubSub(service micro.Service, gm iface.IGameMgr, wm iface.IWorldMgr) *pubSub {
@@ -29,6 +30,7 @@ func newPubSub(service micro.Service, gm iface.IGameMgr, wm iface.IWorldMgr) *pu
 	// create publisher
 	ps.pubArenaMatching = micro.NewPublisher("arena.Matching", service.Client())
 	ps.pubArenaAddRecord = micro.NewPublisher("arena.AddRecord", service.Client())
+	ps.pubArenaBattleResult = micro.NewPublisher("arena.BattleResult", service.Client())
 
 	// register subscriber
 	micro.RegisterSubscriber("game.SendWorldMessage", service.Server(), &sendWorldMessageSubHandler{pubsub: ps})
@@ -54,6 +56,21 @@ func (ps *pubSub) publishArenaMatching(ctx context.Context, m proto.Message) err
 
 func (ps *pubSub) publishArenaAddRecord(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaAddRecord.Publish(ctx, m); err != nil {
+		logger.WithFieldsWarn("publish failed", logger.Fields{
+			"error":   err,
+			"message": proto.MessageName(m),
+		})
+		return err
+	}
+
+	return nil
+}
+
+func (ps *pubSub) publishArenaBattleResult(ctx context.Context, m proto.Message) error {
+	logger.WithFieldsInfo("publish arena battle result", logger.Fields{
+		"message": proto.MessageName(m),
+	})
+	if err := ps.pubArenaBattleResult.Publish(ctx, m); err != nil {
 		logger.WithFieldsWarn("publish failed", logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(m),

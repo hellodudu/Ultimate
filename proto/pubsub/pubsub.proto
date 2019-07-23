@@ -28,3 +28,9 @@ message PublishMatching {
 message PublishAddRecord {
     arena.ArenaRecord data = 1;
 }
+
+message PublishBattleResult {
+    int64 attack_id = 1;
+    int64 target_id = 2;
+    bool attack_win = 3;
+}

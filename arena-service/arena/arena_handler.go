@@ -38,11 +38,6 @@ func (h *RPCHandler) GetChampion(ctx context.Context, req *pbArena.GetChampionRe
 	return nil
 }
 
-func (h *RPCHandler) BattleResult(ctx context.Context, req *pbArena.BattleResultRequest, rsp *pbArena.BattleResultReply) error {
-	h.arena.battleResult(req.AttackId, req.TargetId, req.AttackWin)
-	return nil
-}
-
 func (h *RPCHandler) GetRank(ctx context.Context, req *pbArena.GetRankRequest, rsp *pbArena.GetRankReply) error {
 	logger.Info("Received ArenaService.GetRank request")
 	h.arena.requestRank(req.PlayerId, req.Page)

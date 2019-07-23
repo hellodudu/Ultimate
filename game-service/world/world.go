@@ -85,7 +85,6 @@ func (w *world) Stop() {
 	w.tTimeOut.Stop()
 	w.cancel()
 	<-w.chStop
-	close(w.chw)
 	close(w.chStop)
 	close(w.chDBInit)
 	w.con.Close()

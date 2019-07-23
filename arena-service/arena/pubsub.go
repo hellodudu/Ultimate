@@ -27,6 +27,7 @@ func newPubSub(service micro.Service, arena *Arena) *pubSub {
 	// register subscriber
 	micro.RegisterSubscriber("arena.Matching", service.Server(), &matchingSubHandler{pubsub: ps})
 	micro.RegisterSubscriber("arena.AddRecord", service.Server(), &addRecordSubHandler{pubsub: ps})
+	micro.RegisterSubscriber("arena.BattleResult", service.Server(), &battleResultSubHandler{pubsub: ps})
 
 	return ps
 }
@@ -109,4 +110,13 @@ type addRecordSubHandler struct {
 func (s *addRecordSubHandler) Process(ctx context.Context, event *pbPubSub.PublishAddRecord) error {
 	s.pubsub.arena.addRecord(event.Data)
 	return nil
+}
+
+// battleResult handler
+type battleResultSubHandler struct {
+	pubsub *pubSub
+}
+
+func (s *battleResultSubHandler) Process(ctx context.Context, event *pbPubSub.PublishBattleResult) {
+	s.pubsub.arena.battleResult(event.AttackId, event.TargetId, event.AttackWin)
 }

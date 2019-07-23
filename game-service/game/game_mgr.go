@@ -165,13 +165,8 @@ func (g *GameMgr) ArenaAddRecord(data *pbArena.ArenaRecord) {
 }
 
 func (g *GameMgr) ArenaBattleResult(attackID int64, targetID int64, attackWin bool) {
-	req := &pbArena.BattleResultRequest{AttackId: attackID, TargetId: targetID, AttackWin: attackWin}
-	_, err := g.arenaCli.BattleResult(g.ctx, req)
-	if err != nil {
-		logger.WithFieldsWarn("ArenaBattleResult Response", logger.Fields{
-			"error": err,
-		})
-	}
+	// publish an event
+	g.pubsub.publishArenaBattleResult(g.ctx, &pbPubSub.PublishBattleResult{AttackId: attackID, TargetId: targetID, AttackWin: attackWin})
 }
 
 func (g *GameMgr) ArenaGetRank(id int64, page int32) {

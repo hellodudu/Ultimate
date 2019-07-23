@@ -48,12 +48,10 @@ func (wp *workerPool) Run() {
 			wp.chStop <- struct{}{}
 			return
 		case newTasker := <-wp.taskerChan:
-			go func(tk Tasker) {
-				freeWorker := <-wp.workerChan
-				freeWorker.AddWork(tk)
-				freeWorker.Work()
-				wp.workerChan <- freeWorker
-			}(newTasker)
+			freeWorker := <-wp.workerChan
+			freeWorker.AddWork(newTasker)
+			freeWorker.Work()
+			wp.workerChan <- freeWorker
 		}
 	}
 }

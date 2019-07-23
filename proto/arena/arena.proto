@@ -166,7 +166,6 @@ message MUW_ArenaChampionOnline {
 service ArenaService {
     rpc GetSeasonData (GetSeasonDataRequest) returns (GetSeasonDataReply) {}
     rpc GetChampion (GetChampionRequest) returns (GetChampionReply) {}
-    rpc BattleResult (BattleResultRequest) returns (BattleResultReply) {}
     rpc GetRank (GetRankRequest) returns (GetRankReply) {}
     rpc GetArenaDataNum (GetArenaDataNumRequest) returns (GetArenaDataNumReply) {}
     rpc GetRecordNum (GetRecordNumRequest) returns (GetRecordNumReply) {}
@@ -193,19 +192,6 @@ message GetChampionRequest {
 
 message GetChampionReply {
     repeated ArenaChampion data = 1;   
-}
-
-
-
-
-message BattleResultRequest {
-    int64 attack_id = 1;
-    int64 target_id = 2;
-    bool attack_win = 3;
-}
-
-message BattleResultReply {
-
 }
 
 message GetRankRequest {

@@ -34,3 +34,5 @@ message PublishBattleResult {
     int64 target_id = 2;
     bool attack_win = 3;
 }
+
+

@@ -67,9 +67,6 @@ func (ps *pubSub) publishArenaAddRecord(ctx context.Context, m proto.Message) er
 }
 
 func (ps *pubSub) publishArenaBattleResult(ctx context.Context, m proto.Message) error {
-	logger.WithFieldsInfo("publish arena battle result", logger.Fields{
-		"message": proto.MessageName(m),
-	})
 	if err := ps.pubArenaBattleResult.Publish(ctx, m); err != nil {
 		logger.WithFieldsWarn("publish failed", logger.Fields{
 			"error":   err,

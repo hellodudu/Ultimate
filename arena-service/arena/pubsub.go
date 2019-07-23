@@ -117,6 +117,7 @@ type battleResultSubHandler struct {
 	pubsub *pubSub
 }
 
-func (s *battleResultSubHandler) Process(ctx context.Context, event *pbPubSub.PublishBattleResult) {
+func (s *battleResultSubHandler) Process(ctx context.Context, event *pbPubSub.PublishBattleResult) error {
 	s.pubsub.arena.battleResult(event.AttackId, event.TargetId, event.AttackWin)
+	return nil
 }

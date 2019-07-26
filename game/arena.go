@@ -399,7 +399,13 @@ func (arena *Arena) loadFromDB() {
 
 		// add to record request list, delay 20s to start request
 		arena.mapRecordReq.Store(v.Playerid, time.Now().Add(time.Second*20))
+
+		// add to slice record sorted by ArenaRecord
+		arena.arrRankArena.Add(v)
 	}
+
+	// resort
+	arena.arrRankArena.Sort()
 
 	now := int(time.Now().Unix())
 
@@ -850,36 +856,34 @@ func (arena *Arena) AddRecord(rec *pb.ArenaRecord) {
 	if _, ok := arena.mapRecord.Load(rec.PlayerId); ok {
 		// update record
 		arena.mapRecord.Store(rec.PlayerId, rec)
+
 	} else {
-		// add new record and arena data
-		data := &arenaData{
-			Playerid:   rec.PlayerId,
-			Score:      int32(arenaDefaultScore),
-			ReachTime:  uint32(time.Now().Unix()),
-			LastTarget: -1,
+
+		// add new arena data
+		if _, ok := arena.mapArenaData.Load(rec.PlayerId); !ok {
+
+			// add new record and arena data
+			data := &arenaData{
+				Playerid:   rec.PlayerId,
+				Score:      int32(arenaDefaultScore),
+				ReachTime:  uint32(time.Now().Unix()),
+				LastTarget: -1,
+			}
+
+			arena.mapArenaData.Store(rec.PlayerId, data)
+			arena.mapRecord.Store(rec.PlayerId, rec)
+
+			// add to slice record sorted by ArenaRecord
+			arena.arrRankArena.Add(data)
+			arena.arrRankArena.Sort()
+
+			// add to matching cache
+			index := getSectionIndexByScore(data.Score)
+			arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
+
+			// save to db
+			arena.ds.DB().Save(data)
 		}
-
-		// use exist arena data first
-		if s, ok := arena.mapArenaData.Load(rec.PlayerId); ok {
-			d := s.(*arenaData)
-			data.Score = d.Score
-			data.ReachTime = d.ReachTime
-			data.LastTarget = d.LastTarget
-		}
-
-		arena.mapArenaData.Store(rec.PlayerId, data)
-		arena.mapRecord.Store(rec.PlayerId, rec)
-
-		// add to slice record sorted by ArenaRecord
-		arena.arrRankArena.Add(data)
-		arena.arrRankArena.Sort()
-
-		// add to matching cache
-		index := getSectionIndexByScore(data.Score)
-		arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
-
-		// save to db
-		arena.ds.DB().Save(data)
 	}
 }
 

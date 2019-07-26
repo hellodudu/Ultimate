@@ -7,6 +7,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.2
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
+	github.com/hellodudu/Ultimate/arena-service v0.0.0-20190723090711-9d2491d3f94c // indirect
 	github.com/jinzhu/gorm v1.9.10
 	github.com/micro/go-micro v1.7.1-0.20190711204633-5157241c88e0
 	github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c

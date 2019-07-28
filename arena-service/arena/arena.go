@@ -417,8 +417,18 @@ func (arena *Arena) loadFromDB() {
 
 		// add to record request list, delay 20s to start request
 		arena.mapRecordReq[v.Playerid] = time.Now().Add(time.Second * 20).Unix()
+
+		// add to slice record sorted by ArenaRecord
+		arena.arrRankArena.Add(v)
+
+		// add to matching pool
+		index := getSectionIndexByScore(v.Score)
+		arena.arrMatchPool[index].Store(v.Playerid, struct{}{})
 	}
 	arena.muRecordReq.Unlock()
+
+	// resort
+	arena.arrRankArena.Sort()
 
 	now := int(time.Now().Unix())
 
@@ -861,9 +871,12 @@ func (arena *Arena) matching(playerID int64) {
 func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 
 	if _, ok := arena.mapRecord.Load(rec.PlayerId); ok {
-		// update record
-		arena.mapRecord.Store(rec.PlayerId, rec)
-	} else {
+		return
+	}
+
+	// add new arena data
+	if _, ok := arena.mapArenaData.Load(rec.PlayerId); !ok {
+
 		// add new record and arena data
 		data := &arenaData{
 			Playerid:   rec.PlayerId,
@@ -872,16 +885,7 @@ func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 			LastTarget: -1,
 		}
 
-		// use exist arena data first
-		if s, ok := arena.mapArenaData.Load(rec.PlayerId); ok {
-			d := s.(*arenaData)
-			data.Score = d.Score
-			data.ReachTime = d.ReachTime
-			data.LastTarget = d.LastTarget
-		}
-
 		arena.mapArenaData.Store(rec.PlayerId, data)
-		arena.mapRecord.Store(rec.PlayerId, rec)
 
 		// add to slice record sorted by ArenaRecord
 		arena.arrRankArena.Add(data)
@@ -894,12 +898,14 @@ func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 		// save to db
 		arena.ds.DB().Save(data)
 	}
+
+	// add arena record
+	arena.mapRecord.Store(rec.PlayerId, rec)
 }
 
 func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {
 	arena.arrMatchPool[preSection].Delete(id)
 	arena.arrMatchPool[newSection].Store(id, struct{}{})
-
 }
 
 // battleResult battle end

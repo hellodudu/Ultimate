@@ -1,0 +1,73 @@
+# github.com/go-ini/ini v1.44.0
+github.com/go-ini/ini
+# github.com/go-log/log v0.1.0
+github.com/go-log/log
+github.com/go-log/log/log
+# github.com/golang/protobuf v1.3.2
+github.com/golang/protobuf/proto
+github.com/golang/protobuf/jsonpb
+github.com/golang/protobuf/ptypes/struct
+# github.com/google/uuid v1.1.1
+github.com/google/uuid
+# github.com/jinzhu/gorm v1.9.10
+github.com/jinzhu/gorm
+# github.com/jinzhu/inflection v1.0.0
+github.com/jinzhu/inflection
+# github.com/konsorten/go-windows-terminal-sequences v1.0.2
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/micro/go-micro v1.7.0
+github.com/micro/go-micro/client
+github.com/micro/go-micro/server
+github.com/micro/go-micro/broker
+github.com/micro/go-micro/codec
+github.com/micro/go-micro/codec/bytes
+github.com/micro/go-micro/codec/grpc
+github.com/micro/go-micro/codec/json
+github.com/micro/go-micro/codec/jsonrpc
+github.com/micro/go-micro/codec/proto
+github.com/micro/go-micro/codec/protorpc
+github.com/micro/go-micro/errors
+github.com/micro/go-micro/metadata
+github.com/micro/go-micro/registry
+github.com/micro/go-micro/selector
+github.com/micro/go-micro/transport
+github.com/micro/go-micro/server/debug
+github.com/micro/go-micro/util/addr
+github.com/micro/go-micro/util/log
+github.com/micro/go-micro/registry/cache
+github.com/micro/go-micro/util/net
+github.com/micro/go-micro/util/tls
+github.com/micro/go-micro/server/debug/proto
+# github.com/micro/mdns v0.1.0
+github.com/micro/mdns
+# github.com/miekg/dns v1.1.15
+github.com/miekg/dns
+# github.com/mitchellh/hashstructure v1.0.0
+github.com/mitchellh/hashstructure
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
+# github.com/sirupsen/logrus v1.4.2
+github.com/sirupsen/logrus
+# golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+golang.org/x/crypto/ed25519
+golang.org/x/crypto/ed25519/internal/edwards25519
+# golang.org/x/net v0.0.0-20190628185345-da137c7871d7
+golang.org/x/net/context
+golang.org/x/net/http2
+golang.org/x/net/http2/h2c
+golang.org/x/net/http/httpguts
+golang.org/x/net/http2/hpack
+golang.org/x/net/idna
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
+golang.org/x/net/bpf
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
+# golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.2
+golang.org/x/text/secure/bidirule
+golang.org/x/text/unicode/bidi
+golang.org/x/text/unicode/norm
+golang.org/x/text/transform

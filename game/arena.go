@@ -447,15 +447,15 @@ func (arena *Arena) loadFromDB() {
 	if arena.ds.TableGlobal().ArenaFixEndTime == 0 {
 		arena.newSeasonRank()
 		arena.ds.TableGlobal().ArenaFixEndTime = 1
-		arena.ds.TableGlobal().ArenaWeekEndTime = arena.WeekEndTime() - 490
+		// arena.ds.TableGlobal().ArenaWeekEndTime = arena.WeekEndTime() - 490
 
 		// save to db
 		arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
-			ArenaWeekEndTime: arena.WeekEndTime(),
-			ArenaFixEndTime:  arena.fixEndTime(),
-			TimeStamp:        int(time.Now().Unix()),
+			// ArenaWeekEndTime: arena.WeekEndTime(),
+			ArenaFixEndTime: arena.fixEndTime(),
+			TimeStamp:       int(time.Now().Unix()),
 		})
-		logger.Trace("set new season rank")
+		logger.Print("set new season rank")
 	}
 
 	// all init ok

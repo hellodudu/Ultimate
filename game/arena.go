@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -736,6 +737,7 @@ func (arena *Arena) nextSeason() {
 func (arena *Arena) newSeasonRank() {
 	// people who's section > 4, set score to 4 section default score
 	// people who's section <= 4, set score to section - 1 default score
+
 	saveList := make([]*arenaData, 0)
 	arena.mapArenaData.Range(func(k, v interface{}) bool {
 		value := v.(*arenaData)
@@ -765,8 +767,17 @@ func (arena *Arena) newSeasonRank() {
 	})
 
 	// save to db
-	for _, v := range saveList {
-		arena.ds.DB().Save(v)
+	if len(saveList) > 0 {
+		var querys []string
+		querys = append(querys, "replace into arena_player values ")
+		for k, v := range saveList {
+			if k > 0 {
+				querys = append(querys, ",")
+			}
+
+			querys = append(querys, fmt.Sprintf("(%d,%d,%d,%d)", v.Playerid, v.Score, v.ReachTime, v.LastTarget))
+		}
+		arena.ds.DB().Exec(strings.Join(querys, ""))
 	}
 
 	// resort

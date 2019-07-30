@@ -35,8 +35,7 @@ push:
 
 .PHONY: docker_rm
 docker_rm:
-	docker rmi hellodudu86/ultimate:$(v)
-	docker rmi ultimate:$(v)
+	docker rmi $(shell docker images -f "dangling=true" -q) --force
 
 .PHONY: stop
 stop:

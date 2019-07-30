@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -324,6 +325,10 @@ func (arena *Arena) season() int {
 	return arena.ds.TableGlobal().ArenaSeason
 }
 
+func (arena *Arena) fixEndTime() int {
+	return arena.ds.TableGlobal().ArenaFixEndTime
+}
+
 func (arena *Arena) WeekEndTime() int {
 	return arena.ds.TableGlobal().ArenaWeekEndTime
 }
@@ -393,7 +398,7 @@ func (arena *Arena) run() {
 			arena.updateMatchingList()
 			arena.updateTime()
 			d := time.Since(t)
-			time.Sleep(time.Millisecond - d)
+			time.Sleep(time.Millisecond*200 - d)
 
 		}
 	}
@@ -416,7 +421,7 @@ func (arena *Arena) loadFromDB() {
 		arena.mapArenaData.Store(v.Playerid, v)
 
 		// add to record request list, delay 20s to start request
-		arena.mapRecordReq[v.Playerid] = time.Now().Add(time.Second * 20).Unix()
+		arena.mapRecordReq[v.Playerid] = time.Now().Add(time.Second * time.Duration((20 + k/30))).Unix()
 
 		// add to slice record sorted by ArenaRecord
 		arena.arrRankArena.Add(v)
@@ -456,6 +461,21 @@ func (arena *Arena) loadFromDB() {
 			<-ct.C
 			arena.seasonEnd()
 		}(t)
+	}
+
+	// fix arena end time
+	if arena.ds.TableGlobal().ArenaFixEndTime == 0 {
+		arena.newSeasonRank()
+		arena.ds.TableGlobal().ArenaFixEndTime = 1
+		// arena.ds.TableGlobal().ArenaWeekEndTime = arena.WeekEndTime() - 490
+
+		// save to db
+		arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
+			// ArenaWeekEndTime: arena.WeekEndTime(),
+			ArenaFixEndTime: arena.fixEndTime(),
+			TimeStamp:       int(time.Now().Unix()),
+		})
+		logger.Print("set new season rank")
 	}
 
 	// all init ok
@@ -544,7 +564,14 @@ func (arena *Arena) updateRequestRecord() {
 	arena.muRecordReq.Lock()
 	defer arena.muRecordReq.Unlock()
 
+	num := 0
+
 	for id, t := range arena.mapRecordReq {
+		// every tick request 30 record
+		if num >= 30 {
+			return false
+		}
+
 		// it's not right time to send request
 		if time.Now().Unix() < t {
 			continue
@@ -552,9 +579,9 @@ func (arena *Arena) updateRequestRecord() {
 
 		resp, err := arena.handler.GetPlayerInfoByID(id)
 
-		// add 3 seconds interval
+		// add 30 seconds interval
 		if err != nil {
-			arena.mapRecordReq[id] = time.Now().Add(time.Second * 3).Unix()
+			arena.mapRecordReq[id] = time.Now().Add(time.Second * 30).Unix()
 			continue
 		}
 
@@ -570,6 +597,11 @@ func (arena *Arena) updateRequestRecord() {
 
 		delete(arena.mapRecordReq, id)
 	}
+
+	// try again 30 seconds later
+	arena.mapRecordReq[id] = time.Now().Add(time.Second * 30).Unix()
+
+	num++
 }
 
 func (arena *Arena) updateMatchingList() {
@@ -610,13 +642,13 @@ func (arena *Arena) weekEnd() {
 	}
 
 	// one full week duration
-	d := time.Duration(time.Hour) * time.Duration(24) * time.Duration(arenaRequestNewRecordDays)
+	o := time.Duration(time.Hour) * time.Duration(24)
 
 	// now elapse duration
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
 	// add 10 seconds inaccuracy
-	arena.ds.TableGlobal().ArenaWeekEndTime = int(ct.Add(d - e + time.Duration(time.Second)*10).Unix())
+	arena.ds.TableGlobal().ArenaWeekEndTime = int(ct.Add(o*7 - e - time.Duration(time.Minute)*8).Unix())
 
 	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
 		ArenaWeekEndTime: arena.ds.TableGlobal().ArenaWeekEndTime,
@@ -639,7 +671,8 @@ func (arena *Arena) weekEnd() {
 			continue
 		}
 
-		arena.mapRecordReq[v] = ct.Add(time.Second * time.Duration(k/50)).Unix()
+		arena.mapRecordReq[v] = ct.Add(time.Second * time.Duration(k/30)).Unix()
+
 	}
 	arena.muRecordReq.Unlock()
 
@@ -730,6 +763,8 @@ func (arena *Arena) nextSeason() {
 func (arena *Arena) newSeasonRank() {
 	// people who's section > 4, set score to 4 section default score
 	// people who's section <= 4, set score to section - 1 default score
+
+	saveList := make([]*arenaData, 0)
 	arena.mapArenaData.Range(func(k, v interface{}) bool {
 		value := v.(*arenaData)
 		oldSec := getSectionIndexByScore(value.Score)
@@ -748,11 +783,7 @@ func (arena *Arena) newSeasonRank() {
 
 		newScore := getDefaultScoreBySection(newSec)
 		value.Score = newScore
-
-		// save to db
-		go func(data *arenaData) {
-			arena.ds.DB().Save(data)
-		}(value)
+		saveList = append(saveList, value)
 
 		if oldSec != newSec {
 			arena.arrMatchPool[oldSec].Delete(value.Playerid)
@@ -761,6 +792,21 @@ func (arena *Arena) newSeasonRank() {
 		return true
 	})
 
+	// save to db
+	if len(saveList) > 0 {
+		var querys []string
+		querys = append(querys, "replace into arena_player values ")
+		for k, v := range saveList {
+			if k > 0 {
+				querys = append(querys, ",")
+			}
+
+			querys = append(querys, fmt.Sprintf("(%d,%d,%d,%d)", v.Playerid, v.Score, v.ReachTime, v.LastTarget))
+		}
+		arena.ds.DB().Exec(strings.Join(querys, ""))
+	}
+
+	// resort
 	arena.arrRankArena.Sort()
 }
 
@@ -870,10 +916,6 @@ func (arena *Arena) matching(playerID int64) {
 // addRecord if existing then replace record
 func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 
-	if _, ok := arena.mapRecord.Load(rec.PlayerId); ok {
-		return
-	}
-
 	// add new arena data
 	if _, ok := arena.mapArenaData.Load(rec.PlayerId); !ok {
 
@@ -901,6 +943,9 @@ func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 
 	// add arena record
 	arena.mapRecord.Store(rec.PlayerId, rec)
+
+	// delete from request list
+	arena.mapRecordReq.Delete(rec.PlayerId)
 }
 
 func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {

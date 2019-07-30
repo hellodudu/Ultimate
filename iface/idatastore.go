@@ -18,6 +18,7 @@ type TableGlobal struct {
 	ArenaSeason        int `gorm:"type:int(10);column:arena_season;default:0;not null"`
 	ArenaWeekEndTime   int `gorm:"type:int(10);column:arena_week_end_time;default:0;not null"` // every monday request new player's record and send weekly reward
 	ArenaSeasonEndTime int `gorm:"type:int(10);column:arena_season_end_time;default:0;not null"`
+	ArenaFixEndTime    int `gorm:"type:tinyint(3);column:arena_fix_end_time;default:0;not null"`
 }
 
 // TableName set global table name to be `global`

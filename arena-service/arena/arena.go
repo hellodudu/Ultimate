@@ -213,8 +213,7 @@ type Arena struct {
 	arrMatchPool []sync.Map // 8 level match pool map[playerid]struct{}
 	matchingList sync.Map   // list of matching waiting player map[playerid]struct{}
 
-	mapRecordReq map[int64]int64 // map of init player request map[playerid]time.Now() : next request time
-	muRecordReq  sync.Mutex
+	mapRecordReq sync.Map // map of init player request map[playerid]time.Now() : next request time
 
 	chMatchWaitOK chan int64 // match wait player channel
 
@@ -237,7 +236,6 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
 		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
 		chMatchWaitOK: make(chan int64, 1000),
-		mapRecordReq:  make(map[int64]int64),
 		chDBInit:      make(chan struct{}, 1),
 		chStop:        make(chan struct{}, 1),
 		championList:  make([]*championData, 0),
@@ -308,7 +306,12 @@ func (arena *Arena) getMatchingList() []int64 {
 }
 
 func (arena *Arena) GetRecordReqList() map[int64]int64 {
-	return arena.mapRecordReq
+	ret := make(map[int64]int64)
+	arena.mapRecordReq.Range(func(k, v interface{}) bool {
+		ret[k.(int64)] = v.(int64)
+		return true
+	})
+	return ret
 }
 
 func (arena *Arena) getRankListByPage(page int) []*arenaData {
@@ -416,12 +419,11 @@ func (arena *Arena) loadFromDB() {
 	arena.ds.DB().Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(arenaData{})
 	arena.ds.DB().Find(&arenaDataList)
 
-	arena.muRecordReq.Lock()
-	for _, v := range arenaDataList {
+	for k, v := range arenaDataList {
 		arena.mapArenaData.Store(v.Playerid, v)
 
 		// add to record request list, delay 20s to start request
-		arena.mapRecordReq[v.Playerid] = time.Now().Add(time.Second * time.Duration((20 + k/30))).Unix()
+		arena.mapRecordReq.Store(v.Playerid, time.Now().Add(time.Second*time.Duration((20+k/30))).Unix())
 
 		// add to slice record sorted by ArenaRecord
 		arena.arrRankArena.Add(v)
@@ -430,7 +432,6 @@ func (arena *Arena) loadFromDB() {
 		index := getSectionIndexByScore(v.Score)
 		arena.arrMatchPool[index].Store(v.Playerid, struct{}{})
 	}
-	arena.muRecordReq.Unlock()
 
 	// resort
 	arena.arrRankArena.Sort()
@@ -561,12 +562,13 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 }
 
 func (arena *Arena) updateRequestRecord() {
-	arena.muRecordReq.Lock()
-	defer arena.muRecordReq.Unlock()
 
 	num := 0
+	idList := make([]int64, 0)
+	arena.mapRecordReq.Range(func(k, v interface{}) bool {
+		id := k.(int64)
+		t := v.(int64)
 
-	for id, t := range arena.mapRecordReq {
 		// every tick request 30 record
 		if num >= 30 {
 			return false
@@ -574,34 +576,33 @@ func (arena *Arena) updateRequestRecord() {
 
 		// it's not right time to send request
 		if time.Now().Unix() < t {
-			continue
+			return true
 		}
 
-		resp, err := arena.handler.GetPlayerInfoByID(id)
+		idList = append(idList, id)
+		num++
+		return true
+	})
 
-		// add 30 seconds interval
-		if err != nil {
-			arena.mapRecordReq[id] = time.Now().Add(time.Second * 30).Unix()
-			continue
-		}
+	for _, v := range idList {
 
-		// send request and try again 1 minutes later
-		msg := &pbArena.MUW_ArenaAddRecord{
-			PlayerId: id,
-		}
+		go func(id int64, ctx context.Context) {
+			if resp, err := arena.handler.GetPlayerInfoByID(id); err == nil {
 
-		err = arena.pubsub.publishSendWorldMessage(arena.ctx, resp.Info.ServerId, msg)
-		if err != nil {
-			continue
-		}
+				// send request and try again 30 seconds later
+				msg := &pbArena.MUW_ArenaAddRecord{
+					PlayerId: id,
+				}
 
-		delete(arena.mapRecordReq, id)
+				arena.pubsub.publishSendWorldMessage(ctx, resp.Info.ServerId, msg)
+
+				// try again 30 seconds later
+				arena.mapRecordReq.Store(id, time.Now().Add(time.Second*30).Unix())
+			}
+		}(v, arena.ctx)
+
 	}
 
-	// try again 30 seconds later
-	arena.mapRecordReq[id] = time.Now().Add(time.Second * 30).Unix()
-
-	num++
 }
 
 func (arena *Arena) updateMatchingList() {
@@ -664,17 +665,15 @@ func (arena *Arena) weekEnd() {
 		return true
 	})
 
-	arena.muRecordReq.Lock()
 	for k, v := range arrReq {
 		_, err := arena.handler.GetPlayerInfoByID(v)
 		if err != nil {
 			continue
 		}
 
-		arena.mapRecordReq[v] = ct.Add(time.Second * time.Duration(k/30)).Unix()
+		arena.mapRecordReq.Store(v, ct.Add(time.Second*time.Duration(k/30)).Unix())
 
 	}
-	arena.muRecordReq.Unlock()
 
 	// send weekly reward
 	type rewardWeek struct {
@@ -892,8 +891,6 @@ func (arena *Arena) seasonEnd() {
 }
 
 func (arena *Arena) matching(playerID int64) {
-	arena.muRecordReq.Lock()
-	defer arena.muRecordReq.Unlock()
 
 	_, ok := arena.mapRecord.Load(playerID)
 
@@ -902,11 +899,11 @@ func (arena *Arena) matching(playerID int64) {
 		arena.chMatchWaitOK <- playerID
 
 		// request newlest record after 5 seconds
-		arena.mapRecordReq[playerID] = time.Now().Add(time.Second * 5).Unix()
+		arena.mapRecordReq.Store(playerID, time.Now().Add(time.Second*5).Unix())
 
 	} else {
 		// request record
-		arena.mapRecordReq[playerID] = time.Now().Unix()
+		arena.mapRecordReq.Store(playerID, time.Now().Unix())
 
 		// add to matching wait list
 		arena.matchingList.Store(playerID, struct{}{})

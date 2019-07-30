@@ -381,7 +381,7 @@ func (arena *Arena) Run() {
 			arena.updateMatchingList()
 			arena.updateTime()
 			d := time.Since(t)
-			time.Sleep(time.Millisecond - d)
+			time.Sleep(time.Millisecond*200 - d)
 
 		}
 	}
@@ -399,11 +399,11 @@ func (arena *Arena) loadFromDB() {
 	arena.ds.DB().Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(arenaData{})
 	arena.ds.DB().Find(&arenaDataList)
 
-	for _, v := range arenaDataList {
+	for k, v := range arenaDataList {
 		arena.mapArenaData.Store(v.Playerid, v)
 
 		// add to record request list, delay 20s to start request
-		arena.mapRecordReq.Store(v.Playerid, time.Now().Add(time.Second*20))
+		arena.mapRecordReq.Store(v.Playerid, time.Now().Add(time.Second*time.Duration((20+k/30))))
 
 		// add to slice record sorted by ArenaRecord
 		arena.arrRankArena.Add(v)
@@ -539,9 +539,13 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 }
 
 func (arena *Arena) updateRequestRecord() {
-	var arrDel []int64
-
+	num := 0
 	arena.mapRecordReq.Range(func(k, v interface{}) bool {
+		// every tick request 30 record
+		if num >= 30 {
+			return false
+		}
+
 		id := k.(int64)
 		t := v.(time.Time)
 
@@ -560,18 +564,18 @@ func (arena *Arena) updateRequestRecord() {
 			return true
 		}
 
-		// send request and try again 1 minutes later
+		// send request
 		msg := &pb.MUW_ArenaAddRecord{
 			PlayerId: id,
 		}
 		world.SendProtoMessage(msg)
-		arrDel = append(arrDel, id)
+
+		// try again 30 seconds later
+		arena.mapRecordReq.Store(id, time.Now().Add(time.Second*30))
+
+		num++
 		return true
 	})
-
-	for _, v := range arrDel {
-		arena.mapRecordReq.Delete(v)
-	}
 }
 
 func (arena *Arena) updateMatchingList() {
@@ -645,7 +649,7 @@ func (arena *Arena) WeekEnd() {
 			continue
 		}
 
-		arena.mapRecordReq.Store(v, ct.Add(time.Second*time.Duration(k/50)))
+		arena.mapRecordReq.Store(v, ct.Add(time.Second*time.Duration(k/30)))
 	}
 
 	// send weekly reward
@@ -890,10 +894,6 @@ func (arena *Arena) Matching(playerID int64) {
 // AddRecord if existing then replace record
 func (arena *Arena) AddRecord(rec *pb.ArenaRecord) {
 
-	if _, ok := arena.mapRecord.Load(rec.PlayerId); ok {
-		return
-	}
-
 	// add new arena data
 	if _, ok := arena.mapArenaData.Load(rec.PlayerId); !ok {
 
@@ -921,6 +921,9 @@ func (arena *Arena) AddRecord(rec *pb.ArenaRecord) {
 
 	// add arena record
 	arena.mapRecord.Store(rec.PlayerId, rec)
+
+	// delete from request list
+	arena.mapRecordReq.Delete(rec.PlayerId)
 }
 
 func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {

@@ -408,9 +408,6 @@ func (arena *Arena) loadFromDB() {
 		// add to slice record sorted by ArenaRecord
 		arena.arrRankArena.Add(v)
 
-		// add to matching pool
-		index := getSectionIndexByScore(v.Score)
-		arena.arrMatchPool[index].Store(v.Playerid, struct{}{})
 	}
 
 	// resort
@@ -912,10 +909,6 @@ func (arena *Arena) AddRecord(rec *pb.ArenaRecord) {
 		arena.arrRankArena.Add(data)
 		arena.arrRankArena.Sort()
 
-		// add to matching cache
-		index := getSectionIndexByScore(data.Score)
-		arena.arrMatchPool[index].Store(rec.PlayerId, struct{}{})
-
 		// save to db
 		arena.ds.DB().Save(data)
 	}
@@ -925,6 +918,12 @@ func (arena *Arena) AddRecord(rec *pb.ArenaRecord) {
 
 	// delete from request list
 	arena.mapRecordReq.Delete(rec.PlayerId)
+
+	// add to matching pool
+	if v, ok := arena.mapArenaData.Load(rec.PlayerId); ok {
+		index := getSectionIndexByScore(v.(*arenaData).Score)
+		arena.arrMatchPool[index].Store(v.(*arenaData).Playerid, struct{}{})
+	}
 }
 
 func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {

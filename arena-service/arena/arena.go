@@ -644,12 +644,13 @@ func (arena *Arena) weekEnd() {
 
 	// one full week duration
 	o := time.Duration(time.Hour) * time.Duration(24)
+	d := o * 7
 
 	// now elapse duration
 	e := time.Hour*time.Duration(24)*time.Duration(cw-1) + time.Hour*time.Duration(ct.Hour()) + time.Minute*time.Duration(ct.Minute()) + time.Second*time.Duration(ct.Second())
 
 	// add 10 seconds inaccuracy
-	arena.ds.TableGlobal().ArenaWeekEndTime = int(ct.Add(o*7 - e - time.Duration(time.Minute)*8).Unix())
+	arena.ds.TableGlobal().ArenaWeekEndTime = int(ct.Add(d + o*7 - e - time.Duration(time.Minute)*8).Unix())
 
 	arena.ds.DB().Model(arena.ds.TableGlobal()).Updates(iface.TableGlobal{
 		ArenaWeekEndTime: arena.ds.TableGlobal().ArenaWeekEndTime,

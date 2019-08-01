@@ -40,9 +40,7 @@ func NewWorldMgr(datastore iface.IDatastore) (*WorldMgr, error) {
 
 func (wm *WorldMgr) Stop() chan struct{} {
 	wm.mapWorld.Range(func(_, v interface{}) bool {
-		if world, ok := v.(iface.IWorld); ok {
-			world.Stop()
-		}
+		v.(*world).Stop()
 		return true
 	})
 
@@ -57,11 +55,7 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con iface.ITCPConn) (iface.
 	}
 
 	if _, ok := wm.mapWorld.Load(id); ok {
-		wm.KickWorld(id)
-	}
-
-	if _, ok := wm.mapConn.Load(con); ok {
-		wm.KickWorld(id)
+		wm.KickWorld(id, "AddWorld")
 	}
 
 	var numConn uint32 = 0
@@ -110,12 +104,7 @@ func (wm *WorldMgr) GetWorldByID(id uint32) iface.IWorld {
 		return nil
 	}
 
-	world, ok := v.(iface.IWorld)
-	if !ok {
-		return nil
-	}
-
-	return world
+	return v.(*world)
 }
 
 func (wm *WorldMgr) GetWorldByCon(con iface.ITCPConn) iface.IWorld {
@@ -124,12 +113,7 @@ func (wm *WorldMgr) GetWorldByCon(con iface.ITCPConn) iface.IWorld {
 		return nil
 	}
 
-	world, ok := v.(iface.IWorld)
-	if !ok {
-		return nil
-	}
-
-	return world
+	return v.(*world)
 }
 
 func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
@@ -138,7 +122,7 @@ func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 		return
 	}
 
-	world, ok := v.(iface.IWorld)
+	world, ok := v.(*world)
 	if !ok {
 		return
 	}
@@ -150,22 +134,19 @@ func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 	wm.mapConn.Delete(con)
 }
 
-func (wm *WorldMgr) KickWorld(id uint32) {
+func (wm *WorldMgr) KickWorld(id uint32, reason string) {
 	v, ok := wm.mapWorld.Load(id)
 	if !ok {
 		return
 	}
 
-	world, ok := v.(iface.IWorld)
+	world, ok := v.(*world)
 	if !ok {
 		return
 	}
 
-	if _, ok := wm.mapConn.Load(world.GetCon()); !ok {
-		return
-	}
-
-	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by timeout reason!", world.GetID()))
+	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by %s!", world.GetID(), reason))
+	logger.Warning(fmt.Sprintf("World last message send: <name:%s>, <data:%v>", world.lastMsgName, world.lastMsgData))
 	world.Stop()
 
 	wm.mapConn.Delete(world.GetCon())
@@ -174,7 +155,7 @@ func (wm *WorldMgr) KickWorld(id uint32) {
 
 func (wm *WorldMgr) BroadCast(msg proto.Message) {
 	wm.mapWorld.Range(func(_, v interface{}) bool {
-		if world, ok := v.(iface.IWorld); ok {
+		if world, ok := v.(*world); ok {
 			world.SendProtoMessage(msg)
 		}
 		return true
@@ -189,7 +170,7 @@ func (wm *WorldMgr) Run() {
 			wm.chStop <- struct{}{}
 			return
 		case wid := <-wm.chTimeOutW:
-			wm.KickWorld(wid)
+			wm.KickWorld(wid, "time out")
 		}
 	}
 }

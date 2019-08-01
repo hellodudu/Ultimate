@@ -1,9 +1,11 @@
 package world
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -30,9 +32,13 @@ type world struct {
 	mapGuild  map[int64]*pb.CrossGuildInfo
 
 	chDBInit chan struct{}
+
+	lastMsgName string // for testing disconnected from world server
+	lastMsgData []byte // for testing disconnected from world server
+	mu          sync.Mutex
 }
 
-func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datastore iface.IDatastore) iface.IWorld {
+func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datastore iface.IDatastore) *world {
 	w := &world{
 		ID:          id,
 		Name:        name,
@@ -45,6 +51,8 @@ func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datas
 		mapPlayer:   make(map[int64]*pb.CrossPlayerInfo),
 		mapGuild:    make(map[int64]*pb.CrossGuildInfo),
 		chDBInit:    make(chan struct{}, 1),
+
+		lastMsgData: make([]byte, 0),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -137,14 +145,45 @@ func (w *world) SendProtoMessage(p proto.Message) {
 
 	if _, err := w.con.Write(resp); err != nil {
 		logger.Warning("send proto msg error:", err)
+		return
 	}
+
+	// for testing disconnected from world server
+	w.mu.Lock()
+	w.lastMsgName = typeName
+	w.lastMsgData = make([]byte, len(resp))
+	copy(w.lastMsgData, resp)
+	w.mu.Unlock()
 }
 
 func (w *world) SendTransferMessage(data []byte) {
 	resp := make([]byte, 4+len(data))
 	binary.LittleEndian.PutUint32(resp[:4], uint32(len(data)))
 	copy(resp[4:], data)
+
 	if _, err := w.con.Write(resp); err != nil {
 		logger.Warning("send transfer msg error:", err)
+		return
 	}
+
+	// for testing disconnected from world server
+	transferMsg := &global.TransferNetMsg{}
+	byTransferMsg := make([]byte, binary.Size(transferMsg))
+
+	copy(byTransferMsg, data[:binary.Size(transferMsg)])
+	buf := &bytes.Buffer{}
+	if _, err := buf.Write(byTransferMsg); err != nil {
+		return
+	}
+
+	// get top 4 bytes messageid
+	if err := binary.Read(buf, binary.LittleEndian, transferMsg); err != nil {
+		return
+	}
+
+	w.mu.Lock()
+	w.lastMsgName = fmt.Sprintf("transfer_msg id=%d, size=%d, world_id=%d, player_id=%d", transferMsg.ID, transferMsg.Size, transferMsg.WorldID, transferMsg.PlayerID)
+	w.lastMsgData = make([]byte, len(resp))
+	copy(w.lastMsgData, resp)
+	w.mu.Unlock()
 }

@@ -146,9 +146,15 @@ func (wm *WorldMgr) KickWorld(id uint32, reason string) {
 	}
 
 	logger.Warning(fmt.Sprintf("World<id:%d> was kicked by %s!", world.GetID(), reason))
-	logger.Warning(fmt.Sprintf("World last message send: <name:%s>, <data:%v>", world.lastMsgName, world.lastMsgData))
-	world.Stop()
 
+	// trace message
+	n := 0
+	for e := world.traceMsgList.Front(); e != nil; e = e.Next() {
+		n++
+		logger.Warning(fmt.Sprintf("World trace message list%d <msgName:%s>, <msgData:%v>", n, e.Value.(*traceMsg).msgName, e.Value.(*traceMsg).msgData))
+	}
+
+	world.Stop()
 	wm.mapConn.Delete(world.GetCon())
 	wm.mapWorld.Delete(world.GetID())
 }

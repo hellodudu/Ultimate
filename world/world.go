@@ -2,6 +2,7 @@ package world
 
 import (
 	"bytes"
+	"container/list"
 	"context"
 	"encoding/binary"
 	"fmt"
@@ -15,6 +16,11 @@ import (
 	pb "github.com/hellodudu/Ultimate/proto"
 	"github.com/hellodudu/Ultimate/utils"
 )
+
+type traceMsg struct {
+	msgName string
+	msgData []byte
+}
 
 type world struct {
 	ID          uint32         `gorm:"type:int(10);primary_key;column:id;default:0;not null"`
@@ -33,9 +39,8 @@ type world struct {
 
 	chDBInit chan struct{}
 
-	lastMsgName string // for testing disconnected from world server
-	lastMsgData []byte // for testing disconnected from world server
-	mu          sync.Mutex
+	traceMsgList *list.List
+	mu           sync.Mutex
 }
 
 func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datastore iface.IDatastore) *world {
@@ -52,7 +57,7 @@ func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datas
 		mapGuild:    make(map[int64]*pb.CrossGuildInfo),
 		chDBInit:    make(chan struct{}, 1),
 
-		lastMsgData: make([]byte, 0),
+		traceMsgList: list.New(),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -148,11 +153,14 @@ func (w *world) SendProtoMessage(p proto.Message) {
 		return
 	}
 
-	// for testing disconnected from world server
+	// trace message
 	w.mu.Lock()
-	w.lastMsgName = typeName
-	w.lastMsgData = make([]byte, len(resp))
-	copy(w.lastMsgData, resp)
+	traceInfo := &traceMsg{msgName: typeName, msgData: make([]byte, len(resp))}
+	copy(traceInfo.msgData, resp)
+	w.traceMsgList.PushBack(traceInfo)
+	if w.traceMsgList.Len() > 5 {
+		w.traceMsgList.Remove(w.traceMsgList.Front())
+	}
 	w.mu.Unlock()
 }
 
@@ -181,9 +189,16 @@ func (w *world) SendTransferMessage(data []byte) {
 		return
 	}
 
+	// trace message
 	w.mu.Lock()
-	w.lastMsgName = fmt.Sprintf("transfer_msg id=%d, size=%d, world_id=%d, player_id=%d", transferMsg.ID, transferMsg.Size, transferMsg.WorldID, transferMsg.PlayerID)
-	w.lastMsgData = make([]byte, len(resp))
-	copy(w.lastMsgData, resp)
+	traceInfo := &traceMsg{
+		msgName: fmt.Sprintf("transfer_msg id=%d, size=%d, world_id=%d, player_id=%d", transferMsg.ID, transferMsg.Size, transferMsg.WorldID, transferMsg.PlayerID),
+		msgData: make([]byte, len(resp)),
+	}
+	copy(traceInfo.msgData, resp)
+	w.traceMsgList.PushBack(traceInfo)
+	if w.traceMsgList.Len() > 5 {
+		w.traceMsgList.Remove(w.traceMsgList.Front())
+	}
 	w.mu.Unlock()
 }

@@ -14,6 +14,7 @@ import (
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
+	_ "github.com/micro/go-plugins/transport/grpc"
 )
 
 var (

@@ -132,7 +132,7 @@ func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Req
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(resp.ID)
 }
 
 func (s *HttpServer) arenaRecordReqListHandler(w http.ResponseWriter, r *http.Request) {
@@ -205,7 +205,7 @@ func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	json.NewEncoder(w).Encode(rsp.Data)
+	w.Write(rsp.Data)
 }
 
 func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {

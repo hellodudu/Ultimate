@@ -39,25 +39,21 @@ func (h *RPCHandler) GetChampion(ctx context.Context, req *pbArena.GetChampionRe
 }
 
 func (h *RPCHandler) GetRank(ctx context.Context, req *pbArena.GetRankRequest, rsp *pbArena.GetRankReply) error {
-	logger.Info("Received ArenaService.GetRank request")
 	h.arena.requestRank(req.PlayerId, req.Page)
 	return nil
 }
 
 func (h *RPCHandler) GetArenaDataNum(ctx context.Context, req *pbArena.GetArenaDataNumRequest, rsp *pbArena.GetArenaDataNumReply) error {
-	logger.Info("Received ArenaService.GetArenaDataNum request")
-	h.arena.getArenaDataNum()
+	rsp.Num = int32(h.arena.getArenaDataNum())
 	return nil
 }
 
 func (h *RPCHandler) GetRecordNum(ctx context.Context, req *pbArena.GetRecordNumRequest, rsp *pbArena.GetRecordNumReply) error {
-	logger.Info("Received ArenaService.GetRecordNum request")
 	rsp.Num = int32(h.arena.getRecordNum())
 	return nil
 }
 
 func (h *RPCHandler) GetMatchingList(ctx context.Context, req *pbArena.GetMatchingListRequest, rsp *pbArena.GetMatchingListReply) error {
-	logger.Info("Received ArenaService.GetMatchingList request")
 	rsp.Ids = h.arena.getMatchingList()
 	return nil
 }

@@ -88,7 +88,7 @@ func (m *MsgParser) decodeToProto(data []byte) (proto.Message, error) {
 	protoNameLen := binary.LittleEndian.Uint16(byProto[:2])
 
 	if uint16(len(byProto)) < 2+protoNameLen {
-		return nil, fmt.Errorf("recv proto msg length < 2+protoNameLen:" + string(byProto))
+		return nil, fmt.Errorf("recv proto msg length<%d> less than 2+protoNameLen<%d>, with byte data:", uint16(len(byProto)), protoNameLen, byProto)
 	}
 
 	// get proto name

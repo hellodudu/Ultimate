@@ -3,36 +3,57 @@ module github.com/hellodudu/Ultimate/arena-service
 go 1.12
 
 require (
-	github.com/Jeffail/gabs v1.1.1 // indirect
-	github.com/SAP/go-hdb v0.13.2 // indirect
-	github.com/SermoDigital/jose v0.9.2-0.20161205224733-f6df55f235c2 // indirect
-	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
-	github.com/docker/docker v0.7.3-0.20190506211059-b20a14b54661 // indirect
-	github.com/elazarl/go-bindata-assetfs v1.0.0 // indirect
-	github.com/fatih/structs v1.1.0 // indirect
+	code.cloudfoundry.org/bytefmt v0.0.0-20190710193110-1eb035ffe2b6 // indirect
+	contrib.go.opencensus.io/exporter/stackdriver v0.12.2 // indirect
+	github.com/Azure/azure-pipeline-go v0.2.2 // indirect
+	github.com/Azure/azure-sdk-for-go v31.1.0+incompatible // indirect
+	github.com/Azure/azure-service-bus-go v0.8.0 // indirect
+	github.com/Azure/azure-storage-blob-go v0.7.0 // indirect
+	github.com/Azure/go-autorest v12.3.0+incompatible // indirect
+	github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20190711182328-f0b00cc64402 // indirect
+	github.com/NYTimes/gziphandler v1.1.1 // indirect
+	github.com/RoaringBitmap/roaring v0.4.18 // indirect
+	github.com/Shopify/sarama v1.23.0 // indirect
+	github.com/anacrolix/tagflag v1.0.0 // indirect
+	github.com/aws/aws-sdk-go v1.20.20 // indirect
+	github.com/cenkalti/backoff v2.2.0+incompatible // indirect
+	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
+	github.com/elazarl/goproxy v0.0.0-20190711103511-473e67f1d7d2 // indirect
+	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
+	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
+	github.com/glycerine/goconvey v0.0.0-20190410193231-58a59202ab31 // indirect
+	github.com/go-openapi/spec v0.19.2 // indirect
+	github.com/go-openapi/swag v0.19.4 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gocql/gocql v0.0.0-20190122205811-30de9a1866a8 // indirect
+	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/golang/protobuf v1.3.2
-	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/hashicorp/go-memdb v0.0.0-20181108192425-032f93b25bec // indirect
-	github.com/hashicorp/go-plugin v0.0.0-20181212150838-f444068e8f5a // indirect
-	github.com/hashicorp/golang-lru v0.5.3 // indirect
+	github.com/googleapis/gax-go v2.0.4+incompatible // indirect
+	github.com/gophercloud/gophercloud v0.2.0 // indirect
+	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.9.4 // indirect
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
+	github.com/hellodudu/Ultimate/game-service v0.0.0-20190730133608-509682c071eb // indirect
+	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/jinzhu/gorm v1.9.10
-	github.com/json-iterator/go v1.1.7 // indirect
-	github.com/keybase/go-crypto v0.0.0-20181127160227-255a5089e85a // indirect
+	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c
-	github.com/mitchellh/copystructure v1.0.0 // indirect
+	github.com/munnerz/goautoneg v0.0.0-20190414153302-2ae31c8b6b30 // indirect
 	github.com/nats-io/jwt v0.2.10 // indirect
 	github.com/nats-io/nats-server/v2 v2.0.2 // indirect
-	github.com/openzipkin/zipkin-go v0.1.6 // indirect
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
-	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
-	golang.org/x/sys v0.0.0-20190801041406-cbf593c0f2f3 // indirect
-	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64 // indirect
-	google.golang.org/grpc v1.22.1 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
+	github.com/pierrec/lz4 v2.2.4+incompatible // indirect
+	github.com/rcrowley/go-metrics v0.0.0-20190706150252-9beb055b7962 // indirect
+	github.com/rogpeppe/fastuuid v1.2.0 // indirect
+	github.com/schollz/progressbar/v2 v2.13.2 // indirect
+	github.com/tidwall/pretty v1.0.0 // indirect
+	go.mongodb.org/mongo-driver v1.0.4 // indirect
+	gopkg.in/jcmturner/gokrb5.v7 v7.3.0 // indirect
+	k8s.io/api v0.0.0-20190717022910-653c86b0609b // indirect
+	k8s.io/client-go v12.0.0+incompatible // indirect
+	k8s.io/gengo v0.0.0-20190327210449-e17681d19d3a // indirect
+	k8s.io/utils v0.0.0-20190712204705-3dccf664f023 // indirect
+	pack.ag/amqp v0.12.0 // indirect
+	sigs.k8s.io/structured-merge-diff v0.0.0-20190711200306-eaa53bff5a75 // indirect
 )
 
 replace github.com/hellodudu/Ultimate => ../

@@ -12,6 +12,7 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/transport"
 )
 
 func main() {
@@ -27,6 +28,7 @@ func main() {
 	service := micro.NewService(
 		micro.Name("ultimate.service.arena"),
 		micro.Version("latest"),
+		micro.Transport(transport.NewTransport(transport.Secure(true))),
 	)
 
 	// Initialise service

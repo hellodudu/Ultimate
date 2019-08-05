@@ -11,6 +11,8 @@ import (
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
 	"github.com/micro/go-micro"
+	client "github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/transport"
 )
 
 // GameMgr game manager
@@ -38,7 +40,10 @@ func NewGameMgr(wm iface.IWorldMgr, service micro.Service) (iface.IGameMgr, erro
 	gm.invite = &invite{gm: gm, wm: wm}
 
 	// init arena service client
-	gm.arenaCli = pbArena.NewArenaServiceClient("", nil)
+	gm.arenaCli = pbArena.NewArenaServiceClient(
+		"",
+		client.NewClient(client.Transport(transport.NewTransport(transport.Secure(true)))),
+	)
 
 	// init context
 	gm.ctx, gm.cancel = context.WithCancel(context.Background())

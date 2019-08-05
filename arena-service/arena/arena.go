@@ -13,6 +13,8 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/transport"
 )
 
 var arenaMatchSectionNum = 8 // arena section num
@@ -243,9 +245,12 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 
 	arena.ctx, arena.cancel = context.WithCancel(ctx)
 	arena.handler = &RPCHandler{
-		ctx:     arena.ctx,
-		arena:   arena,
-		gameCli: pbGame.NewGameServiceClient("", nil),
+		ctx:   arena.ctx,
+		arena: arena,
+		gameCli: pbGame.NewGameServiceClient(
+			"",
+			client.NewClient(client.Transport(transport.NewTransport(transport.Secure(true)))),
+		),
 	}
 
 	// register Handler

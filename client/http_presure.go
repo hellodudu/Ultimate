@@ -11,10 +11,12 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
+	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
-	_ "github.com/micro/go-plugins/transport/grpc"
+	"github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/transport"
 )
 
 var (
@@ -25,22 +27,34 @@ var (
 		2820379275230707714,
 		2820379275230707715,
 	}
-	gameCli = pbGame.NewGameServiceClient("", nil)
-	wg      sync.WaitGroup
+	gameCli = pbGame.NewGameServiceClient(
+		"",
+		client.NewClient(client.Transport(transport.NewTransport(transport.Secure(true)))),
+	)
+
+	arenaCli = pbArena.NewArenaServiceClient(
+		"",
+		client.NewClient(client.Transport(transport.NewTransport(transport.Secure(true)))),
+	)
+
+	wg sync.WaitGroup
 )
 
 func callback(_ iface.ITCPConn, _ []byte) {
-	_, err := gameCli.GetPlayerInfoByID(context.Background(), &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
+	// _, err := gameCli.GetPlayerInfoByID(context.Background(), &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
+	// if err != nil {
+	// 	logger.WithFieldsWarn("GetPlayerInfoByID Request err", logger.Fields{
+	// 		"err": err,
+	// 	})
+	// 	return
+	// }
+	_, err := arenaCli.GetSeasonData(context.Background(), &pbArena.GetSeasonDataRequest{})
 	if err != nil {
-		logger.WithFieldsWarn("GetPlayerInfoByID Request err", logger.Fields{
-			"err": err,
+		logger.WithFieldsWarn("GetArenaSeasonData Response", logger.Fields{
+			"error": err,
 		})
 		return
 	}
-
-	// logger.WithFieldsInfo("Request success", logger.Fields{
-	// 	"info": resp.Info,
-	// })
 
 	wg.Done()
 }

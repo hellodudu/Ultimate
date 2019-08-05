@@ -16,6 +16,7 @@ import (
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/transport"
 )
 
 // ultimate define
@@ -162,6 +163,7 @@ func (umt *ultimate) initGameMgr() error {
 	umt.gameSrv = micro.NewService(
 		micro.Name("ultimate.service.game"),
 		micro.Version("latest"),
+		micro.Transport(transport.NewTransport(transport.Secure(true))),
 	)
 
 	// init service

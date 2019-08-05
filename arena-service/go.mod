@@ -18,6 +18,7 @@ require (
 	github.com/aws/aws-sdk-go v1.20.20 // indirect
 	github.com/cenkalti/backoff v2.2.0+incompatible // indirect
 	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/elazarl/goproxy v0.0.0-20190711103511-473e67f1d7d2 // indirect
 	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
@@ -35,10 +36,13 @@ require (
 	github.com/hellodudu/Ultimate/game-service v0.0.0-20190730133608-509682c071eb // indirect
 	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/jinzhu/gorm v1.9.10
+	github.com/lucas-clemente/quic-go v0.11.2 // indirect
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
+	github.com/marten-seemann/qtls v0.3.2 // indirect
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c
 	github.com/munnerz/goautoneg v0.0.0-20190414153302-2ae31c8b6b30 // indirect
+	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/nats-io/jwt v0.2.10 // indirect
 	github.com/nats-io/nats-server/v2 v2.0.2 // indirect
 	github.com/pierrec/lz4 v2.2.4+incompatible // indirect
@@ -47,7 +51,10 @@ require (
 	github.com/schollz/progressbar/v2 v2.13.2 // indirect
 	github.com/tidwall/pretty v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.0.4 // indirect
+	golang.org/x/tools v0.0.0-20190716221150-e98af2309876 // indirect
+	gopkg.in/go-playground/validator.v9 v9.29.1 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.3.0 // indirect
+	gotest.tools v2.3.0+incompatible // indirect
 	k8s.io/api v0.0.0-20190717022910-653c86b0609b // indirect
 	k8s.io/client-go v12.0.0+incompatible // indirect
 	k8s.io/gengo v0.0.0-20190327210449-e17681d19d3a // indirect

@@ -60,6 +60,6 @@ replace github.com/hellodudu/Ultimate => ../
 
 replace github.com/testcontainers/testcontainer-go => github.com/testcontainers/testcontainers-go v0.0.4
 
-// replace github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d => github.com/nats-io/nats.go v1.8.1
+replace github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d => github.com/nats-io/nats.go v1.8.1
 
 replace github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1

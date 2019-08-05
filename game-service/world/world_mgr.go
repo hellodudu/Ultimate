@@ -14,27 +14,22 @@ import (
 )
 
 type WorldMgr struct {
-	mapWorld      map[uint32]iface.IWorld
-	mapConn       map[iface.ITCPConn]iface.IWorld
-	mapRefWorldID map[uint32]uint32
-	mu            sync.Mutex
-
-	ds         iface.IDatastore
-	wg         sync.WaitGroup
-	ctx        context.Context
-	cancel     context.CancelFunc
-	chTimeOutW chan uint32
-	chStop     chan struct{}
+	mapWorld      sync.Map
+	mapConn       sync.Map
+	mapRefWorldID sync.Map
+	ds            iface.IDatastore
+	wg            sync.WaitGroup
+	ctx           context.Context
+	cancel        context.CancelFunc
+	chTimeOutW    chan uint32
+	chStop        chan struct{}
 }
 
 func NewWorldMgr(datastore iface.IDatastore) (*WorldMgr, error) {
 	wm := &WorldMgr{
-		mapWorld:      make(map[uint32]iface.IWorld),
-		mapConn:       make(map[iface.ITCPConn]iface.IWorld),
-		mapRefWorldID: make(map[uint32]uint32),
-		chTimeOutW:    make(chan uint32, global.WorldConnectMax),
-		chStop:        make(chan struct{}, 1),
-		ds:            datastore,
+		chTimeOutW: make(chan uint32, global.WorldConnectMax),
+		chStop:     make(chan struct{}, 1),
+		ds:         datastore,
 	}
 
 	wm.ctx, wm.cancel = context.WithCancel(context.Background())
@@ -44,11 +39,10 @@ func NewWorldMgr(datastore iface.IDatastore) (*WorldMgr, error) {
 }
 
 func (wm *WorldMgr) Stop() {
-	wm.mu.Lock()
-	defer wm.mu.Unlock()
-	for _, v := range wm.mapWorld {
-		v.Stop()
-	}
+	wm.mapWorld.Range(func(_, v interface{}) bool {
+		v.(*world).Stop()
+		return true
+	})
 
 	wm.cancel()
 	<-wm.chStop
@@ -62,26 +56,24 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con iface.ITCPConn) (iface.
 		return nil, errors.New("add world id invalid!")
 	}
 
-	if _, ok := wm.mapWorld[id]; ok {
-		wm.KickWorld(id)
+	if _, ok := wm.mapWorld.Load(id); ok {
+		wm.KickWorld(id, "AddWorld")
 	}
 
-	if _, ok := wm.mapConn[con]; ok {
-		wm.KickWorld(id)
-	}
+	var numConn uint32
+	wm.mapConn.Range(func(_, _ interface{}) bool {
+		numConn++
+		return true
+	})
 
-	if len(wm.mapConn) >= global.WorldConnectMax {
+	if numConn >= uint32(global.WorldConnectMax) {
 		return nil, errors.New("world connected num full!")
 	}
 
 	// new world
 	w := NewWorld(id, name, con, wm.chTimeOutW, wm.ds)
-
-	wm.mu.Lock()
-	wm.mapWorld[w.GetID()] = w
-	wm.mapConn[w.GetCon()] = w
-	wm.mu.Unlock()
-
+	wm.mapWorld.Store(w.GetID(), w)
+	wm.mapConn.Store(w.GetCon(), w)
 	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.GetID(), w.GetName(), w.GetCon()))
 
 	// world run
@@ -94,86 +86,108 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con iface.ITCPConn) (iface.
 }
 
 func (wm *WorldMgr) AddWorldRef(id uint32, ref []uint32) {
-	wm.mu.Lock()
-	defer wm.mu.Unlock()
-
 	for _, v := range ref {
-		wm.mapRefWorldID[v] = id
+		wm.mapRefWorldID.Store(v, id)
 	}
+}
+
+func (wm *WorldMgr) getWorldRefID(id uint32) uint32 {
+	if v, ok := wm.mapRefWorldID.Load(id); ok {
+		return v.(uint32)
+	}
+
+	return 0
 }
 
 func (wm *WorldMgr) GetWorldByID(id uint32) iface.IWorld {
-	worldID, ok := wm.mapRefWorldID[id]
+	worldID := wm.getWorldRefID(id)
+	v, ok := wm.mapWorld.Load(worldID)
 	if !ok {
 		return nil
 	}
 
-	w, ok := wm.mapWorld[worldID]
-	if !ok {
-		return nil
-	}
-
-	return w
+	return v.(*world)
 }
 
 func (wm *WorldMgr) GetWorldByCon(con iface.ITCPConn) iface.IWorld {
-	w, ok := wm.mapConn[con]
+	v, ok := wm.mapConn.Load(con)
 	if !ok {
 		return nil
 	}
 
-	return w
+	return v.(*world)
 }
 
 func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
-	w, ok := wm.mapConn[con]
+	v, ok := wm.mapConn.Load(con)
 	if !ok {
 		return
 	}
 
-	logger.WithFieldsWarn("world disconnected", logger.Fields{"world_id": w.GetID()})
-	w.Stop()
+	world, ok := v.(*world)
+	if !ok {
+		return
+	}
 
-	wm.mu.Lock()
-	defer wm.mu.Unlock()
-	delete(wm.mapWorld, w.GetID())
-	delete(wm.mapConn, con)
+	logger.WithFieldsWarn("World disconnected!", logger.Fields{
+		"id": world.GetID(),
+	})
+	world.Stop()
+
+	wm.mapWorld.Delete(world.GetID())
+	wm.mapConn.Delete(con)
 }
 
-func (wm *WorldMgr) KickWorld(id uint32) {
-	w, ok := wm.mapWorld[id]
+func (wm *WorldMgr) KickWorld(id uint32, reason string) {
+	v, ok := wm.mapWorld.Load(id)
 	if !ok {
 		return
 	}
 
-	if _, ok := wm.mapConn[w.GetCon()]; !ok {
+	world, ok := v.(*world)
+	if !ok {
 		return
 	}
 
-	logger.WithFieldsWarn("world was kicked by timeout", logger.Fields{"world_id": w.GetID()})
-	w.Stop()
+	logger.WithFieldsWarn("World was kicked!", logger.Fields{
+		"id":     world.GetID(),
+		"reason": reason,
+	})
 
-	wm.mu.Lock()
-	defer wm.mu.Unlock()
-	delete(wm.mapConn, w.GetCon())
-	delete(wm.mapWorld, w.GetID())
+	// trace message
+	n := 0
+	for e := world.traceMsgList.Front(); e != nil; e = e.Next() {
+		n++
+		logger.WithFieldsWarn("World trace message list", logger.Fields{
+			"list_num": n,
+			"msg_name": e.Value.(*traceMsg).msgName,
+			"msg_data": e.Value.(*traceMsg).msgData,
+		})
+	}
+
+	world.Stop()
+	wm.mapConn.Delete(world.GetCon())
+	wm.mapWorld.Delete(world.GetID())
 }
 
 func (wm *WorldMgr) BroadCast(msg proto.Message) {
-	for _, w := range wm.mapWorld {
-		w.SendProtoMessage(msg)
-	}
+	wm.mapWorld.Range(func(_, v interface{}) bool {
+		if world, ok := v.(*world); ok {
+			world.SendProtoMessage(msg)
+		}
+		return true
+	})
 }
 
 func (wm *WorldMgr) Run() {
 	for {
 		select {
 		case <-wm.ctx.Done():
-			logger.Info("world session context done!")
+			logger.Print("world session context done!")
 			wm.chStop <- struct{}{}
 			return
 		case wid := <-wm.chTimeOutW:
-			wm.KickWorld(wid)
+			wm.KickWorld(wid, "time out")
 		}
 	}
 }

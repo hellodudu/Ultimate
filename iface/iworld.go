@@ -11,7 +11,7 @@ type IWorldMgr interface {
 	DisconnectWorld(con ITCPConn)
 	GetWorldByCon(con ITCPConn) IWorld
 	GetWorldByID(id uint32) IWorld
-	KickWorld(id uint32)
+	KickWorld(id uint32, reason string)
 	Run()
 	Stop()
 }

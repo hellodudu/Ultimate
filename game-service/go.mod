@@ -13,6 +13,7 @@ require (
 	github.com/lucas-clemente/quic-go v0.11.2 // indirect
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c
+	github.com/micro/util v0.2.0 // indirect
 	go.etcd.io/etcd v3.3.13+incompatible
 )
 

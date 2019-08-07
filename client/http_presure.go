@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gammazero/workerpool"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
-	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/transport"
 )
@@ -63,22 +63,39 @@ func main() {
 
 	logger.Init(global.Debugging, true, "http_presure")
 
-	td, err := task.NewDispatcher()
-	if err != nil {
-		return
-	}
-
 	// Run service
 	t := time.Now()
-	wg.Add(testNum)
+	wp := workerpool.New(4)
 	for n := 0; n < testNum; n++ {
-		go func(n int) {
-			td.AddTask(&task.TaskReqInfo{ID: n, Con: nil, Data: nil, CB: callback})
-		}(n)
+		wp.Submit(func() {
+			_, err := gameCli.GetPlayerInfoByID(context.Background(), &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
+			if err != nil {
+				logger.WithFieldsWarn("GetArenaSeasonData Response", logger.Fields{
+					"error": err,
+				})
+				return
+			}
+		})
 	}
 
-	wg.Wait()
+	wp.StopWait()
 	d := time.Since(t)
+
+	// td, err := task.NewDispatcher()
+	// if err != nil {
+	// 	return
+	// }
+
+	// t := time.Now()
+	// wg.Add(testNum)
+	// for n := 0; n < testNum; n++ {
+	// 	go func(n int) {
+	// 		td.AddTask(&task.TaskReqInfo{ID: n, Con: nil, Data: nil, CB: callback})
+	// 	}(n)
+	// }
+	// wg.Wait()
+	// d := time.Since(t)
+
 	logger.WithFieldsWarn("elapse time", logger.Fields{
 		"duration": d,
 	})

@@ -10,6 +10,7 @@ require (
 	github.com/lucas-clemente/quic-go v0.11.2 // indirect
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c
+	github.com/micro/util v0.2.0 // indirect
 	github.com/nats-io/jwt v0.2.10 // indirect
 	github.com/nats-io/nats-server/v2 v2.0.2 // indirect
 )

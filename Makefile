@@ -26,7 +26,8 @@ test:
 
 .PHONY: run
 run:
-	docker-compose up
+	docker-compose -f compose_nsq.yml up -d
+	docker-compose -f compose_ultimate.yml up -d
 
 .PHONY: push
 push:
@@ -39,4 +40,5 @@ docker_rm:
 
 .PHONY: stop
 stop:
-	docker stop $(shell docker ps -q  --filter ancestor=ultimate)
+	docker-compose -f compose_nsq.yml down
+	docker-compose -f compose_ultimate.yml down

@@ -3,7 +3,7 @@ v ?= latest
 
 .PHONY: build
 build: 
-	MICRO_BROKER=nsq env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ultimate-service-arena main.go plugin.go
+	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ultimate-service-arena main.go plugin.go
 
 .PHONY: proto
 proto:

@@ -10,10 +10,10 @@ require (
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
 	github.com/hellodudu/Ultimate/arena-service v0.0.0-20190730133608-509682c071eb // indirect
 	github.com/jinzhu/gorm v1.9.10
-	github.com/lucas-clemente/quic-go v0.11.2 // indirect
 	github.com/micro/go-micro v1.8.1
-	github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c
+	github.com/micro/go-plugins v1.2.0
 	github.com/micro/util v0.2.0 // indirect
+	github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d // indirect
 	go.etcd.io/etcd v3.3.13+incompatible
 )
 

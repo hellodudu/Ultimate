@@ -1,6 +1,13 @@
 version: "3"
 
 services:
+
+  consul:
+    image: consul
+    ports:
+      - "8500:8500"
+    volumes:
+      - "./consul_data:/consul/data"
   
   ultimate-service-arena:
     build: game-service/
@@ -15,10 +22,13 @@ services:
     environment:
       MICRO_SERVER_ADDRESS: ":50051"
       MICRO_REGISTRY: "consul"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
       - "ultimate-service-game"
+      - "consul"
 
   ultimate-service-game:
     build: arena-service/
@@ -34,6 +44,10 @@ services:
     environment:
       micro_server_address: ":50052"
       MICRO_REGISTRY: "consul"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       MYSQL_ADDR: "host.docker.internal"
+    depends_on:
+      - "consul"
   

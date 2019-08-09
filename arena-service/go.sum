@@ -414,6 +414,7 @@ github.com/micro/go-micro v0.26.1/go.mod h1:Jgc5gPEmDiG1TWE5Qnzzx5qyXnU9VTXKT1Fk
 github.com/micro/go-micro v1.7.1-0.20190709174126-0bf54c122f2c/go.mod h1:7aiddEWYlyxvm14L6+/LpUbyFPehYDUiQjOy+GOkwbg=
 github.com/micro/go-micro v1.8.1 h1:++vFKfOpj/oW71vwkso9UT6y8q77bNG5WAsrevPk5JQ=
 github.com/micro/go-micro v1.8.1/go.mod h1:oO5ShfJrdzayFLPUueZF85tZoez8VYLcXuTOTaHxROI=
+github.com/micro/go-micro v1.8.2 h1:HbKFoUG6lmsowndJxYUNghaV4UwN1+Wspsf4/1hH3QY=
 github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c h1:N5uhXhWqGRNeChdt+yea9VWDrEzQM2MzvF0yyr3r3QE=
 github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c/go.mod h1:1yrY825un6IH9H3ecCb6BAx7ZqNMMWTwOhmCkQFVc8I=
 github.com/micro/go-rcache v0.1.0/go.mod h1:INzyZjXO5M+PmN2A33YxD4TaOY61xjFIM4CfSHv+At8=

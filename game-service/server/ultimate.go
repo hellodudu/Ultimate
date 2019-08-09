@@ -163,7 +163,7 @@ func (umt *ultimate) initGameMgr() error {
 	umt.gameSrv = micro.NewService(
 		micro.Name("ultimate.service.game"),
 		micro.Version("latest"),
-		micro.Transport(transport.NewTransport(transport.Secure(true))),
+		micro.Transport(transport.NewTransport()),
 	)
 
 	// init service

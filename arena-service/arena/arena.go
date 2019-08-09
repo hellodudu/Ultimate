@@ -14,7 +14,7 @@ import (
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/client"
-	"github.com/micro/go-micro/transport"
+	"github.com/micro/go-plugins/transport/tcp"
 )
 
 var arenaMatchSectionNum = 8 // arena section num
@@ -249,7 +249,7 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 		arena: arena,
 		gameCli: pbGame.NewGameServiceClient(
 			"",
-			client.NewClient(client.Transport(transport.NewTransport(transport.Secure(true)))),
+			client.NewClient(client.Transport(tcp.NewTransport())),
 		),
 	}
 

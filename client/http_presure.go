@@ -16,7 +16,7 @@ import (
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/micro/go-micro/client"
-	"github.com/micro/go-micro/transport"
+	"github.com/micro/go-plugins/transport/tcp"
 )
 
 var (
@@ -29,12 +29,12 @@ var (
 	}
 	gameCli = pbGame.NewGameServiceClient(
 		"",
-		client.NewClient(client.Transport(transport.NewTransport(transport.Secure(true)))),
+		client.NewClient(client.Transport(tcp.NewTransport())),
 	)
 
 	arenaCli = pbArena.NewArenaServiceClient(
 		"",
-		client.NewClient(client.Transport(transport.NewTransport(transport.Secure(true)))),
+		client.NewClient(client.Transport(tcp.NewTransport())),
 	)
 
 	wg sync.WaitGroup

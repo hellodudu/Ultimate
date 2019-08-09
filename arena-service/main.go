@@ -28,7 +28,7 @@ func main() {
 	service := micro.NewService(
 		micro.Name("ultimate.service.arena"),
 		micro.Version("latest"),
-		micro.Transport(transport.NewTransport(transport.Secure(true))),
+		micro.Transport(transport.NewTransport()),
 	)
 
 	// Initialise service

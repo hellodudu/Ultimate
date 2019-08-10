@@ -40,7 +40,7 @@ func NewGameMgr(wm iface.IWorldMgr, service micro.Service) (iface.IGameMgr, erro
 
 	// init arena service client
 	gm.arenaCli = pbArena.NewArenaServiceClient(
-		"",
+		"ultimate-service-arena",
 		client.NewClient(
 		// client.Transport(tcp.NewTransport()),
 		// client.Registry(consul.NewRegistry()),

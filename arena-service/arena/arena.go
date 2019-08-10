@@ -247,7 +247,7 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 		ctx:   arena.ctx,
 		arena: arena,
 		gameCli: pbGame.NewGameServiceClient(
-			"",
+			"ultimate-service-game",
 			client.NewClient(
 			// client.Transport(tcp.NewTransport()),
 			// client.Registry(consul.NewRegistry()),

@@ -2,11 +2,8 @@ package world
 
 import (
 	"bytes"
-	"container/list"
 	"context"
 	"encoding/binary"
-	"fmt"
-	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -40,9 +37,6 @@ type world struct {
 
 	chDBInit chan struct{}
 	chStop   chan struct{}
-
-	traceMsgList *list.List
-	mu           sync.Mutex
 }
 
 func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datastore iface.IDatastore) *world {
@@ -59,8 +53,6 @@ func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datas
 		mapGuild:    make(map[int64]*pbGame.CrossGuildInfo),
 		chDBInit:    make(chan struct{}, 1),
 		chStop:      make(chan struct{}, 1),
-
-		traceMsgList: list.New(),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -161,16 +153,6 @@ func (w *world) SendProtoMessage(p proto.Message) {
 		logger.Warn("send proto msg error:", err)
 		return
 	}
-
-	// trace message
-	w.mu.Lock()
-	traceInfo := &traceMsg{msgName: typeName, msgData: make([]byte, len(resp))}
-	copy(traceInfo.msgData, resp)
-	w.traceMsgList.PushBack(traceInfo)
-	if w.traceMsgList.Len() > 5 {
-		w.traceMsgList.Remove(w.traceMsgList.Front())
-	}
-	w.mu.Unlock()
 }
 
 func (w *world) SendTransferMessage(data []byte) {
@@ -197,17 +179,4 @@ func (w *world) SendTransferMessage(data []byte) {
 	if err := binary.Read(buf, binary.LittleEndian, transferMsg); err != nil {
 		return
 	}
-
-	// trace message
-	w.mu.Lock()
-	traceInfo := &traceMsg{
-		msgName: fmt.Sprintf("transfer_msg id=%d, size=%d, world_id=%d, player_id=%d", transferMsg.ID, transferMsg.Size, transferMsg.WorldID, transferMsg.PlayerID),
-		msgData: make([]byte, len(resp)),
-	}
-	copy(traceInfo.msgData, resp)
-	w.traceMsgList.PushBack(traceInfo)
-	if w.traceMsgList.Len() > 5 {
-		w.traceMsgList.Remove(w.traceMsgList.Front())
-	}
-	w.mu.Unlock()
 }

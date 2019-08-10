@@ -26,7 +26,7 @@ func main() {
 
 	// New Service
 	service := micro.NewService(
-		micro.Name("ultimate.service.arena"),
+		micro.Name("ultimate_service_arena"),
 		micro.Version("latest"),
 		micro.Transport(transport.NewTransport()),
 	)

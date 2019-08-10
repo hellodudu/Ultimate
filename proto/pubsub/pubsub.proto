@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ultimate.service.pubsub;
+package ultimate_service_pubsub;
 
 option go_package = "github.com/hellodudu/Ultimate/proto/pubsub";
 
@@ -26,7 +26,7 @@ message PublishMatching {
 }
 
 message PublishAddRecord {
-    arena.ArenaRecord data = 1;
+    ultimate_service_arena.ArenaRecord data = 1;
 }
 
 message PublishBattleResult {

@@ -25,10 +25,9 @@ services:
       MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
-      MICRO_TRANSPORT: "tcp"
+      # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
-      - "ultimate-service-game"
       - "consul"
       - "nsqd"
       - "nsqadmin"
@@ -45,12 +44,12 @@ services:
       - "./log/:/log"
       - "./config/:/config"
     environment:
-      micro_server_address: ":50052"
+      MICRO_SERVER_ADDRESS: ":50052"
       MICRO_REGISTRY: "consul"
       MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
-      MICRO_TRANSPORT: "tcp"
+      # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
       - "consul"

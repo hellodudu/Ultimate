@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ultimate.service.world;
+package ultimate_service_world;
 
 option go_package = "github.com/hellodudu/Ultimate/proto/world";
 

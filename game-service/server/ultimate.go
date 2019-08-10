@@ -161,7 +161,7 @@ func (umt *ultimate) initGameMgr() error {
 
 	// New Service
 	umt.gameSrv = micro.NewService(
-		micro.Name("ultimate.service.game"),
+		micro.Name("ultimate_service_game"),
 		micro.Version("latest"),
 		micro.Transport(transport.NewTransport()),
 	)
@@ -176,6 +176,13 @@ func (umt *ultimate) initGameMgr() error {
 	}
 
 	logger.Info("game_mgr init ok!")
+
+	// logger.WithFieldsWarn("ultimate_service_game env vars", logger.Fields{
+	// 	"broker":        os.Getenv("MICRO_BROKER"),
+	// 	"broker_addr":   os.Getenv("MICRO_BROKER_ADDRESS"),
+	// 	"registry":      os.Getenv("MICRO_REGISTRY"),
+	// 	"registry_addr": os.Getenv("MICRO_REGISTRY_ADDRESS"),
+	// })
 	return nil
 }
 

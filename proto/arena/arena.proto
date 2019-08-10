@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ultimate.service.arena;
+package ultimate_service_arena;
 
 option go_package = "github.com/hellodudu/Ultimate/proto/arena";
 

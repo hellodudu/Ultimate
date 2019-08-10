@@ -2,12 +2,12 @@ version: "3"
 
 services:
 
-  consul:
-    image: consul
-    ports:
-      - "8500:8500"
-    volumes:
-      - "./consul_data:/consul/data"
+  # consul:
+  #   image: consul
+    # ports:
+    #   - "8500:8500"
+    # volumes:
+    #   - "./consul_data:/consul/data"
   
   ultimate-service-arena:
     build: game-service/
@@ -21,14 +21,14 @@ services:
       - "./config/:/config"
     environment:
       MICRO_SERVER_ADDRESS: ":50051"
-      MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
+      # MICRO_REGISTRY: "consul"
+      # MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
-      - "consul"
+      # - "consul"
       - "nsqd"
       - "nsqadmin"
 
@@ -45,14 +45,14 @@ services:
       - "./config/:/config"
     environment:
       MICRO_SERVER_ADDRESS: ":50052"
-      MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
+      # MICRO_REGISTRY: "consul"
+      # MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
-      - "consul"
+      # - "consul"
       - "nsqd"
       - "nsqadmin"
 

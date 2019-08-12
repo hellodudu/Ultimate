@@ -7,9 +7,9 @@
 
 ## Requirement:
 
-###[go module](https://github.com/golang/go/wiki/Modules)
-###[nsq](https://nsq.io) as message broker
-###[consul](https://www.consul.io) as service discovery and registry
+* [go module](https://github.com/golang/go/wiki/Modules)
+* [nsq](https://nsq.io) as message broker
+* [consul](https://www.consul.io) as service discovery and registry
 
 
 ## Install:

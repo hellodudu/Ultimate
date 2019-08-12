@@ -11,8 +11,6 @@ import (
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
 	"github.com/micro/go-micro"
-	client "github.com/micro/go-micro/client"
-	"github.com/micro/go-micro/registry/consul"
 )
 
 // GameMgr game manager
@@ -42,10 +40,7 @@ func NewGameMgr(wm iface.IWorldMgr, service micro.Service) (iface.IGameMgr, erro
 	// init arena service client
 	gm.arenaCli = pbArena.NewArenaServiceClient(
 		"ultimate-service-arena",
-		client.NewClient(
-			// client.Transport(tcp.NewTransport()),
-			client.Registry(consul.NewRegistry()),
-		),
+		service.Client(),
 	)
 
 	// init context

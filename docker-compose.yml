@@ -17,7 +17,6 @@ services:
       MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
-      # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
       - "consul"
@@ -39,11 +38,11 @@ services:
       MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
-      # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
       - "consul"
       - "nsqd"
+      - "ultimate-service-arena"
 
   consul:
     image: consul

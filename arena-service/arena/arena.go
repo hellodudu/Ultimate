@@ -13,8 +13,6 @@ import (
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/micro/go-micro"
-	"github.com/micro/go-micro/client"
-	"github.com/micro/go-micro/registry/consul"
 )
 
 var arenaMatchSectionNum = 8 // arena section num
@@ -249,10 +247,7 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 		arena: arena,
 		gameCli: pbGame.NewGameServiceClient(
 			"ultimate-service-game",
-			client.NewClient(
-				// client.Transport(tcp.NewTransport()),
-				client.Registry(consul.NewRegistry()),
-			),
+			service.Client(),
 		),
 	}
 

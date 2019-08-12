@@ -6,9 +6,9 @@
 [![LICENSE](https://img.shields.io/badge/license-NPL%20(The%20996%20Prohibited%20License)-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
 ## Requirement:
-> go version >= 1.11, using module.
-
-see [go module wiki](https://github.com/golang/go/wiki/Modules)
+> [go module](https://github.com/golang/go/wiki/Modules)
+> [nsq](https://nsq.io) as message broker
+> [consul](https://www.consul.io) as service discovery and registry
 
 
 ## Install:
@@ -16,6 +16,15 @@ see [go module wiki](https://github.com/golang/go/wiki/Modules)
 	git clone https://github.com/hellodudu/Ultimate.git
 
 ## Run From Path:
+
+* nsq:
+
+        nsqlookupd
+        nsqd --lookupd-tcp-address=127.0.0.1:4160
+
+* consul:
+
+        consul agent -dev
 
 * game-service:
 
@@ -36,10 +45,6 @@ see [go module wiki](https://github.com/golang/go/wiki/Modules)
 * Docker Build:
     
 	    make docker
-
-* Run
-    
-	    make run
 
 
 ## Run From Docker Hub:

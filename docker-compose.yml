@@ -14,9 +14,9 @@ services:
       - "./config/:/config"
     environment:
       MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "consul:8500"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "nsqd:4150"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
@@ -36,9 +36,9 @@ services:
       - "./config/:/config"
     environment:
       MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "consul:8500"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "nsqd:4150"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       # MICRO_TRANSPORT: "tcp"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:

@@ -6,9 +6,10 @@
 [![LICENSE](https://img.shields.io/badge/license-NPL%20(The%20996%20Prohibited%20License)-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
 ## Requirement:
-> [go module](https://github.com/golang/go/wiki/Modules)
-> [nsq](https://nsq.io) as message broker
-> [consul](https://www.consul.io) as service discovery and registry
+
+###[go module](https://github.com/golang/go/wiki/Modules)
+###[nsq](https://nsq.io) as message broker
+###[consul](https://www.consul.io) as service discovery and registry
 
 
 ## Install:
@@ -29,12 +30,12 @@
 * game-service:
 
         cd game-service
-        go run main.go
+        go run main.go plugin.go --registry=consul --broker=nsq
 
 * arena-service:
 
         cd arena-service
-        go run main.go
+        go run main.go plugin.go --registry=consul --broker=nsq
 
 ## Run From Docker:
 

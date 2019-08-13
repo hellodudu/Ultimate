@@ -157,6 +157,59 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 	return rsp.Data, nil
 }
 
+func (g *GameMgr) GetArenaMatchingList() ([]int64, error) {
+	req := &pbArena.GetMatchingListRequest{}
+	rsp, err := g.arenaCli.GetMatchingList(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetMatchingList Response", logger.Fields{
+			"error": err,
+		})
+		return rsp.Ids, nil
+	}
+
+	return nil, err
+}
+
+func (g *GameMgr) GetArenaRecordReqList() ([]*pbArena.RecordReqList, error) {
+	req := &pbArena.GetRecordReqListRequest{}
+	rsp, err := g.arenaCli.GetRecordReqList(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("GetRecordReqList Response", logger.Fields{
+			"error": err,
+		})
+		return rsp.ReqList, nil
+	}
+
+	return nil, err
+}
+
+func (g *GameMgr) GetArenaRecord() (*pbArena.ArenaRecord, error) {
+	rpcReq := &pbArena.GetRecordByIDRequest{Id: req.ID}
+	rsp, err := g.arenaCli.GetRecordByID(g.ctx, rpcReq)
+	if err != nil {
+		logger.WithFieldsWarn("GetRecordByID Response", logger.Fields{
+			"error": err,
+		})
+		return nil, err
+	}
+
+	return rsp.Record, nil
+}
+
+func (g *GameMgr) GetArenaRankList(page int) ([]byte, error) {
+	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(req.Page)}
+	rsp, err := g.arenaCli.GetRankListByPage(g.ctx, rpcReq)
+	if err != nil {
+		logger.WithFieldsWarn("GetRankListByPage Response", logger.Fields{
+			"error": err,
+		})
+		w.Write([]byte(err.Error()))
+		return nil, err
+	}
+
+	return rsp.Data, nil
+}
+
 func (g *GameMgr) ArenaMatching(id int64) {
 	// publish an event
 	g.pubsub.publishArenaMatching(g.ctx, &pbPubSub.PublishMatching{Id: id})

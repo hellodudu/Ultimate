@@ -140,7 +140,7 @@ func (umt *ultimate) initTCPServer() error {
 
 // init http server
 func (umt *ultimate) initHTTPServer() error {
-	umt.httpServ = NewHttpServer(umt.gm)
+	umt.httpServ = NewHttpServer(umt.gm, umt.gameSrv)
 	logger.Info("http_server init ok!")
 	return nil
 }

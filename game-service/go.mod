@@ -15,6 +15,7 @@ require (
 	github.com/micro/go-plugins v1.2.0
 	github.com/micro/util v0.2.0 // indirect
 	github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d // indirect
+	github.com/prometheus/client_golang v1.1.0
 	go.etcd.io/etcd v3.3.13+incompatible
 )
 

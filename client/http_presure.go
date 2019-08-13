@@ -10,13 +10,11 @@ import (
 	"time"
 
 	"github.com/gammazero/workerpool"
-	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
-	"github.com/micro/go-micro/client"
-	"github.com/micro/go-plugins/transport/tcp"
+	"github.com/micro/go-micro"
+	_ "github.com/micro/go-plugins/broker/nsq"
 )
 
 var (
@@ -27,43 +25,40 @@ var (
 		2820379275230707714,
 		2820379275230707715,
 	}
-	gameCli = pbGame.NewGameServiceClient(
-		"",
-		client.NewClient(client.Transport(tcp.NewTransport())),
-	)
-
-	arenaCli = pbArena.NewArenaServiceClient(
-		"",
-		client.NewClient(client.Transport(tcp.NewTransport())),
-	)
 
 	wg sync.WaitGroup
 )
-
-func callback(_ iface.ITCPConn, _ []byte) {
-	// _, err := gameCli.GetPlayerInfoByID(context.Background(), &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
-	// if err != nil {
-	// 	logger.WithFieldsWarn("GetPlayerInfoByID Request err", logger.Fields{
-	// 		"err": err,
-	// 	})
-	// 	return
-	// }
-	_, err := arenaCli.GetSeasonData(context.Background(), &pbArena.GetSeasonDataRequest{})
-	if err != nil {
-		logger.WithFieldsWarn("GetArenaSeasonData Response", logger.Fields{
-			"error": err,
-		})
-		return
-	}
-
-	wg.Done()
-}
 
 func main() {
 
 	logger.Init(global.Debugging, true, "http_presure")
 
+	service := micro.NewService(
+		micro.Name("ultimate-service-client"),
+		// micro.Version("latest"),
+		// micro.Transport(transport.NewTransport()),
+	)
+
+	// Initialise service
+	service.Init()
+
 	// Run service
+	go func() {
+		if err := service.Run(); err != nil {
+			logger.Fatal(err)
+		}
+	}()
+
+	gameCli := pbGame.NewGameServiceClient(
+		"ultimate-service-game",
+		service.Client(),
+	)
+
+	// arenaCli := pbArena.NewArenaServiceClient(
+	// 	"ultimate-service-game",
+	// 	service.Client(),
+	// )
+
 	t := time.Now()
 	wp := workerpool.New(4)
 	for n := 0; n < testNum; n++ {

@@ -6,7 +6,6 @@ import (
 	"expvar"
 	"io/ioutil"
 	"net/http"
-	_ "net/http/pprof"
 	"runtime"
 	"time"
 
@@ -66,18 +65,16 @@ func (s *HttpServer) getArenaRecordNum() interface{} {
 }
 
 type HttpServer struct {
-	ctx      context.Context
-	cancel   context.CancelFunc
-	gm       iface.IGameMgr
-	arenaCli pbArena.ArenaServiceClient
-	gameCli  pbGame.GameServiceClient
+	ctx    context.Context
+	cancel context.CancelFunc
+	gm     iface.IGameMgr
 }
 
 func NewHttpServer(gm iface.IGameMgr) *HttpServer {
 	s := &HttpServer{
 		gm:       gm,
-		arenaCli: pbArena.NewArenaServiceClient("", nil),
-		gameCli:  pbGame.NewGameServiceClient("", nil),
+		arenaCli: pbArena.NewArenaServiceClient("ultimate-service-arena", srv.Client()),
+		gameCli:  pbGame.NewGameServiceClient("ultimate-service-game", srv.Client()),
 	}
 
 	s.ctx, s.cancel = context.WithCancel(context.Background())
@@ -115,12 +112,8 @@ func (s *HttpServer) Run() {
 }
 
 func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Request) {
-	req := &pbArena.GetMatchingListRequest{}
-	rsp, err := s.arenaCli.GetMatchingList(s.ctx, req)
+	ids, err := s.gm.GetArenaMatchingList()
 	if err != nil {
-		logger.WithFieldsWarn("GetMatchingList Response", logger.Fields{
-			"error": err,
-		})
 		return
 	}
 
@@ -128,7 +121,7 @@ func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Req
 		ID []int64 `json:"id"`
 	}
 
-	resp.ID = rsp.Ids
+	resp.ID = ids
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -136,18 +129,14 @@ func (s *HttpServer) arenaMatchingListHandler(w http.ResponseWriter, r *http.Req
 }
 
 func (s *HttpServer) arenaRecordReqListHandler(w http.ResponseWriter, r *http.Request) {
-	req := &pbArena.GetRecordReqListRequest{}
-	rsp, err := s.arenaCli.GetRecordReqList(s.ctx, req)
+	list, err := s.gm.GetArenaRecordReqList()
 	if err != nil {
-		logger.WithFieldsWarn("GetRecordReqList Response", logger.Fields{
-			"error": err,
-		})
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(rsp.ReqList)
+	json.NewEncoder(w).Encode(list)
 }
 
 func (s *HttpServer) arenaGetRecordHandler(w http.ResponseWriter, r *http.Request) {
@@ -166,17 +155,13 @@ func (s *HttpServer) arenaGetRecordHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	rpcReq := &pbArena.GetRecordByIDRequest{Id: req.ID}
-	rsp, err := s.arenaCli.GetRecordByID(s.ctx, rpcReq)
+	r, err := s.gm.GetArenaRecord(req.ID)
 	if err != nil {
-		logger.WithFieldsWarn("GetRecordByID Response", logger.Fields{
-			"error": err,
-		})
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	json.NewEncoder(w).Encode(rsp.Record)
+	json.NewEncoder(w).Encode(r)
 }
 
 func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Request) {
@@ -195,17 +180,13 @@ func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(req.Page)}
-	rsp, err := s.arenaCli.GetRankListByPage(s.ctx, rpcReq)
+	data, err := s.gm.GetArenaRankList(req.Page)
 	if err != nil {
-		logger.WithFieldsWarn("GetRankListByPage Response", logger.Fields{
-			"error": err,
-		})
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	w.Write(rsp.Data)
+	w.Write(data)
 }
 
 func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {

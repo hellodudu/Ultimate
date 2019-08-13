@@ -3,12 +3,11 @@ version: "3"
 services:
   
   ultimate-service-arena:
-    build: game-service/
+    build: arena-service/
     image: ultimate-service-arena
     ports:
       - "3306"
       - "8080"
-      - "8500"
     volumes:
       - "./log/:/log"
       - "./config/:/config"
@@ -23,13 +22,12 @@ services:
       - "nsqd"
 
   ultimate-service-game:
-    build: arena-service/
+    build: game-service/
     image: ultimate-service-game
     ports:
       - "7030:7030"
       - "3306"
-      - "8080"
-      - "8500"
+      - "8080:8080"
     volumes:
       - "./log/:/log"
       - "./config/:/config"
@@ -46,11 +44,12 @@ services:
 
   consul:
     image: consul
+    command: "agent -dev -data-dir=/consul/data -ui -client=0.0.0.0"
     hostname: consul
     ports:
       - "8500:8500"
-    # volumes:
-    #   - "./consul_data:/consul/data"
+    volumes:
+      - "./consul_data:/consul/data"
 
   nsqlookupd:
     image: nsqio/nsq

@@ -183,8 +183,8 @@ func (g *GameMgr) GetArenaRecordReqList() ([]*pbArena.RecordReqList, error) {
 	return nil, err
 }
 
-func (g *GameMgr) GetArenaRecord() (*pbArena.ArenaRecord, error) {
-	rpcReq := &pbArena.GetRecordByIDRequest{Id: req.ID}
+func (g *GameMgr) GetArenaRecord(id int64) (*pbArena.ArenaRecord, error) {
+	rpcReq := &pbArena.GetRecordByIDRequest{Id: id}
 	rsp, err := g.arenaCli.GetRecordByID(g.ctx, rpcReq)
 	if err != nil {
 		logger.WithFieldsWarn("GetRecordByID Response", logger.Fields{
@@ -197,17 +197,42 @@ func (g *GameMgr) GetArenaRecord() (*pbArena.ArenaRecord, error) {
 }
 
 func (g *GameMgr) GetArenaRankList(page int) ([]byte, error) {
-	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(req.Page)}
+	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(page)}
 	rsp, err := g.arenaCli.GetRankListByPage(g.ctx, rpcReq)
 	if err != nil {
 		logger.WithFieldsWarn("GetRankListByPage Response", logger.Fields{
 			"error": err,
 		})
-		w.Write([]byte(err.Error()))
 		return nil, err
 	}
 
 	return rsp.Data, nil
+}
+
+func (g *GameMgr) ArenaSaveChampion() error {
+	req := &pbArena.SaveChampionRequest{}
+	_, err := g.arenaCli.SaveChampion(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("SaveChampion Response", logger.Fields{
+			"error": err,
+		})
+		return err
+	}
+
+	return nil
+}
+
+func (g *GameMgr) ArenaWeekEnd() error {
+	req := &pbArena.WeekEndRequest{}
+	_, err := g.arenaCli.WeekEnd(g.ctx, req)
+	if err != nil {
+		logger.WithFieldsWarn("WeekEnd Response", logger.Fields{
+			"error": err,
+		})
+		return err
+	}
+
+	return nil
 }
 
 func (g *GameMgr) ArenaMatching(id int64) {

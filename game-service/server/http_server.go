@@ -11,8 +11,6 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/logger"
-	pbArena "github.com/hellodudu/Ultimate/proto/arena"
-	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
 )
 
@@ -72,9 +70,7 @@ type HttpServer struct {
 
 func NewHttpServer(gm iface.IGameMgr) *HttpServer {
 	s := &HttpServer{
-		gm:       gm,
-		arenaCli: pbArena.NewArenaServiceClient("ultimate-service-arena", srv.Client()),
-		gameCli:  pbGame.NewGameServiceClient("ultimate-service-game", srv.Client()),
+		gm: gm,
 	}
 
 	s.ctx, s.cancel = context.WithCancel(context.Background())
@@ -155,13 +151,11 @@ func (s *HttpServer) arenaGetRecordHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	r, err := s.gm.GetArenaRecord(req.ID)
-	if err != nil {
+	if r, err := s.gm.GetArenaRecord(req.ID); err != nil {
 		w.Write([]byte(err.Error()))
-		return
+	} else {
+		json.NewEncoder(w).Encode(r)
 	}
-
-	json.NewEncoder(w).Encode(r)
 }
 
 func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Request) {
@@ -180,38 +174,27 @@ func (s *HttpServer) arenaGetRankListHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	data, err := s.gm.GetArenaRankList(req.Page)
-	if err != nil {
+	if data, err := s.gm.GetArenaRankList(req.Page); err != nil {
 		w.Write([]byte(err.Error()))
-		return
+	} else {
+		w.Write(data)
 	}
 
-	w.Write(data)
 }
 
 func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {
-	req := &pbArena.SaveChampionRequest{}
-	_, err := s.arenaCli.SaveChampion(s.ctx, req)
-	if err != nil {
-		logger.WithFieldsWarn("SaveChampion Response", logger.Fields{
-			"error": err,
-		})
+
+	if err := s.gm.ArenaSaveChampion(); err != nil {
 		w.Write([]byte(err.Error()))
-		return
 	}
 
 	w.Write([]byte("success"))
 }
 
 func (s *HttpServer) arenaWeekEnd(w http.ResponseWriter, r *http.Request) {
-	req := &pbArena.WeekEndRequest{}
-	_, err := s.arenaCli.WeekEnd(s.ctx, req)
-	if err != nil {
-		logger.WithFieldsWarn("WeekEnd Response", logger.Fields{
-			"error": err,
-		})
+
+	if err := s.gm.ArenaWeekEnd(); err != nil {
 		w.Write([]byte(err.Error()))
-		return
 	}
 
 	w.Write([]byte("success"))
@@ -233,8 +216,7 @@ func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	rpcReq := &pbGame.GetPlayerInfoByIDRequest{Id: req.ID}
-	rsp, err := s.gameCli.GetPlayerInfoByID(s.ctx, rpcReq)
+	info, err := s.gm.GetPlayerInfoByID(req.ID)
 	if err != nil {
 		logger.WithFieldsWarn("cannot find player info by id", logger.Fields{
 			"error": err,
@@ -245,7 +227,7 @@ func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json.NewEncoder(w).Encode(rsp.Info)
+	json.NewEncoder(w).Encode(info)
 }
 
 func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -264,8 +246,7 @@ func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	rpcReq := &pbGame.GetGuildInfoByIDRequest{Id: req.ID}
-	rsp, err := s.gameCli.GetGuildInfoByID(s.ctx, rpcReq)
+	info, err := s.gm.GetGuildInfoByID(req.ID)
 	if err != nil {
 		logger.WithFieldsWarn("cannot find guild info by id", logger.Fields{
 			"error": err,
@@ -275,5 +256,5 @@ func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	json.NewEncoder(w).Encode(rsp.Info)
+	json.NewEncoder(w).Encode(info)
 }

@@ -15,6 +15,12 @@ type IGameMgr interface {
 	GetArenaChampion() ([]*pbArena.ArenaChampion, error)
 	GetArenaDataNum() int32
 	GetArenaRecordNum() int32
+	GetArenaMatchingList() ([]int64, error)
+	GetArenaRecordReqList() ([]*pbArena.RecordReqList, error)
+	GetArenaRecord(id int64) (*pbArena.ArenaRecord, error)
+	GetArenaRankList(page int) ([]byte, error)
+	ArenaSaveChampion() error
+	ArenaWeekEnd() error
 	ArenaMatching(id int64)
 	ArenaAddRecord(*pbArena.ArenaRecord)
 	ArenaBattleResult(attackID int64, targetID int64, attackWin bool)

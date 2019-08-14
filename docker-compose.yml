@@ -12,6 +12,7 @@ services:
       - "./log/:/log"
       - "./config/:/config"
     environment:
+      MICRO_SERVER_ID: 2001
       MICRO_REGISTRY: "consul"
       MICRO_REGISTRY_ADDRESS: "consul:8500"
       MICRO_BROKER: "nsq"
@@ -32,6 +33,7 @@ services:
       - "./log/:/log"
       - "./config/:/config"
     environment:
+      MICRO_SERVER_ID: 1001
       MICRO_REGISTRY: "consul"
       MICRO_REGISTRY_ADDRESS: "consul:8500"
       MICRO_BROKER: "nsq"
@@ -44,16 +46,17 @@ services:
 
   consul:
     image: consul
-    command: "agent -dev -data-dir=/consul/data -ui -client=0.0.0.0"
+    command: "agent -dev -log-level=info -data-dir=/consul/data -ui -client=0.0.0.0"
     hostname: consul
     ports:
       - "8500:8500"
     volumes:
-      - "./consul_data:/consul/data"
+      - "./consul_data/:/consul/data"
+      - "./config/:/config"
 
   nsqlookupd:
     image: nsqio/nsq
-    command: /nsqlookupd
+    command: /nsqlookupd -log-level=info
     hostname: nsqlookupd
     ports:
       - "4160:4160"
@@ -61,7 +64,7 @@ services:
 
   nsqd:
     image: nsqio/nsq
-    command: /nsqd --data-path=/nsq_data -lookupd-tcp-address=nsqlookupd:4160 
+    command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=nsqlookupd:4160 
     depends_on:
       - nsqlookupd
       - nsqadmin

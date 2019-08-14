@@ -46,12 +46,12 @@ services:
 
   consul:
     image: consul
-    command: "agent -dev -log-level=info -data-dir=/consul/data -ui -client=0.0.0.0"
+    command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
     hostname: consul
     ports:
       - "8500:8500"
     volumes:
-      - "./consul_data/:/consul/data"
+      - "./consul_data/:/consul_data"
       - "./config/:/config"
 
   nsqlookupd:

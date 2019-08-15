@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 // Dispatcher define

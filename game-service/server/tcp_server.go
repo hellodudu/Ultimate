@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils/global"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/hellodudu/Ultimate/utils/task"
 )
 

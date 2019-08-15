@@ -9,8 +9,8 @@ import (
 
 	"github.com/hellodudu/Ultimate/arena-service/arena"
 	datastore "github.com/hellodudu/Ultimate/arena-service/db"
-	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils/global"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
 )
 

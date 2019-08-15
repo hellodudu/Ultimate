@@ -6,10 +6,10 @@ import (
 	"sync"
 
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
 )
 

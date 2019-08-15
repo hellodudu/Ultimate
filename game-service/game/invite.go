@@ -2,8 +2,8 @@ package game
 
 import (
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	pb "github.com/hellodudu/Ultimate/proto/game"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 type invite struct {

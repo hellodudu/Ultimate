@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/gammazero/workerpool"
-	"github.com/hellodudu/Ultimate/logger"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/broker/nsq"
 )

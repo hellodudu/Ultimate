@@ -10,11 +10,11 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 // ProtoHandler handle function

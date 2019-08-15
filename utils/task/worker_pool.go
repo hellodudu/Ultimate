@@ -4,7 +4,7 @@ import (
 	"context"
 	"runtime"
 
-	"github.com/hellodudu/Ultimate/logger"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 type workerPool struct {

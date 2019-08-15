@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	"github.com/hellodudu/Ultimate/utils/global"
+	logger "github.com/hellodudu/Ultimate/utils/log"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var startTime = time.Now()
@@ -96,6 +97,8 @@ func (s *HttpServer) Run() {
 	http.HandleFunc("/arena_weekend", s.arenaWeekEnd)
 	http.HandleFunc("/player_info", s.getPlayerInfoHandler)
 	http.HandleFunc("/guild_info", s.getGuildInfoHandler)
+
+	http.Handle("/metrics", promhttp.Handler())
 
 	addr, err := global.IniMgr.GetIniValue("../config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {

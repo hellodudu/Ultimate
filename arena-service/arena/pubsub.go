@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hellodudu/Ultimate/logger"
 	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
 )
 

@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/hellodudu/Ultimate/logger"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 type XmlEntityClient struct {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/hellodudu/Ultimate/logger"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 // RPCHandler rpc handler

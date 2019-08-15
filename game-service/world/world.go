@@ -8,11 +8,11 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
-	"github.com/hellodudu/Ultimate/logger"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
 	"github.com/hellodudu/Ultimate/utils/global"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 type traceMsg struct {

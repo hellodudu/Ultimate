@@ -17,14 +17,13 @@ require (
 	github.com/gophercloud/gophercloud v0.2.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
-	github.com/hellodudu/Ultimate/game-service v0.0.0-20190806060602-fd3846d01bf0 // indirect
+	github.com/hellodudu/Ultimate/game-service v0.0.0-20190814104743-5f9009a7e445 // indirect
 	github.com/jinzhu/gorm v1.9.10
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
+	github.com/micro/go-log v0.1.0
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.2.0
-	github.com/micro/util v0.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20190414153302-2ae31c8b6b30 // indirect
-	github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d // indirect
 	github.com/pierrec/lz4 v2.2.4+incompatible // indirect
 	github.com/schollz/progressbar/v2 v2.13.2 // indirect
 	gotest.tools v2.3.0+incompatible // indirect

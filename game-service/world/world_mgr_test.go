@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	datastore "github.com/hellodudu/Ultimate/game-service/db"
-	"github.com/hellodudu/Ultimate/logger"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils/global"
+	logger "github.com/hellodudu/Ultimate/utils/log"
 )
 
 type TestCon struct {

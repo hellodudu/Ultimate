@@ -9,7 +9,8 @@ type IniMgr struct {
 }
 
 func NewIniMgr() *IniMgr {
-	return &IniMgr{mapIniFile: make(map[string]*ini.File, 256)}
+	im := &IniMgr{mapIniFile: make(map[string]*ini.File, 256)}
+	return im
 }
 
 // get ini file by path

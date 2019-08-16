@@ -100,7 +100,7 @@ func (s *HttpServer) Run() {
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	addr, err := global.IniMgr.GetIniValue("../config/ultimate.ini", "listen", "HttpListenAddr")
+	addr, err := global.GetIniMgr().GetIniValue("../config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {
 		logger.Error("cannot read ini HttpListenAddr!")
 		return

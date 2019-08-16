@@ -69,7 +69,7 @@ func NewTcpServer(parser iface.IMsgParser, dispatcher iface.IDispatcher) (*TCPSe
 		dispatcher: dispatcher,
 	}
 
-	addr, err := global.IniMgr.GetIniValue("../config/ultimate.ini", "listen", "TcpListenAddr")
+	addr, err := global.GetIniMgr().GetIniValue("../config/ultimate.ini", "listen", "TcpListenAddr")
 	if err != nil {
 		return nil, err
 	}

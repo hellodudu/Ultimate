@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/Ultimate/game-service/define"
 	"github.com/hellodudu/Ultimate/iface"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
@@ -134,7 +135,7 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 		return
 	}
 
-	baseMsg := &utils.BaseNetMsg{}
+	baseMsg := &define.BaseNetMsg{}
 	byBaseMsg := make([]byte, binary.Size(baseMsg))
 
 	copy(byBaseMsg, data[:binary.Size(baseMsg)])
@@ -183,7 +184,7 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 
 		// transfer message
 	} else if baseMsg.ID == utils.Crc32(string("MWU_TransferMsg")) {
-		transferMsg := &utils.TransferNetMsg{}
+		transferMsg := &define.TransferNetMsg{}
 		byTransferMsg := make([]byte, binary.Size(transferMsg))
 
 		copy(byTransferMsg, data[:binary.Size(transferMsg)])

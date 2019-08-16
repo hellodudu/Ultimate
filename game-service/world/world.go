@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hellodudu/Ultimate/game-service/define"
 	"github.com/hellodudu/Ultimate/iface"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
@@ -136,7 +137,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	}
 
 	typeName := proto.MessageName(p)
-	baseMsg := &utils.BaseNetMsg{}
+	baseMsg := &define.BaseNetMsg{}
 	msgSize := binary.Size(baseMsg) + 2 + len(typeName) + len(out)
 	baseMsg.ID = utils.Crc32("MUW_DirectProtoMsg")
 	baseMsg.Size = uint32(msgSize)
@@ -166,7 +167,7 @@ func (w *world) SendTransferMessage(data []byte) {
 	}
 
 	// for testing disconnected from world server
-	transferMsg := &utils.TransferNetMsg{}
+	transferMsg := &define.TransferNetMsg{}
 	byTransferMsg := make([]byte, binary.Size(transferMsg))
 
 	copy(byTransferMsg, data[:binary.Size(transferMsg)])

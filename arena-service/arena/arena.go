@@ -3,7 +3,6 @@ package arena
 import (
 	"context"
 	"fmt"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -20,143 +19,6 @@ var arenaRankNumPerPage = 10
 var arenaSeasonDays = 4 * 7       // one season = 4 weeks
 var arenaRequestNewRecordDays = 7 // every week request new player record
 var arenaDefaultScore = 1000      // default arena score
-
-// rankRecord sort interface
-type rankArenaData struct {
-	item   []*arenaData
-	rwLock sync.RWMutex
-}
-
-func (s *rankArenaData) Sort() {
-	s.rwLock.Lock()
-	defer s.rwLock.Unlock()
-	sort.Sort(s)
-}
-
-func (s *rankArenaData) Len() int {
-	return len(s.item)
-}
-
-func (s *rankArenaData) Length() int {
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-	return len(s.item)
-}
-
-func (s *rankArenaData) Swap(a, b int) {
-	s.item[a], s.item[b] = s.item[b], s.item[a]
-}
-
-func (s *rankArenaData) Less(a, b int) bool {
-	if s.item[a].Score == s.item[b].Score {
-		if s.item[a].ReachTime == s.item[b].ReachTime {
-			return s.item[a].Playerid < s.item[b].Playerid
-		}
-		return s.item[a].ReachTime < s.item[b].ReachTime
-	}
-	return s.item[a].Score > s.item[b].Score
-}
-
-func (s *rankArenaData) Get(n int) *arenaData {
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-	return s.item[n]
-}
-
-func (s *rankArenaData) GetBottom() *arenaData {
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-	if s.Len() == 0 {
-		return nil
-	}
-	return s.item[len(s.item)-1]
-}
-
-func (s *rankArenaData) GetIndexBefore100(d *arenaData) int {
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-
-	rank := -1
-	for n := 0; n < len(s.item); n++ {
-		if n >= 100 {
-			break
-		}
-
-		if s.item[n].Playerid == d.Playerid {
-			rank = n
-			break
-		}
-	}
-
-	return rank
-}
-
-func (s *rankArenaData) GetTop(top int) []*arenaData {
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-
-	l := make([]*arenaData, 0)
-	for n := 0; n < len(s.item); n++ {
-		if n >= top {
-			break
-		}
-
-		l = append(l, s.item[n])
-	}
-
-	return l
-}
-
-func (s *rankArenaData) GetListByPage(page int) []*arenaData {
-	l := make([]*arenaData, 0)
-
-	s.rwLock.RLock()
-	defer s.rwLock.RUnlock()
-
-	for n := 0 + int(page)*arenaRankNumPerPage; n < 10+int(page)*arenaRankNumPerPage; n++ {
-		if n >= s.Len() {
-			break
-		}
-
-		l = append(l, s.item[n])
-	}
-
-	return l
-}
-
-func (s *rankArenaData) Add(v *arenaData) {
-	s.rwLock.Lock()
-	defer s.rwLock.Unlock()
-	s.item = append(s.item, v)
-}
-
-// arena player data
-type arenaData struct {
-	Playerid   int64  `gorm:"type:bigint(20);primary_key;column:player_id;default:-1;not null" json:"player_id,omitempty"`
-	Score      int32  `gorm:"type:int(10);column:score;default:0;not null" json:"score,omitempty"`
-	ReachTime  uint32 `gorm:"type:int(10);column:reach_time;default:0;not null" json:"reach_time,omitempty"`
-	LastTarget int64  `gorm:"type:bigint(20);column:last_target;default:-1;not null" json:"last_target,omitempty"` // target cannot be last one
-}
-
-func (arenaData) TableName() string {
-	return "arena_player"
-}
-
-// champion data
-type championData struct {
-	Rank       int    `gorm:"type:smallint(5);primary_key;column:champion_rank;default:0;not null"`
-	PlayerID   int64  `gorm:"type:bigint(20);column:player_id;default:-1;not null"`
-	Score      int    `gorm:"type:int(10);column:score;default:0;not null"`
-	Season     int    `gorm:"type:int(10);column:arena_season;default:0;not null"`
-	PlayerName string `gorm:"type:varchar(32);column:player_name;default:'';not null"`
-	ServerName string `gorm:"type:varchar(32);column:server_name;default:'';not null"`
-	MasterID   int    `gorm:"type:int(10);column:master_id;default:1;not null"`
-	FashionID  int    `gorm:"type:int(10);column:fashion_id;default:-1;not null"`
-}
-
-func (championData) TableName() string {
-	return "arena_champion"
-}
 
 func getSectionIndexByScore(score int32) int32 {
 	if score < 1200 {
@@ -308,7 +170,7 @@ func (arena *Arena) getMatchingList() []int64 {
 	return l
 }
 
-func (arena *Arena) GetRecordReqList() map[int64]int64 {
+func (arena *Arena) getRecordReqList() map[int64]int64 {
 	ret := make(map[int64]int64)
 	arena.mapRecordReq.Range(func(k, v interface{}) bool {
 		ret[k.(int64)] = v.(int64)
@@ -318,7 +180,7 @@ func (arena *Arena) GetRecordReqList() map[int64]int64 {
 }
 
 func (arena *Arena) getRankListByPage(page int) []*arenaData {
-	return arena.arrRankArena.GetListByPage(page)
+	return arena.arrRankArena.getListByPage(page)
 }
 
 // seasonEndTime get season end time
@@ -812,7 +674,7 @@ func (arena *Arena) newSeasonRank() {
 
 // save top 3 champion id
 func (arena *Arena) saveChampion() {
-	list := arena.arrRankArena.GetTop(3)
+	list := arena.arrRankArena.getTop(3)
 
 	arena.cpLock.Lock()
 	arena.championList = nil
@@ -862,7 +724,7 @@ func (arena *Arena) saveChampion() {
 
 // send top 100 reward mail
 func (arena *Arena) seasonReward() {
-	list := arena.arrRankArena.GetTop(100)
+	list := arena.arrRankArena.getTop(100)
 
 	for n, data := range list {
 		resp, err := arena.handler.GetPlayerInfoByID(data.Playerid)
@@ -1021,11 +883,11 @@ func (arena *Arena) requestRank(id int64, page int32) {
 	if d, ok := arena.mapArenaData.Load(id); ok {
 		data := d.(*arenaData)
 		msg.Score = data.Score
-		msg.Rank = int32(arena.arrRankArena.GetIndexBefore100(data))
+		msg.Rank = int32(arena.arrRankArena.getIndexBefore100(data))
 	}
 
 	// rank player data
-	l := arena.arrRankArena.GetListByPage(int(page))
+	l := arena.arrRankArena.getListByPage(int(page))
 	for _, r := range l {
 		v, ok := arena.mapRecord.Load(r.Playerid)
 		if !ok {

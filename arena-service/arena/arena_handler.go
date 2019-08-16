@@ -60,7 +60,7 @@ func (h *RPCHandler) GetMatchingList(ctx context.Context, req *pbArena.GetMatchi
 
 func (h *RPCHandler) GetRecordReqList(ctx context.Context, req *pbArena.GetRecordReqListRequest, rsp *pbArena.GetRecordReqListReply) error {
 	logger.Info("Received ArenaService.GetRecordReqList request")
-	m := h.arena.GetRecordReqList()
+	m := h.arena.getRecordReqList()
 	for k, v := range m {
 		rsp.ReqList = append(rsp.ReqList, &pbArena.RecordReqList{PlayerId: k, Time: int32(v)})
 	}

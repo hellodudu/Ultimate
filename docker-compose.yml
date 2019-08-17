@@ -5,6 +5,7 @@ services:
   ultimate-service-arena:
     build: arena-service/
     image: ultimate-service-arena
+    container_name: ultimate-service-arena
     ports:
       - "3306"
       - "8080"
@@ -25,6 +26,7 @@ services:
   ultimate-service-game:
     build: game-service/
     image: ultimate-service-game
+    container_name: ultimate-service-game
     ports:
       - "7030:7030"
       - "3306"
@@ -57,6 +59,7 @@ services:
   nsqlookupd:
     image: nsqio/nsq
     command: /nsqlookupd -log-level=info
+    container_name: nsqlookupd
     hostname: nsqlookupd
     ports:
       - "4160:4160"

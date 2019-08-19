@@ -12,6 +12,7 @@ import (
 	"github.com/hellodudu/Ultimate/utils/global"
 	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 )
 
 func main() {
@@ -26,6 +27,7 @@ func main() {
 	// New Service
 	service := micro.NewService(
 		micro.Name("ultimate-service-arena"),
+		micro.WrapHandler(prometheus.NewHandlerWrapper()),
 		// micro.Version("latest"),
 		// micro.Transport(transport.NewTransport()),
 	)

@@ -16,6 +16,7 @@ import (
 	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 )
 
 // ultimate define
@@ -161,6 +162,7 @@ func (umt *ultimate) initGameMgr() error {
 	// New Service
 	umt.gameSrv = micro.NewService(
 		micro.Name("ultimate-service-game"),
+		micro.WrapHandler(prometheus.NewHandlerWrapper()),
 		// micro.Version("latest"),
 		// micro.Transport(transport.NewTransport()),
 	)

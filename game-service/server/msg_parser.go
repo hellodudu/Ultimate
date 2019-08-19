@@ -67,7 +67,7 @@ func (m *MsgParser) getRegProtoHandle(id uint32) (ProtoHandler, error) {
 		return v, nil
 	}
 
-	return nil, errors.New("cannot find proto type registed in msg_handle!")
+	return nil, errors.New("cannot find proto type registered in msg_handle!")
 }
 
 func (m *MsgParser) regProtoHandle(name string, fn ProtoHandler) {
@@ -126,7 +126,7 @@ func (m *MsgParser) decodeToProto(data []byte) (proto.Message, error) {
 
 // top 8 bytes are baseNetMsg
 // if it is protobuf msg, then next 2 bytes are proto name length, the next is proto name, final is proto data.
-// if it is transfer msg(transfer binarys to other world), then next are binarys to be transferd
+// if it is transfer msg(transfer binarys to other world), then next are binarys to be transferred
 func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 	if len(data) <= 8 {
 		logger.WithFieldsWarn("tcp recv data length <= 8", logger.Fields{

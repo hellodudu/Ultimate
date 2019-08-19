@@ -1,7 +1,5 @@
 package main
 
-import pbGame "github.com/hellodudu/Ultimate/proto/game"
-
 const (
 	address  = "localhost:7080"
 	playerID = []int64{
@@ -12,7 +10,7 @@ const (
 
 func main() {
 
-	gameCli := pbGame.NewGameServiceClient("", nil)
+	// gameCli := pbGame.NewGameServiceClient("", nil)
 	// Set up a connection to the server.
 	// conn, err := grpc.Dial(address, grpc.WithInsecure())
 	// if err != nil {

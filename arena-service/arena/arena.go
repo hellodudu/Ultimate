@@ -41,7 +41,7 @@ func getSectionIndexByScore(score int32) int32 {
 }
 
 func getDefaultScoreBySection(secIdx int32) int32 {
-	var def int32 = 1000
+	def := 1000
 	switch secIdx {
 	case 0:
 		def = 1000
@@ -62,7 +62,7 @@ func getDefaultScoreBySection(secIdx int32) int32 {
 	default:
 		def = 1000
 	}
-	return def
+	return int32(def)
 }
 
 // Arena data

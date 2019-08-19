@@ -456,6 +456,8 @@ github.com/hellodudu/Ultimate/arena-service v0.0.0-20190730133608-509682c071eb/g
 github.com/hellodudu/Ultimate/game-service v0.0.0-20190717151922-7f185e0bb90c/go.mod h1:krg+JF4MJ/YyYETf7Yc37uYYcnyFSDahoj/ea9e32eI=
 github.com/hellodudu/Ultimate/game-service v0.0.0-20190814104743-5f9009a7e445 h1:pGHG8CF8o13s1TxWbmBvD2mRPLRdEc2jV9axiMXYnO4=
 github.com/hellodudu/Ultimate/game-service v0.0.0-20190814104743-5f9009a7e445/go.mod h1:plDBQa4oXhk11QrQ0fWcv9/aVwMpx9EVldCWdPgx00I=
+github.com/hellodudu/Ultimate/game-service v0.0.0-20190819101416-1c9ac340075e h1:9QioTqSjg7YGm9MLHB3rHanSQeTiA7GOH6JnOIZYpFg=
+github.com/hellodudu/Ultimate/game-service v0.0.0-20190819101416-1c9ac340075e/go.mod h1:l80r+eOt0uafxH78mZJtYXh0a6oMSs93nhuVIe3eTNo=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/huandu/xstrings v1.0.0/go.mod h1:4qWG/gcEcfX4z/mBDHJ++3ReCw9ibxbsNJbcucJdbSo=

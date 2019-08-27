@@ -160,11 +160,12 @@ services:
     #     - cadvisor
 
   fluentd:
-    image: fluent/fluentd
-    container_name: fluent
+    build:
+      context: fluentd/
+    container_name: fluentd
     volumes:
-      - ./config/fluentd/etc/:/fluentd/etc/
-      - ./fluentd_data/:/fluentd/log
+      - ./fluentd/etc/:/fluentd/etc/
+      - ./fluentd/log/:/fluentd/log
     logging:
       driver: "json-file"
       options:

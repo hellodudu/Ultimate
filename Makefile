@@ -38,6 +38,10 @@ push:
 docker_rm:
 	docker rmi $(shell docker images -f "dangling=true" -q) --force
 
+.PHONY: docker_clean
+docker_clean:
+	docker rm -f $(shell docker ps -a -q)
+
 .PHONY: stop
 stop:
 	docker-compose -f compose_nsq.yml down

@@ -14,7 +14,10 @@ require (
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.2.0
 	github.com/sirupsen/logrus v1.4.2
-	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
+	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
+	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
 	golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a // indirect
+	golang.org/x/tools v0.0.0-20190820205717-547ecf7b1ef1 // indirect
+	golang.org/x/tools/gopls v0.1.3 // indirect
 	gopkg.in/ini.v1 v1.45.0 // indirect
 )

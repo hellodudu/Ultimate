@@ -15,13 +15,21 @@ services:
     environment:
       MICRO_SERVER_ID: 2001
       MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "consul:8500"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "nsqd:4150"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       MYSQL_ADDR: "host.docker.internal"
+    links:
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: host.docker.internal:24224
+        tag: ultimate-service-arena
     depends_on:
       - "consul"
       - "nsqd"
+      - "fluentd"
 
   ultimate-service-game:
     build: game-service/
@@ -37,71 +45,150 @@ services:
     environment:
       MICRO_SERVER_ID: 1001
       MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "consul:8500"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "nsqd:4150"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       MYSQL_ADDR: "host.docker.internal"
+    links:
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: host.docker.internal:24224
+        tag: ultimate-service-game
+
     depends_on:
       - "consul"
       - "nsqd"
+      - "fluentd"
       - "ultimate-service-arena"
 
   consul:
     image: consul
     command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
-    hostname: consul
+    container_name: consul
     ports:
       - "8500:8500"
     volumes:
       - "./consul_data/:/consul_data"
       - "./config/:/config"
+    links:
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: host.docker.internal:24224
+        tag: consul_log
+    depends_on:
+      - "fluentd"
 
   nsqlookupd:
     image: nsqio/nsq
     command: /nsqlookupd -log-level=info
     container_name: nsqlookupd
-    hostname: nsqlookupd
     ports:
       - "4160:4160"
       - "4161:4161"
+    links:
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: host.docker.internal:24224
+        tag: nsqlookupd
 
   nsqd:
     image: nsqio/nsq
-    command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=nsqlookupd:4160 
+    command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=host.docker.internal:4160 
+    container_name: nsqd
     depends_on:
       - nsqlookupd
       - nsqadmin
-    hostname: nsqd
     volumes:
       - "./nsq_data/:/nsq_data"
     ports:
       - "4150:4150"
       - "4151:4151"
+    links:
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: host.docker.internal:24224
+        tag: nsqd
 
   nsqadmin:
     image: nsqio/nsq
-    command: /nsqadmin -lookupd-http-address=nsqlookupd:4161
-    hostname: nsqadmin
+    command: /nsqadmin -lookupd-http-address=host.docker.internal:4161
+    container_name: nsqadmin
     depends_on:
       - nsqlookupd  
     ports:
       - "4171:4171"
+    links:
+      - fluentd
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: host.docker.internal:24224
+        tag: nsqadmin
 
   grafana:
     image: grafana/grafana
     container_name: grafana
-    hostname: grafana
     ports:
-        - 3000:3000
+        - "3000:3000"
     user: "472"
 
   prometheus:
     image: prom/prometheus
     container_name: prometheus
-    hostname: prometheus
+    links:
+      - fluentd
     volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
         - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
         - "9090:9090"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: host.docker.internal:24224
+        tag: prometheus_log
+    # depends_on:
+    #     - cadvisor
+
+  fluentd:
+    image: fluent/fluentd
+    container_name: fluent
+    volumes:
+      - ./config/fluentd/etc/:/fluentd/etc/
+      - ./fluentd_data/:/fluentd/log
+    logging:
+      driver: "json-file"
+      options:
+          max-size: "1G"
+          max-file: "2"
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
+  # cadvisor:
+  #   image: google/cadvisor:latest
+  #   container_name: cadvisor
+  #   ports:
+  #       - "8080:8080"
+  #   volumes:
+  #       - /:/rootfs:ro
+  #       - /var/run:/var/run:rw
+  #       - /sys:/sys:ro
+  #       - /var/lib/docker/:/var/lib/docker:ro
+  #   depends_on:
+  #       - redis
+
+  # redis:
+  #   image: redis:latest
+  #   container_name: redis
+  #   ports:
+  #       - "6379:6379"

@@ -25,7 +25,7 @@ services:
       driver: fluentd
       options:
         fluentd-address: host.docker.internal:24224
-        tag: ultimate-service-arena
+        tag: docker.ultimate.arena
     depends_on:
       - "consul"
       - "nsqd"
@@ -55,7 +55,7 @@ services:
       driver: fluentd
       options:
         fluentd-address: host.docker.internal:24224
-        tag: ultimate-service-game
+        tag: docker.ultimate.game
 
     depends_on:
       - "consul"
@@ -78,7 +78,7 @@ services:
       driver: fluentd
       options:
         fluentd-address: host.docker.internal:24224
-        tag: consul_log
+        tag: docker.consul
     depends_on:
       - "fluentd"
 
@@ -95,7 +95,7 @@ services:
       driver: fluentd
       options:
         fluentd-address: host.docker.internal:24224
-        tag: nsqlookupd
+        tag: docker.nsq.lookupd
 
   nsqd:
     image: nsqio/nsq
@@ -115,7 +115,7 @@ services:
       driver: fluentd
       options:
         fluentd-address: host.docker.internal:24224
-        tag: nsqd
+        tag: docker.nsq.nsqd
 
   nsqadmin:
     image: nsqio/nsq
@@ -131,33 +131,31 @@ services:
       driver: fluentd
       options:
         fluentd-address: host.docker.internal:24224
-        tag: nsqadmin
+        tag: docker.nsq.admin
 
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    ports:
-        - "3000:3000"
-    user: "472"
+  # grafana:
+  #   image: grafana/grafana
+  #   container_name: grafana
+  #   ports:
+  #       - "3000:3000"
+  #   user: "472"
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    links:
-      - fluentd
-    volumes:
-        - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-        - "--config.file=/etc/prometheus/prometheus.yml"
-    ports:
-        - "9090:9090"
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: host.docker.internal:24224
-        tag: prometheus_log
-    # depends_on:
-    #     - cadvisor
+  # prometheus:
+  #   image: prom/prometheus
+  #   container_name: prometheus
+  #   links:
+  #     - fluentd
+  #   volumes:
+  #       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   command:
+  #       - "--config.file=/etc/prometheus/prometheus.yml"
+  #   ports:
+  #       - "9090:9090"
+  #   logging:
+  #     driver: fluentd
+  #     options:
+  #       fluentd-address: host.docker.internal:24224
+  #       tag: docker.prometheus
 
   fluentd:
     build:
@@ -166,6 +164,8 @@ services:
     volumes:
       - ./fluentd/etc/:/fluentd/etc/
       - ./fluentd/log/:/fluentd/log
+    links:
+      - "elasticsearch"
     logging:
       driver: "json-file"
       options:
@@ -175,21 +175,16 @@ services:
       - "24224:24224"
       - "24224:24224/udp"
 
-  # cadvisor:
-  #   image: google/cadvisor:latest
-  #   container_name: cadvisor
-  #   ports:
-  #       - "8080:8080"
-  #   volumes:
-  #       - /:/rootfs:ro
-  #       - /var/run:/var/run:rw
-  #       - /sys:/sys:ro
-  #       - /var/lib/docker/:/var/lib/docker:ro
-  #   depends_on:
-  #       - redis
+  elasticsearch:
+    image: elasticsearch
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
 
-  # redis:
-  #   image: redis:latest
-  #   container_name: redis
-  #   ports:
-  #       - "6379:6379"
+  kibana:
+    image: kibana
+    links:
+      - "elasticsearch"
+    ports:
+      - "5601:5601"

@@ -96,14 +96,13 @@ services:
       options:
         fluentd-address: host.docker.internal:24224
         tag: docker.nsq.lookupd
+    depends_on:
+      - "fluentd"
 
   nsqd:
     image: nsqio/nsq
     command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=host.docker.internal:4160 
     container_name: nsqd
-    depends_on:
-      - nsqlookupd
-      - nsqadmin
     volumes:
       - "./nsq_data/:/nsq_data"
     ports:
@@ -116,6 +115,10 @@ services:
       options:
         fluentd-address: host.docker.internal:24224
         tag: docker.nsq.nsqd
+    depends_on:
+      - fluentd
+      - nsqlookupd
+      - nsqadmin
 
   nsqadmin:
     image: nsqio/nsq
@@ -174,16 +177,21 @@ services:
     ports:
       - "24224:24224"
       - "24224:24224/udp"
+    depends_on:
+      - elasticsearch
+      - kibana
 
   elasticsearch:
-    image: elasticsearch
+    image: elasticsearch:7.3.1
+    container_name: elasticsearch
     expose:
       - 9200
     ports:
       - "9200:9200"
 
   kibana:
-    image: kibana
+    image: kibana:7.3.1
+    container_name: kibana
     links:
       - "elasticsearch"
     ports:

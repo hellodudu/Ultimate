@@ -184,15 +184,22 @@ services:
   elasticsearch:
     image: elasticsearch:7.3.1
     container_name: elasticsearch
-    expose:
-      - 9200
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/data/:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+      - "9300:9300"
 
   kibana:
     image: kibana:7.3.1
     container_name: kibana
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - ./kibana/data/:/usr/share/kibana/data
     links:
       - "elasticsearch"
     ports:
       - "5601:5601"
+    depends_on:
+      - elasticsearch

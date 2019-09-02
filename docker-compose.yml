@@ -69,8 +69,16 @@ services:
   #   image: nsqio/nsq
   #   command: /nsqlookupd -log-level=info
   #   container_name: nsqlookupd
+  #   logging:
+  #     driver: loki
+  #     options:
+  #       loki-url: "http://loki:3100/api/prom/push"
+  #       # loki-retries: 5
+  #       # loki-batch-size: 400
+  #   depends_on:
+  #     - promtail
   #   networks:
-  #     - ultimate
+  #     - loki
   #   ports:
   #     - "4160:4160"
   #     - "4161:4161"
@@ -80,20 +88,30 @@ services:
   #   command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=ultimate:4160 
   #   container_name: nsqd
   #   networks:
-  #     - ultimate
+  #     - loki
   #   volumes:
   #     - "./data/nsq/:/nsq_data"
   #   ports:
   #     - "4150:4150"
   #     - "4151:4151"
+  #   logging:
+  #     driver: loki
+  #     options:
+  #       loki-url: http://loki:3100/api/prom/push
+  #       loki-retries: 5
+  #       loki-batch-size: 400
+
   #   depends_on:
+  #     - promtail
   #     - nsqlookupd
   #     - nsqadmin
 
   # nsqadmin:
   #   image: nsqio/nsq
-  #   command: /nsqadmin -lookupd-http-address=ultimate:4161
+  #   command: /nsqadmin -lookupd-http-address=loki:4161
   #   container_name: nsqadmin
+  #   networks:
+  #     - loki
   #   depends_on:
   #     - nsqlookupd  
   #   ports:
@@ -115,7 +133,6 @@ services:
     container_name: promtail
     volumes:
       - ./config/promtail/:/etc/promtail
-      # - ./data:/var/log
       - /var/log:/var/log
     command:
       -config.file=/etc/promtail/promtail-docker-config.yaml
@@ -132,6 +149,14 @@ services:
       GF_EXPLORE_ENABLED: "true"
     networks:
       - loki
+    links:
+      - loki
+    logging:
+      driver: loki
+      options:
+        loki-url: http://loki:3100/api/prom/push
+    depends_on:
+      - promtail  
 
   # prometheus:
   #   image: prom/prometheus

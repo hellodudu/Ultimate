@@ -1,0 +1,56 @@
+version: "3"
+
+networks:
+    loki:
+
+services:
+  
+  loki:
+    image: grafana/loki
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - $PWD/loki/:/etc/loki
+    command: -config.file=/etc/loki/loki-local-config.yaml
+    networks:
+      - loki
+
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    volumes:
+      - $PWD/promtail/:/etc/promtail
+      - /var/log:/var/log
+    command:
+      -config.file=/etc/promtail/promtail-docker-config.yaml
+    networks:
+      - loki
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+        - "3000:3000"
+    user: "472"
+    environment:
+      GF_EXPLORE_ENABLED: "true"
+    networks:
+      - loki
+
+  # prometheus:
+  #   image: prom/prometheus
+  #   container_name: prometheus
+  #   volumes:
+  #       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   command:
+  #       - "--config.file=/etc/prometheus/prometheus.yml"
+  #   ports:
+  #       - "9090:9090"
+    # logging:
+    #   driver: fluentd
+    #   options:
+    #     fluentd-address: host.docker.internal:24224
+    #     tag: docker.prometheus
+
+    

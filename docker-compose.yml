@@ -1,205 +1,161 @@
 version: "3"
 
+networks:
+    loki:
+
 services:
   
-  ultimate-service-arena:
-    build: arena-service/
-    image: ultimate-service-arena
-    container_name: ultimate-service-arena
-    ports:
-      - "3306"
-      - "8080"
-    volumes:
-      - "./log/:/log"
-      - "./config/:/config"
-    environment:
-      MICRO_SERVER_ID: 2001
-      MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
-      MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
-      MYSQL_ADDR: "host.docker.internal"
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: host.docker.internal:24224
-        tag: docker.ultimate.arena
-    depends_on:
-      - "consul"
-      - "nsqd"
-      - "fluentd"
-
-  ultimate-service-game:
-    build: game-service/
-    image: ultimate-service-game
-    container_name: ultimate-service-game
-    ports:
-      - "7030:7030"
-      - "3306"
-      - "8080:8080"
-    volumes:
-      - "./log/:/log"
-      - "./config/:/config"
-    environment:
-      MICRO_SERVER_ID: 1001
-      MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
-      MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
-      MYSQL_ADDR: "host.docker.internal"
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: host.docker.internal:24224
-        tag: docker.ultimate.game
-
-    depends_on:
-      - "consul"
-      - "nsqd"
-      - "fluentd"
-      - "ultimate-service-arena"
-
-  consul:
-    image: consul
-    command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
-    container_name: consul
-    ports:
-      - "8500:8500"
-    volumes:
-      - "./consul_data/:/consul_data"
-      - "./config/:/config"
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: host.docker.internal:24224
-        tag: docker.consul
-    depends_on:
-      - "fluentd"
-
-  nsqlookupd:
-    image: nsqio/nsq
-    command: /nsqlookupd -log-level=info
-    container_name: nsqlookupd
-    ports:
-      - "4160:4160"
-      - "4161:4161"
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: host.docker.internal:24224
-        tag: docker.nsq.lookupd
-    depends_on:
-      - "fluentd"
-
-  nsqd:
-    image: nsqio/nsq
-    command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=host.docker.internal:4160 
-    container_name: nsqd
-    volumes:
-      - "./nsq_data/:/nsq_data"
-    ports:
-      - "4150:4150"
-      - "4151:4151"
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: host.docker.internal:24224
-        tag: docker.nsq.nsqd
-    depends_on:
-      - fluentd
-      - nsqlookupd
-      - nsqadmin
-
-  nsqadmin:
-    image: nsqio/nsq
-    command: /nsqadmin -lookupd-http-address=host.docker.internal:4161
-    container_name: nsqadmin
-    depends_on:
-      - nsqlookupd  
-    ports:
-      - "4171:4171"
-    links:
-      - fluentd
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: host.docker.internal:24224
-        tag: docker.nsq.admin
-
-  # grafana:
-  #   image: grafana/grafana
-  #   container_name: grafana
+  # ultimate-service-arena:
+  #   build: arena-service/
+  #   image: ultimate-service-arena
+  #   container_name: ultimate-service-arena
+  #   networks:
+  #     - ultimate
   #   ports:
-  #       - "3000:3000"
-  #   user: "472"
+  #     - "3306"
+  #     - "8080"
+  #   volumes:
+  #     - "./log/:/log"
+  #     - "./config/:/config"
+  #   environment:
+  #     MICRO_SERVER_ID: 2001
+  #     MICRO_REGISTRY: "consul"
+  #     MICRO_REGISTRY_ADDRESS: "ultimate:8500"
+  #     MICRO_BROKER: "nsq"
+  #     MICRO_BROKER_ADDRESS: "ultimate:4150"
+  #     MYSQL_ADDR: "host.docker.internal"
+  #   depends_on:
+  #     - "consul"
+  #     - "nsqd"
+
+  # ultimate-service-game:
+  #   build: game-service/
+  #   image: ultimate-service-game
+  #   container_name: ultimate-service-game
+  #   networks:
+  #     - ultimate
+  #   ports:
+  #     - "7030:7030"
+  #     - "3306"
+  #     - "8080:8080"
+  #   volumes:
+  #     - "./log/:/log"
+  #     - "./config/:/config"
+  #   environment:
+  #     MICRO_SERVER_ID: 1001
+  #     MICRO_REGISTRY: "consul"
+  #     MICRO_REGISTRY_ADDRESS: "ultimate:8500"
+  #     MICRO_BROKER: "nsq"
+  #     MICRO_BROKER_ADDRESS: "ultimate:4150"
+  #     MYSQL_ADDR: "ultimate"
+  #   depends_on:
+  #     - "consul"
+  #     - "nsqd"
+  #     - "ultimate-service-arena"
+
+  # consul:
+  #   image: consul
+  #   command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
+  #   container_name: consul
+  #   networks:
+  #     - ultimate
+  #   ports:
+  #     - "8500:8500"
+  #   volumes:
+  #     - "./data/consul/:/consul_data"
+  #     - "./config/:/config"
+
+  # nsqlookupd:
+  #   image: nsqio/nsq
+  #   command: /nsqlookupd -log-level=info
+  #   container_name: nsqlookupd
+  #   networks:
+  #     - ultimate
+  #   ports:
+  #     - "4160:4160"
+  #     - "4161:4161"
+
+  # nsqd:
+  #   image: nsqio/nsq
+  #   command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=ultimate:4160 
+  #   container_name: nsqd
+  #   networks:
+  #     - ultimate
+  #   volumes:
+  #     - "./data/nsq/:/nsq_data"
+  #   ports:
+  #     - "4150:4150"
+  #     - "4151:4151"
+  #   depends_on:
+  #     - nsqlookupd
+  #     - nsqadmin
+
+  # nsqadmin:
+  #   image: nsqio/nsq
+  #   command: /nsqadmin -lookupd-http-address=ultimate:4161
+  #   container_name: nsqadmin
+  #   depends_on:
+  #     - nsqlookupd  
+  #   ports:
+  #     - "4171:4171"
+
+  loki:
+    image: grafana/loki
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki/:/etc/loki
+    command: -config.file=/etc/loki/loki-local-config.yaml
+    networks:
+      - loki
+
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    volumes:
+      - ./config/promtail/:/etc/promtail
+      # - ./data:/var/log
+      - /var/log:/var/log
+    command:
+      -config.file=/etc/promtail/promtail-docker-config.yaml
+    networks:
+      - loki
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+        - "3000:3000"
+    user: "472"
+    environment:
+      GF_EXPLORE_ENABLED: "true"
+    networks:
+      - loki
 
   # prometheus:
   #   image: prom/prometheus
   #   container_name: prometheus
-  #   links:
-  #     - fluentd
   #   volumes:
   #       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
   #   command:
   #       - "--config.file=/etc/prometheus/prometheus.yml"
   #   ports:
   #       - "9090:9090"
+
+  # fluentd:
+  #   build:
+  #     context: fluentd/
+  #   container_name: fluentd
+  #   volumes:
+  #     - ./fluentd/etc/:/fluentd/etc/
+  #     - ./fluentd/log/:/fluentd/log
   #   logging:
-  #     driver: fluentd
+  #     driver: "json-file"
   #     options:
-  #       fluentd-address: host.docker.internal:24224
-  #       tag: docker.prometheus
-
-  fluentd:
-    build:
-      context: fluentd/
-    container_name: fluentd
-    volumes:
-      - ./fluentd/etc/:/fluentd/etc/
-      - ./fluentd/log/:/fluentd/log
-    links:
-      - "elasticsearch"
-    logging:
-      driver: "json-file"
-      options:
-          max-size: "1G"
-          max-file: "2"
-    ports:
-      - "24224:24224"
-      - "24224:24224/udp"
-    depends_on:
-      - elasticsearch
-      - kibana
-
-  elasticsearch:
-    image: elasticsearch:7.3.1
-    container_name: elasticsearch
-    volumes:
-      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-      - ./elasticsearch/data/:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-
-  kibana:
-    image: kibana:7.3.1
-    container_name: kibana
-    volumes:
-      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
-      - ./kibana/data/:/usr/share/kibana/data
-    links:
-      - "elasticsearch"
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
+  #         max-size: "1G"
+  #         max-file: "2"
+  #   ports:
+  #     - "24224:24224"
+  #     - "24224:24224/udp"
+  

@@ -59,7 +59,7 @@ func Init(d bool, c bool, fn string) {
 	consoleFormatter := new(logrus.TextFormatter)
 	consoleFormatter.TimestampFormat = "2006-01-02 15:04:05"
 	consoleFormatter.FullTimestamp = true
-	consoleFormatter.ForceColors = true
+	consoleFormatter.DisableColors = true
 	defaultLogger.console.SetFormatter(consoleFormatter)
 }
 

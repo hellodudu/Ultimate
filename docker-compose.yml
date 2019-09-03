@@ -5,65 +5,89 @@ networks:
 
 services:
   
-  # ultimate-service-arena:
-  #   build: arena-service/
-  #   image: ultimate-service-arena
-  #   container_name: ultimate-service-arena
-  #   networks:
-  #     - ultimate
-  #   ports:
-  #     - "3306"
-  #     - "8080"
-  #   volumes:
-  #     - "./log/:/log"
-  #     - "./config/:/config"
-  #   environment:
-  #     MICRO_SERVER_ID: 2001
-  #     MICRO_REGISTRY: "consul"
-  #     MICRO_REGISTRY_ADDRESS: "ultimate:8500"
-  #     MICRO_BROKER: "nsq"
-  #     MICRO_BROKER_ADDRESS: "ultimate:4150"
-  #     MYSQL_ADDR: "host.docker.internal"
-  #   depends_on:
-  #     - "consul"
-  #     - "nsqd"
+  ultimate-service-arena:
+    build: arena-service/
+    image: ultimate-service-arena
+    container_name: ultimate-service-arena
+    ports:
+      - "3306"
+      - "8080"
+    volumes:
+      - "./log/:/log"
+      - "./config/:/config"
+    environment:
+      MICRO_SERVER_ID: 2001
+      MICRO_REGISTRY: "consul"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
+      MICRO_BROKER: "nsq"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
+      MYSQL_ADDR: "host.docker.internal"
+    depends_on:
+      - "consul"
+      - "nsqd"
+      - "loki"
+    networks:
+      - loki
+    logging:
+      driver: loki
+      options:
+        loki-url: http://host.docker.internal:3100/api/prom/push
+        loki-retries: "5"
+        loki-batch-size: "400"
 
-  # ultimate-service-game:
-  #   build: game-service/
-  #   image: ultimate-service-game
-  #   container_name: ultimate-service-game
-  #   networks:
-  #     - ultimate
-  #   ports:
-  #     - "7030:7030"
-  #     - "3306"
-  #     - "8080:8080"
-  #   volumes:
-  #     - "./log/:/log"
-  #     - "./config/:/config"
-  #   environment:
-  #     MICRO_SERVER_ID: 1001
-  #     MICRO_REGISTRY: "consul"
-  #     MICRO_REGISTRY_ADDRESS: "ultimate:8500"
-  #     MICRO_BROKER: "nsq"
-  #     MICRO_BROKER_ADDRESS: "ultimate:4150"
-  #     MYSQL_ADDR: "ultimate"
-  #   depends_on:
-  #     - "consul"
-  #     - "nsqd"
-  #     - "ultimate-service-arena"
 
-  # consul:
-  #   image: consul
-  #   command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
-  #   container_name: consul
-  #   networks:
-  #     - ultimate
-  #   ports:
-  #     - "8500:8500"
-  #   volumes:
-  #     - "./data/consul/:/consul_data"
-  #     - "./config/:/config"
+  ultimate-service-game:
+    build: game-service/
+    image: ultimate-service-game
+    container_name: ultimate-service-game
+    ports:
+      - "7030:7030"
+      - "3306"
+      - "8080:8080"
+    volumes:
+      - "./log/:/log"
+      - "./config/:/config"
+    environment:
+      MICRO_SERVER_ID: 1001
+      MICRO_REGISTRY: "consul"
+      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
+      MICRO_BROKER: "nsq"
+      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
+      MYSQL_ADDR: "host.docker.internal"
+    depends_on:
+      - "consul"
+      - "nsqd"
+      - "ultimate-service-arena"
+      - "loki"
+    networks:
+      - loki
+    logging:
+      driver: loki
+      options:
+        loki-url: http://host.docker.internal:3100/api/prom/push
+        loki-retries: "5"
+        loki-batch-size: "400"
+
+
+  consul:
+    image: consul
+    command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
+    container_name: consul
+    ports:
+      - "8500:8500"
+    volumes:
+      - "./data/consul/:/consul_data"
+      - "./config/:/config"
+    networks:
+      - loki
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+      options:
+        loki-url: http://host.docker.internal:3100/api/prom/push
+        loki-retries: "5"
+        loki-batch-size: "400"
 
   nsqlookupd:
     image: nsqio/nsq
@@ -76,6 +100,8 @@ services:
         loki-retries: "5"
         loki-batch-size: "400"
     networks:
+      - loki
+    depends_on:
       - loki
     ports:
       - "4160:4160"
@@ -102,6 +128,7 @@ services:
     depends_on:
       - nsqlookupd
       - nsqadmin
+      - loki
 
   nsqadmin:
     image: nsqio/nsq
@@ -111,6 +138,7 @@ services:
       - loki
     depends_on:
       - nsqlookupd  
+      - loki
     ports:
       - "4171:4171"
     logging:

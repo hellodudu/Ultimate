@@ -65,57 +65,61 @@ services:
   #     - "./data/consul/:/consul_data"
   #     - "./config/:/config"
 
-  # nsqlookupd:
-  #   image: nsqio/nsq
-  #   command: /nsqlookupd -log-level=info
-  #   container_name: nsqlookupd
-  #   logging:
-  #     driver: loki
-  #     options:
-  #       loki-url: "http://loki:3100/api/prom/push"
-  #       # loki-retries: 5
-  #       # loki-batch-size: 400
-  #   depends_on:
-  #     - promtail
-  #   networks:
-  #     - loki
-  #   ports:
-  #     - "4160:4160"
-  #     - "4161:4161"
+  nsqlookupd:
+    image: nsqio/nsq
+    command: /nsqlookupd -log-level=info
+    container_name: nsqlookupd
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://host.docker.internal:3100/api/prom/push"
+        loki-retries: "5"
+        loki-batch-size: "400"
+    networks:
+      - loki
+    ports:
+      - "4160:4160"
+      - "4161:4161"
 
-  # nsqd:
-  #   image: nsqio/nsq
-  #   command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=ultimate:4160 
-  #   container_name: nsqd
-  #   networks:
-  #     - loki
-  #   volumes:
-  #     - "./data/nsq/:/nsq_data"
-  #   ports:
-  #     - "4150:4150"
-  #     - "4151:4151"
-  #   logging:
-  #     driver: loki
-  #     options:
-  #       loki-url: http://loki:3100/api/prom/push
-  #       loki-retries: 5
-  #       loki-batch-size: 400
+  nsqd:
+    image: nsqio/nsq
+    command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=host.docker.internal:4160 
+    container_name: nsqd
+    networks:
+      - loki
+    volumes:
+      - "./data/nsq/:/nsq_data"
+    ports:
+      - "4150:4150"
+      - "4151:4151"
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://host.docker.internal:3100/api/prom/push"
+        loki-retries: "5"
+        loki-batch-size: "400"
 
-  #   depends_on:
-  #     - promtail
-  #     - nsqlookupd
-  #     - nsqadmin
+    depends_on:
+      - nsqlookupd
+      - nsqadmin
 
-  # nsqadmin:
-  #   image: nsqio/nsq
-  #   command: /nsqadmin -lookupd-http-address=loki:4161
-  #   container_name: nsqadmin
-  #   networks:
-  #     - loki
-  #   depends_on:
-  #     - nsqlookupd  
-  #   ports:
-  #     - "4171:4171"
+  nsqadmin:
+    image: nsqio/nsq
+    command: /nsqadmin -lookupd-http-address=loki:4161
+    container_name: nsqadmin
+    networks:
+      - loki
+    depends_on:
+      - nsqlookupd  
+    ports:
+      - "4171:4171"
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://host.docker.internal:3100/api/prom/push"
+        loki-retries: "5"
+        loki-batch-size: "400"
+
 
   loki:
     image: grafana/loki
@@ -128,16 +132,16 @@ services:
     networks:
       - loki
 
-  promtail:
-    image: grafana/promtail
-    container_name: promtail
-    volumes:
-      - ./config/promtail/:/etc/promtail
-      - /var/log:/var/log
-    command:
-      -config.file=/etc/promtail/promtail-docker-config.yaml
-    networks:
-      - loki
+  # promtail:
+  #   image: grafana/promtail
+  #   container_name: promtail
+  #   volumes:
+  #     - ./config/promtail/:/etc/promtail
+  #     - /var/log:/var/log
+  #   command:
+  #     -config.file=/etc/promtail/promtail-docker-config.yaml
+  #   networks:
+  #     - loki
 
   grafana:
     image: grafana/grafana
@@ -149,14 +153,12 @@ services:
       GF_EXPLORE_ENABLED: "true"
     networks:
       - loki
-    links:
-      - loki
     logging:
       driver: loki
       options:
-        loki-url: http://loki:3100/api/prom/push
-    depends_on:
-      - promtail  
+        loki-url: http://host.docker.internal:3100/api/prom/push
+        loki-retries: "5"
+        loki-batch-size: "400"
 
   # prometheus:
   #   image: prom/prometheus

@@ -13,7 +13,7 @@ import (
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 type traceMsg struct {
@@ -104,9 +104,9 @@ func (w *world) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			logger.WithFieldsInfo("world context done!", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"id": w.GetID(),
-			})
+			}).Info("world context done!")
 			w.chStop <- struct{}{}
 			return
 

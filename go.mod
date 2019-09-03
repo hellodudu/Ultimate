@@ -9,6 +9,7 @@ require (
 	github.com/go-log/log v0.1.0
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.1 // indirect
+	github.com/hellodudu/Ultimate/arena-service v0.0.0-20190819102231-2e0f3ed9d647 // indirect
 	github.com/jinzhu/gorm v1.9.10
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/micro/go-micro v1.8.1

@@ -12,9 +12,9 @@ import (
 	"github.com/gammazero/workerpool"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
 	_ "github.com/micro/go-plugins/broker/nsq"
+	logger "github.com/sirupsen/logrus"
 )
 
 var (
@@ -65,9 +65,9 @@ func main() {
 		wp.Submit(func() {
 			_, err := gameCli.GetPlayerInfoByID(context.Background(), &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
 			if err != nil {
-				logger.WithFieldsWarn("GetArenaSeasonData Response", logger.Fields{
+				logger.WithFields(logger.Fields{
 					"error": err,
-				})
+				}).Warn("GetArenaSeasonData Response")
 				return
 			}
 		})
@@ -91,9 +91,9 @@ func main() {
 	// wg.Wait()
 	// d := time.Since(t)
 
-	logger.WithFieldsWarn("elapse time", logger.Fields{
+	logger.WithFields(logger.Fields{
 		"duration": d,
-	})
+	}).Warn("elapse time")
 
 	// server exit
 	c := make(chan os.Signal, 1)

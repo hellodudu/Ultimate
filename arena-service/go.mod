@@ -10,6 +10,7 @@ require (
 	github.com/jinzhu/gorm v1.9.10
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.2.0
+	github.com/sirupsen/logrus v1.4.2
 )
 
 replace github.com/hellodudu/Ultimate => ../

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 func init() {

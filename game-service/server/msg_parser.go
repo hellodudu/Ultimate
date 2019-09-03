@@ -15,7 +15,7 @@ import (
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 // ProtoHandler handle function
@@ -73,10 +73,10 @@ func (m *MsgParser) getRegProtoHandle(id uint32) (ProtoHandler, error) {
 func (m *MsgParser) regProtoHandle(name string, fn ProtoHandler) {
 	id := utils.Crc32(name)
 	if v, ok := m.protoHandler[id]; ok {
-		logger.WithFieldsWarn("register proto msg id existed", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"id":   id,
 			"type": v,
-		})
+		}).Warn("register proto msg id existed")
 		return
 	}
 
@@ -114,10 +114,10 @@ func (m *MsgParser) decodeToProto(data []byte) (proto.Message, error) {
 
 	// unmarshal
 	if err := proto.Unmarshal(protoData, newProto); err != nil {
-		logger.WithFieldsWarn("Failed to parse proto msg", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"proto": newProto,
 			"error": err,
-		})
+		}).Warn("Failed to parse proto msg")
 		return nil, fmt.Errorf("invalid message<%s>, won't deal with it", protoTypeName)
 	}
 
@@ -129,9 +129,9 @@ func (m *MsgParser) decodeToProto(data []byte) (proto.Message, error) {
 // if it is transfer msg(transfer binarys to other world), then next are binarys to be transferred
 func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 	if len(data) <= 8 {
-		logger.WithFieldsWarn("tcp recv data length <= 8", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"data": string(data),
-		})
+		}).Warn("tcp recv data length <= 8")
 		return
 	}
 
@@ -141,21 +141,21 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 	copy(byBaseMsg, data[:binary.Size(baseMsg)])
 	buf := &bytes.Buffer{}
 	if _, err := buf.Write(byBaseMsg); err != nil {
-		logger.WithFieldsWarn("cannot read message from connection", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"base_msg": byBaseMsg,
 			"con":      con,
 			"error":    err,
-		})
+		}).Warn("cannot read message from connection")
 		return
 	}
 
 	// get top 4 bytes messageid
 	if err := binary.Read(buf, binary.LittleEndian, baseMsg); err != nil {
-		logger.WithFieldsWarn("cannot read message from connection", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"base_msg": byBaseMsg,
 			"con":      con,
 			"error":    err,
-		})
+		}).Warn("cannot read message from connection")
 		return
 	}
 
@@ -171,11 +171,11 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 		protoMsgID := utils.Crc32(protoMsgName)
 		fn, err := m.getRegProtoHandle(protoMsgID)
 		if err != nil {
-			logger.WithFieldsWarn("unregisted proto message received", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"message_id":   protoMsgID,
 				"message_name": protoMsgName,
 				"error":        err,
-			})
+			}).Warn("unregisted proto message received")
 			return
 		}
 
@@ -190,30 +190,30 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 		copy(byTransferMsg, data[:binary.Size(transferMsg)])
 		buf := &bytes.Buffer{}
 		if _, err := buf.Write(byTransferMsg); err != nil {
-			logger.WithFieldsWarn("cannot read message from connection", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"transfer_msg": byTransferMsg,
 				"con":          con,
 				"error":        err,
-			})
+			}).Warn("cannot read message from connection")
 			return
 		}
 
 		// get top 4 bytes messageid
 		if err := binary.Read(buf, binary.LittleEndian, transferMsg); err != nil {
-			logger.WithFieldsWarn("cannot read message from connection", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"transfer_msg": byTransferMsg,
 				"con":          con,
 				"error":        err,
-			})
+			}).Warn("cannot read message from connection")
 			return
 		}
 
 		// send message to world
 		sendWorld := m.wm.GetWorldByID(transferMsg.WorldID)
 		if sendWorld == nil {
-			logger.WithFieldsWarn("send transfer message to unconnected world", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"world_id": transferMsg.WorldID,
-			})
+			}).Warn("send transfer message to unconnected world")
 			return
 		}
 
@@ -231,11 +231,11 @@ func (m *MsgParser) handleWorldLogon(con iface.ITCPConn, p proto.Message) {
 
 	world, err := m.wm.AddWorld(msg.WorldId, msg.WorldName, con)
 	if err != nil {
-		logger.WithFieldsWarn("add world failed", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"id":   msg.WorldId,
 			"name": msg.WorldName,
 			"con":  con,
-		})
+		}).Warn("add world failed")
 		return
 	}
 
@@ -265,9 +265,9 @@ func (m *MsgParser) handleHeartBeat(con iface.ITCPConn, p proto.Message) {
 func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 	if world := m.wm.GetWorldByCon(con); world != nil {
 		arrWorldID := p.(*pbWorld.MWU_WorldConnected).WorldId
-		logger.WithFieldsInfo("world ref connected", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"ref_id": arrWorldID,
-		})
+		}).Info("world ref connected")
 
 		// add reference world id
 		m.wm.AddWorldRef(world.GetID(), arrWorldID)
@@ -282,10 +282,10 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 
 		// sync arena data
 		if season, seasonEndTime, err := m.gm.GetArenaSeasonData(); err == nil {
-			logger.WithFieldsInfo("GetArenaSeasonData success", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"season": season,
 				"time":   seasonEndTime,
-			})
+			}).Info("GetArenaSeasonData success")
 			msgArena := &pbArena.MUW_SyncArenaSeason{
 				Season:  season,
 				EndTime: uint32(seasonEndTime),
@@ -299,9 +299,9 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 			<-t.C
 			w := m.wm.GetWorldByID(id)
 			if w == nil {
-				logger.WithFieldsWarn("world disconnected, cannot sync arena champion", logger.Fields{
+				logger.WithFields(logger.Fields{
 					"world_id": id,
-				})
+				}).Warn("world disconnected, cannot sync arena champion")
 				return
 			}
 
@@ -311,10 +311,10 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 				}
 
 				w.SendProtoMessage(msg)
-				logger.WithFieldsInfo("sync arena champion to world", logger.Fields{
+				logger.WithFields(logger.Fields{
 					"world_id":   w.GetID(),
 					"world_name": w.GetName(),
-				})
+				}).Info("sync arena champion to world")
 			}
 		}(world.GetID())
 	}
@@ -324,9 +324,9 @@ func (m *MsgParser) handleRequestPlayerInfo(con iface.ITCPConn, p proto.Message)
 	if world := m.wm.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*pbGame.MWU_RequestPlayerInfo)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -338,9 +338,9 @@ func (m *MsgParser) handleRequestGuildInfo(con iface.ITCPConn, p proto.Message) 
 	if world := m.wm.GetWorldByCon(con); world != nil {
 		msg, ok := p.(*pbGame.MWU_RequestGuildInfo)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -352,9 +352,9 @@ func (m *MsgParser) handlePlayUltimateRecord(con iface.ITCPConn, p proto.Message
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_PlayUltimateRecord)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -377,9 +377,9 @@ func (m *MsgParser) handleRequestUltimatePlayer(con iface.ITCPConn, p proto.Mess
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_RequestUltimatePlayer)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -411,9 +411,9 @@ func (m *MsgParser) handleViewFormation(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_ViewFormation)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -448,9 +448,9 @@ func (m *MsgParser) handleArenaMatching(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbArena.MWU_ArenaMatching)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -462,9 +462,9 @@ func (m *MsgParser) handleArenaAddRecord(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbArena.MWU_ArenaAddRecord)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -476,9 +476,9 @@ func (m *MsgParser) handleArenaBattleResult(con iface.ITCPConn, p proto.Message)
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbArena.MWU_ArenaBattleResult)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -490,9 +490,9 @@ func (m *MsgParser) handleReplacePlayerInfo(con iface.ITCPConn, p proto.Message)
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_ReplacePlayerInfo)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -504,9 +504,9 @@ func (m *MsgParser) handleReplaceGuildInfo(con iface.ITCPConn, p proto.Message) 
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_ReplaceGuildInfo)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -518,9 +518,9 @@ func (m *MsgParser) handleRequestArenaRank(con iface.ITCPConn, p proto.Message) 
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbArena.MWU_RequestArenaRank)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -532,9 +532,9 @@ func (m *MsgParser) handleAddInvite(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_AddInvite)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -555,9 +555,9 @@ func (m *MsgParser) handleCheckInviteResult(con iface.ITCPConn, p proto.Message)
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_CheckInviteResult)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -569,9 +569,9 @@ func (m *MsgParser) handleInviteRecharge(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbGame.MWU_InviteRecharge)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 
@@ -583,9 +583,9 @@ func (m *MsgParser) handleArenaChampionOnline(con iface.ITCPConn, p proto.Messag
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
 		msg, ok := p.(*pbArena.MWU_ArenaChampionOnline)
 		if !ok {
-			logger.WithFieldsWarn("parsing message name error", logger.Fields{
+			logger.WithFields(logger.Fields{
 				"msg_name": proto.MessageName(p),
-			})
+			}).Warn("parsing message name error")
 			return
 		}
 

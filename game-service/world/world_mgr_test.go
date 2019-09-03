@@ -8,7 +8,7 @@ import (
 	datastore "github.com/hellodudu/Ultimate/game-service/db"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 type TestCon struct {

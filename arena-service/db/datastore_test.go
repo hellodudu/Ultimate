@@ -5,7 +5,7 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 var ds iface.IDatastore

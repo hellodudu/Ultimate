@@ -8,8 +8,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
 	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
-	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
+	logger "github.com/sirupsen/logrus"
 )
 
 type pubSub struct {
@@ -44,10 +44,10 @@ func newPubSub(service micro.Service, gm iface.IGameMgr, wm iface.IWorldMgr) *pu
 /////////////////////////////////////
 func (ps *pubSub) publishArenaMatching(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaMatching.Publish(ctx, m); err != nil {
-		logger.WithFieldsWarn("publish failed", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(m),
-		})
+		}).Warn("publish failed")
 		return err
 	}
 
@@ -56,10 +56,10 @@ func (ps *pubSub) publishArenaMatching(ctx context.Context, m proto.Message) err
 
 func (ps *pubSub) publishArenaAddRecord(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaAddRecord.Publish(ctx, m); err != nil {
-		logger.WithFieldsWarn("publish failed", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(m),
-		})
+		}).Warn("publish failed")
 		return err
 	}
 
@@ -68,10 +68,10 @@ func (ps *pubSub) publishArenaAddRecord(ctx context.Context, m proto.Message) er
 
 func (ps *pubSub) publishArenaBattleResult(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaBattleResult.Publish(ctx, m); err != nil {
-		logger.WithFieldsWarn("publish failed", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"error":   err,
 			"message": proto.MessageName(m),
-		})
+		}).Warn("publish failed")
 		return err
 	}
 
@@ -102,10 +102,10 @@ func (s *broadCastSubHandler) Process(ctx context.Context, event *pbPubSub.Publi
 
 	// unmarshal
 	if err := proto.Unmarshal(event.MsgData, msg); err != nil {
-		logger.WithFieldsWarn("Failed to parse proto msg", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"msg":   msg,
 			"error": err,
-		})
+		}).Warn("Failed to parse proto msg")
 		return err
 	}
 
@@ -141,10 +141,10 @@ func (s *sendWorldMessageSubHandler) Process(ctx context.Context, event *pbPubSu
 
 	// unmarshal
 	if err := proto.Unmarshal(event.MsgData, msg); err != nil {
-		logger.WithFieldsWarn("Failed to parse proto msg", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"msg":   msg,
 			"error": err,
-		})
+		}).Warn("Failed to parse proto msg")
 		return err
 	}
 

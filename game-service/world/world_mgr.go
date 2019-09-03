@@ -10,7 +10,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 type WorldMgr struct {
@@ -129,9 +129,9 @@ func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 		return
 	}
 
-	logger.WithFieldsWarn("World disconnected!", logger.Fields{
+	logger.WithFields(logger.Fields{
 		"id": world.GetID(),
-	})
+	}).Warn("World disconnected!")
 	world.Stop()
 
 	wm.mapWorld.Delete(world.GetID())
@@ -149,10 +149,10 @@ func (wm *WorldMgr) KickWorld(id uint32, reason string) {
 		return
 	}
 
-	logger.WithFieldsWarn("World was kicked!", logger.Fields{
+	logger.WithFields(logger.Fields{
 		"id":     world.GetID(),
 		"reason": reason,
-	})
+	}).Warn("World was kicked!")
 
 	world.Stop()
 	wm.mapConn.Delete(world.GetCon())

@@ -6,7 +6,7 @@ import (
 
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 // RPCHandler rpc handler

@@ -9,15 +9,12 @@ import (
 
 	"github.com/hellodudu/Ultimate/arena-service/arena"
 	datastore "github.com/hellodudu/Ultimate/arena-service/db"
-	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
+	logger "github.com/sirupsen/logrus"
 )
 
 func main() {
-
-	logger.Init(global.Debugging, true, "ultimate_service_arena")
 
 	ds, err := datastore.NewDatastore()
 	if err != nil {

@@ -13,10 +13,10 @@ import (
 	"github.com/hellodudu/Ultimate/game-service/world"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/hellodudu/Ultimate/utils/task"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
+	logger "github.com/sirupsen/logrus"
 )
 
 // ultimate define
@@ -178,7 +178,7 @@ func (umt *ultimate) initGameMgr() error {
 
 	logger.Info("game_mgr init ok!")
 
-	// logger.WithFieldsWarn("ultimate_service_game env vars", logger.Fields{
+	// logger.Warn("ultimate_service_game env vars").WithFields(logger.Fields{
 	// 	"broker":        os.Getenv("MICRO_BROKER"),
 	// 	"broker_addr":   os.Getenv("MICRO_BROKER_ADDRESS"),
 	// 	"registry":      os.Getenv("MICRO_REGISTRY"),

@@ -11,8 +11,8 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	logger "github.com/sirupsen/logrus"
 )
 
 var startTime = time.Now()
@@ -221,10 +221,10 @@ func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request
 
 	info, err := s.gm.GetPlayerInfoByID(req.ID)
 	if err != nil {
-		logger.WithFieldsWarn("cannot find player info by id", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"error": err,
 			"id":    req.ID,
-		})
+		}).Warn("cannot find player info by id")
 
 		w.Write([]byte(err.Error()))
 		return
@@ -251,10 +251,10 @@ func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request)
 
 	info, err := s.gm.GetGuildInfoByID(req.ID)
 	if err != nil {
-		logger.WithFieldsWarn("cannot find guild info by id", logger.Fields{
+		logger.WithFields(logger.Fields{
 			"error": err,
 			"id":    req.ID,
-		})
+		}).Warn("cannot find guild info by id")
 		w.Write([]byte(err.Error()))
 		return
 	}

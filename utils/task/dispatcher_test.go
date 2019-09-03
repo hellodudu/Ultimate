@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hellodudu/Ultimate/iface"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 var chCallback chan int

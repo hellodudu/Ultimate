@@ -8,13 +8,10 @@ import (
 	_ "net/http/pprof"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/hellodudu/Ultimate/utils/log"
+	logger "github.com/sirupsen/logrus"
 )
 
 func main() {
-
-	logger.Init(global.Debugging, true, "ultimate_service_game")
 
 	umt, err := server.NewUltimate()
 	if err != nil {

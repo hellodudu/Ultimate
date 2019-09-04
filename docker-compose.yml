@@ -132,7 +132,7 @@ services:
 
   nsqadmin:
     image: nsqio/nsq
-    command: /nsqadmin -lookupd-http-address=loki:4161
+    command: /nsqadmin -lookupd-http-address=host.docker.internal:4161
     container_name: nsqadmin
     networks:
       - loki

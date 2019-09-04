@@ -69,14 +69,14 @@ clone this repo
 ## Monitor
 
 - **consul** can be watched by [https://localhost:8500](https://localhost:8500)
-![screen_shot_consul](https://github.com/hellodudu/Ultimate/blob/master/docs/screen_shot_consul.png)
+![screen_shot_consul](https://github.com/hellodudu/Ultimate/raw/master/docs/screen_shot_consul.png)
 
 - **nsq** can be watched by [https://localhost:4171](https://localhost:4171)
-![screen_shot_nsq](https://github.com/hellodudu/Ultimate/blob/master/docs/screen_shot_nsq.png)
+![screen_shot_nsq](https://github.com/hellodudu/Ultimate/raw/master/docs/screen_shot_nsq.png)
 
 - **grafana** can be watched by [https://localhost:3000](https://localhost:3000)
-![screen_shot_grafana](https://github.com/hellodudu/Ultimate/blob/master/docs/screen_shot_grafana.png)
+![screen_shot_grafana](https://github.com/hellodudu/Ultimate/raw/master/docs/screen_shot_grafana.png)
 
 - **loki** can be watched after [adding data source](https://grafana.com/docs/features/datasources/loki/)
-![screen_shot_grafana_add_loki_data_source](https://github.com/hellodudu/Ultimate/blob/master/docs/screen_shot_grafana_add_loki_data_source.png)
-![screen_shot_loki_log](https://github.com/hellodudu/Ultimate/blob/master/docs/screen_shot_loki_log.png)
+![screen_shot_grafana_add_loki_data_source](https://github.com/hellodudu/Ultimate/raw/master/docs/screen_shot_grafana_add_loki_data_source.png)
+![screen_shot_loki_log](https://github.com/hellodudu/Ultimate/raw/master/docs/screen_shot_loki_log.png)

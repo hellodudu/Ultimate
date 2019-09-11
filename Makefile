@@ -11,7 +11,7 @@ build:
 proto:
 	make -C arena-service proto
 	make -C game-service proto
-	protoc -I=./proto --go_out=plugins=micro:${GOPATH}/src ./proto/pubsub/pubsub.proto
+	protoc -I=./proto --go_out=:${GOPATH}/src --micro_out=:${GOPATH}/src ./proto/pubsub/pubsub.proto
 
 .PHONY: docker
 docker:
@@ -22,7 +22,6 @@ docker:
 test:
 	make -C arena-service test
 	make -C game-service test
-	go test -v ./... -cover
 
 .PHONY: run
 run:

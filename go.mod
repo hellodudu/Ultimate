@@ -3,22 +3,25 @@ module github.com/hellodudu/Ultimate
 go 1.12
 
 require (
+	cloud.google.com/go v0.45.1 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20190715232110-2b613d287457 // indirect
 	github.com/gammazero/workerpool v0.0.0-20190608213748-0ed5e40ec55e
 	github.com/go-ini/ini v1.44.0
-	github.com/go-log/log v0.1.0
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.1 // indirect
-	github.com/hellodudu/Ultimate/arena-service v0.0.0-20190819102231-2e0f3ed9d647 // indirect
 	github.com/jinzhu/gorm v1.9.10
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.2.0
+	github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d // indirect
 	github.com/sirupsen/logrus v1.4.2
-	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
-	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
-	golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a // indirect
-	golang.org/x/tools v0.0.0-20190820205717-547ecf7b1ef1 // indirect
-	golang.org/x/tools/gopls v0.1.3 // indirect
+	github.com/stretchr/testify v1.4.0 // indirect
+	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7 // indirect
+	golang.org/x/net v0.0.0-20190909003024-a7b16738d86b // indirect
+	golang.org/x/sys v0.0.0-20190910064555-bbd175535a8b // indirect
+	google.golang.org/appengine v1.6.2 // indirect
+	google.golang.org/genproto v0.0.0-20190905072037-92dd089d5514 // indirect
+	google.golang.org/grpc v1.23.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/ini.v1 v1.45.0 // indirect
 )

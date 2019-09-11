@@ -7,7 +7,7 @@ build:
 
 .PHONY: proto
 proto:
-	protoc -I=../proto --go_out=plugins=micro:${GOPATH}/src ../proto/arena/arena.proto
+	protoc -I=../proto --go_out=:${GOPATH}/src --micro_out=:${GOPATH}/src ../proto/arena/arena.proto
 
 .PHONY: test
 test:

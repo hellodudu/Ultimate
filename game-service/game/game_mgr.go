@@ -23,7 +23,7 @@ type GameMgr struct {
 	ctx           context.Context
 	cancel        context.CancelFunc
 
-	arenaCli pbArena.ArenaServiceClient
+	arenaSrv pbArena.ArenaService
 	pubsub   *pubSub
 }
 
@@ -38,7 +38,7 @@ func NewGameMgr(wm iface.IWorldMgr, service micro.Service) (iface.IGameMgr, erro
 	gm.invite = &invite{gm: gm, wm: wm}
 
 	// init arena service client
-	gm.arenaCli = pbArena.NewArenaServiceClient(
+	gm.arenaSrv = pbArena.NewArenaService(
 		"ultimate-service-arena",
 		service.Client(),
 	)
@@ -132,7 +132,7 @@ func (g *GameMgr) GetGuildInfoByID(id int64) (*pbGame.CrossGuildInfo, error) {
 
 func (g *GameMgr) GetArenaSeasonData() (int32, int32, error) {
 	req := &pbArena.GetSeasonDataRequest{}
-	rsp, err := g.arenaCli.GetSeasonData(g.ctx, req)
+	rsp, err := g.arenaSrv.GetSeasonData(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -145,7 +145,7 @@ func (g *GameMgr) GetArenaSeasonData() (int32, int32, error) {
 
 func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 	req := &pbArena.GetChampionRequest{}
-	rsp, err := g.arenaCli.GetChampion(g.ctx, req)
+	rsp, err := g.arenaSrv.GetChampion(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -159,7 +159,7 @@ func (g *GameMgr) GetArenaChampion() ([]*pbArena.ArenaChampion, error) {
 
 func (g *GameMgr) GetArenaMatchingList() ([]int64, error) {
 	req := &pbArena.GetMatchingListRequest{}
-	rsp, err := g.arenaCli.GetMatchingList(g.ctx, req)
+	rsp, err := g.arenaSrv.GetMatchingList(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -172,7 +172,7 @@ func (g *GameMgr) GetArenaMatchingList() ([]int64, error) {
 
 func (g *GameMgr) GetArenaRecordReqList() ([]*pbArena.RecordReqList, error) {
 	req := &pbArena.GetRecordReqListRequest{}
-	rsp, err := g.arenaCli.GetRecordReqList(g.ctx, req)
+	rsp, err := g.arenaSrv.GetRecordReqList(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -185,7 +185,7 @@ func (g *GameMgr) GetArenaRecordReqList() ([]*pbArena.RecordReqList, error) {
 
 func (g *GameMgr) GetArenaRecord(id int64) (*pbArena.ArenaRecord, error) {
 	rpcReq := &pbArena.GetRecordByIDRequest{Id: id}
-	rsp, err := g.arenaCli.GetRecordByID(g.ctx, rpcReq)
+	rsp, err := g.arenaSrv.GetRecordByID(g.ctx, rpcReq)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -198,7 +198,7 @@ func (g *GameMgr) GetArenaRecord(id int64) (*pbArena.ArenaRecord, error) {
 
 func (g *GameMgr) GetArenaRankList(page int) ([]byte, error) {
 	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(page)}
-	rsp, err := g.arenaCli.GetRankListByPage(g.ctx, rpcReq)
+	rsp, err := g.arenaSrv.GetRankListByPage(g.ctx, rpcReq)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -211,7 +211,7 @@ func (g *GameMgr) GetArenaRankList(page int) ([]byte, error) {
 
 func (g *GameMgr) ArenaSaveChampion() error {
 	req := &pbArena.SaveChampionRequest{}
-	_, err := g.arenaCli.SaveChampion(g.ctx, req)
+	_, err := g.arenaSrv.SaveChampion(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -224,7 +224,7 @@ func (g *GameMgr) ArenaSaveChampion() error {
 
 func (g *GameMgr) ArenaWeekEnd() error {
 	req := &pbArena.WeekEndRequest{}
-	_, err := g.arenaCli.WeekEnd(g.ctx, req)
+	_, err := g.arenaSrv.WeekEnd(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -252,7 +252,7 @@ func (g *GameMgr) ArenaBattleResult(attackID int64, targetID int64, attackWin bo
 
 func (g *GameMgr) ArenaGetRank(id int64, page int32) {
 	req := &pbArena.GetRankRequest{PlayerId: id, Page: page}
-	_, err := g.arenaCli.GetRank(g.ctx, req)
+	_, err := g.arenaSrv.GetRank(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -262,7 +262,7 @@ func (g *GameMgr) ArenaGetRank(id int64, page int32) {
 
 func (g *GameMgr) GetArenaDataNum() int32 {
 	req := &pbArena.GetArenaDataNumRequest{}
-	rsp, err := g.arenaCli.GetArenaDataNum(g.ctx, req)
+	rsp, err := g.arenaSrv.GetArenaDataNum(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,
@@ -274,7 +274,7 @@ func (g *GameMgr) GetArenaDataNum() int32 {
 
 func (g *GameMgr) GetArenaRecordNum() int32 {
 	req := &pbArena.GetRecordNumRequest{}
-	rsp, err := g.arenaCli.GetRecordNum(g.ctx, req)
+	rsp, err := g.arenaSrv.GetRecordNum(g.ctx, req)
 	if err != nil {
 		logger.WithFields(logger.Fields{
 			"error": err,

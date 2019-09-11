@@ -13,7 +13,7 @@ import (
 type RPCHandler struct {
 	ctx     context.Context
 	arena   *Arena
-	gameCli pbGame.GameServiceClient
+	gameSrv pbGame.GameService
 }
 
 /////////////////////////////////////////////
@@ -21,7 +21,7 @@ type RPCHandler struct {
 /////////////////////////////////////////////
 func (h *RPCHandler) GetPlayerInfoByID(id int64) (*pbGame.GetPlayerInfoByIDReply, error) {
 	req := &pbGame.GetPlayerInfoByIDRequest{Id: id}
-	return h.gameCli.GetPlayerInfoByID(h.ctx, req)
+	return h.gameSrv.GetPlayerInfoByID(h.ctx, req)
 }
 
 /////////////////////////////////////////////

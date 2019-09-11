@@ -9,12 +9,6 @@ import (
 	math "math"
 )
 
-import (
-	client "github.com/micro/go-micro/client"
-	server "github.com/micro/go-micro/server"
-	context "golang.org/x/net/context"
-)
-
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
@@ -1572,77 +1566,4 @@ var fileDescriptor_2a9278d664c0c01e = []byte{
 	0x67, 0xbb, 0x51, 0x96, 0xec, 0x0d, 0x45, 0x1c, 0x67, 0xbc, 0xe0, 0xc5, 0xde, 0xe4, 0xba, 0xda,
 	0xa3, 0x9f, 0xc7, 0xf4, 0x4b, 0xf9, 0xac, 0x42, 0xff, 0x7f, 0xf3, 0x77, 0x00, 0x00, 0x00, 0xff,
 	0xff, 0xf2, 0x99, 0x1d, 0x69, 0x3d, 0x0f, 0x00, 0x00,
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ client.Option
-var _ server.Option
-
-// Client API for GameService service
-
-type GameServiceClient interface {
-	GetPlayerInfoByID(ctx context.Context, in *GetPlayerInfoByIDRequest, opts ...client.CallOption) (*GetPlayerInfoByIDReply, error)
-	GetGuildInfoByID(ctx context.Context, in *GetGuildInfoByIDRequest, opts ...client.CallOption) (*GetGuildInfoByIDReply, error)
-}
-
-type gameServiceClient struct {
-	c           client.Client
-	serviceName string
-}
-
-func NewGameServiceClient(serviceName string, c client.Client) GameServiceClient {
-	if c == nil {
-		c = client.NewClient()
-	}
-	if len(serviceName) == 0 {
-		serviceName = "ultimate_service_game"
-	}
-	return &gameServiceClient{
-		c:           c,
-		serviceName: serviceName,
-	}
-}
-
-func (c *gameServiceClient) GetPlayerInfoByID(ctx context.Context, in *GetPlayerInfoByIDRequest, opts ...client.CallOption) (*GetPlayerInfoByIDReply, error) {
-	req := c.c.NewRequest(c.serviceName, "GameService.GetPlayerInfoByID", in)
-	out := new(GetPlayerInfoByIDReply)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *gameServiceClient) GetGuildInfoByID(ctx context.Context, in *GetGuildInfoByIDRequest, opts ...client.CallOption) (*GetGuildInfoByIDReply, error) {
-	req := c.c.NewRequest(c.serviceName, "GameService.GetGuildInfoByID", in)
-	out := new(GetGuildInfoByIDReply)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Server API for GameService service
-
-type GameServiceHandler interface {
-	GetPlayerInfoByID(context.Context, *GetPlayerInfoByIDRequest, *GetPlayerInfoByIDReply) error
-	GetGuildInfoByID(context.Context, *GetGuildInfoByIDRequest, *GetGuildInfoByIDReply) error
-}
-
-func RegisterGameServiceHandler(s server.Server, hdlr GameServiceHandler, opts ...server.HandlerOption) {
-	s.Handle(s.NewHandler(&GameService{hdlr}, opts...))
-}
-
-type GameService struct {
-	GameServiceHandler
-}
-
-func (h *GameService) GetPlayerInfoByID(ctx context.Context, in *GetPlayerInfoByIDRequest, out *GetPlayerInfoByIDReply) error {
-	return h.GameServiceHandler.GetPlayerInfoByID(ctx, in, out)
-}
-
-func (h *GameService) GetGuildInfoByID(ctx context.Context, in *GetGuildInfoByIDRequest, out *GetGuildInfoByIDReply) error {
-	return h.GameServiceHandler.GetGuildInfoByID(ctx, in, out)
 }

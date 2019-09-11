@@ -107,7 +107,7 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 	arena.handler = &RPCHandler{
 		ctx:   arena.ctx,
 		arena: arena,
-		gameCli: pbGame.NewGameServiceClient(
+		gameSrv: pbGame.NewGameService(
 			"ultimate-service-game",
 			service.Client(),
 		),

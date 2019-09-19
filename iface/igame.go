@@ -25,6 +25,7 @@ type IArena interface {
 	GetRecordByID(id int64) (*pb.ArenaRecord, error)
 	GetRecordNum() int
 	GetRecordReqList() map[int64]uint32
+	APIRequestRank(id int64, page int) *pb.MUW_RequestArenaRank
 	Season() int
 	SeasonEndTime() int
 	WeekEnd()

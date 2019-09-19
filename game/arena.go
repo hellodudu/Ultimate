@@ -1030,3 +1030,67 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 
 	world.SendProtoMessage(msg)
 }
+
+func (arena *Arena) APIRequestRank(id int64, page int) *pb.MUW_RequestArenaRank {
+	if page >= 10 || page < 0 {
+		logger.Warning("player ", id, " api request rank error: page ", page)
+		return nil
+	}
+
+	info := arena.gm.GetPlayerInfoByID(id)
+	if info == nil {
+		logger.Warning("player ", id, " api request rank error: cannot find player info")
+		return nil
+	}
+
+	world := arena.wm.GetWorldByID(info.ServerId)
+	if world == nil {
+		logger.Warning("player ", id, " api request rank error: cannot find world ", info.ServerId)
+		return nil
+	}
+
+	msg := &pb.MUW_RequestArenaRank{
+		PlayerId:      id,
+		Page:          int32(page),
+		Score:         int32(arenaDefaultScore),
+		Rank:          -1,
+		SeasonEndTime: uint32(arena.SeasonEndTime()),
+		Infos:         make([]*pb.ArenaTargetInfo, 0),
+	}
+
+	// get player rank
+	if d, ok := arena.mapArenaData.Load(id); ok {
+		data := d.(*arenaData)
+		msg.Score = data.Score
+		msg.Rank = int32(arena.arrRankArena.GetIndexBefore100(data))
+	}
+
+	// rank player data
+	l := arena.arrRankArena.GetListByPage(page)
+	for _, r := range l {
+		v, ok := arena.mapRecord.Load(r.Playerid)
+		if !ok {
+			continue
+		}
+
+		value := v.(*pb.ArenaRecord)
+
+		info := &pb.ArenaTargetInfo{
+			PlayerId:     value.PlayerId,
+			PlayerName:   value.FirstGroup.Name,
+			ServerName:   value.FirstGroup.WorldName,
+			Level:        value.FirstGroup.Level,
+			PlayerScore:  value.FirstGroup.PlayerScore,
+			HeadProtrait: int32(value.FirstGroup.HeadProtrait),
+			HeadQuality:  int32(value.FirstGroup.HeadQuality),
+			ArenaScore:   r.Score,
+		}
+		msg.Infos = append(msg.Infos, info)
+	}
+
+	if msg.Page >= 10 {
+		logger.Warning("reply arena api request rank pages error:", msg.Page)
+	}
+
+	return msg
+}

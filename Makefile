@@ -1,5 +1,4 @@
 
-# GOPATH:=$(shell go env GOPATH)
 v ?= latest
 
 .PHONY: build
@@ -17,7 +16,7 @@ test:
 
 .PHONY: run
 run:
-	docker run -itd -v $(shell pwd)/config:/app/config/ -v $(shell pwd)/log:/app/log/ -p 7030:7030 -p 8088:8080 ultimate:$(v)
+	v=${v} docker-compose up -d
 
 .PHONY: docker_push
 docker_push:
@@ -30,4 +29,4 @@ docker_rm:
 
 .PHONY: stop
 stop:
-	docker stop $(shell docker ps -q  --filter ancestor=ultimate)
+	docker-compose down

@@ -994,6 +994,8 @@ func (arena *Arena) RequestRank(id int64, page int32) {
 		Infos:         make([]*pb.ArenaTargetInfo, 0),
 	}
 
+	logger.Warning("get arena request rank page:", msg.Page)
+
 	// get player rank
 	if d, ok := arena.mapArenaData.Load(id); ok {
 		data := d.(*arenaData)
@@ -1057,6 +1059,8 @@ func (arena *Arena) APIRequestRank(id int64, page int) *pb.MUW_RequestArenaRank 
 		SeasonEndTime: uint32(arena.SeasonEndTime()),
 		Infos:         make([]*pb.ArenaTargetInfo, 0),
 	}
+
+	logger.Warning("get arena request rank page:", msg.Page)
 
 	// get player rank
 	if d, ok := arena.mapArenaData.Load(id); ok {

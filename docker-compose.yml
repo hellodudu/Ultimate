@@ -1,15 +1,46 @@
 version: "3"
+
 services:
-  ultimate-service:
-    build: ./
-    command: env GOOS=linux GOARCH=amd64 go build -o ultimate-service
-    image: ultimate-service
-    ports:
-      - 7030:7030
-      - 8088:8080
-    environment:
-      MICRO_ADRESS: ":50051"
-      MICRO_REGISTRY: "mdns"
-      DB_HOST: "root:@(localhost:3306)/db_ultimate"
+    ultimate:
+        image: hellodudu86/ultimate:${v}
+        container_name: ultimate
+        ports:
+          - "3306"
+          - "8088:8080"
+        volumes:
+          - "./log/:/app/log"
+          - "./config/:/app/config"
+        logging:
+            driver: loki
+            options:
+                loki-url: http://host.docker.internal:3100/api/prom/push
+                loki-retries: "5"
+                loki-batch-size: "400"
+        depends_on:
+          - "loki"
+          - "grafana"
 
+    loki:
+        image: grafana/loki
+        container_name: loki
+        ports:
+          - "3100:3100"
+        volumes:
+          - ./config/loki/:/etc/loki
+          - ./data/loki/:/tmp/loki
+        command: -config.file=/etc/loki/loki-local-config.yaml
 
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        ports:
+          - "3000:3000"
+        user: "472"
+        environment:
+          GF_EXPLORE_ENABLED: "true"
+        logging:
+          driver: loki
+          options:
+            loki-url: http://host.docker.internal:3100/api/prom/push
+            loki-retries: "5"
+            loki-batch-size: "400"

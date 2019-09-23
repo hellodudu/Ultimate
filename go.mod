@@ -6,6 +6,7 @@ require (
 	9fans.net/go v0.0.2 // indirect
 	cloud.google.com/go v0.41.0 // indirect
 	github.com/alecthomas/gometalinter v3.0.0+incompatible // indirect
+	github.com/astaxie/beego v1.12.0 // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect
 	github.com/coreos/etcd v3.3.13+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
@@ -47,6 +48,7 @@ require (
 	github.com/rogpeppe/fastuuid v1.2.0 // indirect
 	github.com/rogpeppe/godef v1.1.1 // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
+	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190710185942-9d28bd7c0945 // indirect
 	github.com/spf13/afero v1.2.2 // indirect

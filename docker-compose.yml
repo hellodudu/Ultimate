@@ -2,8 +2,8 @@ version: "3"
 
 services:
     ultimate:
-        build: ./
-        # image: hellodudu86/ultimate:${v}
+        # build: ./
+        image: hellodudu86/ultimate:${v}
         container_name: ultimate
         ports:
           - "3306"
@@ -14,7 +14,7 @@ services:
         logging:
             driver: loki
             options:
-                loki-url: http://host.docker.internal:3100/api/prom/push
+                loki-url: http://{外网ip}:3100/api/prom/push
                 loki-retries: "5"
                 loki-batch-size: "400"
         depends_on:
@@ -29,15 +29,7 @@ services:
         volumes:
           - ./config/loki/:/etc/loki
           - ./data/loki/:/tmp/loki
-        command: -config.file=/etc/loki/loki-local-config.yaml
-
-    # promtail:
-    #     image: grafana/promtail
-    #     container_name: promtail
-    #     volumes:
-    #       - ./config/promtail/:/etc/promtail
-    #       - /var/log/:/var/log
-    #     command: -config.file=/etc/promtail/promtail-docker-config.yaml
+        command: -config.file=/etc/loki/local-config.yaml
 
     grafana:
         image: grafana/grafana
@@ -50,6 +42,6 @@ services:
         logging:
           driver: loki
           options:
-            loki-url: http://host.docker.internal:3100/api/prom/push
+            loki-url: http://{外网ip}:3100/api/prom/push
             loki-retries: "5"
             loki-batch-size: "400"

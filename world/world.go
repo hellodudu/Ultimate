@@ -141,6 +141,14 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	copy(resp[14:14+len(typeName)], []byte(typeName))
 	copy(resp[14+len(typeName):], out)
 
+	// trace proto bug
+	if msg, ok := p.(*pb.MUW_RequestArenaRank); ok {
+		if msg.PlayerId == 1412159966747296018 {
+			logger.Warning("trace SendProtoMessage, 锅包肉's MUW_RequestArenaRank page:", msg.Page, ", rank:", msg.Rank, ", score:", msg.Score, ", proto_data:", resp)
+		}
+	}
+	// end trace
+
 	if _, err := w.con.Write(resp); err != nil {
 		logger.Warning("send proto msg error:", err)
 		return
@@ -199,6 +207,14 @@ func (w *world) TestSendProtoMessage(p proto.Message) *TestSeasonSync {
 	if !ok {
 		return nil
 	}
+
+	// trace proto bug
+	if msg, ok := p.(*pb.MUW_RequestArenaRank); ok {
+		if msg.PlayerId == 1412159966747296018 {
+			logger.Warning("trace TestSendProtoMessage, 锅包肉's MUW_RequestArenaRank page:", msg.Page, ", rank:", msg.Rank, ", score:", msg.Score, ", proto_data:", resp)
+		}
+	}
+	// end trace
 
 	ret := &TestSeasonSync{}
 	ret.WorldID = w.GetID()

@@ -23,9 +23,9 @@ docker_push:
 	docker tag ultimate hellodudu86/ultimate:$(v)
 	docker push hellodudu86/ultimate:$(v)
 
-.PHONY: docker_rm
-docker_rm:
-	docker rmi $(shell docker images -f "dangling=true" -q) --force
+.PHONY: clean
+clean:
+	docker rm -f $(shell docker ps -a -q)
 
 .PHONY: stop
 stop:

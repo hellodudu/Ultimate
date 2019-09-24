@@ -161,16 +161,16 @@ services:
     networks:
       - loki
 
-  # promtail:
-  #   image: grafana/promtail
-  #   container_name: promtail
-  #   volumes:
-  #     - ./config/promtail/:/etc/promtail
-  #     - /var/log:/var/log
-  #   command:
-  #     -config.file=/etc/promtail/promtail-docker-config.yaml
-  #   networks:
-  #     - loki
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    volumes:
+      - ./config/promtail/:/etc/promtail
+      - /var/log:/var/log
+    command:
+      -config.file=/etc/promtail/promtail-docker-config.yaml
+    networks:
+      - loki
 
   grafana:
     image: grafana/grafana

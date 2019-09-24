@@ -13,6 +13,12 @@ import (
 	"github.com/hellodudu/Ultimate/logger"
 )
 
+type TestSeasonSync struct {
+	WorldID       uint32 `json:"world_id"`
+	Season        int32  `json:"season"`
+	SeasonEndTime uint32 `json:"season_end_time"`
+}
+
 type WorldMgr struct {
 	mapWorld      sync.Map
 	mapConn       sync.Map
@@ -172,4 +178,23 @@ func (wm *WorldMgr) Run() {
 			wm.KickWorld(wid, "time out")
 		}
 	}
+}
+
+func (wm *WorldMgr) TestBroadCast(msg proto.Message) interface{} {
+
+	retList := []*TestSeasonSync{}
+
+	wm.mapWorld.Range(func(_, v interface{}) bool {
+		if world, ok := v.(*world); ok {
+			ret := world.TestSendProtoMessage(msg)
+			if ret == nil {
+				logger.Print("TestSendProtoMessage failed")
+			} else {
+				retList = append(retList, ret)
+			}
+		}
+		return true
+	})
+
+	return retList
 }

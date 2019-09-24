@@ -1098,3 +1098,14 @@ func (arena *Arena) APIRequestRank(id int64, page int) *pb.MUW_RequestArenaRank 
 
 	return msg
 }
+
+func (arena *Arena) APISyncSeason() interface{} {
+
+	// broadcast to all world
+	msg := &pb.MUW_SyncArenaSeason{
+		Season:  int32(arena.Season()),
+		EndTime: uint32(arena.SeasonEndTime()),
+	}
+
+	return arena.wm.TestBroadCast(msg)
+}

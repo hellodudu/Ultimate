@@ -172,3 +172,42 @@ func (w *world) SendTransferMessage(data []byte) {
 		return
 	}
 }
+
+func (w *world) TestSendProtoMessage(p proto.Message) *TestSeasonSync {
+	// reply message length = 4bytes size + 8bytes size BaseNetMsg + 2bytes message_name size + message_name + proto_data
+	out, err := proto.Marshal(p)
+	if err != nil {
+		logger.Warning(err)
+		return nil
+	}
+
+	typeName := proto.MessageName(p)
+	baseMsg := &global.BaseNetMsg{}
+	msgSize := binary.Size(baseMsg) + 2 + len(typeName) + len(out)
+	baseMsg.ID = utils.Crc32("MUW_DirectProtoMsg")
+	baseMsg.Size = uint32(msgSize)
+
+	var resp []byte = make([]byte, 4+msgSize)
+	binary.LittleEndian.PutUint32(resp[:4], uint32(msgSize))
+	binary.LittleEndian.PutUint32(resp[4:8], baseMsg.ID)
+	binary.LittleEndian.PutUint32(resp[8:12], baseMsg.Size)
+	binary.LittleEndian.PutUint16(resp[12:12+2], uint16(len(typeName)))
+	copy(resp[14:14+len(typeName)], []byte(typeName))
+	copy(resp[14+len(typeName):], out)
+
+	msg, ok := p.(*pb.MUW_SyncArenaSeason)
+	if !ok {
+		return nil
+	}
+
+	ret := &TestSeasonSync{}
+	ret.WorldID = w.GetID()
+	ret.Season = msg.Season
+	ret.SeasonEndTime = msg.EndTime
+	return ret
+
+	// if _, err := w.con.Write(resp); err != nil {
+	// 	logger.Warning("send proto msg error:", err)
+	// 	return
+	// }
+}

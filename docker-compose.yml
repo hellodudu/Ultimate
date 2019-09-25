@@ -8,13 +8,14 @@ services:
         ports:
           - "3306"
           - "8088:8080"
+          - "7030:7030"
         volumes:
           - "./log/:/app/log"
           - "./config/:/app/config"
         logging:
             driver: loki
             options:
-                loki-url: http://{外网ip}:3100/api/prom/push
+                loki-url: http://host.docker.internal:3100/api/prom/push
                 loki-retries: "5"
                 loki-batch-size: "400"
         depends_on:
@@ -36,12 +37,14 @@ services:
         container_name: grafana
         ports:
           - "3000:3000"
+        volumes:
+          - ./data/grafana/:/var/lib/grafana
         user: "472"
         environment:
           GF_EXPLORE_ENABLED: "true"
         logging:
           driver: loki
           options:
-            loki-url: http://{外网ip}:3100/api/prom/push
+            loki-url: http://host.docker.internal:3100/api/prom/push
             loki-retries: "5"
             loki-batch-size: "400"

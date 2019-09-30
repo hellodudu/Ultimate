@@ -5,7 +5,6 @@ go 1.12
 require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.2
-	github.com/google/btree v1.0.0 // indirect
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
 	github.com/jinzhu/gorm v1.9.10
 	github.com/micro/go-micro v1.8.1

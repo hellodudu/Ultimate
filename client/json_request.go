@@ -10,14 +10,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	pb "github.com/hellodudu/Ultimate/proto"
+	"github.com/sirupsen/logrus"
 )
 
 var endPoint = "http://118.25.151.103:8088/arena_api_request_rank"
 var tickSeconds int = 3
+var chFault chan int
 
 type reqArena struct {
 	ID   int64 `json:"id"`
@@ -60,16 +63,41 @@ func call() {
 		return
 	}
 
-	fmt.Println("response Status:", resp.Status, ", PlayerID:", respJSON.PlayerId, ", Score:", respJSON.Score, ", Page:", respJSON.Page, ", Rank:", respJSON.Rank)
+	logrus.WithFields(logrus.Fields{
+		"status":    resp.Status,
+		"player_id": respJSON.PlayerId,
+		"score":     respJSON.Score,
+		"page":      respJSON.Page,
+		"rank":      respJSON.Rank,
+	}).Info("recv respons")
+
+	if strings.Compare(resp.Status, "200 OK") != 0 {
+		return
+	}
+
+	if respJSON.Page < 0 || respJSON.Page > 10 {
+		chFault <- 1
+		return
+	}
+
+	if respJSON.Score < 1000 || respJSON.Score > 5000 {
+		chFault <- 1
+		return
+	}
 }
 
 func run() {
 
 	for {
-		t := time.Now()
-		call()
-		d := time.Since(t)
-		time.Sleep(time.Second*time.Duration(tickSeconds) - d)
+		select {
+		case <-chFault:
+			return
+		default:
+			t := time.Now()
+			call()
+			d := time.Since(t)
+			time.Sleep(time.Second*time.Duration(tickSeconds) - d)
+		}
 	}
 }
 

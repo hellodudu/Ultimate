@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -30,7 +30,7 @@ type reqArena struct {
 func call() {
 	r := &reqArena{
 		ID:   1412159966747296018,
-		Page: 0,
+		Page: rand.Intn(10),
 	}
 
 	reqJSON, err := json.Marshal(r)
@@ -71,7 +71,7 @@ func call() {
 		"rank":      respJSON.Rank,
 	}).Info("recv respons")
 
-	if strings.Compare(resp.Status, "200 OK") != 0 {
+	if resp.StatusCode == http.StatusOK {
 		return
 	}
 

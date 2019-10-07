@@ -24,6 +24,7 @@ require (
 	github.com/google/shlex v0.0.0-20181106134648-c34317bd91bf // indirect
 	github.com/gorilla/websocket v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway v1.9.4 // indirect
+	github.com/hellodudu/shippy v0.0.0-20190519024118-629041b14978 // indirect
 	github.com/jinzhu/gorm v1.9.10
 	github.com/josharian/impl v0.0.0-20190706034337-76254c7a7314 // indirect
 	github.com/jstemmer/gotags v1.4.1 // indirect

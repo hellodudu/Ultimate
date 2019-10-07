@@ -116,7 +116,10 @@ func callArenaSync() {
 		return
 	}
 
-	logrus.Warning("recv arena season sync")
+	logrus.WithFields(logrus.Fields{
+		"status":    resp.StatusCode,
+		"world_len": len(respJSON),
+	}).Warning("recv arena season sync")
 
 	if resp.StatusCode == http.StatusOK {
 		return

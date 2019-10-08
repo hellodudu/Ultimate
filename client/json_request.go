@@ -20,7 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var tickSeconds int = 3
+var tickSeconds int = 10
 var chFault chan int
 
 type reqArena struct {

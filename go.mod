@@ -36,6 +36,7 @@ require (
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/ini.v1 v1.45.0 // indirect
 	gopkg.in/ldap.v2 v2.5.1 // indirect
+
 )
 
 replace github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d => github.com/nats-io/nats.go v1.8.1

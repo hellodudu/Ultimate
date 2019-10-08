@@ -1,7 +1,5 @@
 version: "3"
 
-networks:
-    loki:
 
 services:
   
@@ -26,8 +24,6 @@ services:
       - "consul"
       - "nsqd"
       - "loki"
-    networks:
-      - loki
     logging:
       driver: loki
       options:
@@ -59,8 +55,6 @@ services:
       - "nsqd"
       - "ultimate-service-arena"
       - "loki"
-    networks:
-      - loki
     logging:
       driver: loki
       options:
@@ -78,8 +72,6 @@ services:
     volumes:
       - "./data/consul/:/consul_data"
       - "./config/:/config"
-    networks:
-      - loki
     depends_on:
       - loki
     logging:
@@ -99,8 +91,6 @@ services:
         loki-url: "http://host.docker.internal:3100/api/prom/push"
         loki-retries: "5"
         loki-batch-size: "400"
-    networks:
-      - loki
     depends_on:
       - loki
     ports:
@@ -111,8 +101,6 @@ services:
     image: nsqio/nsq
     command: /nsqd --data-path=/nsq_data -log-level=info -lookupd-tcp-address=host.docker.internal:4160 
     container_name: nsqd
-    networks:
-      - loki
     volumes:
       - "./data/nsq/:/nsq_data"
     ports:
@@ -134,8 +122,6 @@ services:
     image: nsqio/nsq
     command: /nsqadmin -lookupd-http-address=host.docker.internal:4161
     container_name: nsqadmin
-    networks:
-      - loki
     depends_on:
       - nsqlookupd  
       - loki
@@ -158,19 +144,15 @@ services:
       - ./config/loki/:/etc/loki
       - ./data/loki/:/tmp/loki
     command: -config.file=/etc/loki/loki-local-config.yaml
-    networks:
-      - loki
 
-  promtail:
-    image: grafana/promtail
-    container_name: promtail
-    volumes:
-      - ./config/promtail/:/etc/promtail
-      - /var/log:/var/log
-    command:
-      -config.file=/etc/promtail/promtail-docker-config.yaml
-    networks:
-      - loki
+#  promtail:
+    #image: grafana/promtail
+    #container_name: promtail
+    #volumes:
+      #- ./config/promtail/:/etc/promtail
+      #- /var/log:/var/log
+    #command:
+      #-config.file=/etc/promtail/promtail-docker-config.yaml
 
   grafana:
     image: grafana/grafana
@@ -180,8 +162,6 @@ services:
     user: "472"
     environment:
       GF_EXPLORE_ENABLED: "true"
-    networks:
-      - loki
     logging:
       driver: loki
       options:

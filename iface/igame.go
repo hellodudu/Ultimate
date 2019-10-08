@@ -1,7 +1,9 @@
 package iface
 
-import pbGame "github.com/hellodudu/Ultimate/proto/game"
-import pbArena "github.com/hellodudu/Ultimate/proto/arena"
+import (
+	pbArena "github.com/hellodudu/Ultimate/proto/arena"
+	pbGame "github.com/hellodudu/Ultimate/proto/game"
+)
 
 type IGameMgr interface {
 	Invite() IInvite
@@ -27,28 +29,6 @@ type IGameMgr interface {
 	ArenaGetRank(id int64, page int32)
 	Run()
 }
-
-// type IArena interface {
-// 	AddRecord(rec *pbGame.ArenaRecord)
-// 	BattleResult(attack int64, target int64, win bool)
-// 	GetArenaDataNum() int
-// 	GetChampion() []*pbGame.ArenaChampion
-// 	GetDataByID(id int64) (interface{}, error) // ret: (*arenaData, error)
-// 	GetMatchingList() []int64
-// 	GetRankListByPage(page int) interface{} //ret: []*arenaData
-// 	GetRecordByID(id int64) (*pbGame.ArenaRecord, error)
-// 	GetRecordNum() int
-// 	GetRecordReqList() map[int64]uint32
-// 	Season() int
-// 	SeasonEndTime() int
-// 	WeekEnd()
-// 	WeekEndTime() int
-// 	Matching(playerID int64)
-// 	RequestRank(id int64, page int32)
-// 	Run()
-// 	Stop()
-// 	SaveChampion()
-// }
 
 type IInvite interface {
 	AddInvite(newbieId int64, inviterId int64) int32

@@ -1,5 +1,4 @@
 
-# GOPATH:=$(shell go env GOPATH)
 v ?= latest
 
 .PHONY: build
@@ -25,23 +24,18 @@ test:
 
 .PHONY: run
 run:
-	docker-compose -f compose_nsq.yml up -d
-	docker-compose -f compose_ultimate.yml up -d
+	v=${v} docker-compose up -d
 
 .PHONY: push
 push:
-	make -C arena-service push
-	make -C game-service push
+	docker tag ultimate hellodudu86/ultimate:$(v)
+	docker push hellodudu86/ultimate:$(v)
 
-.PHONY: docker_rm
-docker_rm:
-	docker rmi $(shell docker images -f "dangling=true" -q) --force
-
-.PHONY: docker_clean
-docker_clean:
+.PHONY: clean
+clean:
 	docker rm -f $(shell docker ps -a -q)
+
 
 .PHONY: stop
 stop:
-	docker-compose -f compose_nsq.yml down
-	docker-compose -f compose_ultimate.yml down
+	docker-compose down

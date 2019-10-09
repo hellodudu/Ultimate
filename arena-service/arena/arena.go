@@ -916,31 +916,22 @@ func (arena *Arena) requestRank(id int64, page int32) {
 	arena.pubsub.publishSendWorldMessage(arena.ctx, resp.Info.ServerId, msg)
 }
 
-func (arena *Arena) APIRequestRank(id int64, page int) *pb.MUW_RequestArenaRank {
+func (arena *Arena) APIRequestRank(id int64, page int) *pbArena.MUW_RequestArenaRank {
 	if page >= 10 || page < 0 {
-		logger.Warning("player ", id, " api request rank error: page ", page)
+		logger.WithFields(logger.Fields{
+			"player_id": id,
+			"page":      page,
+		}).Warn("api request rank error")
 		return nil
 	}
 
-	info := arena.gm.GetPlayerInfoByID(id)
-	if info == nil {
-		logger.Warning("player ", id, " api request rank error: cannot find player info")
-		return nil
-	}
-
-	world := arena.wm.GetWorldByID(info.ServerId)
-	if world == nil {
-		logger.Warning("player ", id, " api request rank error: cannot find world ", info.ServerId)
-		return nil
-	}
-
-	msg := &pb.MUW_RequestArenaRank{
+	msg := &pbArena.MUW_RequestArenaRank{
 		PlayerId:      id,
 		Page:          int32(page),
 		Score:         int32(arenaDefaultScore),
 		Rank:          -1,
-		SeasonEndTime: uint32(arena.SeasonEndTime()),
-		Infos:         make([]*pb.ArenaTargetInfo, 0),
+		SeasonEndTime: uint32(arena.seasonEndTime()),
+		Infos:         make([]*pbArena.ArenaTargetInfo, 0),
 	}
 
 	logger.Warning("get arena request rank page:", msg.Page)
@@ -949,20 +940,20 @@ func (arena *Arena) APIRequestRank(id int64, page int) *pb.MUW_RequestArenaRank 
 	if d, ok := arena.mapArenaData.Load(id); ok {
 		data := d.(*arenaData)
 		msg.Score = data.Score
-		msg.Rank = int32(arena.arrRankArena.GetIndexBefore100(data))
+		msg.Rank = int32(arena.arrRankArena.getIndexBefore100(data))
 	}
 
 	// rank player data
-	l := arena.arrRankArena.GetListByPage(page)
+	l := arena.arrRankArena.getListByPage(page)
 	for _, r := range l {
 		v, ok := arena.mapRecord.Load(r.Playerid)
 		if !ok {
 			continue
 		}
 
-		value := v.(*pb.ArenaRecord)
+		value := v.(*pbArena.ArenaRecord)
 
-		info := &pb.ArenaTargetInfo{
+		info := &pbArena.ArenaTargetInfo{
 			PlayerId:     value.PlayerId,
 			PlayerName:   value.FirstGroup.Name,
 			ServerName:   value.FirstGroup.WorldName,
@@ -980,15 +971,4 @@ func (arena *Arena) APIRequestRank(id int64, page int) *pb.MUW_RequestArenaRank 
 	}
 
 	return msg
-}
-
-func (arena *Arena) APISyncSeason() interface{} {
-
-	// broadcast to all world
-	msg := &pb.MUW_SyncArenaSeason{
-		Season:  int32(arena.Season()),
-		EndTime: uint32(arena.SeasonEndTime()),
-	}
-
-	return arena.wm.TestBroadCast(msg)
 }

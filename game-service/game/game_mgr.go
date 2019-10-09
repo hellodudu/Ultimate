@@ -209,6 +209,19 @@ func (g *GameMgr) GetArenaRankList(page int) ([]byte, error) {
 	return rsp.Data, nil
 }
 
+func (g *GameMgr) ArenaAPIRequestRank(id int64, page int) ([]byte, error) {
+	rpcReq := &pbArena.GetRankListByPageRequest{Page: int32(page)}
+	rsp, err := g.arenaSrv.GetRankListByPage(g.ctx, rpcReq)
+	if err != nil {
+		logger.WithFields(logger.Fields{
+			"error": err,
+		}).Warn("GetRankListByPage Response")
+		return nil, err
+	}
+
+	return rsp.Data, nil
+}
+
 func (g *GameMgr) ArenaSaveChampion() error {
 	req := &pbArena.SaveChampionRequest{}
 	_, err := g.arenaSrv.SaveChampion(g.ctx, req)

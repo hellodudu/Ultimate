@@ -94,7 +94,6 @@ func (s *HttpServer) Run() {
 	http.HandleFunc("/arena_get_record", s.arenaGetRecordHandler)
 	http.HandleFunc("/arena_rank_list", s.arenaGetRankListHandler)
 	http.HandleFunc("/arena_api_request_rank", s.arenaAPIRequestRankHandler)
-	http.HandleFunc("/arena_api_sync_season", s.arenaAPISyncSeasonHandler)
 	http.HandleFunc("/arena_save_champion", s.arenaSaveChampion)
 	http.HandleFunc("/arena_weekend", s.arenaWeekEnd)
 	http.HandleFunc("/player_info", s.getPlayerInfoHandler)
@@ -204,19 +203,11 @@ func (s *HttpServer) arenaAPIRequestRankHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	d := s.gm.Arena().APIRequestRank(req.ID, req.Page)
-	if d == nil {
-		w.Write([]byte("api request rank error"))
-		return
+	if data, err := s.gm.ArenaAPIRequestRank(req.ID, req.Page); err != nil {
+		w.Write([]byte(err.Error()))
+	} else {
+		json.NewEncoder(w).Encode(data)
 	}
-	json.NewEncoder(w).Encode(d)
-}
-
-func (s *HttpServer) arenaAPISyncSeasonHandler(w http.ResponseWriter, r *http.Request) {
-
-	d := s.gm.Arena().APISyncSeason()
-
-	json.NewEncoder(w).Encode(d)
 }
 
 func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {

@@ -21,6 +21,7 @@ type IGameMgr interface {
 	GetArenaRecordReqList() ([]*pbArena.RecordReqList, error)
 	GetArenaRecord(id int64) (*pbArena.ArenaRecord, error)
 	GetArenaRankList(page int) ([]byte, error)
+	ArenaAPIRequestRank(id int64, page int) ([]byte, error)
 	ArenaSaveChampion() error
 	ArenaWeekEnd() error
 	ArenaMatching(id int64)

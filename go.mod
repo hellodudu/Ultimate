@@ -10,6 +10,7 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190715232110-2b613d287457 // indirect
 	github.com/gammazero/workerpool v0.0.0-20190608213748-0ed5e40ec55e
 	github.com/go-ini/ini v1.44.0
+
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/hellodudu/Ultimate/arena-service v0.0.0-20190924062254-b2fc9d6cf412 // indirect
@@ -32,7 +33,7 @@ require (
 	golang.org/x/sys v0.0.0-20190910064555-bbd175535a8b // indirect
 	google.golang.org/appengine v1.6.2 // indirect
 	google.golang.org/genproto v0.0.0-20190905072037-92dd089d5514 // indirect
-	google.golang.org/grpc v1.23.0 // indirect
+	google.golang.org/grpc v1.23.0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/ini.v1 v1.45.0 // indirect
 	gopkg.in/ldap.v2 v2.5.1 // indirect

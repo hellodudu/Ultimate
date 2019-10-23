@@ -1107,3 +1107,13 @@ func (arena *Arena) APISyncSeason() interface{} {
 
 	return arena.wm.TestBroadCast(msg)
 }
+
+func (arena *Arena) TestSyncSeason() {
+	// broadcast to all world
+	msg := &pb.MUW_TestSyncArenaSeason{
+		Season:  int32(arena.Season()),
+		EndTime: uint32(arena.SeasonEndTime()),
+	}
+	logger.Info("broadcast MUW_TestSyncArenaSeason with season:", msg.Season, ", endtime:", msg.EndTime)
+	arena.wm.BroadCast(msg)
+}

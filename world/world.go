@@ -142,10 +142,8 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	copy(resp[14+len(typeName):], out)
 
 	// trace proto bug
-	if msg, ok := p.(*pb.MUW_RequestArenaRank); ok {
-		if msg.PlayerId == 1412159966747296018 {
-			logger.Warning("trace SendProtoMessage, 锅包肉's MUW_RequestArenaRank page:", msg.Page, ", rank:", msg.Rank, ", score:", msg.Score, ", proto_data:", resp)
-		}
+	if _, ok := p.(*pb.MUW_TestSyncArenaSeason); ok {
+		logger.Warning("trace MUW_TestSyncArenaSeason, world_id:", w.GetID(), ", resp:", resp)
 	}
 	// end trace
 

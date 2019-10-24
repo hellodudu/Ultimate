@@ -2,13 +2,16 @@ package rpc_presure
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/hellodudu/Ultimate/internal/utils"
 	"github.com/micro/go-micro"
+
+	pbArena "github.com/hellodudu/Ultimate/proto/arena"
+	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	logger "github.com/sirupsen/logrus"
 )
 
 var playerID = []int64{
@@ -30,13 +33,12 @@ type RPCPresure struct {
 	cancel    context.CancelFunc
 	opts      *Options
 	waitGroup utils.WaitGroupWrapper
-	services  []micro.Service
+	service   micro.Service
 }
 
 func New(opts *Options) (*RPCPresure, error) {
 	r := &RPCPresure{
-		opts:     opts,
-		services: make([]micro.Service, 0),
+		opts: opts,
 	}
 
 	r.ctx, r.cancel = context.WithCancel(context.Background())
@@ -47,15 +49,16 @@ func New(opts *Options) (*RPCPresure, error) {
 }
 
 func (r *RPCPresure) initService() {
-	for n := 0; n < r.opts.Workers; n++ {
-		s := micro.NewService(
-			micro.Name(fmt.Sprintf("rpc_client%d", n+1)),
-		)
+	r.service = micro.NewService(
+		micro.Name("rpc_client"),
+	)
+	r.service.Init()
 
-		s.Init()
-		r.services = append(r.services, s)
-	}
-
+	go func() {
+		if err := r.service.Run(); err != nil {
+			logger.Fatal(err)
+		}
+	}()
 }
 
 // Main starts an instance of RPCPresure and returns an
@@ -73,11 +76,9 @@ func (r *RPCPresure) Main() error {
 		})
 	}
 
-	for n := 0; n < r.opts.Workers; n++ {
-		r.waitGroup.Wrap(func() {
-			exitFunc(r.work(n))
-		})
-	}
+	r.waitGroup.Wrap(func() {
+		exitFunc(r.work())
+	})
 
 	err := <-exitCh
 	return err
@@ -88,26 +89,16 @@ func (r *RPCPresure) Exit() {
 	r.waitGroup.Wait()
 }
 
-func (r *RPCPresure) work(n int) error {
+func (r *RPCPresure) work() error {
 
-	// Run service
-	ch := make(chan int, 1)
-	go func() {
-		if err := service.Run(); err != nil {
-			logger.Fatal(err)
-		}
-		ch <- 1
-	}()
-	<-ch
-
-	gameCli := pbGame.NewGameServiceClient(
+	gameSrv := pbGame.NewGameService(
 		"ultimate-service-game",
-		r.services[n].Client(),
+		r.service.Client(),
 	)
 
-	arenaCli := pbArena.NewArenaServiceClient(
+	arenaSrv := pbArena.NewArenaService(
 		"ultimate-service-arena",
-		r.services[n].Client(),
+		r.service.Client(),
 	)
 
 	now := time.Now()
@@ -121,21 +112,21 @@ func (r *RPCPresure) work(n int) error {
 		default:
 		}
 
-		if e := r.call(n, gameCli, arenaCli); e != nil {
-			logger.Warn("worker ", n, " call rpc failed:", e)
+		if e := r.call(gameSrv, arenaSrv); e != nil {
+			logger.Warn("call rpc failed:", e)
 		}
 
 		times++
 		if times >= r.opts.RPCTimes {
 			d := time.Since(now)
-			logger.Info("worker ", n, " do rpc call ", r.opts.RPCTimes, " times, cost time ", d)
+			logger.Info("do rpc call ", r.opts.RPCTimes, " times, cost time ", d)
 			time.Sleep(time.Second - d)
 			now = time.Now()
 		}
 	}
 }
 
-func (r *RPCPresure) call(n int, gameCli micro.Client, arenaCli micro.Client) error {
-	_, err := gameCli.GetPlayerInfoByID(r.ctx, &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
+func (r *RPCPresure) call(gameSrv pbGame.GameService, arenaSrv pbArena.ArenaService) error {
+	_, err := gameSrv.GetPlayerInfoByID(r.ctx, &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
 	return err
 }

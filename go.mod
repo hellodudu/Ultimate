@@ -15,6 +15,7 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/hellodudu/Ultimate/arena-service v0.0.0-20190924062254-b2fc9d6cf412 // indirect
+	github.com/hellodudu/Ultimate/game-service v0.0.0-20191023104308-b22baf597dba // indirect
 	github.com/howeyc/fsnotify v0.9.0 // indirect
 	github.com/jinzhu/gorm v1.9.10
 	github.com/judwhite/go-svc v1.1.2

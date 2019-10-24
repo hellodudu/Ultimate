@@ -256,6 +256,7 @@ func (s *HttpServer) arenaAPISyncSeasonHandler(w http.ResponseWriter, r *http.Re
 
 func (s *HttpServer) arenaTestSyncSeasonHandler(w http.ResponseWriter, r *http.Request) {
 	s.gm.Arena().TestSyncSeason()
+	w.Write([]byte("success"))
 }
 
 func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {

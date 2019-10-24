@@ -83,86 +83,68 @@ func (r *RPCPresure) initRandFuncs() {
 	// game: get player info
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := game.GetPlayerInfoByID(r.ctx, &pbGame.GetPlayerInfoByIDRequest{Id: playerID[rand.Intn(len(playerID))]})
-		logger.Info(resp)
 		return err
 	})
 
 	// game: get guild info
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := game.GetGuildInfoByID(r.ctx, &pbGame.GetGuildInfoByIDRequest{Id: guildID[rand.Intn(len(guildID))]})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get season data
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetSeasonData(r.ctx, &pbArena.GetSeasonDataRequest{})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get champion
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetChampion(r.ctx, &pbArena.GetChampionRequest{})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get rank
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetRank(r.ctx, &pbArena.GetRankRequest{PlayerId: playerID[rand.Intn(len(playerID))], Page: rand.Int31n(maxPage)})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get arena data num
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetArenaDataNum(r.ctx, &pbArena.GetArenaDataNumRequest{})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get record num
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetRecordNum(r.ctx, &pbArena.GetRecordNumRequest{})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get matching list
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetMatchingList(r.ctx, &pbArena.GetMatchingListRequest{})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get record req list
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetRecordReqList(r.ctx, &pbArena.GetRecordReqListRequest{})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get record by id
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetRecordByID(r.ctx, &pbArena.GetRecordByIDRequest{Id: playerID[rand.Intn(len(playerID))]})
-		logger.Info(resp)
 		return err
 	})
 
 	// arena: get rank list by page
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		resp, err := arena.GetRankListByPage(r.ctx, &pbArena.GetRankListByPageRequest{Page: rand.Int31n(maxPage)})
-		logger.Info(resp)
 		return err
 	})
-}
-
-func (r *RPCPresure) registerProto(p *protoRequest) {
-	switch p.Name {
-	case "GetPlayerInfoByID":
-		logger.Info("value = ", p.Value)
-	}
 }
 
 // Main starts an instance of RPCPresure and returns an

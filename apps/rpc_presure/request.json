@@ -1,0 +1,35 @@
+{
+	"requests":[
+		{"name":"GetPlayerInfoByID", "value":[1452692363393630209,
+												1452692363393630210,
+												1452692363393630211,
+												1452692363393630212,
+												1452692363393630213,
+												1452692363393630214,
+												1452692363393630215,
+												1452692363393630216,
+												1452692363393630217,
+												1452692363393630218]},
+		
+		{"name": "GetGuildInfoByID", "value":[1452692354803695617]},
+		
+		{"name": "GetSeasonData", "value":[]},
+		
+		{"name": "GetChampion", "value":[]},
+		
+		{"name": "GetRank", "value":[{"player_id":1452692363393630209, "page":0}]},
+		
+		{"name": "GetArenaDataNum", "value":[]},
+		
+		{"name": "GetRecordNum", "value":[]},
+		
+		{"name": "GetMatchingList", "value":[]},
+		
+		{"name": "GetRecordReqList", "value":[]},
+		
+		{"name": "GetRecordByID", "value":[{"id":1452692363393630209}]},
+		
+		{"name": "GetRankListByPage", "value":[{"page":0}]}
+	]
+
+}

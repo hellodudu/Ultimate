@@ -8,4 +8,6 @@ build:
 docker: build
 	docker build . -t rpc-client:latest
 
-
+.PHONY: run
+run:
+	go run main.go plugin.go

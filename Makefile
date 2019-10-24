@@ -16,6 +16,7 @@ proto:
 docker:
 	make -C arena-service docker
 	make -C game-service docker
+	make -C apps/rpc_presure docker
 
 .PHONY: test
 test:
@@ -24,6 +25,12 @@ test:
 
 .PHONY: run
 run:
+	make -C arena-service run
+	make -C game-service run
+	make -C apps/rpc_presure run
+
+.PHONY: docker_run
+docker_run:
 	v=${v} docker-compose up -d
 
 .PHONY: push

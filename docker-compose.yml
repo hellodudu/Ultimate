@@ -78,6 +78,13 @@ services:
       #- "consul"
       #- "nsqd"
       #- "ultimate-service-game"
+      #- "loki"
+    #logging:
+      #driver: loki
+      #options:
+        #loki-url: http://host.docker.internal:3100/api/prom/push
+        #loki-retries: "5"
+        #loki-batch-size: "400"
 
   consul:
     image: consul

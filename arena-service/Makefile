@@ -24,13 +24,4 @@ push: build
 
 .PHONY: run
 run:
-	docker run -it \
-	 -p 50051 \
-	 -p 3306 \
-	 -e MICRO_BROKER=nsq \
-	 -e MICRO_SERVER_ADDRESS=:50051 \
-	 -e MICRO_REGISTRY=mdns \
-	 -e MYSQL_ADDR=host.docker.internal \
-	 -v $(shell pwd)/../config:/config/ \
-	 -v $(shell pwd)/../log:/log/ \
-	 ultimate-service-arena
+	go run main.go plugin.go

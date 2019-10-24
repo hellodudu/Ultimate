@@ -6,12 +6,9 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.2
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
-	github.com/hellodudu/Ultimate/game-service v0.0.0-20191023104308-b22baf597dba // indirect
 	github.com/jinzhu/gorm v1.9.10
-	github.com/judwhite/go-svc v1.1.2 // indirect
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.2.0
-	github.com/mreiferson/go-options v0.0.0-20190302064952-20ba7d382d05 // indirect
 	github.com/sirupsen/logrus v1.4.2
 )
 

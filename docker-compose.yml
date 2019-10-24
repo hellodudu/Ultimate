@@ -62,6 +62,22 @@ services:
         loki-retries: "5"
         loki-batch-size: "400"
 
+  #rpc-client:
+    #image: rpc-client
+    #container_name: rpc-client
+    #volumes:
+      #- "./log/:/log"
+      #- "./config/:/config"
+    #environment:
+      #MICRO_SERVER_ID: 3001
+      #MICRO_REGISTRY: "consul"
+      #MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
+      #MICRO_BROKER: "nsq"
+      #MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
+    #depends_on:
+      #- "consul"
+      #- "nsqd"
+      #- "ultimate-service-game"
 
   consul:
     image: consul

@@ -82,67 +82,67 @@ func (r *RPCPresure) initService() {
 func (r *RPCPresure) initRandFuncs() {
 	// game: get player info
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := game.GetPlayerInfoByID(r.ctx, &pbGame.GetPlayerInfoByIDRequest{Id: playerID[rand.Intn(len(playerID))]})
+		_, err := game.GetPlayerInfoByID(r.ctx, &pbGame.GetPlayerInfoByIDRequest{Id: playerID[rand.Intn(len(playerID))]})
 		return err
 	})
 
 	// game: get guild info
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := game.GetGuildInfoByID(r.ctx, &pbGame.GetGuildInfoByIDRequest{Id: guildID[rand.Intn(len(guildID))]})
+		_, err := game.GetGuildInfoByID(r.ctx, &pbGame.GetGuildInfoByIDRequest{Id: guildID[rand.Intn(len(guildID))]})
 		return err
 	})
 
 	// arena: get season data
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetSeasonData(r.ctx, &pbArena.GetSeasonDataRequest{})
+		_, err := arena.GetSeasonData(r.ctx, &pbArena.GetSeasonDataRequest{})
 		return err
 	})
 
 	// arena: get champion
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetChampion(r.ctx, &pbArena.GetChampionRequest{})
+		_, err := arena.GetChampion(r.ctx, &pbArena.GetChampionRequest{})
 		return err
 	})
 
 	// arena: get rank
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetRank(r.ctx, &pbArena.GetRankRequest{PlayerId: playerID[rand.Intn(len(playerID))], Page: rand.Int31n(maxPage)})
+		_, err := arena.GetRank(r.ctx, &pbArena.GetRankRequest{PlayerId: playerID[rand.Intn(len(playerID))], Page: rand.Int31n(maxPage)})
 		return err
 	})
 
 	// arena: get arena data num
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetArenaDataNum(r.ctx, &pbArena.GetArenaDataNumRequest{})
+		_, err := arena.GetArenaDataNum(r.ctx, &pbArena.GetArenaDataNumRequest{})
 		return err
 	})
 
 	// arena: get record num
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetRecordNum(r.ctx, &pbArena.GetRecordNumRequest{})
+		_, err := arena.GetRecordNum(r.ctx, &pbArena.GetRecordNumRequest{})
 		return err
 	})
 
 	// arena: get matching list
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetMatchingList(r.ctx, &pbArena.GetMatchingListRequest{})
+		_, err := arena.GetMatchingList(r.ctx, &pbArena.GetMatchingListRequest{})
 		return err
 	})
 
 	// arena: get record req list
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetRecordReqList(r.ctx, &pbArena.GetRecordReqListRequest{})
+		_, err := arena.GetRecordReqList(r.ctx, &pbArena.GetRecordReqListRequest{})
 		return err
 	})
 
 	// arena: get record by id
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetRecordByID(r.ctx, &pbArena.GetRecordByIDRequest{Id: playerID[rand.Intn(len(playerID))]})
+		_, err := arena.GetRecordByID(r.ctx, &pbArena.GetRecordByIDRequest{Id: playerID[rand.Intn(len(playerID))]})
 		return err
 	})
 
 	// arena: get rank list by page
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
-		resp, err := arena.GetRankListByPage(r.ctx, &pbArena.GetRankListByPageRequest{Page: rand.Int31n(maxPage)})
+		_, err := arena.GetRankListByPage(r.ctx, &pbArena.GetRankListByPageRequest{Page: rand.Int31n(maxPage)})
 		return err
 	})
 }
@@ -208,6 +208,7 @@ func (r *RPCPresure) work() error {
 			logger.Info("do rpc call ", r.opts.RPCTimes, " times, cost time ", d)
 			time.Sleep(time.Second - d)
 			now = time.Now()
+			times = 0
 		}
 	}
 }

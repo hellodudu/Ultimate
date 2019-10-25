@@ -13,6 +13,7 @@ import (
 
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
+	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
 	logger "github.com/sirupsen/logrus"
 )
 
@@ -45,6 +46,7 @@ type RPCPresure struct {
 	waitGroup utils.WaitGroupWrapper
 	service   micro.Service
 	randFuncs []mappingFunc
+	pub       micro.Publisher
 }
 
 type protoRequest struct {
@@ -71,6 +73,7 @@ func (r *RPCPresure) initService() {
 		micro.Name("rpc_client"),
 	)
 	r.service.Init()
+	r.pub = micro.NewPublisher("arena.Matching", r.service.Client())
 
 	go func() {
 		if err := r.service.Run(); err != nil {
@@ -144,6 +147,11 @@ func (r *RPCPresure) initRandFuncs() {
 	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
 		_, err := arena.GetRankListByPage(r.ctx, &pbArena.GetRankListByPageRequest{Page: rand.Int31n(maxPage)})
 		return err
+	})
+
+	// arean: publish matching
+	r.randFuncs = append(r.randFuncs, func(game pbGame.GameService, arena pbArena.ArenaService) error {
+		return r.pub.Publish(r.ctx, &pbPubSub.PublishMatching{Id: playerID[rand.Intn(len(playerID))]})
 	})
 }
 

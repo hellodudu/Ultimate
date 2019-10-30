@@ -56,6 +56,7 @@ func (m *MsgParser) registerAllMessage() {
 	m.regProtoHandle("world_message.MWU_CheckInviteResult", m.handleCheckInviteResult)
 	m.regProtoHandle("world_message.MWU_InviteRecharge", m.handleInviteRecharge)
 	m.regProtoHandle("world_message.MWU_ArenaChampionOnline", m.handleArenaChampionOnline)
+	m.regProtoHandle("world_message.MWU_SyncArenaSeason", m.handlerArenaSyncSeason)
 
 }
 
@@ -515,5 +516,17 @@ func (m *MsgParser) handleArenaChampionOnline(con iface.ITCPConn, p proto.Messag
 		}
 
 		m.wm.BroadCast(msgSend)
+	}
+}
+
+func (m *MsgParser) handlerArenaSyncSeason(con iface.ITCPConn, p proto.Message) {
+	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
+		_, ok := p.(*pb.MWU_SyncArenaSeason)
+		if !ok {
+			logger.Warning("Cannot assert value to message pb.MWU_SyncArenaSeason")
+			return
+		}
+
+		m.gm.Arena().SyncArenaSeason(srcWorld.GetID())
 	}
 }

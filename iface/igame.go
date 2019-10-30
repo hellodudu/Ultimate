@@ -34,6 +34,7 @@ type IArena interface {
 	WeekEndTime() int
 	Matching(playerID int64)
 	RequestRank(id int64, page int32)
+	SyncArenaSeason(id uint32)
 	Run()
 	Stop()
 	SaveChampion()

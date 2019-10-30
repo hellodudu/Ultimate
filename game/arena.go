@@ -836,6 +836,21 @@ func (arena *Arena) SaveChampion() {
 	arena.wm.BroadCast(msg)
 }
 
+func (arena *Arena) SyncArenaSeason(id uint32) {
+	world := arena.wm.GetWorldByID(id)
+	if world == nil {
+		logger.Warning("arena sync season data to world: ", id)
+		return
+	}
+
+	msg := &pb.MUW_SyncArenaSeason{
+		Season:  int32(arena.Season()),
+		EndTime: uint32(arena.SeasonEndTime()),
+	}
+
+	world.SendProtoMessage(msg)
+}
+
 // send top 100 reward mail
 func (arena *Arena) seasonReward() {
 	list := arena.arrRankArena.GetTop(100)

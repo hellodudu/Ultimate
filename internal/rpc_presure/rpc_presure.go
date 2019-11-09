@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/internal/utils"
+	"github.com/micro/cli"
 	"github.com/micro/go-micro"
 
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
@@ -71,6 +72,10 @@ func New(opts *Options) (*RPCPresure, error) {
 func (r *RPCPresure) initService() {
 	r.service = micro.NewService(
 		micro.Name("rpc_client"),
+		micro.Flags(cli.StringFlag{
+			Name:  "times",
+			Usage: "how many rpc call times per 1 second",
+		}),
 	)
 	r.service.Init()
 	r.pub = micro.NewPublisher("arena.Matching", r.service.Client())

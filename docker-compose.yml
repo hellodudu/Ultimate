@@ -62,30 +62,30 @@ services:
         loki-retries: "5"
         loki-batch-size: "400"
 
-  rpc-client:
-    image: rpc-client
-    container_name: hellodudu86/rpc-client
-    command: "-times=10"
-    volumes:
-      - "./log/:/log"
-      - "./config/:/config"
-    environment:
-      micro_server_id: 3001
-      micro_registry: "consul"
-      micro_registry_address: "host.docker.internal:8500"
-      micro_broker: "nsq"
-      micro_broker_address: "host.docker.internal:4150"
-    depends_on:
-      - "consul"
-      - "nsqd"
-      - "ultimate-service-game"
-      - "loki"
-    logging:
-      driver: loki
-      options:
-        loki-url: http://host.docker.internal:3100/api/prom/push
-        loki-retries: "5"
-        loki-batch-size: "400"
+  #rpc-client:
+    #image: hellodudu86/rpc-client
+    #container_name: rpc-client
+    #command: "-times=10"
+    #volumes:
+      #- "./log/:/log"
+      #- "./config/:/config"
+    #environment:
+      #MICRO_SERVER_ID: 3001
+      #MICRO_REGISTRY: "consul"
+      #MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
+      #MICRO_BROKER: "nsq"
+      #MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
+    #depends_on:
+      #- "consul"
+      #- "nsqd"
+      #- "ultimate-service-game"
+      #- "loki"
+    #logging:
+      #driver: loki
+      #options:
+        #loki-url: http://host.docker.internal:3100/api/prom/push
+        #loki-retries: "5"
+        #loki-batch-size: "400"
 
   consul:
     image: consul

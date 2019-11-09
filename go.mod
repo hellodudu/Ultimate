@@ -23,6 +23,7 @@ require (
 	github.com/lifei6671/gocaptcha v0.0.0-20190301083731-c467a25bc100 // indirect
 	github.com/lifei6671/mindoc v1.0.2 // indirect
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
+	github.com/micro/cli v0.2.0
 	github.com/micro/examples v0.2.0 // indirect
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.2.0

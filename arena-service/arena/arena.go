@@ -68,8 +68,8 @@ func getDefaultScoreBySection(secIdx int32) int32 {
 // Arena data
 type Arena struct {
 	ds           iface.IDatastore
-	mapArenaData sync.Map      // all player's arena data
-	arrRankArena rankArenaData // slice of arena record sorted with ArenaScore
+	mapArenaData map[int64]*arenaData // all player's arena data
+	arrRankArena rankArenaData        // slice of arena record sorted with ArenaScore
 
 	mapRecord    sync.Map   // all player's arena record
 	arrMatchPool []sync.Map // 8 level match pool map[playerid]struct{}
@@ -80,7 +80,7 @@ type Arena struct {
 	chMatchWaitOK chan int64 // match wait player channel
 
 	championList []*championData // top 3 champion data
-	cpLock       sync.RWMutex    // champion read write lock
+	lock         sync.RWMutex    // champion read write lock
 
 	ctx      context.Context
 	cancel   context.CancelFunc
@@ -96,6 +96,7 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 	arena := &Arena{
 		ds:            ds,
 		arrRankArena:  rankArenaData{item: make([]*arenaData, 0)},
+		mapArenaData:  make(map[int64]*arenaData),
 		arrMatchPool:  make([]sync.Map, arenaMatchSectionNum),
 		chMatchWaitOK: make(chan int64, 1000),
 		chDBInit:      make(chan struct{}, 1),
@@ -126,21 +127,21 @@ func NewArena(ctx context.Context, service micro.Service, ds iface.IDatastore) (
 }
 
 func (arena *Arena) getArenaDataNum() int {
-	n := 0
-	arena.mapArenaData.Range(func(_, _ interface{}) bool {
-		n++
-		return true
-	})
-	return n
+	arena.lock.RLock()
+	defer arena.lock.RUnlock()
+	return len(arena.mapArenaData)
 }
 
 func (arena *Arena) GetDataByID(id int64) (interface{}, error) {
-	v, ok := arena.mapArenaData.Load(id)
+	arena.lock.RLock()
+	defer arena.lock.RUnlock()
+
+	v, ok := arena.mapArenaData[id]
 	if !ok {
 		return nil, fmt.Errorf("cannot find arena data with id %d", id)
 	}
 
-	return v.(*arenaData), nil
+	return v, nil
 }
 
 func (arena *Arena) getRecordNum() int {
@@ -284,8 +285,9 @@ func (arena *Arena) loadFromDB() {
 	arena.ds.DB().Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(arenaData{})
 	arena.ds.DB().Find(&arenaDataList)
 
+	arena.lock.Lock()
 	for k, v := range arenaDataList {
-		arena.mapArenaData.Store(v.Playerid, v)
+		arena.mapArenaData[v.Playerid] = v
 
 		// add to record request list, delay 20s to start request
 		arena.mapRecordReq.Store(v.Playerid, time.Now().Add(time.Second*time.Duration((20+k/30))).Unix())
@@ -294,6 +296,7 @@ func (arena *Arena) loadFromDB() {
 		arena.arrRankArena.Add(v)
 
 	}
+	arena.lock.Unlock()
 
 	// resort
 	arena.arrRankArena.Sort()
@@ -348,15 +351,17 @@ func (arena *Arena) loadFromDB() {
 func (arena *Arena) updateMatching(id int64) (bool, error) {
 
 	// get player arena data
-	d, ok := arena.mapArenaData.Load(id)
+	arena.lock.RLock()
+	d, ok := arena.mapArenaData[id]
+	data := *d
+	arena.lock.RUnlock()
+
 	if !ok {
 		logger.WithFields(logger.Fields{
 			"player_id": id,
 		}).Warn("cannot find player's arena data")
 		return false, fmt.Errorf("cannot find player %d 's arena data", id)
 	}
-
-	data := d.(*arenaData)
 
 	// function of find target
 	f := func(sec int32) *pbArena.ArenaRecord {
@@ -546,12 +551,11 @@ func (arena *Arena) weekEnd() {
 
 	// map[world_id]arrayRewardWeek
 	mapWeekReward := make(map[uint32]([]*rewardWeek))
-	arena.mapArenaData.Range(func(_, v interface{}) bool {
-		data := v.(*arenaData)
-
+	arena.lock.RLock()
+	for _, v := range arena.mapArenaData {
 		r := &rewardWeek{
-			id: data.Playerid,
-			s:  data.Score,
+			id: v.Playerid,
+			s:  v.Score,
 		}
 
 		resp, err := arena.handler.GetPlayerInfoByID(r.id)
@@ -566,6 +570,7 @@ func (arena *Arena) weekEnd() {
 		mapWeekReward[resp.Info.ServerId] = append(mapWeekReward[resp.Info.ServerId], r)
 		return true
 	})
+	arena.lock.RUnlock()
 
 	// send to world
 	for worldID, rewardList := range mapWeekReward {
@@ -627,8 +632,8 @@ func (arena *Arena) newSeasonRank() {
 	// people who's section <= 4, set score to section - 1 default score
 
 	saveList := make([]*arenaData, 0)
-	arena.mapArenaData.Range(func(k, v interface{}) bool {
-		value := v.(*arenaData)
+	arena.lock.Lock()
+	for _, value := range arena.mapArenaData {
 		oldSec := getSectionIndexByScore(value.Score)
 
 		newSec := func(s int32) int32 {
@@ -645,14 +650,21 @@ func (arena *Arena) newSeasonRank() {
 
 		newScore := getDefaultScoreBySection(newSec)
 		value.Score = newScore
-		saveList = append(saveList, value)
+
+		saveValue := &arenaData{
+			Playerid:   value.Playerid,
+			Score:      value.Score,
+			ReachTime:  value.ReachTime,
+			LastTarget: value.LastTarget,
+		}
+		saveList = append(saveList, saveValue)
 
 		if oldSec != newSec {
 			arena.arrMatchPool[oldSec].Delete(value.Playerid)
 			arena.arrMatchPool[newSec].Store(value.Playerid, struct{}{})
 		}
-		return true
-	})
+	}
+	arena.lock.Unlock()
 
 	// save to db
 	if len(saveList) > 0 {
@@ -676,7 +688,7 @@ func (arena *Arena) newSeasonRank() {
 func (arena *Arena) saveChampion() {
 	list := arena.arrRankArena.getTop(3)
 
-	arena.cpLock.Lock()
+	arena.lock.Lock()
 	arena.championList = nil
 
 	for k, v := range list {
@@ -706,7 +718,7 @@ func (arena *Arena) saveChampion() {
 
 		arena.championList = append(arena.championList, data)
 	}
-	arena.cpLock.Unlock()
+	arena.lock.Unlock()
 
 	// save to db
 	arena.ds.DB().Delete(championData{})
@@ -720,6 +732,21 @@ func (arena *Arena) saveChampion() {
 	}
 
 	arena.pubsub.publishBroadCast(arena.ctx, msg)
+}
+
+func (arena *Arena) SyncArenaSeason(id uint32) {
+	world := arena.wm.GetWorldByID(id)
+	if world == nil {
+		logger.Warning("arena sync season data to world: ", id)
+		return
+	}
+
+	msg := &pb.MUW_SyncArenaSeason{
+		Season:  int32(arena.Season()),
+		EndTime: uint32(arena.SeasonEndTime()),
+	}
+
+	world.SendProtoMessage(msg)
 }
 
 // send top 100 reward mail
@@ -775,9 +802,11 @@ func (arena *Arena) matching(playerID int64) {
 
 // addRecord if existing then replace record
 func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
+	arena.lock.Lock()
+	defer arena.lock.Unlock()
 
 	// add new arena data
-	if _, ok := arena.mapArenaData.Load(rec.PlayerId); !ok {
+	if _, ok := arena.mapArenaData[rec.PlayerId]; !ok {
 
 		// add new record and arena data
 		data := &arenaData{
@@ -787,7 +816,7 @@ func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 			LastTarget: -1,
 		}
 
-		arena.mapArenaData.Store(rec.PlayerId, data)
+		arena.mapArenaData[rec.PlayerId] = data
 
 		// add to slice record sorted by ArenaRecord
 		arena.arrRankArena.Add(data)
@@ -804,9 +833,9 @@ func (arena *Arena) addRecord(rec *pbArena.ArenaRecord) {
 	arena.mapRecordReq.Delete(rec.PlayerId)
 
 	// add to matching pool
-	if v, ok := arena.mapArenaData.Load(rec.PlayerId); ok {
-		index := getSectionIndexByScore(v.(*arenaData).Score)
-		arena.arrMatchPool[index].Store(v.(*arenaData).Playerid, struct{}{})
+	if v, ok := arena.mapArenaData[rec.PlayerId]; ok {
+		index := getSectionIndexByScore(v.Score)
+		arena.arrMatchPool[index].Store(v.Playerid, struct{}{})
 	}
 }
 
@@ -817,7 +846,10 @@ func (arena *Arena) reorderRecord(id int64, preSection, newSection int32) {
 
 // battleResult battle end
 func (arena *Arena) battleResult(attack int64, target int64, win bool) {
-	d, ok := arena.mapArenaData.Load(attack)
+	arena.lock.Lock()
+	defer arena.lock.Unlock()
+
+	data, ok := arena.mapArenaData[attack]
 	if !ok {
 		logger.WithFields(logger.Fields{
 			"player_id": attack,
@@ -826,8 +858,6 @@ func (arena *Arena) battleResult(attack int64, target int64, win bool) {
 	}
 
 	// record target into last target
-	data := d.(*arenaData)
-
 	if target > 0 {
 		data.LastTarget = target
 	}
@@ -880,11 +910,12 @@ func (arena *Arena) requestRank(id int64, page int32) {
 	}
 
 	// get player rank
-	if d, ok := arena.mapArenaData.Load(id); ok {
-		data := d.(*arenaData)
+	arena.lock.Lock()
+	if data, ok := arena.mapArenaData[id]; ok {
 		msg.Score = data.Score
 		msg.Rank = int32(arena.arrRankArena.getIndexBefore100(data))
 	}
+	arena.lock.Unlock()
 
 	// rank player data
 	l := arena.arrRankArena.getListByPage(int(page))
@@ -937,11 +968,12 @@ func (arena *Arena) APIRequestRank(id int64, page int) *pbArena.MUW_RequestArena
 	logger.Warning("get arena request rank page:", msg.Page)
 
 	// get player rank
-	if d, ok := arena.mapArenaData.Load(id); ok {
-		data := d.(*arenaData)
+	arena.lock.Lock()
+	if data, ok := arena.mapArenaData[id]; ok {
 		msg.Score = data.Score
 		msg.Rank = int32(arena.arrRankArena.getIndexBefore100(data))
 	}
+	arena.lock.Unlock()
 
 	// rank player data
 	l := arena.arrRankArena.getListByPage(page)

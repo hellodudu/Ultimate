@@ -35,8 +35,9 @@ docker_run:
 
 .PHONY: push
 push:
-	docker tag ultimate hellodudu86/ultimate:$(v)
-	docker push hellodudu86/ultimate:$(v)
+	make -C arena-service push
+	make -C game-service push
+	make -C apps/rpc_presure push
 
 .PHONY: clean
 clean:

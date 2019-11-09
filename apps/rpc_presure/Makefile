@@ -1,4 +1,5 @@
 GOPATH:=$(shell go env GOPATH)
+v ?= latest
 
 .PHONY: build
 build: 
@@ -11,3 +12,10 @@ docker: build
 .PHONY: run
 run:
 	go run main.go plugin.go
+
+.PHONY: push
+push: build
+	docker tag rpc-client hellodudu86/rpc-client:$(v)
+	docker push hellodudu86/rpc-client:$(v)
+
+

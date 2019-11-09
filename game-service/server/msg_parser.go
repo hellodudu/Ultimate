@@ -11,7 +11,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/game-service/define"
 	"github.com/hellodudu/Ultimate/iface"
-	pb "github.com/hellodudu/Ultimate/proto"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
@@ -602,12 +601,24 @@ func (m *MsgParser) handleArenaChampionOnline(con iface.ITCPConn, p proto.Messag
 
 func (m *MsgParser) handlerArenaSyncSeason(con iface.ITCPConn, p proto.Message) {
 	if srcWorld := m.wm.GetWorldByCon(con); srcWorld != nil {
-		_, ok := p.(*pb.MWU_SyncArenaSeason)
+		_, ok := p.(*pbArena.MWU_SyncArenaSeason)
 		if !ok {
-			logger.Warning("Cannot assert value to message pb.MWU_SyncArenaSeason")
+			logger.Warning("Cannot assert value to message pbArena.MWU_SyncArenaSeason")
 			return
 		}
 
-		m.gm.Arena().SyncArenaSeason(srcWorld.GetID())
+		if season, seasonEndTime, err := m.gm.GetArenaSeasonData(); err == nil {
+			logger.WithFields(logger.Fields{
+				"season":   season,
+				"time":     seasonEndTime,
+				"world_id": srcWorld.GetID(),
+			}).Info("GetArenaSeasonData success")
+
+			msgArena := &pbArena.MUW_SyncArenaSeason{
+				Season:  season,
+				EndTime: uint32(seasonEndTime),
+			}
+			srcWorld.SendProtoMessage(msgArena)
+		}
 	}
 }

@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	pb "github.com/hellodudu/Ultimate/proto"
+	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	"github.com/hellodudu/Ultimate/world"
 	"github.com/sirupsen/logrus"
 )
@@ -59,7 +59,7 @@ func callArenaRank() {
 		return
 	}
 
-	respJSON := &pb.MUW_RequestArenaRank{}
+	respJSON := &pbArena.MUW_RequestArenaRank{}
 	if err := json.Unmarshal(body, &respJSON); err != nil {
 		fmt.Println("unmarshal resp json err:", err)
 		return

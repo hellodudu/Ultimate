@@ -219,11 +219,6 @@ func (s *HttpServer) arenaSaveChampion(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-func (s *HttpServer) arenaTestSyncSeasonHandler(w http.ResponseWriter, r *http.Request) {
-	s.gm.Arena().TestSyncSeason()
-	w.Write([]byte("success"))
-}
-
 func (s *HttpServer) arenaWeekEnd(w http.ResponseWriter, r *http.Request) {
 	if err := s.gm.ArenaWeekEnd(); err != nil {
 		w.Write([]byte(err.Error()))

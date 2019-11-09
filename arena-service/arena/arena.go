@@ -203,8 +203,8 @@ func (arena *Arena) WeekEndTime() int {
 }
 
 func (arena *Arena) getChampion() []*pbArena.ArenaChampion {
-	arena.cpLock.RLock()
-	defer arena.cpLock.RUnlock()
+	arena.lock.RLock()
+	defer arena.lock.RUnlock()
 
 	championRet := make([]*pbArena.ArenaChampion, 0)
 	for _, v := range arena.championList {
@@ -560,7 +560,7 @@ func (arena *Arena) weekEnd() {
 
 		resp, err := arena.handler.GetPlayerInfoByID(r.id)
 		if err != nil {
-			return true
+			continue
 		}
 
 		if _, ok := mapWeekReward[resp.Info.ServerId]; !ok {
@@ -568,8 +568,7 @@ func (arena *Arena) weekEnd() {
 		}
 
 		mapWeekReward[resp.Info.ServerId] = append(mapWeekReward[resp.Info.ServerId], r)
-		return true
-	})
+	}
 	arena.lock.RUnlock()
 
 	// send to world
@@ -735,18 +734,12 @@ func (arena *Arena) saveChampion() {
 }
 
 func (arena *Arena) SyncArenaSeason(id uint32) {
-	world := arena.wm.GetWorldByID(id)
-	if world == nil {
-		logger.Warning("arena sync season data to world: ", id)
-		return
+	// broadcast to all world
+	msg := &pbArena.MUW_SyncArenaSeason{
+		Season:  int32(arena.season()),
+		EndTime: uint32(arena.seasonEndTime()),
 	}
-
-	msg := &pb.MUW_SyncArenaSeason{
-		Season:  int32(arena.Season()),
-		EndTime: uint32(arena.SeasonEndTime()),
-	}
-
-	world.SendProtoMessage(msg)
+	arena.pubsub.publishBroadCast(arena.ctx, msg)
 }
 
 // send top 100 reward mail

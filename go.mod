@@ -27,7 +27,6 @@ require (
 	github.com/micro/go-micro v1.8.1
 	github.com/micro/go-plugins v1.2.0
 	github.com/mreiferson/go-options v0.0.0-20190302064952-20ba7d382d05
-	github.com/nats-io/nats.go v1.8.2-0.20190607221125-9f4d16fe7c2d // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
 	github.com/sirupsen/logrus v1.4.2

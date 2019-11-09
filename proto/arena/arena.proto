@@ -115,6 +115,10 @@ message MUW_RequestArenaRank {
     repeated ArenaTargetInfo infos = 6;
 }
 
+message MWU_SyncArenaSeason {
+
+}
+
 message MUW_SyncArenaSeason {
     int32 season = 1;
     uint32 end_time = 2;

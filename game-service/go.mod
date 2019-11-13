@@ -3,9 +3,15 @@ module github.com/hellodudu/Ultimate/game-service
 go 1.12
 
 require (
+	github.com/Azure/go-autorest/autorest v0.9.2 // indirect
+	github.com/Azure/go-autorest/autorest/adal v0.8.0 // indirect
+	github.com/Azure/go-autorest/autorest/to v0.3.0 // indirect
+	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.2
+	github.com/hashicorp/consul v0.0.0-00010101000000-000000000000 // indirect
+	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
 	github.com/jinzhu/gorm v1.9.10
 	github.com/micro/go-micro v1.8.1

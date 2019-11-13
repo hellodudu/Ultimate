@@ -58,6 +58,7 @@ func (m *MsgParser) registerAllMessage() {
 	m.regProtoHandle("ultimate_service_arena.MWU_ArenaBattleResult", m.handleArenaBattleResult)
 	m.regProtoHandle("ultimate_service_arena.MWU_RequestArenaRank", m.handleRequestArenaRank)
 	m.regProtoHandle("ultimate_service_arena.MWU_ArenaChampionOnline", m.handleArenaChampionOnline)
+	m.regProtoHandle("ultimate_service_arena.MWU_SyncArenaSeason", m.handlerArenaSyncSeason)
 
 }
 

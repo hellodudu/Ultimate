@@ -33,12 +33,15 @@ func (i *invite) AddInvite(newbieID int64, inviterID int64) int32 {
 	}
 
 	if world := i.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
-		msg := &pb.MUW_CheckInvite{
-			NewbieId:  newbieID,
-			InviterId: inviterID,
-		}
+		world.PushWrapHandler(func() {
+			msg := &pb.MUW_CheckInvite{
+				NewbieId:  newbieID,
+				InviterId: inviterID,
+			}
 
-		world.SendProtoMessage(msg)
+			world.SendProtoMessage(msg)
+		})
+
 		return 0
 	}
 
@@ -59,13 +62,16 @@ func (i *invite) CheckInviteResult(newbieID int64, inviterID int64, errorCode in
 	}
 
 	if world := i.wm.GetWorldByID(newbieInfo.ServerId); world != nil {
-		msg := &pb.MUW_AddInviteResult{
-			NewbieId:  newbieID,
-			InviterId: inviterID,
-			ErrorCode: errorCode,
-		}
+		world.PushWrapHandler(func() {
+			msg := &pb.MUW_AddInviteResult{
+				NewbieId:  newbieID,
+				InviterId: inviterID,
+				ErrorCode: errorCode,
+			}
 
-		world.SendProtoMessage(msg)
+			world.SendProtoMessage(msg)
+		})
+
 	}
 }
 
@@ -91,13 +97,16 @@ func (i *invite) InviteRecharge(newbieID int64, newbieName string, inviterID int
 	}
 
 	if world := i.wm.GetWorldByID(inviterInfo.ServerId); world != nil {
-		msg := &pb.MUW_InviteRecharge{
-			NewbieId:    newbieID,
-			NewbieName:  newbieName,
-			InviterId:   inviterID,
-			DiamondGift: diamondGift,
-		}
+		world.PushWrapHandler(func() {
+			msg := &pb.MUW_InviteRecharge{
+				NewbieId:    newbieID,
+				NewbieName:  newbieName,
+				InviterId:   inviterID,
+				DiamondGift: diamondGift,
+			}
 
-		world.SendProtoMessage(msg)
+			world.SendProtoMessage(msg)
+		})
+
 	}
 }

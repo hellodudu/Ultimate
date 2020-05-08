@@ -148,7 +148,9 @@ func (s *sendWorldMessageSubHandler) Process(ctx context.Context, event *pbPubSu
 		return err
 	}
 
-	world.SendProtoMessage(msg)
+	world.PushWrapHandler(func() {
+		world.SendProtoMessage(msg)
+	})
 
 	return nil
 }

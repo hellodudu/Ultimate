@@ -218,7 +218,9 @@ func (m *MsgParser) ParserMessage(con iface.ITCPConn, data []byte) {
 			return
 		}
 
-		sendWorld.SendTransferMessage(data)
+		sendWorld.PushAsyncHandler(func() {
+			sendWorld.SendTransferMessage(data)
+		})
 	}
 
 }
@@ -240,8 +242,10 @@ func (m *MsgParser) handleWorldLogon(con iface.ITCPConn, p proto.Message) {
 		return
 	}
 
-	reply := &pbWorld.MUW_WorldLogon{}
-	world.SendProtoMessage(reply)
+	world.PushWrapHandler(func() {
+		reply := &pbWorld.MUW_WorldLogon{}
+		world.SendProtoMessage(reply)
+	})
 
 }
 
@@ -258,8 +262,10 @@ func (m *MsgParser) handleHeartBeat(con iface.ITCPConn, p proto.Message) {
 			return
 		}
 
-		reply := &pbWorld.MUW_HeartBeat{BattleTime: uint32(time.Now().Unix())}
-		world.SendProtoMessage(reply)
+		world.PushWrapHandler(func() {
+			reply := &pbWorld.MUW_HeartBeat{BattleTime: uint32(time.Now().Unix())}
+			world.SendProtoMessage(reply)
+		})
 	}
 }
 
@@ -274,24 +280,30 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 		m.wm.AddWorldRef(world.GetID(), arrWorldID)
 
 		// request player info
-		msgP := &pbGame.MUW_RequestPlayerInfo{MinLevel: 20}
-		world.SendProtoMessage(msgP)
+		world.PushWrapHandler(func() {
+			msgP := &pbGame.MUW_RequestPlayerInfo{MinLevel: 20}
+			world.SendProtoMessage(msgP)
+		})
 
 		// request guild info
-		msgG := &pbGame.MUW_RequestGuildInfo{}
-		world.SendProtoMessage(msgG)
+		world.PushWrapHandler(func() {
+			msgG := &pbGame.MUW_RequestGuildInfo{}
+			world.SendProtoMessage(msgG)
+		})
 
 		// sync arena data
 		if season, seasonEndTime, err := m.gm.GetArenaSeasonData(); err == nil {
-			logger.WithFields(logger.Fields{
-				"season": season,
-				"time":   seasonEndTime,
-			}).Info("GetArenaSeasonData success")
-			msgArena := &pbArena.MUW_SyncArenaSeason{
-				Season:  season,
-				EndTime: uint32(seasonEndTime),
-			}
-			world.SendProtoMessage(msgArena)
+			world.PushWrapHandler(func() {
+				logger.WithFields(logger.Fields{
+					"season": season,
+					"time":   seasonEndTime,
+				}).Info("GetArenaSeasonData success")
+				msgArena := &pbArena.MUW_SyncArenaSeason{
+					Season:  season,
+					EndTime: uint32(seasonEndTime),
+				}
+				world.SendProtoMessage(msgArena)
+			})
 		}
 
 		// 20s later sync arena champion
@@ -307,15 +319,17 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 			}
 
 			if championList, err := m.gm.GetArenaChampion(); err != nil {
-				msg := &pbArena.MUW_ArenaChampion{
-					Data: championList,
-				}
+				w.PushWrapHandler(func() {
+					msg := &pbArena.MUW_ArenaChampion{
+						Data: championList,
+					}
 
-				w.SendProtoMessage(msg)
-				logger.WithFields(logger.Fields{
-					"world_id":   w.GetID(),
-					"world_name": w.GetName(),
-				}).Info("sync arena champion to world")
+					w.SendProtoMessage(msg)
+					logger.WithFields(logger.Fields{
+						"world_id":   w.GetID(),
+						"world_name": w.GetName(),
+					}).Info("sync arena champion to world")
+				})
 			}
 		}(world.GetID())
 	}
@@ -364,13 +378,15 @@ func (m *MsgParser) handlePlayUltimateRecord(con iface.ITCPConn, p proto.Message
 			return
 		}
 
-		msgSend := &pbGame.MUW_PlayUltimateRecord{
-			SrcPlayerId: msg.SrcPlayerId,
-			SrcServerId: msg.SrcServerId,
-			RecordId:    msg.RecordId,
-			DstServerId: msg.DstServerId,
-		}
-		dstWorld.SendProtoMessage(msgSend)
+		dstWorld.PushWrapHandler(func() {
+			msgSend := &pbGame.MUW_PlayUltimateRecord{
+				SrcPlayerId: msg.SrcPlayerId,
+				SrcServerId: msg.SrcServerId,
+				RecordId:    msg.RecordId,
+				DstServerId: msg.DstServerId,
+			}
+			dstWorld.SendProtoMessage(msgSend)
+		})
 	}
 }
 
@@ -398,13 +414,16 @@ func (m *MsgParser) handleRequestUltimatePlayer(con iface.ITCPConn, p proto.Mess
 			return
 		}
 
-		msgSend := &pbGame.MUW_RequestUltimatePlayer{
-			SrcPlayerId: msg.SrcPlayerId,
-			SrcServerId: msg.SrcServerId,
-			DstPlayerId: msg.DstPlayerId,
-			DstServerId: dstWorld.GetID(),
-		}
-		dstWorld.SendProtoMessage(msgSend)
+		dstWorld.PushWrapHandler(func() {
+			msgSend := &pbGame.MUW_RequestUltimatePlayer{
+				SrcPlayerId: msg.SrcPlayerId,
+				SrcServerId: msg.SrcServerId,
+				DstPlayerId: msg.DstPlayerId,
+				DstServerId: dstWorld.GetID(),
+			}
+			dstWorld.SendProtoMessage(msgSend)
+		})
+
 	}
 }
 
@@ -432,13 +451,16 @@ func (m *MsgParser) handleViewFormation(con iface.ITCPConn, p proto.Message) {
 			return
 		}
 
-		msgSend := &pbGame.MUW_ViewFormation{
-			SrcPlayerId: msg.SrcPlayerId,
-			SrcServerId: msg.SrcServerId,
-			DstPlayerId: msg.DstPlayerId,
-			DstServerId: dstWorld.GetID(),
-		}
-		dstWorld.SendProtoMessage(msgSend)
+		dstWorld.PushWrapHandler(func() {
+			msgSend := &pbGame.MUW_ViewFormation{
+				SrcPlayerId: msg.SrcPlayerId,
+				SrcServerId: msg.SrcServerId,
+				DstPlayerId: msg.DstPlayerId,
+				DstServerId: dstWorld.GetID(),
+			}
+			dstWorld.SendProtoMessage(msgSend)
+		})
+
 	}
 }
 
@@ -541,13 +563,16 @@ func (m *MsgParser) handleAddInvite(con iface.ITCPConn, p proto.Message) {
 
 		ret := m.gm.Invite().AddInvite(msg.NewbieId, msg.InviterId)
 		if ret != 0 {
-			msgRet := &pbGame.MUW_AddInviteResult{
-				NewbieId:  msg.NewbieId,
-				InviterId: msg.InviterId,
-				ErrorCode: ret,
-			}
+			srcWorld.PushWrapHandler(func() {
+				msgRet := &pbGame.MUW_AddInviteResult{
+					NewbieId:  msg.NewbieId,
+					InviterId: msg.InviterId,
+					ErrorCode: ret,
+				}
 
-			srcWorld.SendProtoMessage(msgRet)
+				srcWorld.SendProtoMessage(msgRet)
+			})
+
 		}
 	}
 }
@@ -615,11 +640,14 @@ func (m *MsgParser) handlerArenaSyncSeason(con iface.ITCPConn, p proto.Message) 
 				"world_id": srcWorld.GetID(),
 			}).Info("GetArenaSeasonData success")
 
-			msgArena := &pbArena.MUW_SyncArenaSeason{
-				Season:  season,
-				EndTime: uint32(seasonEndTime),
-			}
-			srcWorld.SendProtoMessage(msgArena)
+			srcWorld.PushWrapHandler(func() {
+				msgArena := &pbArena.MUW_SyncArenaSeason{
+					Season:  season,
+					EndTime: uint32(seasonEndTime),
+				}
+				srcWorld.SendProtoMessage(msgArena)
+			})
+
 		}
 	}
 }

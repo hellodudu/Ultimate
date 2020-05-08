@@ -16,6 +16,9 @@ import (
 	logger "github.com/sirupsen/logrus"
 )
 
+var WrapHandlerSize int = 100
+var AsyncHandlerSize int = 100
+
 type traceMsg struct {
 	msgName string
 	msgData []byte
@@ -38,6 +41,9 @@ type world struct {
 
 	chDBInit chan struct{}
 	chStop   chan struct{}
+
+	wrapHandler  chan func() `bson:"-"`
+	asyncHandler chan func() `bson:"-"`
 }
 
 func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datastore iface.IDatastore) *world {
@@ -54,6 +60,9 @@ func NewWorld(id uint32, name string, con iface.ITCPConn, chw chan uint32, datas
 		mapGuild:    make(map[int64]*pbGame.CrossGuildInfo),
 		chDBInit:    make(chan struct{}, 1),
 		chStop:      make(chan struct{}, 1),
+
+		wrapHandler:  make(chan func(), WrapHandlerSize),
+		asyncHandler: make(chan func(), AsyncHandlerSize),
 	}
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
@@ -116,9 +125,22 @@ func (w *world) Run() {
 
 		// Heart Beat
 		case <-w.tHeartBeat.C:
-			msg := &pbWorld.MUW_TestConnect{}
-			w.SendProtoMessage(msg)
-			w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
+			w.PushAsyncHandler(func() {
+				msg := &pbWorld.MUW_TestConnect{}
+				w.SendProtoMessage(msg)
+				w.tHeartBeat.Reset(time.Duration(global.WorldHeartBeatSec) * time.Second)
+			})
+
+		// async handler
+		case h := <-w.asyncHandler:
+			h()
+
+		// request handler
+		case h := <-w.wrapHandler:
+			t := time.Now()
+			h()
+			d := time.Since(t)
+			time.Sleep(time.Millisecond*10 - d)
 		}
 	}
 }
@@ -180,4 +202,20 @@ func (w *world) SendTransferMessage(data []byte) {
 	if err := binary.Read(buf, binary.LittleEndian, transferMsg); err != nil {
 		return
 	}
+}
+
+func (w *world) PushWrapHandler(f func()) {
+	if len(w.wrapHandler) >= WrapHandlerSize {
+		logger.WithFields(logger.Fields{
+			"world_id": w.GetID(),
+			"func":     f,
+		}).Warn("wrap handler channel full, ignored.")
+		return
+	}
+
+	w.wrapHandler <- f
+}
+
+func (w *world) PushAsyncHandler(f func()) {
+	w.asyncHandler <- f
 }

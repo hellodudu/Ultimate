@@ -162,7 +162,9 @@ func (wm *WorldMgr) KickWorld(id uint32, reason string) {
 func (wm *WorldMgr) BroadCast(msg proto.Message) {
 	wm.mapWorld.Range(func(_, v interface{}) bool {
 		if world, ok := v.(*world); ok {
-			world.SendProtoMessage(msg)
+			world.PushAsyncHandler(func() {
+				world.SendProtoMessage(msg)
+			})
 		}
 		return true
 	})

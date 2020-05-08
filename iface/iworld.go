@@ -25,5 +25,7 @@ type IWorld interface {
 	Run()
 	SendProtoMessage(p proto.Message)
 	SendTransferMessage(data []byte)
+	PushWrapHandler(func())
+	PushAsyncHandler(func())
 	Stop()
 }

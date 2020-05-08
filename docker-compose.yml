@@ -199,14 +199,6 @@ services:
         loki-retries: "5"
         loki-batch-size: "400"
 
-  loki_conn:
-    image: hellodudu86/loki_conn
-    container_name: loki_conn
-    command:
-        -url="http://loki:3100/api/prom/push"
-    depends_on:
-        - loki
-
   # prometheus:
   #   image: prom/prometheus
   #   container_name: prometheus

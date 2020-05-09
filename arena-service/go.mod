@@ -8,8 +8,9 @@ require (
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
 	github.com/hellodudu/shippy v0.0.0-20190519024118-629041b14978 // indirect
 	github.com/jinzhu/gorm v1.9.10
-	github.com/micro/go-micro v1.16.0
+	github.com/micro/go-micro v1.18.0
 	github.com/micro/go-plugins v1.2.0
+	github.com/micro/go-plugins/registry/consul v0.0.0-20200119172437-4fe21aa238fd // indirect
 	github.com/micro/micro v1.16.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 )

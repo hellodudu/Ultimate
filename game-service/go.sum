@@ -554,6 +554,7 @@ github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d h1:kJCB4vdITiW1eC1
 github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/hellodudu/Ultimate/arena-service v0.0.0-20190819102231-2e0f3ed9d647/go.mod h1:JTJmrdUgFpstvGILbKtVO3EhYrXld6jO0asYEuxb5x0=
 github.com/hellodudu/Ultimate/arena-service v0.0.0-20190904092449-816963a2c149/go.mod h1:g9JB/85a9H1kxB18bVGOsqQdf0yul9CVkc6iof/gLmo=
+github.com/hellodudu/Ultimate/arena-service v0.0.0-20190924062254-b2fc9d6cf412 h1:sm4QhEaZmlhRyLJMQDIL7XURYyCY7lnHwFg+/zJKfBc=
 github.com/hellodudu/Ultimate/arena-service v0.0.0-20190924062254-b2fc9d6cf412/go.mod h1:0CNvtjF8d725JcAwr5xoH+/CF4TiVAdWuajkz239Bdc=
 github.com/hellodudu/Ultimate/game-service v0.0.0-20190819101416-1c9ac340075e/go.mod h1:l80r+eOt0uafxH78mZJtYXh0a6oMSs93nhuVIe3eTNo=
 github.com/hellodudu/Ultimate/game-service v0.0.0-20190819102231-2e0f3ed9d647/go.mod h1:l80r+eOt0uafxH78mZJtYXh0a6oMSs93nhuVIe3eTNo=
@@ -682,6 +683,7 @@ github.com/micro/go-micro v1.8.1/go.mod h1:oO5ShfJrdzayFLPUueZF85tZoez8VYLcXuTOT
 github.com/micro/go-plugins v1.1.2-0.20190710094942-bf407858372c/go.mod h1:1yrY825un6IH9H3ecCb6BAx7ZqNMMWTwOhmCkQFVc8I=
 github.com/micro/go-plugins v1.2.0 h1:/p9EzqJUiKkldzhANbu4hgKOaQufSBBwusQyhhvfjv8=
 github.com/micro/go-plugins v1.2.0/go.mod h1:N2UCiG7ExrTZ1N1dq1PF9bOgtuBOlUVEc86rfNGqxFQ=
+github.com/micro/go-plugins v2.0.1+incompatible h1:WYNrIeBhv+84ASevN22Z6ijGJf8bfMsdYUuuh9C8JOc=
 github.com/micro/go-rcache v0.1.0/go.mod h1:INzyZjXO5M+PmN2A33YxD4TaOY61xjFIM4CfSHv+At8=
 github.com/micro/go-rcache v0.2.0/go.mod h1:EoiTwbY2ubQ6lc3ScV+SnmKbelDzeFezDxPDvF8XDxw=
 github.com/micro/h2c v1.0.0/go.mod h1:54sOOQW/GRlHhH43vKwOhUb+kHaXhVxR0d3CJhn9alE=

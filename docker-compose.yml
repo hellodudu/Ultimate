@@ -15,13 +15,10 @@ services:
       - "./config/:/config"
     environment:
       MICRO_SERVER_ID: 2001
-      MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
-      - "consul"
       - "nsqd"
       - "loki"
     logging:
@@ -45,13 +42,10 @@ services:
       - "./config/:/config"
     environment:
       MICRO_SERVER_ID: 1001
-      MICRO_REGISTRY: "consul"
-      MICRO_REGISTRY_ADDRESS: "host.docker.internal:8500"
       MICRO_BROKER: "nsq"
       MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
-      - "consul"
       - "nsqd"
       - "ultimate-service-arena"
       - "loki"
@@ -86,24 +80,6 @@ services:
         #loki-url: http://host.docker.internal:3100/api/prom/push
         #loki-retries: "5"
         #loki-batch-size: "400"
-
-  consul:
-    image: consul
-    command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
-    container_name: consul
-    ports:
-      - "8500:8500"
-    volumes:
-      - "./data/consul/:/consul_data"
-      - "./config/:/config"
-    depends_on:
-      - loki
-    logging:
-      driver: loki
-      options:
-        loki-url: http://host.docker.internal:3100/api/prom/push
-        loki-retries: "5"
-        loki-batch-size: "400"
 
   nsqlookupd:
     image: nsqio/nsq

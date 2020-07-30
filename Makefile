@@ -39,6 +39,12 @@ push:
 	make -C game-service push
 	make -C apps/rpc_presure push
 
+.PHONY: push_github
+push_github:
+	make -C arena-service push_github
+	make -C game-service push_github
+	make -C apps/rpc_presure push_github
+
 .PHONY: clean
 clean:
 	docker rm -f $(shell docker ps -a -q)

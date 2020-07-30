@@ -22,6 +22,12 @@ push: build
 	docker tag ultimate-service-arena hellodudu86/ultimate-service-arena:$(v)
 	docker push hellodudu86/ultimate-service-arena:$(v)
 
+.PHONY: push_github
+push_github:
+	# github packages
+	docker tag ultimate-service-arena docker.pkg.github.com/hellodudu/ultimate/ultimate-service-arena:$(v)
+	docker push docker.pkg.github.com/hellodudu/ultimate/ultimate-service-arena:$(v)
+
 .PHONY: run
 run:
 	go run main.go plugin.go

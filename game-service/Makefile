@@ -23,6 +23,12 @@ push: build
 	docker tag ultimate-service-game hellodudu86/ultimate-service-game:$(v)
 	docker push hellodudu86/ultimate-service-game:$(v)
 
+.PHONY: push_github
+push_github:
+	# github packages
+	docker tag ultimate-service-game docker.pkg.github.com/hellodudu/ultimate/ultimate-service-game:$(v)
+	docker push docker.pkg.github.com/hellodudu/ultimate/ultimate-service-game:$(v)
+
 .PHONY: run
 run:
 	go run main.go plugin.go

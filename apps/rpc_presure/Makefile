@@ -18,4 +18,10 @@ push: build
 	docker tag rpc-client hellodudu86/rpc-client:$(v)
 	docker push hellodudu86/rpc-client:$(v)
 
+.PHONY: push_github
+push_github:
+	# github packages
+	docker tag rpc-client docker.pkg.github.com/hellodudu/ultimate/rpc-client:$(v)
+	docker push docker.pkg.github.com/hellodudu/ultimate/rpc-client:$(v)
+
 

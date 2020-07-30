@@ -27,7 +27,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: http://loki:3100/api/prom/push
+        loki-url: http://host.docker.internal:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -58,7 +58,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: http://loki:3100/api/prom/push
+        loki-url: http://host.docker.internal:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -101,7 +101,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: http://loki:3100/api/prom/push
+        loki-url: http://host.docker.internal:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -112,7 +112,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: "http://loki:3100/api/prom/push"
+        loki-url: http://host.docker.internal:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
     depends_on:
@@ -133,7 +133,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: "http://loki:3100/api/prom/push"
+        loki-url: http://host.docker.internal:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -154,7 +154,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: "http://loki:3100/api/prom/push"
+        loki-url: http://host.docker.internal:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -195,7 +195,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: http://loki:3100/api/prom/push
+        loki-url: http://host.docker.internal:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 

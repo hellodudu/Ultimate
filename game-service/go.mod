@@ -14,8 +14,9 @@ require (
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hellodudu/Ultimate v0.0.0-20190620075824-e0382f9185c2
 	github.com/jinzhu/gorm v1.9.10
-	github.com/micro/go-micro v1.8.1
+	github.com/micro/go-micro v1.18.0
 	github.com/micro/go-plugins v1.2.0
+	github.com/micro/go-plugins/registry/consul v0.0.0-20200119172437-4fe21aa238fd
 	github.com/prometheus/client_golang v1.1.0
 	github.com/sirupsen/logrus v1.4.2
 )

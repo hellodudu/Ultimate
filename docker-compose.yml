@@ -15,16 +15,19 @@ services:
       - "./config/:/config"
     environment:
       MICRO_SERVER_ID: 2001
+      MICRO_REGISTRY: "consul"
+      MICRO_REGISTRY_ADDRESS: "consul:8500"
       MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
+      MICRO_BROKER_ADDRESS: "nsqd:4150"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
+      - "consul"
       - "nsqd"
       - "loki"
     logging:
       driver: loki
       options:
-        loki-url: http://host.docker.internal:3100/api/prom/push
+        loki-url: http://loki:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -42,17 +45,20 @@ services:
       - "./config/:/config"
     environment:
       MICRO_SERVER_ID: 1001
+      MICRO_REGISTRY: "consul"
+      MICRO_REGISTRY_ADDRESS: "consul:8500"
       MICRO_BROKER: "nsq"
-      MICRO_BROKER_ADDRESS: "host.docker.internal:4150"
+      MICRO_BROKER_ADDRESS: "nsqd:4150"
       MYSQL_ADDR: "host.docker.internal"
     depends_on:
+      - "consul"
       - "nsqd"
       - "ultimate-service-arena"
       - "loki"
     logging:
       driver: loki
       options:
-        loki-url: http://host.docker.internal:3100/api/prom/push
+        loki-url: http://loki:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -81,6 +87,24 @@ services:
         #loki-retries: "5"
         #loki-batch-size: "400"
 
+  consul:
+    image: consul
+    command: "agent -dev -log-level=info -data-dir=/consul_data -ui -client=0.0.0.0"
+    container_name: consul
+    ports:
+      - "8500:8500"
+    volumes:
+      - "./data/consul/:/consul_data"
+      - "./config/:/config"
+    depends_on:
+      - loki
+    logging:
+      driver: loki
+      options:
+        loki-url: http://loki:3100/api/prom/push
+        loki-retries: "5"
+        loki-batch-size: "400"
+
   nsqlookupd:
     image: nsqio/nsq
     command: /nsqlookupd -log-level=info
@@ -88,7 +112,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: "http://host.docker.internal:3100/api/prom/push"
+        loki-url: "http://loki:3100/api/prom/push"
         loki-retries: "5"
         loki-batch-size: "400"
     depends_on:
@@ -109,7 +133,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: "http://host.docker.internal:3100/api/prom/push"
+        loki-url: "http://loki:3100/api/prom/push"
         loki-retries: "5"
         loki-batch-size: "400"
 
@@ -120,7 +144,7 @@ services:
 
   nsqadmin:
     image: nsqio/nsq
-    command: /nsqadmin -lookupd-http-address=host.docker.internal:4161
+    command: /nsqadmin -lookupd-http-address=nsqlookupd:4161
     container_name: nsqadmin
     depends_on:
       - nsqlookupd  
@@ -130,13 +154,13 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: "http://host.docker.internal:3100/api/prom/push"
+        loki-url: "http://loki:3100/api/prom/push"
         loki-retries: "5"
         loki-batch-size: "400"
 
 
   loki:
-    image: grafana/loki
+    image: grafana/loki:v1.3.0
     container_name: loki
     ports:
       - "3100:3100"
@@ -161,7 +185,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     volumes:
-        - ./config/grafana.ini:/etc/grafana/grafana.ini
+        - ./config/grafana/grafana.ini:/etc/grafana/grafana.ini
         - ./data/grafana/:/var/lib/grafana/
     ports:
         - "3000:3000"
@@ -171,33 +195,27 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: http://host.docker.internal:3100/api/prom/push
+        loki-url: http://loki:3100/api/prom/push
         loki-retries: "5"
         loki-batch-size: "400"
 
-  # prometheus:
-  #   image: prom/prometheus
-  #   container_name: prometheus
-  #   volumes:
-  #       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-  #   command:
-  #       - "--config.file=/etc/prometheus/prometheus.yml"
-  #   ports:
-  #       - "9090:9090"
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+        - "9090:9090"
+    command:
+        - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+        - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        - ./data/prometheus:/prometheus
 
-  # fluentd:
-  #   build:
-  #     context: fluentd/
-  #   container_name: fluentd
-  #   volumes:
-  #     - ./fluentd/etc/:/fluentd/etc/
-  #     - ./fluentd/log/:/fluentd/log
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #         max-size: "1G"
-  #         max-file: "2"
-  #   ports:
-  #     - "24224:24224"
-  #     - "24224:24224/udp"
-  
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    hostname: "gate no1"
+    restart: always
+    ports:
+        - "9100:9100"
+
+

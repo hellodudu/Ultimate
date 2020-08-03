@@ -318,7 +318,14 @@ func (m *MsgParser) handleWorldConnected(con iface.ITCPConn, p proto.Message) {
 				return
 			}
 
-			if championList, err := m.gm.GetArenaChampion(); err != nil {
+			championList, err := m.gm.GetArenaChampion()
+			if err != nil {
+				logger.WithFields(logger.Fields{
+					"world_id":   w.GetID(),
+					"world_name": w.GetName(),
+					"error":      err.Error(),
+				}).Warn("MsgParser.handleWorldConnected GetArenaChampion failed")
+			} else {
 				w.PushWrapHandler(func() {
 					msg := &pbArena.MUW_ArenaChampion{
 						Data: championList,

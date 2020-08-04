@@ -1,11 +1,9 @@
 version: "3"
-
-
 services:
   
   ultimate-service-arena:
-    build: arena-service/
-    image: hellodudu86/ultimate-service-arena
+    #build: arena-service/
+    image: hellodudu86/ultimate-service-arena:${v:-latest}
     container_name: ultimate-service-arena
     ports:
       - "3306"
@@ -33,8 +31,8 @@ services:
 
 
   ultimate-service-game:
-    build: game-service/
-    image: hellodudu86/ultimate-service-game
+    #build: game-service/
+      image: hellodudu86/ultimate-service-game:${v:-latest}
     container_name: ultimate-service-game
     ports:
       - "7030:7030"

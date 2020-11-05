@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/hellodudu/Ultimate/arena-service/arena"
@@ -13,24 +11,12 @@ import (
 	"github.com/hellodudu/Ultimate/utils"
 	logger "github.com/hellodudu/Ultimate/utils/log"
 	"github.com/micro/go-micro/v2"
+	micro_logger "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus/v2"
 	log "github.com/rs/zerolog/log"
 )
 
 func main() {
-	// check path
-	path, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(0)
-	}
-
-	if strings.Contains(path, "arena-service") || strings.Contains(path, "ultimate-service-arena") {
-		os.Chdir("../")
-		newPath, _ := os.Getwd()
-		fmt.Println("change current path to project root path:", newPath)
-	}
-
 	logger.InitLogger("arena-service")
 
 	ds, err := datastore.NewDatastore()
@@ -39,6 +25,7 @@ func main() {
 	}
 
 	// New Service
+	micro_logger.Init(micro_logger.WithOutput(logger.Logger))
 	service := micro.NewService(
 		micro.Name("ultimate-service-arena"),
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),

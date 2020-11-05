@@ -10,11 +10,11 @@ require (
 	github.com/micro/go-micro v1.18.0
 	github.com/micro/go-micro/v2 v2.9.1
 	github.com/micro/go-plugins v1.2.0
-	github.com/micro/go-plugins/broker/nsq/v2 v2.9.1 // indirect
+	github.com/micro/go-plugins/broker/nsq/v2 v2.9.1
 	github.com/micro/go-plugins/registry/consul v0.0.0-20200119172437-4fe21aa238fd
-	github.com/micro/go-plugins/registry/consul/v2 v2.9.1 // indirect
-	github.com/micro/go-plugins/transport/tcp/v2 v2.9.1 // indirect
-	github.com/micro/go-plugins/wrapper/monitoring/prometheus/v2 v2.9.1 // indirect
+	github.com/micro/go-plugins/registry/consul/v2 v2.9.1
+	github.com/micro/go-plugins/transport/tcp/v2 v2.9.1
+	github.com/micro/go-plugins/wrapper/monitoring/prometheus/v2 v2.9.1
 	github.com/rs/zerolog v1.20.0
 )
 

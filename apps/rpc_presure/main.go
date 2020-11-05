@@ -11,6 +11,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/hellodudu/Ultimate/internal/rpc_presure"
+	"github.com/hellodudu/Ultimate/utils"
 	"github.com/judwhite/go-svc/svc"
 	"github.com/mreiferson/go-options"
 )
@@ -69,6 +70,7 @@ func (p *program) Start() error {
 	p.r = r
 
 	go func() {
+		defer utils.CaptureException()
 		err := p.r.Main()
 		if err != nil {
 			p.Stop()

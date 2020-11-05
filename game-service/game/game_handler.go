@@ -5,7 +5,7 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
-	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/v2"
 )
 
 type gameHandler struct {

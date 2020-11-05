@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -12,11 +11,12 @@ import (
 	"github.com/hellodudu/Ultimate/game-service/game"
 	"github.com/hellodudu/Ultimate/game-service/world"
 	"github.com/hellodudu/Ultimate/iface"
+	"github.com/hellodudu/Ultimate/utils"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
-	"github.com/micro/go-micro"
-	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
-	logger "github.com/sirupsen/logrus"
+	"github.com/micro/go-micro/v2"
+	"github.com/micro/go-plugins/wrapper/monitoring/prometheus/v2"
+	log "github.com/rs/zerolog/log"
 )
 
 // ultimate define
@@ -67,7 +67,7 @@ func NewUltimate() (iface.IUltimate, error) {
 		return nil, err
 	}
 
-	logger.Info("all init ok!")
+	log.Info().Msg("all init ok!")
 
 	return umt, nil
 }
@@ -91,7 +91,7 @@ func (umt *ultimate) initTask() error {
 		return err
 	}
 
-	logger.Info("task init ok!")
+	log.Info().Msg("task init ok!")
 
 	return nil
 }
@@ -103,7 +103,7 @@ func (umt *ultimate) initDatastore() error {
 		return err
 	}
 
-	logger.Info("datastore init ok!")
+	log.Info().Msg("datastore init ok!")
 	return nil
 }
 
@@ -115,16 +115,16 @@ func (umt *ultimate) InitRedis() {
 	})
 
 	if _, err := umt.rds.Ping().Result(); err != nil {
-		logger.Fatal(err)
+		log.Fatal().Err(err).Send()
 		return
 	}
 
-	logger.Info("redis init ok")
+	log.Info().Msg("redis init ok")
 }
 
 func (umt *ultimate) initMsgParser() error {
 	umt.mp = NewMsgParser(umt.gm, umt.wm)
-	logger.Info("msg parser init ok!")
+	log.Info().Msg("msg parser init ok!")
 	return nil
 }
 
@@ -135,14 +135,14 @@ func (umt *ultimate) initTCPServer() error {
 		return err
 	}
 
-	logger.Info("tcp_server init ok!")
+	log.Info().Msg("tcp_server init ok!")
 	return nil
 }
 
 // init http server
 func (umt *ultimate) initHTTPServer() error {
 	umt.httpServ = NewHttpServer(umt.gm)
-	logger.Info("http_server init ok!")
+	log.Info().Msg("http_server init ok!")
 	return nil
 }
 
@@ -153,7 +153,7 @@ func (umt *ultimate) initWorldMgr() error {
 		return err
 	}
 
-	logger.Info("world_mgr init ok!")
+	log.Info().Msg("world_mgr init ok!")
 	return nil
 }
 
@@ -176,14 +176,8 @@ func (umt *ultimate) initGameMgr() error {
 		return err
 	}
 
-	logger.Info("game_mgr init ok!")
+	log.Info().Msg("game_mgr init ok!")
 
-	// logger.Warn("ultimate_service_game env vars").WithFields(logger.Fields{
-	// 	"broker":        os.Getenv("MICRO_BROKER"),
-	// 	"broker_addr":   os.Getenv("MICRO_BROKER_ADDRESS"),
-	// 	"registry":      os.Getenv("MICRO_REGISTRY"),
-	// 	"registry_addr": os.Getenv("MICRO_REGISTRY_ADDRESS"),
-	// })
 	return nil
 }
 
@@ -197,8 +191,9 @@ func (umt *ultimate) Run() {
 
 	// rpc service
 	go func() {
+		defer utils.CaptureException()
 		if err := umt.gameSrv.Run(); err != nil {
-			logger.Fatal(err)
+			log.Fatal().Err(err).Send()
 		}
 	}()
 
@@ -208,12 +203,12 @@ func (umt *ultimate) Run() {
 	for {
 		sig := <-c
 		close(c)
-		logger.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
+		log.Info().Msgf("ultimate server closing down (signal: %v)", sig)
 
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
 			umt.Stop()
-			logger.Info("server exit safely")
+			log.Info().Msg("server exit safely")
 			return
 		case syscall.SIGHUP:
 		default:

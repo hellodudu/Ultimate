@@ -4,13 +4,11 @@ import (
 	"testing"
 
 	"github.com/hellodudu/Ultimate/iface"
-	logger "github.com/sirupsen/logrus"
 )
 
 var chCallback chan int
 
 func init() {
-	logger.Init(false, false, "dispatcher_test")
 	chCallback = make(chan int, 1)
 }
 

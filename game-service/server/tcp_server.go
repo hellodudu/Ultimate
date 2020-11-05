@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/hellodudu/Ultimate/iface"
+	"github.com/hellodudu/Ultimate/utils"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/hellodudu/Ultimate/utils/task"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 var tcpReadBufMax = 1024 * 1024 * 2
@@ -79,7 +80,7 @@ func NewTcpServer(parser iface.IMsgParser, dispatcher iface.IDispatcher) (*TCPSe
 		return nil, err
 	}
 
-	logger.Info("tcp server listening at ", addr)
+	log.Info().Str("addr", addr).Msg("tcp server listening ")
 
 	s.ln = ln
 	s.ctx, s.cancel = context.WithCancel(context.Background())
@@ -102,10 +103,10 @@ func (server *TCPServer) Run() {
 					tempDelay = max
 				}
 
-				logger.WithFields(logger.Fields{
-					"error":         err,
-					"retry_seconds": tempDelay,
-				}).Warn("accept error")
+				log.Warn().
+					Err(err).
+					Dur("retry_seconds", tempDelay).
+					Msg("accept error")
 
 				time.Sleep(tempDelay)
 				continue
@@ -120,9 +121,9 @@ func (server *TCPServer) Run() {
 		if len(server.conns) >= 5000 {
 			server.mutexConns.Unlock()
 			connection.Close()
-			logger.WithFields(logger.Fields{
-				"connections": len(server.conns),
-			}).Warn("too many connections")
+			log.Warn().
+				Int("connections", len(server.conns)).
+				Msg("too many connections")
 			continue
 		}
 		server.conns[connection] = struct{}{}
@@ -130,6 +131,7 @@ func (server *TCPServer) Run() {
 
 		server.wgConns.Add(1)
 		go func(c *TCPCon) {
+			defer utils.CaptureException()
 			server.handleTCPConnection(c)
 
 			server.mutexConns.Lock()
@@ -157,27 +159,27 @@ func (server *TCPServer) Stop() {
 func (server *TCPServer) handleTCPConnection(connection *TCPCon) {
 	defer connection.Close()
 
-	logger.Info("a new tcp connection with remote addr:", connection.con.RemoteAddr().String())
+	log.Info().Str("addr", connection.con.RemoteAddr().String()).Msg("a new tcp connection with remote addr")
 	connection.con.(*net.TCPConn).SetKeepAlive(true)
 	connection.con.(*net.TCPConn).SetKeepAlivePeriod(30 * time.Second)
 
 	for {
 		select {
 		case <-server.ctx.Done():
-			logger.Print("tcp connection context done!")
+			log.Info().Msg("tcp connection context done!")
 			return
 		default:
 		}
 
 		if connection.Closed() {
-			logger.Print("tcp connection closed:", connection)
+			log.Info().Interface("con", connection).Msg("tcp connection closed")
 			return
 		}
 
 		// read len
 		b := make([]byte, 4)
 		if _, err := io.ReadFull(connection.con, b); err != nil {
-			logger.Info("one client connection was shut down:", err)
+			log.Info().Err(err).Msg("one client connection was shut down")
 			return
 		}
 
@@ -186,25 +188,21 @@ func (server *TCPServer) handleTCPConnection(connection *TCPCon) {
 
 		// check len
 		if msgLen > uint32(tcpReadBufMax) {
-			logger.WithFields(logger.Fields{
-				"error":  "message too long",
-				"length": msgLen,
-			}).Warn("tcp recv failed")
+			log.Warn().
+				Uint32("length", msgLen).
+				Msg("tcp recv failed, message too long")
 			continue
 		} else if msgLen < 4 {
-			logger.WithFields(logger.Fields{
-				"error":  "message too short",
-				"length": msgLen,
-			}).Warn("tcp recv failed")
+			log.Warn().
+				Uint32("length", msgLen).
+				Msg("tcp recv failed, message too short")
 			continue
 		}
 
 		// data
 		msgData := make([]byte, msgLen)
 		if _, err := io.ReadFull(connection.con, msgData); err != nil {
-			logger.WithFields(logger.Fields{
-				"error": err,
-			}).Warn("tcp recv failed")
+			log.Warn().Err(err).Msg("tcp recv failed")
 			continue
 		}
 

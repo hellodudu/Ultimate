@@ -8,8 +8,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
 	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
-	"github.com/micro/go-micro"
-	logger "github.com/sirupsen/logrus"
+	"github.com/micro/go-micro/v2"
+	log "github.com/rs/zerolog/log"
 )
 
 type pubSub struct {
@@ -44,10 +44,10 @@ func newPubSub(service micro.Service, gm iface.IGameMgr, wm iface.IWorldMgr) *pu
 /////////////////////////////////////
 func (ps *pubSub) publishArenaMatching(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaMatching.Publish(ctx, m); err != nil {
-		logger.WithFields(logger.Fields{
-			"error":   err,
-			"message": proto.MessageName(m),
-		}).Warn("publish failed")
+		log.Warn().
+			Err(err).
+			Str("message", proto.MessageName(m)).
+			Msg("publish failed")
 		return err
 	}
 
@@ -56,10 +56,10 @@ func (ps *pubSub) publishArenaMatching(ctx context.Context, m proto.Message) err
 
 func (ps *pubSub) publishArenaAddRecord(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaAddRecord.Publish(ctx, m); err != nil {
-		logger.WithFields(logger.Fields{
-			"error":   err,
-			"message": proto.MessageName(m),
-		}).Warn("publish failed")
+		log.Warn().
+			Err(err).
+			Str("message", proto.MessageName(m)).
+			Msg("publish failed")
 		return err
 	}
 
@@ -68,10 +68,10 @@ func (ps *pubSub) publishArenaAddRecord(ctx context.Context, m proto.Message) er
 
 func (ps *pubSub) publishArenaBattleResult(ctx context.Context, m proto.Message) error {
 	if err := ps.pubArenaBattleResult.Publish(ctx, m); err != nil {
-		logger.WithFields(logger.Fields{
-			"error":   err,
-			"message": proto.MessageName(m),
-		}).Warn("publish failed")
+		log.Warn().
+			Err(err).
+			Str("message", proto.MessageName(m)).
+			Msg("publish failed")
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (s *broadCastSubHandler) Process(ctx context.Context, event *pbPubSub.Publi
 	pType := proto.MessageType(event.MsgName)
 	if pType == nil {
 		s := fmt.Sprintf("invalid message<%s>, send world message canceled", event.MsgName)
-		logger.Error(s)
+		log.Error().Msg(s)
 		return fmt.Errorf(s)
 	}
 
@@ -102,10 +102,10 @@ func (s *broadCastSubHandler) Process(ctx context.Context, event *pbPubSub.Publi
 
 	// unmarshal
 	if err := proto.Unmarshal(event.MsgData, msg); err != nil {
-		logger.WithFields(logger.Fields{
-			"msg":   msg,
-			"error": err,
-		}).Warn("Failed to parse proto msg")
+		log.Warn().
+			Err(err).
+			Str("msg_name", proto.MessageName(msg)).
+			Msg("failed to parse proto msg")
 		return err
 	}
 
@@ -122,14 +122,14 @@ func (s *sendWorldMessageSubHandler) Process(ctx context.Context, event *pbPubSu
 	world := s.pubsub.wm.GetWorldByID(event.Id)
 	if world == nil {
 		s := fmt.Sprintf("cannot send world message, world<id:%d> isn't exist", event.Id)
-		logger.Error(s)
+		log.Error().Msg(s)
 		return fmt.Errorf(s)
 	}
 
 	pType := proto.MessageType(event.MsgName)
 	if pType == nil {
 		s := fmt.Sprintf("invalid message<%s>, send world message canceled", event.MsgName)
-		logger.Error(s)
+		log.Error().Msg(s)
 		return fmt.Errorf(s)
 	}
 
@@ -141,10 +141,10 @@ func (s *sendWorldMessageSubHandler) Process(ctx context.Context, event *pbPubSu
 
 	// unmarshal
 	if err := proto.Unmarshal(event.MsgData, msg); err != nil {
-		logger.WithFields(logger.Fields{
-			"msg":   msg,
-			"error": err,
-		}).Warn("Failed to parse proto msg")
+		log.Warn().
+			Err(err).
+			Str("message_name", proto.MessageName(msg)).
+			Msg("failed to parse proto msg")
 		return err
 	}
 

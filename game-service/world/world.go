@@ -13,7 +13,7 @@ import (
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 var WrapHandlerSize int = 100
@@ -113,9 +113,7 @@ func (w *world) Run() {
 		select {
 		// context canceled
 		case <-w.ctx.Done():
-			logger.WithFields(logger.Fields{
-				"id": w.GetID(),
-			}).Info("world context done!")
+			log.Info().Uint32("id", w.GetID()).Msg("world context done")
 			w.chStop <- struct{}{}
 			return
 
@@ -154,7 +152,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	// reply message length = 4bytes size + 8bytes size BaseNetMsg + 2bytes message_name size + message_name + proto_data
 	out, err := proto.Marshal(p)
 	if err != nil {
-		logger.Warn(err)
+		log.Warn().Err(err).Send()
 		return
 	}
 
@@ -173,7 +171,7 @@ func (w *world) SendProtoMessage(p proto.Message) {
 	copy(resp[14+len(typeName):], out)
 
 	if _, err := w.con.Write(resp); err != nil {
-		logger.Warn("send proto msg error:", err)
+		log.Warn().Err(err).Msg("send proto msg error")
 		return
 	}
 }
@@ -184,7 +182,7 @@ func (w *world) SendTransferMessage(data []byte) {
 	copy(resp[4:], data)
 
 	if _, err := w.con.Write(resp); err != nil {
-		logger.Warn("send transfer msg error:", err)
+		log.Warn().Err(err).Msg("send transfer msg error")
 		return
 	}
 
@@ -206,10 +204,10 @@ func (w *world) SendTransferMessage(data []byte) {
 
 func (w *world) PushWrapHandler(f func()) {
 	if len(w.wrapHandler) >= WrapHandlerSize {
-		logger.WithFields(logger.Fields{
-			"world_id": w.GetID(),
-			"func":     f,
-		}).Warn("wrap handler channel full, ignored.")
+		log.Warn().
+			Uint32("world_id", w.GetID()).
+			Interface("func", f).
+			Msg("wrap handler channel full, ignored.")
 		return
 	}
 

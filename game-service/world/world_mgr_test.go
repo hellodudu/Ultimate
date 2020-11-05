@@ -8,7 +8,6 @@ import (
 	datastore "github.com/hellodudu/Ultimate/game-service/db"
 	pbWorld "github.com/hellodudu/Ultimate/proto/world"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/sirupsen/logrus"
 )
 
 type TestCon struct {
@@ -34,7 +33,6 @@ func init() {
 	global.WorldConnectMax = 500
 	global.WorldHeartBeatSec = 10
 	global.WorldConTimeOutSec = 10
-	logger.Init(global.Debugging, false, "game_datastore_test")
 }
 
 func TestNewWorldMgr(t *testing.T) {

@@ -5,7 +5,6 @@ import (
 
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/sirupsen/logrus"
 )
 
 var ds iface.IDatastore
@@ -18,8 +17,6 @@ func init() {
 	global.MysqlPort = "3306"
 	global.MysqlDB = "db_ultimate"
 	global.UltimateID = 110
-
-	logger.Init(global.Debugging, false, "arena_datastore_test")
 }
 
 func TestNewDatastore(t *testing.T) {

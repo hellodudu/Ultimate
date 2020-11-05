@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -16,7 +15,6 @@ func init() {
 	global.MysqlDB = "db_ultimate"
 	global.UltimateID = 110
 
-	logger.Init(global.Debugging, false, "game_datastore_test")
 }
 
 func TestNewDatastore(t *testing.T) {

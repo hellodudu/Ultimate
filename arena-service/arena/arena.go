@@ -10,8 +10,9 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
-	"github.com/micro/go-micro"
-	logger "github.com/sirupsen/logrus"
+	"github.com/hellodudu/Ultimate/utils"
+	"github.com/micro/go-micro/v2"
+	log "github.com/rs/zerolog/log"
 )
 
 var arenaMatchSectionNum = 8 // arena section num
@@ -240,7 +241,7 @@ func (arena *Arena) run() {
 		select {
 		// context canceled
 		case <-arena.ctx.Done():
-			logger.Info("arena context done!")
+			log.Info().Msg("arena context done!")
 			arena.chStop <- struct{}{}
 			return
 
@@ -254,8 +255,12 @@ func (arena *Arena) run() {
 			if !ok {
 				// try again 5 seconds later
 				t := time.NewTimer(5 * time.Second)
-				logger.Info("player:", id, " will retry matching in 5 seconds")
+				log.Info().
+					Int64("id", id).
+					Msg("will retry matching in 5 seconds")
+
 				go func(p int64) {
+					defer utils.CaptureException()
 					<-t.C
 					arena.chMatchWaitOK <- p
 				}(id)
@@ -311,6 +316,7 @@ func (arena *Arena) loadFromDB() {
 	} else if now > arena.WeekEndTime() {
 		t := time.NewTimer(9 * time.Minute)
 		go func(ct *time.Timer) {
+			defer utils.CaptureException()
 			<-ct.C
 			arena.weekEnd()
 		}(t)
@@ -324,6 +330,7 @@ func (arena *Arena) loadFromDB() {
 	} else if now > arena.seasonEndTime() {
 		t := time.NewTimer(10 * time.Minute)
 		go func(ct *time.Timer) {
+			defer utils.CaptureException()
 			<-ct.C
 			arena.seasonEnd()
 		}(t)
@@ -341,7 +348,7 @@ func (arena *Arena) loadFromDB() {
 			ArenaFixEndTime: arena.fixEndTime(),
 			TimeStamp:       int(time.Now().Unix()),
 		})
-		logger.Print("set new season rank")
+		log.Info().Msg("set new season rank")
 	}
 
 	// all init ok
@@ -357,9 +364,9 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 	arena.lock.RUnlock()
 
 	if !ok {
-		logger.WithFields(logger.Fields{
-			"player_id": id,
-		}).Warn("cannot find player's arena data")
+		log.Warn().
+			Int64("player_id", id).
+			Msg("cannot find player's arena data")
 		return false, fmt.Errorf("cannot find player %d 's arena data", id)
 	}
 
@@ -406,10 +413,10 @@ func (arena *Arena) updateMatching(id int64) (bool, error) {
 
 	resp, err := arena.handler.GetPlayerInfoByID(id)
 	if err != nil {
-		logger.WithFields(logger.Fields{
-			"player_id": id,
-			"error":     err,
-		}).Warn("cannot find player's info")
+		log.Warn().
+			Err(err).
+			Int64("player_id", id).
+			Msg("cannot find player's info")
 		return false, nil
 	}
 
@@ -454,6 +461,8 @@ func (arena *Arena) updateRequestRecord() {
 	for _, v := range idList {
 
 		go func(id int64, ctx context.Context) {
+			defer utils.CaptureException()
+
 			if resp, err := arena.handler.GetPlayerInfoByID(id); err == nil {
 
 				// send request and try again 30 seconds later
@@ -749,11 +758,11 @@ func (arena *Arena) seasonReward() {
 	for n, data := range list {
 		resp, err := arena.handler.GetPlayerInfoByID(data.Playerid)
 		if err != nil {
-			logger.WithFields(logger.Fields{
-				"top":       n + 1,
-				"player_id": data.Playerid,
-				"error":     err,
-			}).Warn("season reward cannot find player")
+			log.Warn().
+				Err(err).
+				Int("top", n+1).
+				Int64("player_id", data.Playerid).
+				Msg("season reward cnnot find player")
 			continue
 		}
 
@@ -844,9 +853,9 @@ func (arena *Arena) battleResult(attack int64, target int64, win bool) {
 
 	data, ok := arena.mapArenaData[attack]
 	if !ok {
-		logger.WithFields(logger.Fields{
-			"player_id": attack,
-		}).Warn("cannot find attacker's arena data")
+		log.Warn().
+			Int64("player_id", attack).
+			Msg("cannot find attacker's arena data")
 		return
 	}
 
@@ -872,24 +881,30 @@ func (arena *Arena) battleResult(attack int64, target int64, win bool) {
 		arena.arrRankArena.Sort()
 	}
 
-	logger.WithFields(logger.Fields{
-		"attack_id":    attack,
-		"target_id":    target,
-		"win":          win,
-		"attack_score": data.Score,
-	}).Info("arena battle result")
+	log.Info().
+		Int64("attack_id", attack).
+		Int64("target_id", target).
+		Bool("win", win).
+		Int32("attack_score", data.Score).
+		Msg("arena battle result")
 }
 
 // requestRank request rank by world, max page is 10
 func (arena *Arena) requestRank(id int64, page int32) {
 	if page >= 10 || page < 0 {
-		logger.Warn("player ", id, " request rank error: page ", page)
+		log.Warn().
+			Int64("id", id).
+			Int32("page", page).
+			Msg("player request rank error")
 		return
 	}
 
 	resp, err := arena.handler.GetPlayerInfoByID(id)
 	if err != nil {
-		logger.Warn("player ", id, " request rank error: cannot find player info ", err)
+		log.Warn().
+			Int64("id", id).
+			Err(err).
+			Msg("player request rank error: cannot find player info")
 		return
 	}
 
@@ -934,7 +949,9 @@ func (arena *Arena) requestRank(id int64, page int32) {
 	}
 
 	if msg.Page >= 10 {
-		logger.WithFields(logger.Fields{"page": msg.Page}).Warn("reply arena request rank pages error")
+		log.Warn().
+			Int32("page", msg.Page).
+			Msg("reply arena request rank pages error")
 	}
 
 	arena.pubsub.publishSendWorldMessage(arena.ctx, resp.Info.ServerId, msg)
@@ -942,10 +959,10 @@ func (arena *Arena) requestRank(id int64, page int32) {
 
 func (arena *Arena) APIRequestRank(id int64, page int) *pbArena.MUW_RequestArenaRank {
 	if page >= 10 || page < 0 {
-		logger.WithFields(logger.Fields{
-			"player_id": id,
-			"page":      page,
-		}).Warn("api request rank error")
+		log.Warn().
+			Int64("player_id", id).
+			Int("page", page).
+			Msg("api request rank error")
 		return nil
 	}
 
@@ -958,7 +975,7 @@ func (arena *Arena) APIRequestRank(id int64, page int) *pbArena.MUW_RequestArena
 		Infos:         make([]*pbArena.ArenaTargetInfo, 0),
 	}
 
-	logger.Warning("get arena request rank page:", msg.Page)
+	log.Info().Int32("page", msg.Page).Msg("get arena request rank page")
 
 	// get player rank
 	arena.lock.Lock()
@@ -992,7 +1009,7 @@ func (arena *Arena) APIRequestRank(id int64, page int) *pbArena.MUW_RequestArena
 	}
 
 	if msg.Page >= 10 {
-		logger.Warning("reply arena api request rank pages error:", msg.Page)
+		log.Warn().Int32("page", msg.Page).Msg("reply arena api request rank pages error")
 	}
 
 	return msg

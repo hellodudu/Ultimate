@@ -2,6 +2,8 @@ package utils
 
 import (
 	"sync"
+
+	fun "github.com/hellodudu/Ultimate/utils"
 )
 
 type WaitGroupWrapper struct {
@@ -11,7 +13,10 @@ type WaitGroupWrapper struct {
 func (w *WaitGroupWrapper) Wrap(cb func()) {
 	w.Add(1)
 	go func() {
+		defer func() {
+			fun.CaptureException()
+			w.Done()
+		}()
 		cb()
-		w.Done()
 	}()
 }

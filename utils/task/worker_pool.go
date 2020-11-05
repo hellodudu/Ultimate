@@ -4,7 +4,7 @@ import (
 	"context"
 	"runtime"
 
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 type workerPool struct {
@@ -28,7 +28,7 @@ func NewWorkerPool(tc chan Tasker) (*workerPool, error) {
 	}
 
 	pool.ctx, pool.cancel = context.WithCancel(context.Background())
-	logger.Info("init max workers ", maxWorker)
+	log.Info().Int("max workers", maxWorker).Msg("init max workers ")
 
 	for n := 1; n <= maxWorker; n++ {
 		worker := &Worker{}

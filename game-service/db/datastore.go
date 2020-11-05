@@ -9,7 +9,7 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/jinzhu/gorm"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 type Datastore struct {
@@ -39,7 +39,7 @@ func NewDatastore() (*Datastore, error) {
 	var err error
 	datastore.db, err = gorm.Open("mysql", mysqlDSN)
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal().Err(err).Send()
 		return nil, err
 	}
 
@@ -58,7 +58,7 @@ func (m *Datastore) Run() {
 	for {
 		select {
 		case <-m.ctx.Done():
-			logger.Info("datastore context done!")
+			log.Info().Msg("datastore context done!")
 			m.chStop <- struct{}{}
 			return
 		}

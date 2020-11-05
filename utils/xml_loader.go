@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 type XmlEntityClient struct {
@@ -30,17 +30,17 @@ func NewXmlLoader() *XmlLoader {
 	xmlLoader := &XmlLoader{}
 	xmlFile, err := os.Open("config/entity_client.xml")
 	if err != nil {
-		logger.Warn(err)
+		log.Warn().Err(err).Send()
 	}
 	defer xmlFile.Close()
 
 	byXml, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
-		logger.Warn(err)
+		log.Warn().Err(err).Send()
 	}
 
 	if err := xml.Unmarshal(byXml, xmlLoader); err != nil {
-		logger.Warn(err)
+		log.Warn().Err(err).Send()
 	}
 
 	return xmlLoader

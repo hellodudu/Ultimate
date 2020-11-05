@@ -3,19 +3,20 @@ package rpc_presure
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 	"sync"
 	"time"
 
 	"github.com/hellodudu/Ultimate/internal/utils"
-	"github.com/micro/cli"
-	"github.com/micro/go-micro"
+	"github.com/micro/cli/v2"
+	"github.com/micro/go-micro/v2"
+
+	fun "github.com/hellodudu/Ultimate/utils"
 
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
 	pbPubSub "github.com/hellodudu/Ultimate/proto/pubsub"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 var (
@@ -81,8 +82,9 @@ func (r *RPCPresure) initService() {
 	r.pub = micro.NewPublisher("arena.Matching", r.service.Client())
 
 	go func() {
+		defer fun.CaptureException()
 		if err := r.service.Run(); err != nil {
-			logger.Fatal(err)
+			log.Fatal().Err(err).Send()
 		}
 	}()
 }
@@ -212,13 +214,16 @@ func (r *RPCPresure) work() error {
 		}
 
 		if e := r.call(gameSrv, arenaSrv); e != nil {
-			logger.Warn("call rpc failed:", e)
+			log.Warn().Err(e).Msg("call rpc failed")
 		}
 
 		times++
 		if times >= r.opts.RPCTimes {
 			d := time.Since(now)
-			logger.Info("do rpc call ", r.opts.RPCTimes, " times, cost time ", d)
+			log.Info().
+				Int("rpc_times", r.opts.RPCTimes).
+				Dur("cost time", d).
+				Msg("do rpc call")
 			time.Sleep(time.Second - d)
 			now = time.Now()
 			times = 0

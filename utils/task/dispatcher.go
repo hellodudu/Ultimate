@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/hellodudu/Ultimate/iface"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 // Dispatcher define
@@ -44,12 +44,12 @@ func (td *Dispatcher) genReqID() int {
 func (td *Dispatcher) AddTask(req iface.ITaskReqInfo) {
 	if td.closed {
 		taskInfo := req.(*TaskReqInfo)
-		logger.WithFields(logger.Fields{
-			"id":   taskInfo.ID,
-			"con":  taskInfo.Con,
-			"cb":   taskInfo.CB,
-			"data": taskInfo.Data,
-		}).Info("AddTask after dispatcher is closed")
+		log.Info().
+			Int("id", taskInfo.ID).
+			Interface("con", taskInfo.Con).
+			Interface("cb", taskInfo.CB).
+			Bytes("data", taskInfo.Data).
+			Msg("AddTask after dispatcher is closed")
 		return
 	}
 

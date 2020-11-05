@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -11,10 +10,10 @@ import (
 
 	"github.com/gammazero/workerpool"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
-	"github.com/hellodudu/Ultimate/utils/global"
-	"github.com/micro/go-micro"
-	_ "github.com/micro/go-plugins/broker/nsq"
-	logger "github.com/sirupsen/logrus"
+	"github.com/hellodudu/Ultimate/utils"
+	"github.com/micro/go-micro/v2"
+	_ "github.com/micro/go-plugins/broker/nsq/v2"
+	log "github.com/rs/zerolog/log"
 )
 
 var (
@@ -31,8 +30,6 @@ var (
 
 func main() {
 
-	logger.Init(global.Debugging, true, "http_presure")
-
 	service := micro.NewService(
 		micro.Name("ultimate-service-client"),
 		// micro.Version("latest"),
@@ -44,8 +41,9 @@ func main() {
 
 	// Run service
 	go func() {
+		defer utils.CaptureException()
 		if err := service.Run(); err != nil {
-			logger.Fatal(err)
+			log.Fatal().Err(err).Send()
 		}
 	}()
 
@@ -65,9 +63,7 @@ func main() {
 		wp.Submit(func() {
 			_, err := gameCli.GetPlayerInfoByID(context.Background(), &pbGame.GetPlayerInfoByIDRequest{Id: playerID[0]})
 			if err != nil {
-				logger.WithFields(logger.Fields{
-					"error": err,
-				}).Warn("GetArenaSeasonData Response")
+				log.Warn().Err(err).Msg("GetArenaSeasonData Response")
 				return
 			}
 		})
@@ -91,20 +87,18 @@ func main() {
 	// wg.Wait()
 	// d := time.Since(t)
 
-	logger.WithFields(logger.Fields{
-		"duration": d,
-	}).Warn("elapse time")
+	log.Warn().Dur("duration", d).Msg("elapse time")
 
 	// server exit
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
 		sig := <-c
-		logger.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
+		log.Info().Msg("ultimate server closing down (signal: %v)", sig)
 
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
-			logger.Info("exit safely")
+			log.Info().Msg("exit safely")
 			return
 		case syscall.SIGHUP:
 		default:

@@ -12,7 +12,7 @@ import (
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 var startTime = time.Now()
@@ -103,11 +103,14 @@ func (s *HttpServer) Run() {
 
 	addr, err := global.GetIniMgr().GetIniValue("../config/ultimate.ini", "listen", "HttpListenAddr")
 	if err != nil {
-		logger.Error("cannot read ini HttpListenAddr!")
+		log.Error().Msg("cannot read ini HttpListenAddr!")
 		return
 	}
 
-	logger.Error(http.ListenAndServe(addr, nil))
+	err = http.ListenAndServe(addr, nil)
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
 
 }
 
@@ -245,10 +248,10 @@ func (s *HttpServer) getPlayerInfoHandler(w http.ResponseWriter, r *http.Request
 
 	info, err := s.gm.GetPlayerInfoByID(req.ID)
 	if err != nil {
-		logger.WithFields(logger.Fields{
-			"error": err,
-			"id":    req.ID,
-		}).Warn("cannot find player info by id")
+		log.Warn().
+			Err(err).
+			Int64("id", req.ID).
+			Msg("cannot find player info by id")
 
 		w.Write([]byte(err.Error()))
 		return
@@ -275,10 +278,11 @@ func (s *HttpServer) getGuildInfoHandler(w http.ResponseWriter, r *http.Request)
 
 	info, err := s.gm.GetGuildInfoByID(req.ID)
 	if err != nil {
-		logger.WithFields(logger.Fields{
-			"error": err,
-			"id":    req.ID,
-		}).Warn("cannot find guild info by id")
+		log.Warn().
+			Err(err).
+			Int64("id", req.ID).
+			Msg("cannot find guild info by id")
+
 		w.Write([]byte(err.Error()))
 		return
 	}

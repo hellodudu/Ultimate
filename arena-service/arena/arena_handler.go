@@ -6,7 +6,7 @@ import (
 
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	pbGame "github.com/hellodudu/Ultimate/proto/game"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 // RPCHandler rpc handler
@@ -59,7 +59,7 @@ func (h *RPCHandler) GetMatchingList(ctx context.Context, req *pbArena.GetMatchi
 }
 
 func (h *RPCHandler) GetRecordReqList(ctx context.Context, req *pbArena.GetRecordReqListRequest, rsp *pbArena.GetRecordReqListReply) error {
-	logger.Info("Received ArenaService.GetRecordReqList request")
+	log.Info().Msg("Received ArenaService.GetRecordReqList request")
 	m := h.arena.getRecordReqList()
 	for k, v := range m {
 		rsp.ReqList = append(rsp.ReqList, &pbArena.RecordReqList{PlayerId: k, Time: int32(v)})
@@ -68,14 +68,14 @@ func (h *RPCHandler) GetRecordReqList(ctx context.Context, req *pbArena.GetRecor
 }
 
 func (h *RPCHandler) GetRecordByID(ctx context.Context, req *pbArena.GetRecordByIDRequest, rsp *pbArena.GetRecordByIDReply) error {
-	logger.Info("Received ArenaService.GetRecordByID request")
+	log.Info().Msg("Received ArenaService.GetRecordByID request")
 	var err error
 	rsp.Record, err = h.arena.getRecordByID(req.Id)
 	return err
 }
 
 func (h *RPCHandler) GetRankListByPage(ctx context.Context, req *pbArena.GetRankListByPageRequest, rsp *pbArena.GetRankListByPageReply) error {
-	logger.Info("Received ArenaService.GetRankListByPage request")
+	log.Info().Msg("Received ArenaService.GetRankListByPage request")
 	data := h.arena.getRankListByPage(int(req.Page))
 
 	var err error
@@ -84,13 +84,13 @@ func (h *RPCHandler) GetRankListByPage(ctx context.Context, req *pbArena.GetRank
 }
 
 func (h *RPCHandler) SaveChampion(ctx context.Context, req *pbArena.SaveChampionRequest, rsp *pbArena.SaveChampionReply) error {
-	logger.Info("Received ArenaService.SaveChampion request")
+	log.Info().Msg("Received ArenaService.SaveChampion request")
 	h.arena.saveChampion()
 	return nil
 }
 
 func (h *RPCHandler) WeekEnd(ctx context.Context, req *pbArena.WeekEndRequest, rsp *pbArena.WeekEndReply) error {
-	logger.Info("Received ArenaService.WeekEnd request")
+	log.Info().Msg("Received ArenaService.WeekEnd request")
 	h.arena.weekEnd()
 	return nil
 }

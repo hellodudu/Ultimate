@@ -3,7 +3,7 @@ package game
 import (
 	"github.com/hellodudu/Ultimate/iface"
 	pb "github.com/hellodudu/Ultimate/proto/game"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 type invite struct {
@@ -26,9 +26,7 @@ func (i *invite) AddInvite(newbieID int64, inviterID int64) int32 {
 
 	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterID)
 	if err != nil {
-		logger.WithFields(logger.Fields{
-			"error": err,
-		}).Warn("AddInvite cannot find inviter info")
+		log.Warn().Err(err).Msg("AddInvite cannot find inviter info")
 		return 3
 	}
 
@@ -55,9 +53,7 @@ func (i *invite) CheckInviteResult(newbieID int64, inviterID int64, errorCode in
 
 	newbieInfo, err := i.gm.GetPlayerInfoByID(newbieID)
 	if err != nil {
-		logger.WithFields(logger.Fields{
-			"error": err,
-		}).Warn("CheckInviteResult cannot find newbie info")
+		log.Warn().Err(err).Msg("CheckInviteResult cannot find newbie info")
 		return
 	}
 
@@ -90,9 +86,7 @@ func (i *invite) InviteRecharge(newbieID int64, newbieName string, inviterID int
 
 	inviterInfo, err := i.gm.GetPlayerInfoByID(inviterID)
 	if err != nil {
-		logger.WithFields(logger.Fields{
-			"error": err,
-		}).Warn("InviteRecharge cannot find inviter info")
+		log.Warn().Err(err).Msg("InviteRecharge cannot find inviter info")
 		return
 	}
 

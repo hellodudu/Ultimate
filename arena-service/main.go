@@ -5,20 +5,37 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/hellodudu/Ultimate/arena-service/arena"
 	datastore "github.com/hellodudu/Ultimate/arena-service/db"
-	"github.com/micro/go-micro"
-	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
-	logger "github.com/sirupsen/logrus"
+	"github.com/hellodudu/Ultimate/utils"
+	logger "github.com/hellodudu/Ultimate/utils/log"
+	"github.com/micro/go-micro/v2"
+	"github.com/micro/go-plugins/wrapper/monitoring/prometheus/v2"
+	log "github.com/rs/zerolog/log"
 )
 
 func main() {
+	// check path
+	path, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	if strings.Contains(path, "arena-service") {
+		os.Chdir("../")
+		newPath, _ := os.Getwd()
+		fmt.Println("change current path to project root path:", newPath)
+	}
+
+	logger.InitLogger("arena-service")
 
 	ds, err := datastore.NewDatastore()
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal().Err(err).Send()
 	}
 
 	// New Service
@@ -35,7 +52,7 @@ func main() {
 	// new arena
 	arena, err := arena.NewArena(context.Background(), service, ds)
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal().Err(err).Send()
 	}
 
 	// Register Struct as Subscriber
@@ -43,8 +60,9 @@ func main() {
 
 	// Run service
 	go func() {
+		defer utils.CaptureException()
 		if err := service.Run(); err != nil {
-			logger.Fatal(err)
+			log.Fatal().Err(err).Send()
 		}
 	}()
 
@@ -56,13 +74,13 @@ func main() {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
 		sig := <-c
-		logger.Info(fmt.Sprintf("ultimate server closing down (signal: %v)", sig))
+		log.Info().Msgf("ultimate server closing down (signal: %v)", sig)
 
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGSTOP, syscall.SIGINT:
 			arena.Stop()
 			ds.Stop()
-			logger.Info("server exit safely")
+			log.Info().Msg("server exit safely")
 			return
 		case syscall.SIGHUP:
 		default:

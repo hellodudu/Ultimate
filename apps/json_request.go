@@ -17,7 +17,7 @@ import (
 
 	pbArena "github.com/hellodudu/Ultimate/proto/arena"
 	"github.com/hellodudu/Ultimate/world"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 var tickSeconds int = 10
@@ -65,13 +65,13 @@ func callArenaRank() {
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"status":    resp.Status,
-		"player_id": respJSON.PlayerId,
-		"score":     respJSON.Score,
-		"page":      respJSON.Page,
-		"rank":      respJSON.Rank,
-	}).Info("recv respons")
+	log.Info().
+		Str("status", resp.Status).
+		Int64("player_id", respJSON.PlayerId)
+	Int32("score", respJSON.Score).
+		Int32("page", respJSON.Page).
+		Int32("rank", respJSON.Rank).
+		Msg("recv response")
 
 	if resp.StatusCode == http.StatusOK {
 		return
@@ -116,10 +116,10 @@ func callArenaSync() {
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"status":    resp.StatusCode,
-		"world_len": len(respJSON),
-	}).Warning("recv arena season sync")
+	log.Warn().
+		Int32("status", resp.StatusCode).
+		Int32("world_len", len(respJSON)).
+		Msg("recv arena season sync")
 
 	if resp.StatusCode == http.StatusOK {
 		return
@@ -127,11 +127,12 @@ func callArenaSync() {
 
 	for _, v := range respJSON {
 		if v.Season != 6 {
-			logrus.WithFields(logrus.Fields{
-				"world_id":        v.WorldID,
-				"season":          v.Season,
-				"season_end_time": v.SeasonEndTime,
-			}).Warning("")
+			log.Warn().
+				Uint32("world_id", v.WorldID).
+				Int32("season", v.Season).
+				Int32("season_end_time", v.SeasonEndTime).
+				Send()
+
 			chFault <- 1
 			return
 		}

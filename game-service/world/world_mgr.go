@@ -3,14 +3,13 @@ package world
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hellodudu/Ultimate/iface"
 	"github.com/hellodudu/Ultimate/utils/global"
-	logger "github.com/sirupsen/logrus"
+	log "github.com/rs/zerolog/log"
 )
 
 type WorldMgr struct {
@@ -74,7 +73,11 @@ func (wm *WorldMgr) AddWorld(id uint32, name string, con iface.ITCPConn) (iface.
 	w := NewWorld(id, name, con, wm.chTimeOutW, wm.ds)
 	wm.mapWorld.Store(w.GetID(), w)
 	wm.mapConn.Store(w.GetCon(), w)
-	logger.Info(fmt.Sprintf("add world <id:%d, name:%s, con:%v> success!", w.GetID(), w.GetName(), w.GetCon()))
+	log.Info().
+		Uint32("id", w.GetID()).
+		Str("name", w.GetName()).
+		Interface("con", w.GetCon()).
+		Msg("add world success")
 
 	// world run
 	go w.Run()
@@ -129,9 +132,7 @@ func (wm *WorldMgr) DisconnectWorld(con iface.ITCPConn) {
 		return
 	}
 
-	logger.WithFields(logger.Fields{
-		"id": world.GetID(),
-	}).Warn("World disconnected!")
+	log.Warn().Uint32("id", world.GetID()).Msg("world disconnected")
 	world.Stop()
 
 	wm.mapWorld.Delete(world.GetID())
@@ -149,10 +150,10 @@ func (wm *WorldMgr) KickWorld(id uint32, reason string) {
 		return
 	}
 
-	logger.WithFields(logger.Fields{
-		"id":     world.GetID(),
-		"reason": reason,
-	}).Warn("World was kicked!")
+	log.Warn().
+		Uint32("id", world.GetID()).
+		Str("reason", reason).
+		Msg("world was kicked")
 
 	world.Stop()
 	wm.mapConn.Delete(world.GetCon())
@@ -174,7 +175,7 @@ func (wm *WorldMgr) Run() {
 	for {
 		select {
 		case <-wm.ctx.Done():
-			logger.Print("world session context done!")
+			log.Info().Msg("world session context done!")
 			wm.chStop <- struct{}{}
 			return
 		case wid := <-wm.chTimeOutW:

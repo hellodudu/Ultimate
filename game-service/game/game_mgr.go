@@ -115,6 +115,9 @@ func (g *GameMgr) AddGuildInfo(p *pbGame.CrossGuildInfo) {
 }
 
 func (g *GameMgr) GetPlayerInfoByID(id int64) (*pbGame.CrossPlayerInfo, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	if v, ok := g.mapPlayerInfo[id]; ok {
 		return v, nil
 	}
@@ -123,6 +126,9 @@ func (g *GameMgr) GetPlayerInfoByID(id int64) (*pbGame.CrossPlayerInfo, error) {
 }
 
 func (g *GameMgr) GetGuildInfoByID(id int64) (*pbGame.CrossGuildInfo, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	if v, ok := g.mapGuildInfo[id]; ok {
 		return v, nil
 	}
